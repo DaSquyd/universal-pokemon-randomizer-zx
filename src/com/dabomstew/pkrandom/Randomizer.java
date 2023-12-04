@@ -144,15 +144,15 @@ public class Randomizer {
             movesChanged = true;
         }
 
-        // Misc Tweaks
-        if (settings.getCurrentMiscTweaks() != MiscTweak.NO_MISC_TWEAKS) {
-            romHandler.applyMiscTweaks(settings);
-        }
-
         // Update base stats to a future generation
         if (settings.isUpdateBaseStats()) {
             romHandler.updatePokemonStats(settings);
             pokemonTraitsChanged = true;
+        }
+
+        // Misc Tweaks
+        if (settings.getCurrentMiscTweaks() != MiscTweak.NO_MISC_TWEAKS) {
+            romHandler.applyMiscTweaks(settings);
         }
 
         // Standardize EXP curves
@@ -228,8 +228,8 @@ public class Randomizer {
 
         // Easier evolutions
         if (settings.isMakeEvolutionsEasier()) {
-            romHandler.condenseLevelEvolutions(40, 30);
             romHandler.makeEvolutionsEasier(settings);
+            romHandler.condenseLevelEvolutions();
         }
 
         // Remove time-based evolutions
@@ -323,6 +323,7 @@ public class Randomizer {
             romHandler.randomizeTMMoves(settings);
             tmMovesChanged = true;
         }
+        romHandler.setTMHMPalettes();
 
         if (tmMovesChanged) {
             checkValue = logTMMoves(log, checkValue);
@@ -643,7 +644,7 @@ public class Randomizer {
 
         switch(settings.getShopItemsMod()) {
             case SHUFFLE:
-                romHandler.shuffleShopItems();
+                romHandler.shuffleShopItems(settings);
                 shopsChanged = true;
                 break;
             case RANDOM:
@@ -655,7 +656,7 @@ public class Randomizer {
         }
 
         if (shopsChanged) {
-            logShops(log);
+            logShops(log, settings);
         }
 
         // Pickup Items
@@ -833,7 +834,7 @@ public class Randomizer {
                 nonTypeChanges.add(String.format("%d PP", mv.pp));
             }
             if (changes[2]) {
-                nonTypeChanges.add(String.format("%.00f%% accuracy", mv.hitratio));
+                nonTypeChanges.add(String.format("%.00f%% accuracy", mv.accuracy));
             }
             String logStr = "Made " + mv.name;
             // type or not?
@@ -1254,7 +1255,7 @@ public class Randomizer {
             if (mv != null) {
                 String mvType = (mv.type == null) ? "???" : mv.type.toString();
                 log.printf("%3d|%-15s|%-8s|%5d|%4d|%3d", mv.internalId, mv.name, mvType, mv.power,
-                        (int) mv.hitratio, mv.pp);
+                        (int) mv.accuracy, mv.pp);
                 if (romHandler.hasPhysicalSpecialSplit()) {
                     log.printf("| %s", mv.category.toString());
                 }
@@ -1264,10 +1265,11 @@ public class Randomizer {
         log.println();
     }
 
-    private void logShops(final PrintStream log) {
+    private void logShops(final PrintStream log, Settings settings) {
         String[] itemNames = romHandler.getItemNames();
         log.println("--Shops--");
-        Map<Integer, Shop> shopsDict = romHandler.getShopItems();
+        int badges = romHandler.getBadgesAtForceEvoLevel(settings);
+        Map<Integer, Shop> shopsDict = romHandler.getShopItems(badges);
         for (int shopID : shopsDict.keySet()) {
             Shop shop = shopsDict.get(shopID);
             log.printf("%s", shop.name);

@@ -602,13 +602,13 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 moves[i].name = moveNames.get(i);
                 moves[i].number = i;
                 moves[i].internalId = i;
-                moves[i].effectIndex = readWord(moveData, 16);
-                moves[i].hitratio = (moveData[4] & 0xFF);
+                moves[i].effect = MoveEffect.fromIndex(generationOfPokemon(), readWord(moveData, 16));
+                moves[i].accuracy = (moveData[4] & 0xFF);
                 moves[i].power = moveData[3] & 0xFF;
                 moves[i].pp = moveData[5] & 0xFF;
                 moves[i].type = Gen6Constants.typeTable[moveData[0] & 0xFF];
                 moves[i].flinchPercentChance = moveData[15] & 0xFF;
-                moves[i].target = moveData[20] & 0xFF;
+                moves[i].target = MoveTarget.values()[moveData[20] & 0xFF];
                 moves[i].category = Gen6Constants.moveCategoryIndices[moveData[2] & 0xFF];
                 moves[i].priority = moveData[6];
 
@@ -619,89 +619,51 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     moves[i].criticalChance = CriticalChance.INCREASED;
                 }
 
-                int internalStatusType = readWord(moveData, 8);
+                int statusTypeIndex = readWord(moveData, 8);
+                MoveStatusMode statusMode = MoveStatusMode.values()[moveData[11] & 0xFF];
+                int minStatusTurns = moveData[12] & 0xFF;
+                int maxStatusTurns = moveData[13] & 0xFF;
+                moves[i].statusType = MoveStatusType.fromValues(statusTypeIndex, statusMode, minStatusTurns, maxStatusTurns);
+
                 int flags = FileFunctions.readFullInt(moveData, 32);
                 moves[i].makesContact = (flags & 0x001) != 0;
                 moves[i].isChargeMove = (flags & 0x002) != 0;
                 moves[i].isRechargeMove = (flags & 0x004) != 0;
                 moves[i].isPunchMove = (flags & 0x080) != 0;
                 moves[i].isSoundMove = (flags & 0x100) != 0;
-                moves[i].isTrapMove = internalStatusType == 8;
-                switch (moves[i].effectIndex) {
-                    case Gen6Constants.noDamageTargetTrappingEffect:
-                    case Gen6Constants.noDamageFieldTrappingEffect:
-                    case Gen6Constants.damageAdjacentFoesTrappingEffect:
-                        moves[i].isTrapMove = true;
-                        break;
-                }
 
-                int qualities = moveData[1];
-                int recoilOrAbsorbPercent = moveData[18];
-                if (qualities == Gen6Constants.damageAbsorbQuality) {
-                    moves[i].absorbPercent = recoilOrAbsorbPercent;
-                } else {
-                    moves[i].recoilPercent = -recoilOrAbsorbPercent;
-                }
+                moves[i].qualities = MoveQualities.values()[moveData[1]];
+                moves[i].recoil = moveData[18];
 
-                if (i == Moves.swift) {
-                    perfectAccuracy = (int)moves[i].hitratio;
-                }
-
-                if (GlobalConstants.normalMultihitMoves.contains(i)) {
-                    moves[i].hitCount = 19 / 6.0;
-                } else if (GlobalConstants.doubleHitMoves.contains(i)) {
-                    moves[i].hitCount = 2;
-                } else if (i == Moves.tripleKick) {
-                    moves[i].hitCount = 2.71; // this assumes the first hit lands
-                }
-
-                switch (qualities) {
-                    case Gen6Constants.noDamageStatChangeQuality:
-                    case Gen6Constants.noDamageStatusAndStatChangeQuality:
-                        // All Allies or Self
-                        if (moves[i].target == 6 || moves[i].target == 7) {
-                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_USER;
-                        } else if (moves[i].target == 2) {
-                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_ALLY;
-                        } else if (moves[i].target == 8) {
-                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_ALL;
-                        } else {
-                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_TARGET;
-                        }
-                        break;
-                    case Gen6Constants.damageTargetDebuffQuality:
-                        moves[i].statChangeMoveType = StatChangeMoveType.DAMAGE_TARGET;
-                        break;
-                    case Gen6Constants.damageUserBuffQuality:
-                        moves[i].statChangeMoveType = StatChangeMoveType.DAMAGE_USER;
-                        break;
-                    default:
-                        moves[i].statChangeMoveType = StatChangeMoveType.NONE_OR_UNKNOWN;
-                        break;
-                }
+//                switch (qualities) {
+//                    case Gen6Constants.noDamageStatChangeQuality:
+//                    case Gen6Constants.noDamageStatusAndStatChangeQuality:
+//                        // All Allies or Self
+//                        if (moves[i].target == 6 || moves[i].target == 7) {
+//                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_USER;
+//                        } else if (moves[i].target == 2) {
+//                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_ALLY;
+//                        } else if (moves[i].target == 8) {
+//                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_ALL;
+//                        } else {
+//                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_TARGET;
+//                        }
+//                        break;
+//                    case Gen6Constants.damageTargetDebuffQuality:
+//                        moves[i].statChangeMoveType = StatChangeMoveType.DAMAGE_TARGET;
+//                        break;
+//                    case Gen6Constants.damageUserBuffQuality:
+//                        moves[i].statChangeMoveType = StatChangeMoveType.DAMAGE_USER;
+//                        break;
+//                    default:
+//                        moves[i].statChangeMoveType = StatChangeMoveType.NONE_OR_UNKNOWN;
+//                        break;
+//                }
 
                 for (int statChange = 0; statChange < 3; statChange++) {
                     moves[i].statChanges[statChange].type = StatChangeType.values()[moveData[21 + statChange]];
                     moves[i].statChanges[statChange].stages = moveData[24 + statChange];
                     moves[i].statChanges[statChange].percentChance = moveData[27 + statChange];
-                }
-
-                // Exclude status types that aren't in the StatusType enum.
-                if (internalStatusType < 7) {
-                    moves[i].statusType = StatusType.values()[internalStatusType];
-                    if (moves[i].statusType == StatusType.POISON && (i == Moves.toxic || i == Moves.poisonFang)) {
-                        moves[i].statusType = StatusType.TOXIC_POISON;
-                    }
-                    moves[i].statusPercentChance = moveData[10] & 0xFF;
-                    switch (qualities) {
-                        case Gen6Constants.noDamageStatusQuality:
-                        case Gen6Constants.noDamageStatusAndStatChangeQuality:
-                            moves[i].statusMoveType = StatusMoveType.NO_DAMAGE;
-                            break;
-                        case Gen6Constants.damageStatusQuality:
-                            moves[i].statusMoveType = StatusMoveType.DAMAGE;
-                            break;
-                    }
                 }
             }
         } catch (IOException e) {
@@ -943,7 +905,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             data[2] = Gen6Constants.moveCategoryToByte(moves[i].category);
             data[3] = (byte) moves[i].power;
             data[0] = Gen6Constants.typeToByte(moves[i].type);
-            int hitratio = (int) Math.round(moves[i].hitratio);
+            int hitratio = (int) Math.round(moves[i].accuracy);
             if (hitratio < 0) {
                 hitratio = 0;
             }
@@ -2616,12 +2578,19 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public int miscTweaksAvailable() {
-        int available = 0;
+    public long miscTweaksAvailable() {
+        long available = 0L;
         available |= MiscTweak.FASTEST_TEXT.getValue();
         available |= MiscTweak.BAN_LUCKY_EGG.getValue();
         available |= MiscTweak.RETAIN_ALT_FORMES.getValue();
         available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
+        available |= MiscTweak.CUSTOM_POKEMON_STATS.getValue();
+        available |= MiscTweak.CUSTOM_POKEMON_TYPES.getValue();
+        available |= MiscTweak.CUSTOM_MOVE_CHANGES.getValue();
+        available |= MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
+        available |= MiscTweak.CUSTOM_NO_EXP.getValue();
+        available |= MiscTweak.MODERNIZE_CRIT.getValue();
+        available |= MiscTweak.NPC_SMART_AI.getValue();
         return available;
     }
 
@@ -2640,12 +2609,43 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
         } else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
             patchForNationalDex();
+        } else if (tweak == MiscTweak.CUSTOM_POKEMON_STATS) {
+            customPokemonStats();
+        } else if (tweak == MiscTweak.CUSTOM_POKEMON_TYPES) {
+            customPokemonTypes(6);
+        } else if (tweak == MiscTweak.CUSTOM_MOVE_CHANGES) {
+            customMoveChanges();
+        } else if (tweak == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS) {
+            customTypeEffectiveness();
+        } else if (tweak == MiscTweak.CUSTOM_NO_EXP) {
+            List<Pokemon> pokes = getPokemonInclFormes();
+
+            for (Pokemon pk : pokes) {
+                pk.expYield = 0;
+            }
+        }
+        else if (tweak == MiscTweak.MODERNIZE_CRIT) {
+            modernizeCrit();
         }
     }
 
     @Override
     public boolean isEffectivenessUpdated() {
         return false;
+    }
+
+    private void customTypeEffectiveness() {
+        // TODO
+        try {
+            byte[] battleFile = readFile(romEntry.getFile("Battle"));
+            writeFile(romEntry.getFile("Battle"), battleFile);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+
+    private void modernizeCrit() {
+        // TODO
     }
 
     private void applyFastestText() {
@@ -2797,6 +2797,54 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public void setTMHMPalettes() {
+        List<Integer> tmMoves = getTMMoves();
+        List<Integer> hmMoves = getHMMoves();
+
+        String palettePrefix = Gen6Constants.itemPalettesPrefix;
+        int offsPals = find(code, palettePrefix);
+        if (offsPals > 0) {
+            offsPals += Gen6Constants.itemPalettesPrefix.length() / 2; // because it was a prefix
+            // Write pals
+            for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
+                int itmNum = Gen6Constants.tmBlockOneOffset + i;
+                Move m = this.moves[tmMoves.get(i)];
+                int pal = this.typeTMPaletteNumber(m.type, false);
+                writeWord(code, offsPals + itmNum * 4, pal);
+            }
+            for (int i = 0; i < (Gen6Constants.tmBlockTwoCount); i++) {
+                int itmNum = Gen6Constants.tmBlockTwoOffset + i;
+                Move m = this.moves[tmMoves.get(i + Gen6Constants.tmBlockOneCount)];
+                int pal = this.typeTMPaletteNumber(m.type, false);
+                writeWord(code, offsPals + itmNum * 4, pal);
+            }
+            for (int i = 0; i < (Gen6Constants.tmBlockThreeCount); i++) {
+                int itmNum = Gen6Constants.tmBlockThreeOffset + i;
+                Move m = this.moves[tmMoves.get(i + Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount)];
+                int pal = this.typeTMPaletteNumber(m.type, false);
+                writeWord(code, offsPals + itmNum * 4, pal);
+            }
+            for (int i = 0; i < (Gen6Constants.hmBlockOneCount); i++) {
+                int itmNum = Gen6Constants.tmBlockThreeOffset + i;
+                Move m = this.moves[tmMoves.get(i + Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount)];
+                int pal = this.typeTMPaletteNumber(m.type, false);
+                writeWord(code, offsPals + itmNum * 4, pal);
+            }
+            if (romEntry.romType == Gen6Constants.Type_ORAS) {
+                int hm06ItmNum = Items.hm06;
+                Move hm06Move = this.moves[hmMoves.get(5)];
+                int hm06Pal = this.typeTMPaletteNumber(hm06Move.type, false);
+                writeWord(code, offsPals + hm06ItmNum * 4, hm06Pal);
+
+                int hm07ItmNum = Items.hm07ORAS;
+                Move hm07Move = this.moves[hmMoves.get(6)];
+                int hm07Pal = this.typeTMPaletteNumber(hm07Move.type, false);
+                writeWord(code, offsPals + hm07ItmNum * 4, hm07Pal);
+            }
+        }
+    }
+
+    @Override
     public void setTMMoves(List<Integer> moveIndexes) {
         String tmDataPrefix = Gen6Constants.tmDataPrefix;
         int offset = find(code, tmDataPrefix);
@@ -2812,48 +2860,22 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
             // Update TM item descriptions
             List<String> itemDescriptions = getStrings(false, romEntry.getInt("ItemDescriptionsTextOffset"));
-            List<String> moveDescriptions = getStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"));
             // TM01 is item 328 and so on
             for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
-                itemDescriptions.set(i + Gen6Constants.tmBlockOneOffset, moveDescriptions.get(moveIndexes.get(i)));
+                itemDescriptions.set(i + Gen6Constants.tmBlockOneOffset, moves[moveIndexes.get(i)].description);
             }
             // TM93-95 are 618-620
             for (int i = 0; i < Gen6Constants.tmBlockTwoCount; i++) {
                 itemDescriptions.set(i + Gen6Constants.tmBlockTwoOffset,
-                        moveDescriptions.get(moveIndexes.get(i + Gen6Constants.tmBlockOneCount)));
+                        moves[moveIndexes.get(i + Gen6Constants.tmBlockOneCount)].description);
             }
             // TM96-100 are 690 and so on
             for (int i = 0; i < Gen6Constants.tmBlockThreeCount; i++) {
                 itemDescriptions.set(i + Gen6Constants.tmBlockThreeOffset,
-                        moveDescriptions.get(moveIndexes.get(i + Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount)));
+                        moves[moveIndexes.get(i + Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount)].description);
             }
             // Save the new item descriptions
             setStrings(false, romEntry.getInt("ItemDescriptionsTextOffset"), itemDescriptions);
-            // Palettes
-            String palettePrefix = Gen6Constants.itemPalettesPrefix;
-            int offsPals = find(code, palettePrefix);
-            if (offsPals > 0) {
-                offsPals += Gen6Constants.itemPalettesPrefix.length() / 2; // because it was a prefix
-                // Write pals
-                for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
-                    int itmNum = Gen6Constants.tmBlockOneOffset + i;
-                    Move m = this.moves[moveIndexes.get(i)];
-                    int pal = this.typeTMPaletteNumber(m.type, false);
-                    writeWord(code, offsPals + itmNum * 4, pal);
-                }
-                for (int i = 0; i < (Gen6Constants.tmBlockTwoCount); i++) {
-                    int itmNum = Gen6Constants.tmBlockTwoOffset + i;
-                    Move m = this.moves[moveIndexes.get(i + Gen6Constants.tmBlockOneCount)];
-                    int pal = this.typeTMPaletteNumber(m.type, false);
-                    writeWord(code, offsPals + itmNum * 4, pal);
-                }
-                for (int i = 0; i < (Gen6Constants.tmBlockThreeCount); i++) {
-                    int itmNum = Gen6Constants.tmBlockThreeOffset + i;
-                    Move m = this.moves[moveIndexes.get(i + Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount)];
-                    int pal = this.typeTMPaletteNumber(m.type, false);
-                    writeWord(code, offsPals + itmNum * 4, pal);
-                }
-            }
         }
     }
 
@@ -3936,7 +3958,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public Map<Integer, Shop> getShopItems() {
+    public Map<Integer, Shop> getShopItems(int maxBadgesForEvoItem) {
         int[] tmShops = romEntry.arrayEntries.get("TMShops");
         int[] regularShops = romEntry.arrayEntries.get("RegularShops");
         int[] shopItemSizes = romEntry.arrayEntries.get("ShopItemSizes");
@@ -3970,10 +3992,10 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     items.add(FileFunctions.read2ByteInt(code,offset));
                     offset += 2;
                 }
-                Shop shop = new Shop();
-                shop.items = items;
-                shop.name = shopNames.get(i);
-                shop.isMainGame = Gen6Constants.getMainGameShops(romEntry.romType).contains(i);
+                boolean isPrimary = Gen6Constants.getPrimaryShops(romEntry.romType).contains(i);
+                boolean isMainGame = Gen6Constants.getMainGameShops(romEntry.romType).contains(i);
+                boolean isBeforeFullyEvolved = Gen6Constants.getNfeShops(romEntry.romType, maxBadgesForEvoItem).contains(i);
+                Shop shop = new Shop(shopNames.get(i), items, isPrimary, isMainGame, isBeforeFullyEvolved);
                 shopItemsMap.put(i, shop);
             }
         }
@@ -4036,7 +4058,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         try {
             GARCArchive itemPriceGarc = this.readGARC(romEntry.getFile("ItemData"),true);
             for (int i = 1; i < itemPriceGarc.files.size(); i++) {
-                writeWord(itemPriceGarc.files.get(i).get(0),0,Gen6Constants.balancedItemPrices.get(i));
+                // TODO: Make this configurable
+                // writeWord(itemPriceGarc.files.get(i).get(0),0,Gen6Constants.balancedItemPrices.get(i));
+                writeWord(itemPriceGarc.files.get(i).get(0),0,0);
             }
             writeGARC(romEntry.getFile("ItemData"),itemPriceGarc);
         } catch (IOException e) {
@@ -4183,7 +4207,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
+    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
         List<Integer> items = new ArrayList<>();
         items.addAll(Gen6Constants.generalPurposeConsumableItems);
         int frequencyBoostCount = 6; // Make some very good items more common, but not too common
@@ -4224,7 +4248,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         if (numDamagingMoves >= 2) {
             items.add(Items.assaultVest);
         }
-        Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.primaryType, tp.pokemon.secondaryType, 6);
+
+        boolean customTypeEffectiveness = (settings.getCurrentMiscTweaks() & MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue()) == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
+        Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.primaryType, tp.pokemon.secondaryType, 6, customTypeEffectiveness);
         for(Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
             Integer berry = Gen6Constants.weaknessReducingBerries.get(entry.getKey());
             if (entry.getValue() == Effectiveness.DOUBLE) {

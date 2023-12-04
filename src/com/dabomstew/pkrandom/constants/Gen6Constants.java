@@ -209,7 +209,7 @@ public class Gen6Constants {
             bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsDarkGrassHeldItemOffset = 16,
             bsGenderOffset = 18, bsGrowthCurveOffset = 21, bsAbility1Offset = 24, bsAbility2Offset = 25,
             bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32,
-            bsTMHMCompatOffset = 40, bsSpecialMTCompatOffset = 56, bsMTCompatOffset = 64;
+            bsExpYieldOffset = 34, bsTMHMCompatOffset = 40, bsSpecialMTCompatOffset = 56, bsMTCompatOffset = 64;
 
     private static final int bsSizeXY = 0x40;
     private static final int bsSizeORAS = 0x50;
@@ -253,67 +253,61 @@ public class Gen6Constants {
 
     public static final String[] fastestTextPrefixes = new String[]{"1080BDE80000A0E31080BDE8F0412DE9", "485080E59C4040E24C50C0E5EC009FE5"};
 
-    private static final List<Integer> mainGameShopsXY = Arrays.asList(
-            10,11,12,13,16,17,20,21,24,25
+    public static final List<ShopData> xyShopData = Arrays.asList(
+            new ShopData("Primary 0 Badges", 0, true, false),
+            new ShopData("Primary 1 Badges", 1, true, false),
+            new ShopData("Primary 2 Badges", 2, true, false),
+            new ShopData("Primary 3 Badges", 3, true, false),
+            new ShopData("Primary 4 Badges", 4, true, false),
+            new ShopData("Primary 5 Badges", 5, true, false),
+            new ShopData("Primary 6 Badges", 6, true, false),
+            new ShopData("Primary 7 Badges", 7, true, false),
+            new ShopData("Primary 8 Badges", 8, true, false),
+            new ShopData("Unused", 8, false, false),
+            new ShopData("Lumiose Herboriste", 1, false, true),
+            new ShopData("Lumiose Poké Ball Boutique", 1, false, true),
+            new ShopData("Lumiose Stone Emporium", 1, false, true),
+            new ShopData("Coumarine Incenses", 3, false, true),
+            new ShopData("Aquacorde Poké Ball", 0, false, false),
+            new ShopData("Aquacorde Potion", 0, false, false),
+            new ShopData("Lumiose North Secondary", 4, false, true),
+            new ShopData("Cyllage Secondary", 1, false, true),
+            new ShopData("Shalour Secondary (TMs)", 2, false, false),
+            new ShopData("Lumiose South Secondary (TMs)", 1, false, false),
+            new ShopData("Laverre Secondary", 5, false, true),
+            new ShopData("Snowbelle Secondary", 7, false, true),
+            new ShopData("Kiloude Secondary (TMs)", 8, false, false),
+            new ShopData("Anistar Secondary (TMs)", 6, false, false),
+            new ShopData("Santalune Secondary", 0, false, true),
+            new ShopData("Coumarine Secondary", 3, false, true)
     );
 
-    private static final List<Integer> mainGameShopsORAS = Arrays.asList(
-            10, 11, 13, 14, 16, 17, 18, 19, 20, 21
+    public static final List<ShopData> orasShopData = Arrays.asList(
+            new ShopData("Primary 0 Badges (After Pokédex)", 0, true, false),
+            new ShopData("Primary 1 Badges", 1, true, false),
+            new ShopData("Primary 2 Badges", 2, true, false),
+            new ShopData("Primary 3 Badges", 3, true, false),
+            new ShopData("Primary 4 Badges", 4, true, false),
+            new ShopData("Primary 5 Badges", 5, true, false),
+            new ShopData("Primary 6 Badges", 6, true, false),
+            new ShopData("Primary 7 Badges", 7, true, false),
+            new ShopData("Primary 8 Badges", 8, true, false),
+            new ShopData("Primary 0 Badges (Before Pokédex)", 0, true, false),
+            new ShopData("Slateport Incenses", 2, false, true),
+            new ShopData("Slateport Vitamins", 2, false, true),
+            new ShopData("Slateport TMs", 2, false, false),
+            new ShopData("Rustboro Secondary", 0, false, true),
+            new ShopData("Slateport Secondary", 2, false, true),
+            new ShopData("Mauville Secondary (TMs)", 2, false, false),
+            new ShopData("Verdanturf Secondary", 3, false, true),
+            new ShopData("Fallarbor Secondary", 3, false, true),
+            new ShopData("Lavaridge Herbs", 3, false, true),
+            new ShopData("Lilycove Dept. Store 2F Left", 6, false, true),
+            new ShopData("Lilycove Dept. Store 3F Left", 6, false, true),
+            new ShopData("Lilycove Dept. Store 3F Right", 6, false, true),
+            new ShopData("Lilycove Dept. Store 4F Left (TMs)", 6, false, false),
+            new ShopData("Lilycove Dept. Store 4F Right (TMs)", 6, false, false)
     );
-
-    private static final List<String> shopNamesXY = Arrays.asList(
-            "Primary 0 Badges",
-            "Primary 1 Badges",
-            "Primary 2 Badges",
-            "Primary 3 Badges",
-            "Primary 4 Badges",
-            "Primary 5 Badges",
-            "Primary 6 Badges",
-            "Primary 7 Badges",
-            "Primary 8 Badges",
-            "Unused",
-            "Lumiose Herboriste",
-            "Lumiose Poké Ball Boutique",
-            "Lumiose Stone Emporium",
-            "Coumarine Incenses",
-            "Aquacorde Poké Ball",
-            "Aquacorde Potion",
-            "Lumiose North Secondary",
-            "Cyllage Secondary",
-            "Shalour Secondary (TMs)",
-            "Lumiose South Secondary (TMs)",
-            "Laverre Secondary",
-            "Snowbelle Secondary",
-            "Kiloude Secondary (TMs)",
-            "Anistar Secondary (TMs)",
-            "Santalune Secondary",
-            "Coumarine Secondary");
-
-    private static final List<String> shopNamesORAS = Arrays.asList(
-            "Primary 0 Badges (After Pokédex)",
-            "Primary 1 Badges",
-            "Primary 2 Badges",
-            "Primary 3 Badges",
-            "Primary 4 Badges",
-            "Primary 5 Badges",
-            "Primary 6 Badges",
-            "Primary 7 Badges",
-            "Primary 8 Badges",
-            "Primary 0 Badges (Before Pokédex)",
-            "Slateport Incenses",
-            "Slateport Vitamins",
-            "Slateport TMs",
-            "Rustboro Secondary",
-            "Slateport Secondary",
-            "Mauville Secondary (TMs)",
-            "Verdanturf Secondary",
-            "Fallarbor Secondary",
-            "Lavaridge Herbs",
-            "Lilycove Dept. Store 2F Left",
-            "Lilycove Dept. Store 3F Left",
-            "Lilycove Dept. Store 3F Right",
-            "Lilycove Dept. Store 4F Left (TMs)",
-            "Lilycove Dept. Store 4F Right (TMs)");
 
 
     public static final List<Integer> evolutionItems = Arrays.asList(Items.sunStone, Items.moonStone, Items.fireStone,
@@ -473,20 +467,51 @@ public class Gen6Constants {
         }
     }
 
-    public static List<Integer> getMainGameShops(int romType) {
-        if (romType == Type_XY) {
-            return mainGameShopsXY;
-        } else {
-            return mainGameShopsORAS;
+    public static List<Integer> getPrimaryShops(int romType) {
+        List<Integer> returnValue = new ArrayList<>();
+        List<ShopData> data = romType == Type_XY ? xyShopData : romType == Type_ORAS ? orasShopData : new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            ShopData shopData = data.get(i);
+            if (shopData.isPrimary)
+                returnValue.add(i);
         }
+
+        return returnValue;
+    }
+
+    public static List<Integer> getMainGameShops(int romType) {
+        List<Integer> returnValue = new ArrayList<>();
+        List<ShopData> data = romType == Type_XY ? xyShopData : romType == Type_ORAS ? orasShopData : new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            ShopData shopData = data.get(i);
+            if (shopData.isMain)
+                returnValue.add(i);
+        }
+
+        return returnValue;
+    }
+
+    // maxBadges = badge you'll have at the max evo level
+    public static List<Integer> getNfeShops(int romType, int maxBadges) {
+        List<Integer> returnValue = new ArrayList<>();
+        List<ShopData> data = romType == Type_XY ? xyShopData : romType == Type_ORAS ? orasShopData : new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            ShopData shopData = data.get(i);
+            if (shopData.badges <= maxBadges)
+                returnValue.add(i);
+        }
+
+        return returnValue;
     }
 
     public static List<String> getShopNames(int romType) {
-        if (romType == Type_XY) {
-            return shopNamesXY;
-        } else {
-            return shopNamesORAS;
+        List<String> returnValue = new ArrayList<>();
+        List<ShopData> data = romType == Type_XY ? xyShopData : romType == Type_ORAS ? orasShopData : new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            returnValue.add(data.get(i).name);
         }
+
+        return returnValue;
     }
 
     public static int getBsSize(int romType) {

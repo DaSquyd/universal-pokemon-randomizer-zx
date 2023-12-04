@@ -184,8 +184,12 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
     protected int readByte(byte[] data, int offset) { return data[offset] & 0xFF; }
 
-    protected int readWord(byte[] data, int offset) {
-        return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8);
+    protected int readUnsignedWord(byte[] data, int offset) {
+        return ((data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8));
+    }
+
+    protected int readSignedWord(byte[] data, int offset) {
+        return (short)(((data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8)));
     }
 
     protected int readLong(byte[] data, int offset) {
@@ -262,7 +266,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         return (byte) thisByte;
     }
 
-    protected int typeTMPaletteNumber(Type t) {
+    protected int typeTMHMPaletteNumber(Type t) {
         if (t == null) {
             return 411; // CURSE
         }

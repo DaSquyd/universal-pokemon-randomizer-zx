@@ -50,20 +50,20 @@ public class Gen5Constants {
 
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
-            bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
-            bsDarkGrassHeldItemOffset = 16, bsGrowthCurveOffset = 21, bsAbility1Offset = 24, bsAbility2Offset = 25,
+            bsCatchRateOffset = 8, bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
+            bsDarkGrassHeldItemOffset = 16, bsBaseHappinessOffset = 20, bsGrowthCurveOffset = 21, bsAbility1Offset = 24, bsAbility2Offset = 25,
             bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32,
-            bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
+            bsExpYieldOffset = 34, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
 
-    public static final byte[] bw1NewStarterScript = { 0x24, 0x00, (byte) 0xA7, 0x02, (byte) 0xE7, 0x00, 0x00, 0x00,
-            (byte) 0xDE, 0x00, 0x00, 0x00, (byte) 0xF8, 0x01, 0x05, 0x00 };
+    public static final byte[] bw1NewStarterScript = {0x24, 0x00, (byte) 0xA7, 0x02, (byte) 0xE7, 0x00, 0x00, 0x00,
+            (byte) 0xDE, 0x00, 0x00, 0x00, (byte) 0xF8, 0x01, 0x05, 0x00};
 
     public static final String bw1StarterScriptMagic = "2400A702";
 
     public static final int bw1StarterTextOffset = 18, bw1CherenText1Offset = 26, bw1CherenText2Offset = 53;
 
-    public static final byte[] bw2NewStarterScript = { 0x28, 0x00, (byte) 0xA1, 0x40, 0x04, 0x00, (byte) 0xDE, 0x00,
-            0x00, 0x00, (byte) 0xFD, 0x01, 0x05, 0x00 };
+    public static final byte[] bw2NewStarterScript = {0x28, 0x00, (byte) 0xA1, 0x40, 0x04, 0x00, (byte) 0xDE, 0x00,
+            0x00, 0x00, (byte) 0xFD, 0x01, 0x05, 0x00};
 
     public static final String bw2StarterScriptMagic = "2800A1400400";
 
@@ -72,12 +72,12 @@ public class Gen5Constants {
     public static final int perSeasonEncounterDataLength = 232;
     private static final int bw1AreaDataEntryLength = 249, bw2AreaDataEntryLength = 345, bw1EncounterAreaCount = 61, bw2EncounterAreaCount = 85;
 
-    public static final int[] encountersOfEachType = { 12, 12, 12, 5, 5, 5, 5 };
+    public static final int[] encountersOfEachType = {12, 12, 12, 5, 5, 5, 5};
 
-    public static final String[] encounterTypeNames = { "Grass/Cave", "Doubles Grass", "Shaking Spots", "Surfing",
-            "Surfing Spots", "Fishing", "Fishing Spots" };
+    public static final String[] encounterTypeNames = {"Grass/Cave", "Doubles Grass", "Shaking Spots", "Surfing",
+            "Surfing Spots", "Fishing", "Fishing Spots"};
 
-    public static final int[] habitatClassificationOfEachType = { 0, 0, 0, 1, 1, 2, 2 };
+    public static final int[] habitatClassificationOfEachType = {0, 0, 0, 1, 1, 2, 2};
 
     public static final int bw2Route4AreaIndex = 40, bw2VictoryRoadAreaIndex = 76, bw2ReversalMountainAreaIndex = 73;
 
@@ -101,7 +101,7 @@ public class Gen5Constants {
     public static final String tmDataPrefix = "87038803";
 
     public static final int tmCount = 95, hmCount = 6, tmBlockOneCount = 92, tmBlockOneOffset = Items.tm01,
-            tmBlockTwoOffset = Items.tm93;
+            tmBlockTwoOffset = Items.tm93, hmOffset = Items.hm01;
 
     public static final String bw1ItemPalettesPrefix = "E903EA03020003000400050006000700",
             bw2ItemPalettesPrefix = "FD03FE03020003000400050006000700";
@@ -115,10 +115,10 @@ public class Gen5Constants {
     public static final int fossilPokemonFile = 877;
     public static final int fossilPokemonLevelOffset = 0x3F7;
 
-    public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
+    public static final Map<Integer, List<Integer>> abilityVariations = setupAbilityVariations();
 
-    private static Map<Integer,List<Integer>> setupAbilityVariations() {
-        Map<Integer,List<Integer>> map = new HashMap<>();
+    private static Map<Integer, List<Integer>> setupAbilityVariations() {
+        Map<Integer, List<Integer>> map = new HashMap<>();
         map.put(Abilities.insomnia, Arrays.asList(Abilities.insomnia, Abilities.vitalSpirit));
         map.put(Abilities.clearBody, Arrays.asList(Abilities.clearBody, Abilities.whiteSmoke));
         map.put(Abilities.hugePower, Arrays.asList(Abilities.hugePower, Abilities.purePower));
@@ -141,18 +141,18 @@ public class Gen5Constants {
 
     public static final int[] mulchIndices = {Items.growthMulch, Items.dampMulch, Items.stableMulch, Items.gooeyMulch};
 
-    public static final MoveCategory[] moveCategoryIndices = { MoveCategory.STATUS, MoveCategory.PHYSICAL,
-            MoveCategory.SPECIAL };
+    public static final MoveCategory[] moveCategoryIndices = {MoveCategory.STATUS, MoveCategory.PHYSICAL,
+            MoveCategory.SPECIAL};
 
     public static byte moveCategoryToByte(MoveCategory cat) {
         switch (cat) {
-        case PHYSICAL:
-            return 1;
-        case SPECIAL:
-            return 2;
-        case STATUS:
-        default:
-            return 0;
+            case PHYSICAL:
+                return 1;
+            case SPECIAL:
+                return 2;
+            case STATUS:
+            default:
+                return 0;
         }
     }
 
@@ -164,22 +164,22 @@ public class Gen5Constants {
 
     public static final Type[] typeTable = constructTypeTable();
 
-    private static final Map<Integer,String> bw1FormeSuffixes = setupFormeSuffixes(Gen5Constants.Type_BW);
+    private static final Map<Integer, String> bw1FormeSuffixes = setupFormeSuffixes(Gen5Constants.Type_BW);
 
-    private static final Map<Integer,String> bw2FormeSuffixes = setupFormeSuffixes(Gen5Constants.Type_BW2);
+    private static final Map<Integer, String> bw2FormeSuffixes = setupFormeSuffixes(Gen5Constants.Type_BW2);
 
-    private static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
-    private static final Map<Integer,String> dummyFormeSuffixes = setupDummyFormeSuffixes();
+    private static final Map<Integer, Map<Integer, String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
+    private static final Map<Integer, String> dummyFormeSuffixes = setupDummyFormeSuffixes();
 
-    private static final Map<Integer,Map<Integer,Integer>> absolutePokeNumsByBaseForme = setupAbsolutePokeNumsByBaseForme();
-    private static final Map<Integer,Integer> dummyAbsolutePokeNums = setupDummyAbsolutePokeNums();
+    private static final Map<Integer, Map<Integer, Integer>> absolutePokeNumsByBaseForme = setupAbsolutePokeNumsByBaseForme();
+    private static final Map<Integer, Integer> dummyAbsolutePokeNums = setupDummyAbsolutePokeNums();
 
     public static String getFormeSuffixByBaseForme(int baseForme, int formNum) {
-        return formeSuffixesByBaseForme.getOrDefault(baseForme,dummyFormeSuffixes).getOrDefault(formNum,"");
+        return formeSuffixesByBaseForme.getOrDefault(baseForme, dummyFormeSuffixes).getOrDefault(formNum, "");
     }
 
     public static Integer getAbsolutePokeNumByBaseForme(int baseForme, int formNum) {
-        return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,baseForme);
+        return absolutePokeNumsByBaseForme.getOrDefault(baseForme, dummyAbsolutePokeNums).getOrDefault(formNum, baseForme);
     }
 
     private static final List<Integer> bw1IrregularFormes = Arrays.asList(
@@ -196,8 +196,8 @@ public class Gen5Constants {
             Species.Gen5Formes.kyuremB
     );
 
-    public static final List<Integer> emptyPlaythroughTrainers = Arrays.asList(new Integer[] { });
-    
+    public static final List<Integer> emptyPlaythroughTrainers = Arrays.asList(new Integer[]{});
+
     public static final List<Integer> bw1MainPlaythroughTrainers = Arrays.asList(
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
             20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
@@ -263,78 +263,70 @@ public class Gen5Constants {
             71, 72, 73, 74, 75, 76, 77);
 
     public static final int normalTrainerNameLength = 813, normalTrainerClassLength = 236;
-    
-//    public static final Map<Integer, String> bw1ShopIndex = new HashMap<Integer, String>() {1:"Check"};
 
-    public static final List<Integer> bw1MainGameShops = Arrays.asList(
-            3, 5, 6, 8, 9, 12, 14, 17, 18, 19, 21, 22
+    public static final List<ShopData> bw1ShopData = Arrays.asList(
+            new ShopData("Primary 0 Badges", 0, true, false),
+            new ShopData("Shopping Mall 9 TMs", 7, false, false),
+            new ShopData("Icirrus Secondary (TMs)", 6, false, false),
+            new ShopData("Driftveil Herb Salesman", 4, false, true),
+            new ShopData("Mistralton Secondary (TMs)", 5, false, false),
+            new ShopData("Shopping Mall 9 F3 Left", 7, false, true),
+            new ShopData("Accumula Secondary", 0, false, true),
+            new ShopData("Nimbasa Secondary (TMs)", 3, false, false),
+            new ShopData("Striaton Secondary", 0, false, true),
+            new ShopData("League Secondary", 8, false, true),
+            new ShopData("Lacunosa Secondary", 8, false, false),
+            new ShopData("Black City/White Forest Secondary", 8, false, false),
+            new ShopData("Nacrene/Shopping Mall 9 X Items", 1, false, true),
+            new ShopData("Driftveil Incense Salesman", 4, false, false),
+            new ShopData("Nacrene Secondary", 1, false, true),
+            new ShopData("Undella Secondary", 8, false, false),
+            new ShopData("Primary 2 Badges", 2, true, false),
+            new ShopData("Castelia Secondary", 2, false, true),
+            new ShopData("Driftveil Secondary", 4, false, true),
+            new ShopData("Opelucid Secondary", 7, false, true),
+            new ShopData("Primary 3 Badges", 3, true, false),
+            new ShopData("Shopping Mall 9 F1", 7, false, true),
+            new ShopData("Shopping Mall 9 F2", 7, false, true),
+            new ShopData("Primary 5 Badges", 5, true, false),
+            new ShopData("Primary 7 Badges", 7, true, false),
+            new ShopData("Primary 8 Badges", 8, true, false)
     );
 
-    public static final List<String> bw1ShopNames = Arrays.asList(
-            "Primary 0 Badges",
-            "Shopping Mall 9 TMs",
-            "Icirrus Secondary (TMs)",
-            "Driftveil Herb Salesman",
-            "Mistralton Secondary (TMs)",
-            "Shopping Mall 9 F3 Left",
-            "Accumula Secondary",
-            "Nimbasa Secondary (TMs)",
-            "Striaton Secondary",
-            "League Secondary",
-            "Lacunosa Secondary",
-            "Black City/White Forest Secondary",
-            "Nacrene/Shopping Mall 9 X Items",
-            "Driftveil Incense Salesman",
-            "Nacrene Secondary",
-            "Undella Secondary",
-            "Primary 2 Badges",
-            "Castelia Secondary",
-            "Driftveil Secondary",
-            "Opelucid Secondary",
-            "Primary 3 Badges",
-            "Shopping Mall 9 F1",
-            "Shopping Mall 9 F2",
-            "Primary 5 Badges",
-            "Primary 7 Badges",
-            "Primary 8 Badges");
-
-    public static final List<Integer> bw2MainGameShops = Arrays.asList(
-            9, 11, 14, 15, 16, 18, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31
+    public static final List<ShopData> bw2ShopData = Arrays.asList(
+            new ShopData("Primary 0 Badges", 0, true, false),
+            new ShopData("Primary 1 Badges", 1, true, false),
+            new ShopData("Primary 3 Badges", 3, true, false),
+            new ShopData("Primary 5 Badges", 5, true, false),
+            new ShopData("Primary 7 Badges", 7, true, false),
+            new ShopData("Primary 8 Badges", 8, true, false),
+            new ShopData("Accumula Secondary", 8, false, false),
+            new ShopData("Striaton Secondary (TMs)", 8, false, false),
+            new ShopData("Nacrene Secondary", 8, false, false),
+            new ShopData("Castelia Secondary", 2, false, true),
+            new ShopData("Nimbasa Secondary (TMs)", 3, false, false),
+            new ShopData("Driftveil Secondary", 4, false, true),
+            new ShopData("Mistralton Secondary (TMs)", 5, false, false),
+            new ShopData("Icirrus Secondary", 8, false, false),
+            new ShopData("Opelucid Secondary", 6, false, true),
+            new ShopData("Victory Road Secondary", 8, false, true),
+            new ShopData("Pokemon League Secondary", 8, false, true),
+            new ShopData("Lacunosa Secondary (TMs)", 6, false, false),
+            new ShopData("Undella Secondary", 6, false, true),
+            new ShopData("Black City/White Forest Secondary", 8, false, false),
+            new ShopData("Nacrene/Shopping Mall 9 X Items", 6, false, true),
+            new ShopData("Driftveil Herb Salesman", 4, false, true),
+            new ShopData("Driftveil Incense Salesman", 4, false, true),
+            new ShopData("Shopping Mall 9 F1", 6, false, true),
+            new ShopData("Shopping Mall 9 TMs", 6, false, false),
+            new ShopData("Shopping Mall 9 F2", 6, false, true),
+            new ShopData("Shopping Mall 9 F3 Left", 6, false, true),
+            new ShopData("Aspertia Secondary", 0, false, true),
+            new ShopData("Virbank Secondary", 1, false, true),
+            new ShopData("Humilau Secondary", 7, false, true),
+            new ShopData("Floccesy Secondary", 0, false, true),
+            new ShopData("Lentimas Secondary", 6, false, true)
     );
-    
-    public static final List<String> bw2ShopNames = Arrays.asList(
-            "Primary 0 Badges",
-            "Primary 1 Badges",
-            "Primary 3 Badges",
-            "Primary 5 Badges",
-            "Primary 7 Badges",
-            "Primary 8 Badges",
-            "Accumula Secondary",
-            "Striaton Secondary (TMs)",
-            "Nacrene Secondary",
-            "Castelia Secondary",
-            "Nimbasa Secondary (TMs)",
-            "Driftveil Secondary",
-            "Mistralton Secondary (TMs)",
-            "Icirrus Secondary",
-            "Opelucid Secondary",
-            "Victory Road Secondary",
-            "Pokemon League Secondary",
-            "Lacunosa Secondary (TMs)",
-            "Undella Secondary",
-            "Black City/White Forest Secondary",
-            "Nacrene/Shopping Mall 9 X Items",
-            "Driftveil Herb Salesman",
-            "Driftveil Incense Salesman",
-            "Shopping Mall 9 F1",
-            "Shopping Mall 9 TMs",
-            "Shopping Mall 9 F2",
-            "Shopping Mall 9 F3 Left",
-            "Aspertia Secondary",
-            "Virbank Secondary",
-            "Humilau Secondary",
-            "Floccesy Secondary",
-            "Lentimas Secondary");
 
 
     public static final List<Integer> evolutionItems = Arrays.asList(Items.sunStone, Items.moonStone, Items.fireStone,
@@ -342,7 +334,7 @@ public class Gen5Constants {
             Items.ovalStone, Items.kingsRock, Items.deepSeaTooth, Items.deepSeaScale, Items.metalCoat, Items.dragonScale,
             Items.upgrade, Items.protector, Items.electirizer, Items.magmarizer, Items.dubiousDisc, Items.reaperCloth,
             Items.razorClaw, Items.razorFang, Items.prismScale);
-    
+
     public static final List<Integer> bw1RequiredFieldTMs = Arrays.asList(2, 3, 5, 6, 9, 12, 13, 19,
             22, 24, 26, 29, 30, 35, 36, 39, 41, 46, 47, 50, 52, 53, 55, 58, 61, 63, 65, 66, 71, 80, 81, 84, 85, 86, 90,
             91, 92, 93);
@@ -366,6 +358,8 @@ public class Gen5Constants {
     public static final String introGraphicPrefix = "5A0000010000001700000001000000", bw1IntroCryPrefix = "0021009101910291", bw2IntroCryLocator = "3D020000F8B51C1C";
 
     public static final String typeEffectivenessTableLocator = "0404040404020400";
+    public static final String critChanceLocator = "1008040302";
+    public static final String critLogicLocator = "002E00D07F00";
 
     public static final String forceChallengeModeLocator = "816A406B0B1C07490022434090000858834201D1";
 
@@ -493,42 +487,42 @@ public class Gen5Constants {
             return 0x00; // normal?
         }
         switch (type) {
-        case NORMAL:
-            return 0x00;
-        case FIGHTING:
-            return 0x01;
-        case FLYING:
-            return 0x02;
-        case POISON:
-            return 0x03;
-        case GROUND:
-            return 0x04;
-        case ROCK:
-            return 0x05;
-        case BUG:
-            return 0x06;
-        case GHOST:
-            return 0x07;
-        case FIRE:
-            return 0x09;
-        case WATER:
-            return 0x0A;
-        case GRASS:
-            return 0x0B;
-        case ELECTRIC:
-            return 0x0C;
-        case PSYCHIC:
-            return 0x0D;
-        case ICE:
-            return 0x0E;
-        case DRAGON:
-            return 0x0F;
-        case STEEL:
-            return 0x08;
-        case DARK:
-            return 0x10;
-        default:
-            return 0; // normal by default
+            case NORMAL:
+                return 0x00;
+            case FIGHTING:
+                return 0x01;
+            case FLYING:
+                return 0x02;
+            case POISON:
+                return 0x03;
+            case GROUND:
+                return 0x04;
+            case ROCK:
+                return 0x05;
+            case BUG:
+                return 0x06;
+            case GHOST:
+                return 0x07;
+            case FIRE:
+                return 0x09;
+            case WATER:
+                return 0x0A;
+            case GRASS:
+                return 0x0B;
+            case ELECTRIC:
+                return 0x0C;
+            case PSYCHIC:
+                return 0x0D;
+            case ICE:
+                return 0x0E;
+            case DRAGON:
+                return 0x0F;
+            case STEEL:
+                return 0x08;
+            case DARK:
+                return 0x10;
+            default:
+                return 0; // normal by default
         }
     }
 
@@ -559,13 +553,41 @@ public class Gen5Constants {
         return new int[0];
     }
 
-    public static List<Integer> getMainGameShops(int romType) {
-        if (romType == Type_BW) {
-            return bw1MainGameShops;
-        } else if (romType == Type_BW2) {
-            return bw2MainGameShops;
+    public static List<Integer> getPrimaryShops(int romType) {
+        List<Integer> returnValue = new ArrayList<>();
+        List<ShopData> data = romType == Type_BW ? bw1ShopData : romType == Type_BW2 ? bw2ShopData : new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            ShopData shopData = data.get(i);
+            if (shopData.isPrimary)
+                returnValue.add(i);
         }
-        return new ArrayList<>();
+
+        return returnValue;
+    }
+
+    public static List<Integer> getMainGameShops(int romType) {
+        List<Integer> returnValue = new ArrayList<>();
+        List<ShopData> data = romType == Type_BW ? bw1ShopData : romType == Type_BW2 ? bw2ShopData : new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            ShopData shopData = data.get(i);
+            if (shopData.isMain)
+                returnValue.add(i);
+        }
+
+        return returnValue;
+    }
+
+    // maxBadges = badge you'll have at the max evo level (ex. level 40 is badge 5 in BW2 Challenge Mode)
+    public static List<Integer> getNfeShops(int romType, int maxBadges) {
+        List<Integer> returnValue = new ArrayList<>();
+        List<ShopData> data = romType == Type_BW ? bw1ShopData : romType == Type_BW2 ? bw2ShopData : new ArrayList<>();
+        for (int i = 0; i < data.size(); i++) {
+            ShopData shopData = data.get(i);
+            if (shopData.badges <= maxBadges)
+                returnValue.add(i);
+        }
+
+        return returnValue;
     }
 
     public static List<Integer> getIrregularFormes(int romType) {
@@ -606,218 +628,218 @@ public class Gen5Constants {
 
     public static String getFormeSuffix(int internalIndex, int romType) {
         if (romType == Type_BW) {
-            return bw1FormeSuffixes.getOrDefault(internalIndex,"");
+            return bw1FormeSuffixes.getOrDefault(internalIndex, "");
         } else if (romType == Type_BW2) {
-            return bw2FormeSuffixes.getOrDefault(internalIndex,"");
+            return bw2FormeSuffixes.getOrDefault(internalIndex, "");
         } else {
             return "";
         }
     }
 
-    private static Map<Integer,String> setupFormeSuffixes(int gameVersion) {
-        Map<Integer,String> formeSuffixes = new HashMap<>();
+    private static Map<Integer, String> setupFormeSuffixes(int gameVersion) {
+        Map<Integer, String> formeSuffixes = new HashMap<>();
         if (gameVersion == Gen5Constants.Type_BW) {
-            formeSuffixes.put(Species.Gen5Formes.deoxysA,"-A");
-            formeSuffixes.put(Species.Gen5Formes.deoxysD,"-D");
-            formeSuffixes.put(Species.Gen5Formes.deoxysS,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamS,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamT,"-T");
-            formeSuffixes.put(Species.Gen5Formes.shayminS,"-S");
-            formeSuffixes.put(Species.Gen5Formes.giratinaO,"-O");
-            formeSuffixes.put(Species.Gen5Formes.rotomH,"-H");
-            formeSuffixes.put(Species.Gen5Formes.rotomW,"-W");
-            formeSuffixes.put(Species.Gen5Formes.rotomFr,"-Fr");
-            formeSuffixes.put(Species.Gen5Formes.rotomFa,"-Fa");
-            formeSuffixes.put(Species.Gen5Formes.rotomM,"-M");
-            formeSuffixes.put(Species.Gen5Formes.castformF,"-F");
-            formeSuffixes.put(Species.Gen5Formes.castformW,"-W");
-            formeSuffixes.put(Species.Gen5Formes.castformI,"-I");
-            formeSuffixes.put(Species.Gen5Formes.basculinB,"-B");
-            formeSuffixes.put(Species.Gen5Formes.darmanitanZ,"-Z");
-            formeSuffixes.put(Species.Gen5Formes.meloettaP,"-P");
+            formeSuffixes.put(Species.Gen5Formes.deoxysA, "-A");
+            formeSuffixes.put(Species.Gen5Formes.deoxysD, "-D");
+            formeSuffixes.put(Species.Gen5Formes.deoxysS, "-S");
+            formeSuffixes.put(Species.Gen5Formes.wormadamS, "-S");
+            formeSuffixes.put(Species.Gen5Formes.wormadamT, "-T");
+            formeSuffixes.put(Species.Gen5Formes.shayminS, "-S");
+            formeSuffixes.put(Species.Gen5Formes.giratinaO, "-O");
+            formeSuffixes.put(Species.Gen5Formes.rotomH, "-H");
+            formeSuffixes.put(Species.Gen5Formes.rotomW, "-W");
+            formeSuffixes.put(Species.Gen5Formes.rotomFr, "-Fr");
+            formeSuffixes.put(Species.Gen5Formes.rotomFa, "-Fa");
+            formeSuffixes.put(Species.Gen5Formes.rotomM, "-M");
+            formeSuffixes.put(Species.Gen5Formes.castformF, "-F");
+            formeSuffixes.put(Species.Gen5Formes.castformW, "-W");
+            formeSuffixes.put(Species.Gen5Formes.castformI, "-I");
+            formeSuffixes.put(Species.Gen5Formes.basculinB, "-B");
+            formeSuffixes.put(Species.Gen5Formes.darmanitanZ, "-Z");
+            formeSuffixes.put(Species.Gen5Formes.meloettaP, "-P");
         } else if (gameVersion == Gen5Constants.Type_BW2) {
-            formeSuffixes.put(Species.Gen5Formes.deoxysA + bw2formeOffset,"-A");
-            formeSuffixes.put(Species.Gen5Formes.deoxysD + bw2formeOffset,"-D");
-            formeSuffixes.put(Species.Gen5Formes.deoxysS + bw2formeOffset,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamS + bw2formeOffset,"-S");
-            formeSuffixes.put(Species.Gen5Formes.wormadamT + bw2formeOffset,"-T");
-            formeSuffixes.put(Species.Gen5Formes.shayminS + bw2formeOffset,"-S");
-            formeSuffixes.put(Species.Gen5Formes.giratinaO + bw2formeOffset,"-O");
-            formeSuffixes.put(Species.Gen5Formes.rotomH + bw2formeOffset,"-H");
-            formeSuffixes.put(Species.Gen5Formes.rotomW + bw2formeOffset,"-W");
-            formeSuffixes.put(Species.Gen5Formes.rotomFr + bw2formeOffset,"-Fr");
-            formeSuffixes.put(Species.Gen5Formes.rotomFa + bw2formeOffset,"-Fa");
-            formeSuffixes.put(Species.Gen5Formes.rotomM + bw2formeOffset,"-M");
-            formeSuffixes.put(Species.Gen5Formes.castformF + bw2formeOffset,"-F");
-            formeSuffixes.put(Species.Gen5Formes.castformW + bw2formeOffset,"-W");
-            formeSuffixes.put(Species.Gen5Formes.castformI + bw2formeOffset,"-I");
-            formeSuffixes.put(Species.Gen5Formes.basculinB + bw2formeOffset,"-B");
-            formeSuffixes.put(Species.Gen5Formes.darmanitanZ + bw2formeOffset,"-Z");
-            formeSuffixes.put(Species.Gen5Formes.meloettaP + bw2formeOffset,"-P");
-            formeSuffixes.put(Species.Gen5Formes.kyuremW + bw2formeOffset,"-W");
-            formeSuffixes.put(Species.Gen5Formes.kyuremB + bw2formeOffset,"-B");
-            formeSuffixes.put(Species.Gen5Formes.tornadusT + bw2formeOffset,"-T");
-            formeSuffixes.put(Species.Gen5Formes.thundurusT + bw2formeOffset,"-T");
-            formeSuffixes.put(Species.Gen5Formes.landorusT + bw2formeOffset,"-T");
+            formeSuffixes.put(Species.Gen5Formes.deoxysA + bw2formeOffset, "-A");
+            formeSuffixes.put(Species.Gen5Formes.deoxysD + bw2formeOffset, "-D");
+            formeSuffixes.put(Species.Gen5Formes.deoxysS + bw2formeOffset, "-S");
+            formeSuffixes.put(Species.Gen5Formes.wormadamS + bw2formeOffset, "-S");
+            formeSuffixes.put(Species.Gen5Formes.wormadamT + bw2formeOffset, "-T");
+            formeSuffixes.put(Species.Gen5Formes.shayminS + bw2formeOffset, "-S");
+            formeSuffixes.put(Species.Gen5Formes.giratinaO + bw2formeOffset, "-O");
+            formeSuffixes.put(Species.Gen5Formes.rotomH + bw2formeOffset, "-H");
+            formeSuffixes.put(Species.Gen5Formes.rotomW + bw2formeOffset, "-W");
+            formeSuffixes.put(Species.Gen5Formes.rotomFr + bw2formeOffset, "-Fr");
+            formeSuffixes.put(Species.Gen5Formes.rotomFa + bw2formeOffset, "-Fa");
+            formeSuffixes.put(Species.Gen5Formes.rotomM + bw2formeOffset, "-M");
+            formeSuffixes.put(Species.Gen5Formes.castformF + bw2formeOffset, "-F");
+            formeSuffixes.put(Species.Gen5Formes.castformW + bw2formeOffset, "-W");
+            formeSuffixes.put(Species.Gen5Formes.castformI + bw2formeOffset, "-I");
+            formeSuffixes.put(Species.Gen5Formes.basculinB + bw2formeOffset, "-B");
+            formeSuffixes.put(Species.Gen5Formes.darmanitanZ + bw2formeOffset, "-Z");
+            formeSuffixes.put(Species.Gen5Formes.meloettaP + bw2formeOffset, "-P");
+            formeSuffixes.put(Species.Gen5Formes.kyuremW + bw2formeOffset, "-W");
+            formeSuffixes.put(Species.Gen5Formes.kyuremB + bw2formeOffset, "-B");
+            formeSuffixes.put(Species.Gen5Formes.tornadusT + bw2formeOffset, "-T");
+            formeSuffixes.put(Species.Gen5Formes.thundurusT + bw2formeOffset, "-T");
+            formeSuffixes.put(Species.Gen5Formes.landorusT + bw2formeOffset, "-T");
         }
 
         return formeSuffixes;
     }
 
-    private static Map<Integer,Map<Integer,String>> setupFormeSuffixesByBaseForme() {
-        Map<Integer,Map<Integer,String>> map = new HashMap<>();
+    private static Map<Integer, Map<Integer, String>> setupFormeSuffixesByBaseForme() {
+        Map<Integer, Map<Integer, String>> map = new HashMap<>();
 
-        Map<Integer,String> deoxysMap = new HashMap<>();
-        deoxysMap.put(1,"-A");
-        deoxysMap.put(2,"-D");
-        deoxysMap.put(3,"-S");
+        Map<Integer, String> deoxysMap = new HashMap<>();
+        deoxysMap.put(1, "-A");
+        deoxysMap.put(2, "-D");
+        deoxysMap.put(3, "-S");
         map.put(Species.deoxys, deoxysMap);
 
-        Map<Integer,String> wormadamMap = new HashMap<>();
-        wormadamMap.put(1,"-S");
-        wormadamMap.put(2,"-T");
+        Map<Integer, String> wormadamMap = new HashMap<>();
+        wormadamMap.put(1, "-S");
+        wormadamMap.put(2, "-T");
         map.put(Species.wormadam, wormadamMap);
 
-        Map<Integer,String> shayminMap = new HashMap<>();
-        shayminMap.put(1,"-S");
+        Map<Integer, String> shayminMap = new HashMap<>();
+        shayminMap.put(1, "-S");
         map.put(Species.shaymin, shayminMap);
 
-        Map<Integer,String> giratinaMap = new HashMap<>();
-        giratinaMap.put(1,"-O");
+        Map<Integer, String> giratinaMap = new HashMap<>();
+        giratinaMap.put(1, "-O");
         map.put(Species.giratina, giratinaMap);
 
-        Map<Integer,String> rotomMap = new HashMap<>();
-        rotomMap.put(1,"-H");
-        rotomMap.put(2,"-W");
-        rotomMap.put(3,"-Fr");
-        rotomMap.put(4,"-Fa");
-        rotomMap.put(5,"-M");
+        Map<Integer, String> rotomMap = new HashMap<>();
+        rotomMap.put(1, "-H");
+        rotomMap.put(2, "-W");
+        rotomMap.put(3, "-Fr");
+        rotomMap.put(4, "-Fa");
+        rotomMap.put(5, "-M");
         map.put(Species.rotom, rotomMap);
 
-        Map<Integer,String> castformMap = new HashMap<>();
-        castformMap.put(1,"-F");
-        castformMap.put(2,"-W");
-        castformMap.put(3,"-I");
+        Map<Integer, String> castformMap = new HashMap<>();
+        castformMap.put(1, "-F");
+        castformMap.put(2, "-W");
+        castformMap.put(3, "-I");
         map.put(Species.castform, castformMap);
 
-        Map<Integer,String> basculinMap = new HashMap<>();
-        basculinMap.put(1,"-B");
+        Map<Integer, String> basculinMap = new HashMap<>();
+        basculinMap.put(1, "-B");
         map.put(Species.basculin, basculinMap);
 
-        Map<Integer,String> darmanitanMap = new HashMap<>();
-        darmanitanMap.put(1,"-Z");
+        Map<Integer, String> darmanitanMap = new HashMap<>();
+        darmanitanMap.put(1, "-Z");
         map.put(Species.darmanitan, darmanitanMap);
 
-        Map<Integer,String> meloettaMap = new HashMap<>();
-        meloettaMap.put(1,"-P");
+        Map<Integer, String> meloettaMap = new HashMap<>();
+        meloettaMap.put(1, "-P");
         map.put(Species.meloetta, meloettaMap);
 
-        Map<Integer,String> kyuremMap = new HashMap<>();
-        kyuremMap.put(1,"-W");
-        kyuremMap.put(2,"-B");
+        Map<Integer, String> kyuremMap = new HashMap<>();
+        kyuremMap.put(1, "-W");
+        kyuremMap.put(2, "-B");
         map.put(Species.kyurem, kyuremMap);
 
-        Map<Integer,String> keldeoMap = new HashMap();
-        keldeoMap.put(1,"-R");
+        Map<Integer, String> keldeoMap = new HashMap();
+        keldeoMap.put(1, "-R");
         map.put(Species.keldeo, keldeoMap);
 
-        Map<Integer,String> tornadusMap = new HashMap<>();
-        tornadusMap.put(1,"-T");
+        Map<Integer, String> tornadusMap = new HashMap<>();
+        tornadusMap.put(1, "-T");
         map.put(Species.tornadus, tornadusMap);
 
-        Map<Integer,String> thundurusMap = new HashMap<>();
-        thundurusMap.put(1,"-T");
+        Map<Integer, String> thundurusMap = new HashMap<>();
+        thundurusMap.put(1, "-T");
         map.put(Species.thundurus, thundurusMap);
 
-        Map<Integer,String> landorusMap = new HashMap<>();
-        landorusMap.put(1,"-T");
+        Map<Integer, String> landorusMap = new HashMap<>();
+        landorusMap.put(1, "-T");
         map.put(Species.landorus, landorusMap);
 
         return map;
     }
 
-    private static Map<Integer,String> setupDummyFormeSuffixes() {
-        Map<Integer,String> m = new HashMap<>();
-        m.put(0,"");
+    private static Map<Integer, String> setupDummyFormeSuffixes() {
+        Map<Integer, String> m = new HashMap<>();
+        m.put(0, "");
         return m;
     }
 
-    private static Map<Integer,Map<Integer,Integer>> setupAbsolutePokeNumsByBaseForme() {
+    private static Map<Integer, Map<Integer, Integer>> setupAbsolutePokeNumsByBaseForme() {
 
-        Map<Integer,Map<Integer,Integer>> map = new HashMap<>();
+        Map<Integer, Map<Integer, Integer>> map = new HashMap<>();
 
-        Map<Integer,Integer> deoxysMap = new HashMap<>();
-        deoxysMap.put(1,Species.Gen5Formes.deoxysA);
-        deoxysMap.put(2,Species.Gen5Formes.deoxysD);
-        deoxysMap.put(3,Species.Gen5Formes.deoxysS);
+        Map<Integer, Integer> deoxysMap = new HashMap<>();
+        deoxysMap.put(1, Species.Gen5Formes.deoxysA);
+        deoxysMap.put(2, Species.Gen5Formes.deoxysD);
+        deoxysMap.put(3, Species.Gen5Formes.deoxysS);
         map.put(Species.deoxys, deoxysMap);
 
-        Map<Integer,Integer> wormadamMap = new HashMap<>();
-        wormadamMap.put(1,Species.Gen5Formes.wormadamS);
-        wormadamMap.put(2,Species.Gen5Formes.wormadamT);
+        Map<Integer, Integer> wormadamMap = new HashMap<>();
+        wormadamMap.put(1, Species.Gen5Formes.wormadamS);
+        wormadamMap.put(2, Species.Gen5Formes.wormadamT);
         map.put(Species.wormadam, wormadamMap);
 
-        Map<Integer,Integer> shayminMap = new HashMap<>();
-        shayminMap.put(1,Species.Gen5Formes.shayminS);
+        Map<Integer, Integer> shayminMap = new HashMap<>();
+        shayminMap.put(1, Species.Gen5Formes.shayminS);
         map.put(Species.shaymin, shayminMap);
 
-        Map<Integer,Integer> giratinaMap = new HashMap<>();
-        giratinaMap.put(1,Species.Gen5Formes.giratinaO);
+        Map<Integer, Integer> giratinaMap = new HashMap<>();
+        giratinaMap.put(1, Species.Gen5Formes.giratinaO);
         map.put(Species.giratina, giratinaMap);
 
-        Map<Integer,Integer> rotomMap = new HashMap<>();
-        rotomMap.put(1,Species.Gen5Formes.rotomH);
-        rotomMap.put(2,Species.Gen5Formes.rotomW);
-        rotomMap.put(3,Species.Gen5Formes.rotomFr);
-        rotomMap.put(4,Species.Gen5Formes.rotomFa);
-        rotomMap.put(5,Species.Gen5Formes.rotomM);
+        Map<Integer, Integer> rotomMap = new HashMap<>();
+        rotomMap.put(1, Species.Gen5Formes.rotomH);
+        rotomMap.put(2, Species.Gen5Formes.rotomW);
+        rotomMap.put(3, Species.Gen5Formes.rotomFr);
+        rotomMap.put(4, Species.Gen5Formes.rotomFa);
+        rotomMap.put(5, Species.Gen5Formes.rotomM);
         map.put(Species.rotom, rotomMap);
 
-        Map<Integer,Integer> castformMap = new HashMap<>();
-        castformMap.put(1,Species.Gen5Formes.castformF);
-        castformMap.put(2,Species.Gen5Formes.castformW);
-        castformMap.put(3,Species.Gen5Formes.castformI);
+        Map<Integer, Integer> castformMap = new HashMap<>();
+        castformMap.put(1, Species.Gen5Formes.castformF);
+        castformMap.put(2, Species.Gen5Formes.castformW);
+        castformMap.put(3, Species.Gen5Formes.castformI);
         map.put(Species.castform, castformMap);
 
-        Map<Integer,Integer> basculinMap = new HashMap<>();
-        basculinMap.put(1,Species.Gen5Formes.basculinB);
+        Map<Integer, Integer> basculinMap = new HashMap<>();
+        basculinMap.put(1, Species.Gen5Formes.basculinB);
         map.put(Species.basculin, basculinMap);
 
-        Map<Integer,Integer> darmanitanMap = new HashMap<>();
-        darmanitanMap.put(1,Species.Gen5Formes.darmanitanZ);
+        Map<Integer, Integer> darmanitanMap = new HashMap<>();
+        darmanitanMap.put(1, Species.Gen5Formes.darmanitanZ);
         map.put(Species.darmanitan, darmanitanMap);
 
-        Map<Integer,Integer> meloettaMap = new HashMap<>();
-        meloettaMap.put(1,Species.Gen5Formes.meloettaP);
+        Map<Integer, Integer> meloettaMap = new HashMap<>();
+        meloettaMap.put(1, Species.Gen5Formes.meloettaP);
         map.put(Species.meloetta, meloettaMap);
 
-        Map<Integer,Integer> kyuremMap = new HashMap<>();
-        kyuremMap.put(1,Species.Gen5Formes.kyuremW);
-        kyuremMap.put(2,Species.Gen5Formes.kyuremB);
+        Map<Integer, Integer> kyuremMap = new HashMap<>();
+        kyuremMap.put(1, Species.Gen5Formes.kyuremW);
+        kyuremMap.put(2, Species.Gen5Formes.kyuremB);
         map.put(Species.kyurem, kyuremMap);
 
-        Map<Integer,Integer> keldeoMap = new HashMap<>();
-        keldeoMap.put(1,Species.Gen5Formes.keldeoCosmetic1);
+        Map<Integer, Integer> keldeoMap = new HashMap<>();
+        keldeoMap.put(1, Species.Gen5Formes.keldeoCosmetic1);
         map.put(Species.keldeo, keldeoMap);
 
-        Map<Integer,Integer> tornadusMap = new HashMap<>();
-        tornadusMap.put(1,Species.Gen5Formes.tornadusT);
+        Map<Integer, Integer> tornadusMap = new HashMap<>();
+        tornadusMap.put(1, Species.Gen5Formes.tornadusT);
         map.put(Species.tornadus, tornadusMap);
 
-        Map<Integer,Integer> thundurusMap = new HashMap<>();
-        thundurusMap.put(1,Species.Gen5Formes.thundurusT);
+        Map<Integer, Integer> thundurusMap = new HashMap<>();
+        thundurusMap.put(1, Species.Gen5Formes.thundurusT);
         map.put(Species.thundurus, thundurusMap);
 
-        Map<Integer,Integer> landorusMap = new HashMap<>();
-        landorusMap.put(1,Species.Gen5Formes.landorusT);
+        Map<Integer, Integer> landorusMap = new HashMap<>();
+        landorusMap.put(1, Species.Gen5Formes.landorusT);
         map.put(Species.landorus, landorusMap);
 
         return map;
     }
 
-    private static Map<Integer,Integer> setupDummyAbsolutePokeNums() {
-        Map<Integer,Integer> m = new HashMap<>();
-        m.put(255,0);
+    private static Map<Integer, Integer> setupDummyAbsolutePokeNums() {
+        Map<Integer, Integer> m = new HashMap<>();
+        m.put(255, 0);
         return m;
     }
 
@@ -825,7 +847,7 @@ public class Gen5Constants {
     public static List<Integer> regularShopItems, opShopItems;
 
     public static String blackBoxLegendaryCheckPrefix1 = "79F6BAEF07B0F0BDC046", blackBoxLegendaryCheckPrefix2 = "DEDB0020C04302B0F8BDC046",
-        whiteBoxLegendaryCheckPrefix1 = "00F0FEF8002070BD", whiteBoxLegendaryCheckPrefix2 = "64F62EF970BD0000";
+            whiteBoxLegendaryCheckPrefix1 = "00F0FEF8002070BD", whiteBoxLegendaryCheckPrefix2 = "64F62EF970BD0000";
 
     static {
         setupAllowedItems();
@@ -854,17 +876,28 @@ public class Gen5Constants {
         nonBadItemsBW2 = allowedItems.copy();
 
         nonBadItemsBW2.banSingles(Items.oddKeystone, Items.griseousOrb, Items.soulDew, Items.lightBall,
-                Items.oranBerry, Items.quickPowder, Items.passOrb);
+                Items.oranBerry, Items.passOrb);
         nonBadItemsBW2.banRange(Items.growthMulch, 4); // mulch
         nonBadItemsBW2.banRange(Items.adamantOrb, 2); // orbs
         nonBadItemsBW2.banRange(Items.mail1, 12); // mails
         nonBadItemsBW2.banRange(Items.figyBerry, 25); // berries without useful battle effects
-        nonBadItemsBW2.banRange(Items.luckyPunch, 4); // pokemon specific
+        // nonBadItemsBW2.banRange(Items.luckyPunch, 4); // pokemon specific
         nonBadItemsBW2.banRange(Items.redScarf, 5); // contest scarves
+        nonBadItemsBW2.banRange(Items.redShard, 4); // shards
+        nonBadItemsBW2.banRange(Items.fireGem, 17); // gems
+        nonBadItemsBW2.banRange(Items.healthFeather, 6); // wings
+        nonBadItemsBW2.banRange(Items.potion, 28); // heal items
+        nonBadItemsBW2.banRange(Items.hpUp, 5); // vitamins
+        nonBadItemsBW2.banSingles(Items.zinc); // Zinc
+        nonBadItemsBW2.banRange(Items.powerBracer, 6); // power items
+        nonBadItemsBW2.banSingles(Items.machoBrace); // macho brace
+        nonBadItemsBW2.banRange(Items.xAttack, 6); // xitems
+        nonBadItemsBW2.banRange(Items.rootFossil, 7); // fossils
+        nonBadItemsBW2.banSingles(Items.coverFossil, Items.plumeFossil); // fossils
+        nonBadItemsBW2.banSingles(Items.potion, Items.plumeFossil); // fossils
+        nonBadItemsBW2.banSingles(Items.luckIncense, Items.amuletCoin); // money
 
-        // Ban the shards in BW1; even the maniac only gives you $200 for them, and they serve no other purpose.
         nonBadItemsBW1 = nonBadItemsBW2.copy();
-        nonBadItemsBW1.banRange(Items.redShard, 4);
 
         regularShopItems = new ArrayList<>();
 
@@ -896,7 +929,7 @@ public class Gen5Constants {
         }
     }
 
-    public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
+    public static final Map<Integer, Integer> balancedItemPrices = Stream.of(new Integer[][]{
             // Skip item index 0. All prices divided by 10
             {Items.masterBall, 300},
             {Items.ultraBall, 120},

@@ -27,17 +27,25 @@ package com.dabomstew.pkrandom.pokemon;
 import java.util.List;
 
 public class Shop {
-    public List<Integer> items;
     public String name;
+    public List<Integer> items;
+    public boolean isPrimary;
     public boolean isMainGame;
+    public boolean isBeforeFullyEvolved;
 
-    public Shop() {
-        this.isMainGame = false;
+    public Shop(String name, List<Integer> items, boolean isPrimary, boolean isMainGame, boolean isBeforeFullyEvolved) {
+        this.name = name;
+        this.items = items;
+        this.isPrimary = isPrimary;
+        this.isMainGame = isMainGame;
+        this.isBeforeFullyEvolved = isBeforeFullyEvolved;
     }
 
     public Shop(Shop otherShop) {
-        this.items = otherShop.items;
         this.name = otherShop.name;
+        this.items = otherShop.items;
+        this.isPrimary = otherShop.isPrimary;
         this.isMainGame = otherShop.isMainGame;
+        this.isBeforeFullyEvolved = otherShop.isBeforeFullyEvolved;
     }
 }

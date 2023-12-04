@@ -49,14 +49,14 @@ public class Settings {
 
     public static final int VERSION = Version.VERSION;
 
-    public static final int LENGTH_OF_SETTINGS_DATA = 51;
+    public static final int LENGTH_OF_SETTINGS_DATA = 56;
 
     private CustomNamesSet customNames;
 
     private String romName;
     private boolean updatedFromOldVersion = false;
     private GenRestrictions currentRestrictions;
-    private int currentMiscTweaks;
+    private long currentMiscTweaks;
 
     private boolean changeImpossibleEvolutions;
     private boolean makeEvolutionsEasier;
@@ -98,6 +98,7 @@ public class Settings {
     private boolean banBadAbilities;
     private boolean weighDuplicateAbilitiesTogether;
     private boolean ensureTwoAbilities;
+    private boolean ensureRelevantAbilities;
 
     public enum StartersMod {
         UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
@@ -154,6 +155,13 @@ public class Settings {
     private boolean reorderDamagingMoves;
     private boolean movesetsForceGoodDamaging;
     private int movesetsGoodDamagingPercent = 0;
+    private boolean noCounter;
+    private boolean noSelfDestruct;
+    private boolean noRechargeMoves;
+    private boolean noDirectDamageMoves;
+    private boolean noMetronome;
+    private boolean noMagnitude;
+    private boolean noOHKOMoves;
     private boolean blockBrokenMovesetMoves;
     private boolean evolutionMovesForAll;
 
@@ -190,6 +198,7 @@ public class Settings {
     private boolean doubleBattleMode;
     private boolean shinyChance;
     private boolean betterTrainerMovesets;
+    private boolean allTrainersUseSmartAI;
 
     public enum WildPokemonMod {
         UNCHANGED, RANDOM, AREA_MAPPING, GLOBAL_MAPPING
@@ -394,10 +403,15 @@ public class Settings {
         write2ByteInt(out, customStarters[2] - 1);
 
         // 11 movesets
-        out.write(makeByteSelected(movesetsMod == MovesetsMod.COMPLETELY_RANDOM,
-                movesetsMod == MovesetsMod.RANDOM_PREFER_SAME_TYPE, movesetsMod == MovesetsMod.UNCHANGED,
-                movesetsMod == MovesetsMod.METRONOME_ONLY, startWithGuaranteedMoves, reorderDamagingMoves)
-                | ((guaranteedMoveCount - 2) << 6));
+        out.write(
+                makeByteSelected(movesetsMod == MovesetsMod.COMPLETELY_RANDOM,
+                        movesetsMod == MovesetsMod.RANDOM_PREFER_SAME_TYPE,
+                        movesetsMod == MovesetsMod.UNCHANGED,
+                        movesetsMod == MovesetsMod.METRONOME_ONLY,
+                        startWithGuaranteedMoves,
+                        reorderDamagingMoves
+                ) | ((guaranteedMoveCount - 2) << 6)
+        );
 
         // 12 movesets good damaging
         out.write((movesetsForceGoodDamaging ? 0x80 : 0) | movesetsGoodDamagingPercent);
@@ -498,9 +512,9 @@ public class Settings {
             e.printStackTrace(); // better than nothing
         }
 
-        // 32 - 35: misc tweaks
+        // 32 - 35: misc tweaks part 1
         try {
-            writeFullInt(out, currentMiscTweaks);
+            writeFullInt(out, (int)(currentMiscTweaks & 0xFFFFFFFFL));
         } catch (IOException e) {
             e.printStackTrace(); // better than nothing
         }
@@ -572,7 +586,8 @@ public class Settings {
                 consumableItemsOnlyForTrainerPokemon,
                 sensibleItemsOnlyForTrainerPokemon,
                 highestLevelOnlyGetsItemsForTrainerPokemon,
-                ensureTwoAbilities));
+                ensureTwoAbilities,
+                ensureRelevantAbilities));
 
         // 49 pickup item randomization
         out.write(makeByteSelected(pickupItemsMod == PickupItemsMod.RANDOM,
@@ -581,6 +596,16 @@ public class Settings {
 
         // 50 elite four unique pokemon (3 bits) + catch rate level (3 bits)
         out.write(eliteFourUniquePokemonNumber | ((minimumCatchRateLevel - 1) << 3));
+
+        // 51 custom move stuff
+        out.write(makeByteSelected(noCounter, noSelfDestruct, noRechargeMoves, noDirectDamageMoves, noMetronome, noMagnitude, noOHKOMoves));
+
+        // 52 - 55: misc tweaks part 2
+        try {
+            writeFullInt(out, (int)(currentMiscTweaks >> 4));
+        } catch (IOException e) {
+            e.printStackTrace(); // better than nothing
+        }
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -799,8 +824,8 @@ public class Settings {
         }
         settings.setCurrentRestrictions(restrictions);
 
-        int codeTweaks = FileFunctions.readFullIntBigEndian(data, 32);
-
+        long codeTweaks = FileFunctions.readFullIntBigEndian(data, 32);
+        codeTweaks |= ((long)(FileFunctions.readFullIntBigEndian(data, 52))) << 4;
         settings.setCurrentMiscTweaks(codeTweaks);
 
         settings.setTrainersLevelModified(restoreState(data[36], 7));
@@ -861,6 +886,7 @@ public class Settings {
         settings.setSensibleItemsOnlyForTrainers(restoreState(data[48], 4));
         settings.setHighestLevelGetsItemsForTrainers(restoreState(data[48], 5));
         settings.setEnsureTwoAbilities(restoreState(data[48], 6));
+        settings.setEnsureRelevantAbilities(restoreState(data[48], 7));
 
         settings.setPickupItemsMod(restoreEnum(PickupItemsMod.class, data[49],
                 1, // UNCHANGED
@@ -870,6 +896,14 @@ public class Settings {
 
         settings.setEliteFourUniquePokemonNumber(data[50] & 0x7);
         settings.setMinimumCatchRateLevel(((data[50] & 0x38) >> 3) + 1);
+
+        settings.setNoCounter(restoreState(data[51], 0));
+        settings.setNoSelfDestruct(restoreState(data[51], 1));
+        settings.setNoRechargeMoves(restoreState(data[51], 2));
+        settings.setNoDirectDamageMoves(restoreState(data[51], 3));
+        settings.setNoMetronome(restoreState(data[51], 4));
+        settings.setNoMagnitude(restoreState(data[51], 5));
+        settings.setNoOHKOMoves(restoreState(data[51], 6));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -948,7 +982,7 @@ public class Settings {
         }
 
         // misc tweaks
-        int oldMiscTweaks = this.currentMiscTweaks;
+        long oldMiscTweaks = this.currentMiscTweaks;
         this.currentMiscTweaks &= rh.miscTweaksAvailable();
 
         if (oldMiscTweaks != this.currentMiscTweaks) {
@@ -1048,11 +1082,11 @@ public class Settings {
         this.currentRestrictions = currentRestrictions;
     }
 
-    public int getCurrentMiscTweaks() {
+    public long getCurrentMiscTweaks() {
         return currentMiscTweaks;
     }
 
-    public void setCurrentMiscTweaks(int currentMiscTweaks) {
+    public void setCurrentMiscTweaks(long currentMiscTweaks) {
         this.currentMiscTweaks = currentMiscTweaks;
     }
 
@@ -1309,6 +1343,11 @@ public class Settings {
         this.ensureTwoAbilities = ensureTwoAbilities;
     }
 
+    public boolean isEnsureRelevantAbilities() { return ensureRelevantAbilities; }
+    public void setEnsureRelevantAbilities(boolean ensureRelevantAbilities) {
+        this.ensureRelevantAbilities = ensureRelevantAbilities;
+    }
+
     public StartersMod getStartersMod() {
         return startersMod;
     }
@@ -1508,6 +1547,62 @@ public class Settings {
 
     public void setMovesetsGoodDamagingPercent(int movesetsGoodDamagingPercent) {
         this.movesetsGoodDamagingPercent = movesetsGoodDamagingPercent;
+    }
+
+    public boolean isNoCounter() {
+        return noCounter;
+    }
+
+    public void setNoCounter(boolean noCounter) {
+        this.noCounter = noCounter;
+    }
+
+    public boolean isNoSelfDestruct() {
+        return noSelfDestruct;
+    }
+
+    public void setNoSelfDestruct(boolean noSelfDestruct) {
+        this.noSelfDestruct = noSelfDestruct;
+    }
+
+    public boolean isNoRechargeMoves() {
+        return noRechargeMoves;
+    }
+
+    public void setNoRechargeMoves(boolean noRechargeMoves) {
+        this.noRechargeMoves = noRechargeMoves;
+    }
+
+    public boolean isNoDirectDamageMoves() {
+        return noDirectDamageMoves;
+    }
+
+    public void setNoDirectDamageMoves(boolean noDirectDamageMoves) {
+        this.noDirectDamageMoves = noDirectDamageMoves;
+    }
+
+    public boolean isNoMetronome() {
+        return noMetronome;
+    }
+
+    public void setNoMetronome(boolean noMetronome) {
+        this.noMetronome = noMetronome;
+    }
+
+    public boolean isNoMagnitude() {
+        return noMagnitude;
+    }
+
+    public void setNoMagnitude(boolean noMagnitude) {
+        this.noMagnitude = noMagnitude;
+    }
+
+    public boolean isNoOHKOMoves() {
+        return noOHKOMoves;
+    }
+
+    public void setNoOHKOMoves(boolean noOHKOMoves) {
+        this.noOHKOMoves = noOHKOMoves;
     }
 
     public boolean isBlockBrokenMovesetMoves() {

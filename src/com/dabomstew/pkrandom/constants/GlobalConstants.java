@@ -32,51 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GlobalConstants {
-
-    public static final boolean[] bannedRandomMoves = new boolean[827], bannedForDamagingMove = new boolean[827];
-    static {
-        bannedRandomMoves[Moves.struggle] = true; //  self explanatory
-
-        bannedForDamagingMove[Moves.selfDestruct] = true;
-        bannedForDamagingMove[Moves.dreamEater] = true;
-        bannedForDamagingMove[Moves.explosion] = true;
-        bannedForDamagingMove[Moves.snore] = true;
-        bannedForDamagingMove[Moves.falseSwipe] = true;
-        bannedForDamagingMove[Moves.futureSight] = true;
-        bannedForDamagingMove[Moves.fakeOut] = true;
-        bannedForDamagingMove[Moves.focusPunch] = true;
-        bannedForDamagingMove[Moves.doomDesire] = true;
-        bannedForDamagingMove[Moves.feint] = true;
-        bannedForDamagingMove[Moves.lastResort] = true;
-        bannedForDamagingMove[Moves.suckerPunch] = true;
-        bannedForDamagingMove[Moves.constrict] = true; // overly weak
-        bannedForDamagingMove[Moves.rage] = true; // lock-in in gen1
-        bannedForDamagingMove[Moves.rollout] = true; // lock-in
-        bannedForDamagingMove[Moves.iceBall] = true; // Rollout clone
-        bannedForDamagingMove[Moves.synchronoise] = true; // hard to use
-        bannedForDamagingMove[Moves.shellTrap] = true; // hard to use
-        bannedForDamagingMove[Moves.foulPlay] = true; // doesn't depend on your own attacking stat
-        bannedForDamagingMove[Moves.spitUp] = true; // hard to use
-
-        // make sure these cant roll
-        bannedForDamagingMove[Moves.sonicBoom] = true;
-        bannedForDamagingMove[Moves.dragonRage] = true;
-        bannedForDamagingMove[Moves.hornDrill] = true;
-        bannedForDamagingMove[Moves.guillotine] = true;
-        bannedForDamagingMove[Moves.fissure] = true;
-        bannedForDamagingMove[Moves.sheerCold] = true;
-
-    }
-
     /* @formatter:off */
-    public static final List<Integer> normalMultihitMoves = Arrays.asList(
-            Moves.armThrust, Moves.barrage, Moves.boneRush, Moves.bulletSeed, Moves.cometPunch, Moves.doubleSlap,
-            Moves.furyAttack, Moves.furySwipes, Moves.icicleSpear, Moves.pinMissile, Moves.rockBlast, Moves.spikeCannon,
-            Moves.tailSlap, Moves.waterShuriken);
-
-    public static final List<Integer> doubleHitMoves = Arrays.asList(
-            Moves.bonemerang, Moves.doubleHit, Moves.doubleIronBash, Moves.doubleKick, Moves.dragonDarts,
-            Moves.dualChop, Moves.gearGrind, Moves.twineedle);
 
     public static final List<Integer> varyingPowerZMoves = Arrays.asList(
             Moves.breakneckBlitzPhysical, Moves.breakneckBlitzSpecial,
@@ -195,7 +151,7 @@ public class GlobalConstants {
     );
 
     public static final List<Integer> badAbilities = Arrays.asList(
-            Abilities.minus, Abilities.plus, Abilities.anticipation, Abilities.forewarn, Abilities.frisk,
+            Abilities.minus, Abilities.plus, Abilities.forewarn, Abilities.frisk,
             Abilities.honeyGather, Abilities.auraBreak, Abilities.receiver, Abilities.powerOfAlchemy
     );
 

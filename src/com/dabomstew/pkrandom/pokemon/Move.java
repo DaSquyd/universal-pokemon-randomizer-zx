@@ -27,46 +27,69 @@ package com.dabomstew.pkrandom.pokemon;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 
 public class Move {
-    public class StatChange {
+    public static class StatChange {
         public StatChangeType type;
         public int stages;
         public double percentChance;
 
         @Override
         public boolean equals(Object obj) {
+            if (obj.getClass() != StatChange.class)
+                return false;
+
             StatChange other = (StatChange)obj;
             return this.type == other.type && this.stages == other.stages && this.percentChance == other.percentChance;
         }
 
+        public StatChange() {
+            type = StatChangeType.NONE;
+            stages = 0;
+            percentChance = 0.0;
+        }
+
+        public StatChange(StatChangeType type, int stages, double percentChance) {
+            this.type = type;
+            this.stages = stages;
+            this.percentChance = percentChance;
+        }
     }
 
     public String name;
+    public String description;
     public int number;
     public int internalId;
-    public int power;
-    public int pp;
-    public double hitratio;
-    public Type type;
-    public MoveCategory category;
-    public StatChangeMoveType statChangeMoveType = StatChangeMoveType.NONE_OR_UNKNOWN;
-    public StatChange[] statChanges = new StatChange[3];
-    public StatusMoveType statusMoveType = StatusMoveType.NONE_OR_UNKNOWN;
-    public StatusType statusType = StatusType.NONE;
-    public CriticalChance criticalChance = CriticalChance.NORMAL;
-    public double statusPercentChance;
-    public double flinchPercentChance;
-    public int recoilPercent;
-    public int absorbPercent;
-    public int priority;
-    public boolean makesContact;
-    public boolean isChargeMove;
-    public boolean isRechargeMove;
-    public boolean isPunchMove;
-    public boolean isSoundMove;
-    public boolean isTrapMove; // True for both binding moves (like Wrap) and trapping moves (like Mean Look)
-    public int effectIndex;
-    public int target;
-    public double hitCount = 1; // not saved, only used in randomized move powers.
+    public Type type; // 00
+    public MoveQualities qualities; // 01
+    public MoveCategory category; // 02
+    public int power; // 03
+    public double accuracy; // 04
+    public int pp; // 05
+    public int priority; // 06
+    public int minHits; // 07
+    public int maxHits; // 07
+    public MoveStatusType statusType = MoveStatusType.NONE; // 08-09, 11-13
+    public double statusPercentChance; // 10
+    public CriticalChance criticalChance = CriticalChance.NORMAL; // 14
+    public double flinchPercentChance; // 15
+    public MoveEffect effect; // 16
+    public int recoil; // 18, can be regained health too
+    public int heal;
+    public MoveTarget target; // 20
+    public StatChange[] statChanges = new StatChange[3]; // 21-29
+    public boolean makesContact; // 30 (0x0001)
+    public boolean isChargeMove; // 30 (0x0002)
+    public boolean isRechargeMove; // 30 (0x0004)
+    public boolean isBlockedByProtect; // 30 (0x0008)
+    public boolean isReflectedByMagicCoat; // 30 (0x0010)
+    public boolean isStolenBySnatch; // 30 (0x0020)
+    public boolean isCopiedByMirrorMove; // 30 (0x0040)
+    public boolean isPunchMove; // 30 (0x080)
+    public boolean isSoundMove; // 30 (0x0100)
+    public boolean isAffectedByGravity; // 30 (0x0200)
+    public boolean isThawingMove; // 30 (0x0400)
+    public boolean hitsNonAdjacentTargets; // 30 (0x0800)
+    public boolean isHealMove; // 30 (0x1000)
+    public boolean hitsThroughSubstitute; // 30 (0x2000)
 
     public Move() {
         // Initialize all statStageChanges to something sensible so that we don't need to have
@@ -74,6 +97,34 @@ public class Move {
         for (int i = 0; i < this.statChanges.length; i++) {
             this.statChanges[i] = new StatChange();
             this.statChanges[i].type = StatChangeType.NONE;
+        }
+    }
+
+    public boolean isTrapMove() {
+            return statusType == MoveStatusType.TRAP || effect == MoveEffect.PREVENT_ESCAPE;
+    }
+
+    public StatChangeMoveType getStatChangeMoveType() {
+        switch (qualities) {
+            case NO_DAMAGE_STAT_CHANGE:
+            case NO_DAMAGE_STAT_CHANGE_STATUS:
+                switch (target) {
+                    case ADJACENT_ALLY:
+                        return StatChangeMoveType.NO_DAMAGE_ALLY;
+                    case PARTY:
+                    case USER:
+                        return StatChangeMoveType.NO_DAMAGE_USER;
+                    case ALL_ON_FIELD:
+                        return StatChangeMoveType.NO_DAMAGE_ALL;
+                    default:
+                        return StatChangeMoveType.NO_DAMAGE_TARGET;
+                }
+            case DAMAGE_TARGET_STAT_CHANGE:
+                return StatChangeMoveType.DAMAGE_TARGET;
+            case DAMAGE_USER_STAT_CHANGE:
+                return StatChangeMoveType.DAMAGE_USER;
+            default:
+                return StatChangeMoveType.NONE_OR_UNKNOWN;
         }
     }
 
@@ -87,18 +138,118 @@ public class Move {
     }
 
     public boolean hasBeneficialStatChange() {
-        return (statChangeMoveType == StatChangeMoveType.DAMAGE_TARGET && statChanges[0].stages < 0) ||
-                statChangeMoveType == StatChangeMoveType.DAMAGE_USER && statChanges[0].stages > 0;
+        return (getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET && statChanges[0].stages < 0) ||
+                getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER && statChanges[0].stages > 0;
     }
 
-    public boolean isGoodDamaging(int perfectAccuracy) {
+    public boolean hasPerfectAccuracy() {
+        return !(accuracy > 1 && accuracy <= 100);
+    }
+
+    public static int getPerfectAccuracy(MoveCategory category, int generation) {
+        switch (generation) {
+            case 5:
+            default:
+                return category == MoveCategory.STATUS ? 101 : 0;
+        }
+    }
+
+    public boolean isCounterMove() {
+        return effect == MoveEffect.COUNTER || effect == MoveEffect.MIRROR_COAT || effect == MoveEffect.METAL_BURST;
+    }
+
+    public boolean isExplosionMove() {
+        return effect == MoveEffect.USER_FAINTS;
+    }
+
+    public boolean isDirectDamageMove() {
+        return effect == MoveEffect.DIRECT_HALF || effect == MoveEffect.DIRECT_40
+                || effect == MoveEffect.DIRECT_DMG_LEVEL || effect == MoveEffect.DIRECT_DMG_20
+                || effect == MoveEffect.PSYWAVE;
+    }
+    public boolean isOHKOMove() {
+        return qualities == MoveQualities.OHKO || effect == MoveEffect.OHKO;
+    }
+
+    public boolean canBeDamagingMove(int generation) {
+        if (isExplosionMove() || isDirectDamageMove())
+            return false;
+
+        if (power * getHitCount(generation) < 20)
+            return false;
+
+        switch (effect) {
+            case DREAM_EATER:
+            case SNORE:
+            case FALSE_SWIPE:
+            case FUTURE_SIGHT:
+            case FAKE_OUT:
+            case FOCUS_PUNCH:
+            case FEINT:
+            case LAST_RESORT:
+            case SUCKER_PUNCH:
+            case RAGE:
+            case ROLLOUT:
+            case SYNCHRONOISE:
+            // case SHELL_TRAP; TODO
+            case FOUL_PLAY:
+            case SPIT_UP:
+            case OHKO:
+                return false;
+        }
+
+        return true;
+    }
+
+    public double getHitCount(int generation) {
+        switch (effect) {
+            case HIT_2_TO_5_TIMES:
+                return generation < 5 ? 3.0 : 3.1;
+            case HIT_2_TIMES:
+            case HIT_2_TIMES_POISON:
+                return 2.0;
+            case TRIPLE_KICK:
+                return 2.71; // Assumes first hit lands
+            default:
+                return 1.0;
+        }
+    }
+
+    public StatusMoveType getStatusMoveType() {
+        switch (qualities) {
+            case NO_DAMAGE_STATUS:
+                return StatusMoveType.NO_DAMAGE;
+            case DAMAGE_TARGET_STATUS:
+                return StatusMoveType.DAMAGE;
+            default:
+                return StatusMoveType.NONE_OR_UNKNOWN;
+        }
+    }
+
+    public boolean isGoodDamaging(int generation) {
+        double hitCount = getHitCount(generation);
         return (power * hitCount) >= 2 * GlobalConstants.MIN_DAMAGING_MOVE_POWER
-                || ((power * hitCount) >= GlobalConstants.MIN_DAMAGING_MOVE_POWER && (hitratio >= 90 || hitratio == perfectAccuracy));
+                || ((power * hitCount) >= GlobalConstants.MIN_DAMAGING_MOVE_POWER && (accuracy >= 90 || hasPerfectAccuracy()));
+    }
+
+    public boolean isRecoilMove() {
+        return effect != MoveEffect.STRUGGLE && recoil < 0;
+    }
+
+    public int getRecoilPercent() {
+        return isRecoilMove() ? -recoil : 0;
+    }
+
+    public boolean isAbsorbMove() {
+        return qualities == MoveQualities.DRAIN_HEALTH && recoil > 0;
+    }
+
+    public int getAbsorbPercent() {
+        return isAbsorbMove() ? recoil : 0;
     }
 
     public String toString() {
         return "#" + number + " " + name + " - Power: " + power + ", Base PP: " + pp + ", Type: " + type + ", Hit%: "
-                + (hitratio) + ", Effect: " + effectIndex + ", Priority: " + priority;
+                + (accuracy) + ", Effect: " + effect.toString() + ", Priority: " + priority;
     }
-
 }

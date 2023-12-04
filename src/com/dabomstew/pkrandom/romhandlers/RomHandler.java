@@ -184,6 +184,8 @@ public interface RomHandler {
 
     boolean typeInGame(Type type);
 
+    void customTypes();
+
     // randomize Pokemon types, with a switch on whether evolutions
     // should follow the same types or not.
     // some evolutions dont anyway, e.g. Eeveelutions, Hitmons
@@ -255,7 +257,7 @@ public interface RomHandler {
 
     void randomizeTrainerHeldItems(Settings settings);
 
-    List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves);
+    List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves);
 
     List<Integer> getAllConsumableHeldItems();
 
@@ -374,6 +376,8 @@ public interface RomHandler {
     List<Integer> getTMMoves();
 
     List<Integer> getHMMoves();
+
+    void setTMHMPalettes();
 
     void setTMMoves(List<Integer> moveIndexes);
 
@@ -529,11 +533,14 @@ public interface RomHandler {
 
     boolean hasShopRandomization();
 
-    void shuffleShopItems();
+    void shuffleShopItems(Settings settings);
 
     void randomizeShopItems(Settings settings);
 
-    Map<Integer, Shop> getShopItems();
+    boolean isChallengeMode();
+
+    Map<Integer, Shop> getShopItems(int maxBadgesForEvoItem);
+    int getBadgesAtForceEvoLevel(Settings settings);
 
     void setShopItems(Map<Integer, Shop> shopItems);
 
@@ -571,7 +578,7 @@ public interface RomHandler {
 
     void removeImpossibleEvolutions(Settings settings);
 
-    void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel);
+    void condenseLevelEvolutions();
 
     void makeEvolutionsEasier(Settings settings);
 
@@ -637,7 +644,7 @@ public interface RomHandler {
     // code tweaks
     // ===========
 
-    int miscTweaksAvailable();
+    long miscTweaksAvailable();
 
     void applyMiscTweaks(Settings settings);
 

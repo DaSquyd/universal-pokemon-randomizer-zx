@@ -856,12 +856,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             moves[i].name = readFixedLengthString(nameoffs + i * namelen, namelen);
             moves[i].number = i;
             moves[i].internalId = i;
-            moves[i].effectIndex = rom[offs + i * 0xC] & 0xFF;
-            moves[i].hitratio = ((rom[offs + i * 0xC + 3] & 0xFF));
+            moves[i].effect = MoveEffect.fromIndex(generationOfPokemon(), rom[offs + i * 0xC] & 0xFF);
+            moves[i].accuracy = ((rom[offs + i * 0xC + 3] & 0xFF));
             moves[i].power = rom[offs + i * 0xC + 1] & 0xFF;
             moves[i].pp = rom[offs + i * 0xC + 4] & 0xFF;
             moves[i].type = Gen3Constants.typeTable[rom[offs + i * 0xC + 2]];
-            moves[i].target = rom[offs + i * 0xC + 6] & 0xFF;
+            moves[i].target = MoveTarget.values()[rom[offs + i * 0xC + 6] & 0xFF];
             moves[i].category = GBConstants.physicalTypes.contains(moves[i].type) ? MoveCategory.PHYSICAL : MoveCategory.SPECIAL;
             if (moves[i].power == 0 && !GlobalConstants.noPowerNonStatusMoves.contains(i)) {
                 moves[i].category = MoveCategory.STATUS;
@@ -871,18 +871,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             moves[i].makesContact = (flags & 1) != 0;
             moves[i].isSoundMove = Gen3Constants.soundMoves.contains(moves[i].number);
 
-            if (i == Moves.swift) {
-                perfectAccuracy = (int)moves[i].hitratio;
-            }
-
-            if (GlobalConstants.normalMultihitMoves.contains(i)) {
-                moves[i].hitCount = 3;
-            } else if (GlobalConstants.doubleHitMoves.contains(i)) {
-                moves[i].hitCount = 2;
-            } else if (i == Moves.tripleKick) {
-                moves[i].hitCount = 2.71; // this assumes the first hit lands
-            }
-
             int secondaryEffectChance = rom[offs + i * 0xC + 5] & 0xFF;
             loadStatChangesFromEffect(moves[i], secondaryEffectChance);
             loadStatusFromEffect(moves[i], secondaryEffectChance);
@@ -891,7 +879,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void loadStatChangesFromEffect(Move move, int secondaryEffectChance) {
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen3Constants.noDamageAtkPlusOneEffect:
             case Gen3Constants.noDamageDefPlusOneEffect:
             case Gen3Constants.noDamageSpAtkPlusOneEffect:
@@ -920,11 +908,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             case Gen3Constants.noDamageAtkAndDefPlusOneEffect:
             case Gen3Constants.noDamageSpAtkAndSpDefPlusOneEffect:
             case Gen3Constants.noDamageAtkAndSpePlusOneEffect:
-                if (move.target == 16) {
-                    move.statChangeMoveType = StatChangeMoveType.NO_DAMAGE_USER;
-                } else {
-                    move.statChangeMoveType = StatChangeMoveType.NO_DAMAGE_TARGET;
-                }
+//                if (move.target == 16) {
+//                    move.statChangeMoveType = StatChangeMoveType.NO_DAMAGE_USER;
+//                } else {
+//                    move.statChangeMoveType = StatChangeMoveType.NO_DAMAGE_TARGET;
+//                }
                 break;
 
             case Gen3Constants.damageAtkMinusOneEffect:
@@ -933,7 +921,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             case Gen3Constants.damageSpAtkMinusOneEffect:
             case Gen3Constants.damageSpDefMinusOneEffect:
             case Gen3Constants.damageAccuracyMinusOneEffect:
-                move.statChangeMoveType = StatChangeMoveType.DAMAGE_TARGET;
+//                move.statChangeMoveType = StatChangeMoveType.DAMAGE_TARGET;
                 break;
 
             case Gen3Constants.damageUserDefPlusOneEffect:
@@ -941,7 +929,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             case Gen3Constants.damageUserAllPlusOneEffect:
             case Gen3Constants.damageUserAtkAndDefMinusOneEffect:
             case Gen3Constants.damageUserSpAtkMinusTwoEffect:
-                move.statChangeMoveType = StatChangeMoveType.DAMAGE_USER;
+//                move.statChangeMoveType = StatChangeMoveType.DAMAGE_USER;
                 break;
 
             default:
@@ -949,7 +937,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
         }
 
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen3Constants.noDamageAtkPlusOneEffect:
             case Gen3Constants.damageUserAtkPlusOneEffect:
                 move.statChanges[0].type = StatChangeType.ATTACK;
@@ -1085,7 +1073,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 break;
         }
 
-        if (move.statChangeMoveType == StatChangeMoveType.DAMAGE_TARGET || move.statChangeMoveType == StatChangeMoveType.DAMAGE_USER) {
+        if (move.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET || move.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER) {
             for (int i = 0; i < move.statChanges.length; i++) {
                 if (move.statChanges[i].type != StatChangeType.NONE) {
                     move.statChanges[i].percentChance = secondaryEffectChance;
@@ -1100,13 +1088,13 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     private void loadStatusFromEffect(Move move, int secondaryEffectChance) {
         if (move.number == Moves.bounce) {
             // GF hardcoded this, so we have to as well
-            move.statusMoveType = StatusMoveType.DAMAGE;
-            move.statusType = StatusType.PARALYZE;
+//            move.statusMoveType = StatusMoveType.DAMAGE;
+            move.statusType = MoveStatusType.PARALYZE;
             move.statusPercentChance = secondaryEffectChance;
             return;
         }
 
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen3Constants.noDamageSleepEffect:
             case Gen3Constants.toxicEffect:
             case Gen3Constants.noDamageConfusionEffect:
@@ -1116,7 +1104,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             case Gen3Constants.swaggerEffect:
             case Gen3Constants.flatterEffect:
             case Gen3Constants.teeterDanceEffect:
-                move.statusMoveType = StatusMoveType.NO_DAMAGE;
+//                move.statusMoveType = StatusMoveType.NO_DAMAGE;
                 break;
 
             case Gen3Constants.damagePoisonEffect:
@@ -1130,7 +1118,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             case Gen3Constants.blazeKickEffect:
             case Gen3Constants.poisonFangEffect:
             case Gen3Constants.poisonTailEffect:
-                move.statusMoveType = StatusMoveType.DAMAGE;
+//                move.statusMoveType = StatusMoveType.DAMAGE;
                 break;
 
             default:
@@ -1138,44 +1126,44 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 return;
         }
 
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen3Constants.noDamageSleepEffect:
-                move.statusType = StatusType.SLEEP;
+                move.statusType = MoveStatusType.SLEEP;
                 break;
             case Gen3Constants.damagePoisonEffect:
             case Gen3Constants.noDamagePoisonEffect:
             case Gen3Constants.twineedleEffect:
             case Gen3Constants.poisonTailEffect:
-                move.statusType = StatusType.POISON;
+                move.statusType = MoveStatusType.POISON;
                 break;
             case Gen3Constants.damageBurnEffect:
             case Gen3Constants.damageBurnAndThawUserEffect:
             case Gen3Constants.noDamageBurnEffect:
             case Gen3Constants.blazeKickEffect:
-                move.statusType = StatusType.BURN;
+                move.statusType = MoveStatusType.BURN;
                 break;
             case Gen3Constants.damageFreezeEffect:
-                move.statusType = StatusType.FREEZE;
+                move.statusType = MoveStatusType.FREEZE;
                 break;
             case Gen3Constants.damageParalyzeEffect:
             case Gen3Constants.noDamageParalyzeEffect:
             case Gen3Constants.thunderEffect:
-                move.statusType = StatusType.PARALYZE;
+                move.statusType = MoveStatusType.PARALYZE;
                 break;
             case Gen3Constants.toxicEffect:
             case Gen3Constants.poisonFangEffect:
-                move.statusType = StatusType.TOXIC_POISON;
+                move.statusType = MoveStatusType.TOXIC_POISON;
                 break;
             case Gen3Constants.noDamageConfusionEffect:
             case Gen3Constants.damageConfusionEffect:
             case Gen3Constants.swaggerEffect:
             case Gen3Constants.flatterEffect:
             case Gen3Constants.teeterDanceEffect:
-                move.statusType = StatusType.CONFUSION;
+                move.statusType = MoveStatusType.CONFUSION;
                 break;
         }
 
-        if (move.statusMoveType == StatusMoveType.DAMAGE) {
+        if (move.getStatusMoveType() == StatusMoveType.DAMAGE) {
             move.statusPercentChance = secondaryEffectChance;
             if (move.statusPercentChance == 0.0) {
                 move.statusPercentChance = 100.0;
@@ -1184,7 +1172,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     private void loadMiscMoveInfoFromEffect(Move move, int secondaryEffectChance) {
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen3Constants.increasedCritEffect:
             case Gen3Constants.blazeKickEffect:
             case Gen3Constants.poisonTailEffect:
@@ -1205,20 +1193,20 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
             case Gen3Constants.damageAbsorbEffect:
             case Gen3Constants.dreamEaterEffect:
-                move.absorbPercent = 50;
+                move.recoil = 50;
                 break;
 
             case Gen3Constants.damageRecoil25PercentEffect:
-                move.recoilPercent = 25;
+                move.recoil = -25;
                 break;
 
             case Gen3Constants.damageRecoil33PercentEffect:
-                move.recoilPercent = 33;
+                move.recoil = -33;
                 break;
 
             case Gen3Constants.bindingEffect:
             case Gen3Constants.trappingEffect:
-                move.isTrapMove = true;
+//                move.isTrapMove = true;
                 break;
 
             case Gen3Constants.razorWindEffect:
@@ -1244,10 +1232,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         int moveCount = romEntry.getValue("MoveCount");
         int offs = romEntry.getValue("MoveData");
         for (int i = 1; i <= moveCount; i++) {
-            rom[offs + i * 0xC] = (byte) moves[i].effectIndex;
+            rom[offs + i * 0xC] = (byte) moves[i].effect.getIndex(generationOfPokemon());
             rom[offs + i * 0xC + 1] = (byte) moves[i].power;
             rom[offs + i * 0xC + 2] = Gen3Constants.typeToByte(moves[i].type);
-            int hitratio = (int) Math.round(moves[i].hitratio);
+            int hitratio = (int) Math.round(moves[i].accuracy);
             if (hitratio < 0) {
                 hitratio = 0;
             }
@@ -2601,6 +2589,24 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public void setTMHMPalettes() {
+        List<Integer> allMoves = getTMMoves();
+        allMoves.addAll(getHMMoves());
+
+        int iiOffset = romEntry.getValue("ItemImages");
+        if (iiOffset > 0) {
+            int[] pals = romEntry.arrayEntries.get("TmPals");
+            // Update the item image palettes
+            // Gen3 TMs are 289-338, HMs are 339-346
+            for (int i = 0; i < (Gen3Constants.tmCount + Gen3Constants.hmCount); i++) {
+                Move mv = moves[allMoves.get(i)];
+                int typeID = Gen3Constants.typeToByte(mv.type);
+                writePointer(iiOffset + (Gen3Constants.tmItemOffset + i) * 8 + 4, pals[typeID]);
+            }
+        }
+    }
+
+    @Override
     public void setTMMoves(List<Integer> moveIndexes) {
         if (!mapLoadingDone) {
             preprocessMaps();
@@ -2614,18 +2620,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         if (otherOffset > 0) {
             // Emerald/FR/LG have *two* TM tables
             System.arraycopy(rom, offset, rom, otherOffset, Gen3Constants.tmCount * 2);
-        }
-
-        int iiOffset = romEntry.getValue("ItemImages");
-        if (iiOffset > 0) {
-            int[] pals = romEntry.arrayEntries.get("TmPals");
-            // Update the item image palettes
-            // Gen3 TMs are 289-338
-            for (int i = 0; i < 50; i++) {
-                Move mv = moves[moveIndexes.get(i)];
-                int typeID = Gen3Constants.typeToByte(mv.type);
-                writePointer(iiOffset + (Gen3Constants.tmItemOffset + i) * 8 + 4, pals[typeID]);
-            }
         }
 
         int fsOffset = romEntry.getValue("FreeSpace");
@@ -3287,7 +3281,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public Map<Integer, Shop> getShopItems() {
+    public Map<Integer, Shop> getShopItems(int maxBadgesForEvoItem) {
         List<String> shopNames = Gen3Constants.getShopNames(romEntry.romType);
         List<Integer> mainGameShops = Arrays.stream(romEntry.arrayEntries.get("MainGameShops")).boxed().collect(Collectors.toList());
         List<Integer> skipShops = Arrays.stream(romEntry.arrayEntries.get("SkipShops")).boxed().collect(Collectors.toList());
@@ -3303,10 +3297,9 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     offset += 2;
                     val = FileFunctions.read2ByteInt(rom, offset);
                 }
-                Shop shop = new Shop();
-                shop.items = items;
-                shop.name = shopNames.get(i);
-                shop.isMainGame = mainGameShops.contains(i);
+
+                boolean isMainGame = mainGameShops.contains(i);
+                Shop shop = new Shop(shopNames.get(i), items, isMainGame, isMainGame, isMainGame);
                 shopItemsMap.put(i, shop);
             }
         }
@@ -4134,8 +4127,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public int miscTweaksAvailable() {
-        int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
+    public long miscTweaksAvailable() {
+        long available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
         available |= MiscTweak.NATIONAL_DEX_AT_START.getValue();
         available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
         if (romEntry.getValue("RunIndoorsTweakOffset") > 0) {
@@ -4436,7 +4429,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
+    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
         List<Integer> items = new ArrayList<>();
         items.addAll(Gen3Constants.generalPurposeConsumableItems);
         if (!consumableOnly) {

@@ -52,7 +52,9 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public int ability1, ability2, ability3;
 
-    public int catchRate, expYield;
+    public int hpEVs, attackEVs, defenseEVs, spatkEVs, spdefEVs, speedEVs;
+
+    public int catchRate, baseHappiness, expYield;
 
     public int guaranteedHeldItem, commonHeldItem, rareHeldItem, darkGrassHeldItem;
 
@@ -196,7 +198,7 @@ public class Pokemon implements Comparable<Pokemon> {
         spdef = (int) Math.min(255, Math.max(1, evolvesFrom.spdef + spdDiff));
     }
 
-    protected int bst() {
+    public int bst() {
         return hp + attack + defense + spatk + spdef + speed;
     }
 

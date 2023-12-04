@@ -31,6 +31,7 @@ import com.dabomstew.pkrandom.constants.Moves;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class MoveSynergy {
@@ -193,7 +194,7 @@ public class MoveSynergy {
     }
 
     public static List<Move> getHardAbilityMoveSynergy(int ability, Type pkType1, Type pkType2, List<Move> moveList,
-                                                       int generation, int perfectAccuracy) {
+                                                       int generation) {
         List<Integer> synergisticMoves = new ArrayList<>();
 
         switch(ability) {
@@ -230,7 +231,7 @@ public class MoveSynergy {
             case Abilities.compoundEyes:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.hitratio > 0 && mv.hitratio <= 80)
+                        .filter(mv -> mv.accuracy > 0 && mv.accuracy <= 80)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
@@ -254,10 +255,10 @@ public class MoveSynergy {
             case Abilities.sereneGrace:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> ((mv.statChangeMoveType == StatChangeMoveType.DAMAGE_TARGET ||
-                                mv.statChangeMoveType == StatChangeMoveType.DAMAGE_USER) &&
+                        .filter(mv -> ((mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET ||
+                                mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER) &&
                                 mv.statChanges[0].percentChance < 100) ||
-                                (mv.statusMoveType == StatusMoveType.DAMAGE && mv.statusPercentChance < 100) ||
+                                (mv.getStatusMoveType() == StatusMoveType.DAMAGE && mv.statusPercentChance < 100) ||
                         mv.flinchPercentChance > 0)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
@@ -291,14 +292,14 @@ public class MoveSynergy {
             case Abilities.hustle:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> (mv.statChangeMoveType == StatChangeMoveType.DAMAGE_USER ||
-                                mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
+                        .filter(mv -> (mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER ||
+                                mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_USER) &&
                                 mv.hasSpecificStatChange(StatChangeType.ACCURACY, true))
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.category == MoveCategory.PHYSICAL && mv.hitratio == perfectAccuracy)
+                        .filter(mv -> mv.category == MoveCategory.PHYSICAL && mv.hasPerfectAccuracy())
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
@@ -308,7 +309,7 @@ public class MoveSynergy {
             case Abilities.rockHead:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.recoilPercent > 0)
+                        .filter(Move::isRecoilMove)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
@@ -345,8 +346,8 @@ public class MoveSynergy {
             case Abilities.simple:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> (mv.statChangeMoveType == StatChangeMoveType.DAMAGE_USER ||
-                                mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
+                        .filter(mv -> (mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER ||
+                                mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_USER) &&
                                 mv.statChanges[0].stages > 0)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
@@ -362,7 +363,7 @@ public class MoveSynergy {
             case Abilities.skillLink:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.hitCount >= 3)
+                        .filter(mv -> mv.getHitCount(generation) >= 3)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
@@ -377,7 +378,7 @@ public class MoveSynergy {
             case Abilities.magicGuard:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.recoilPercent > 0)
+                        .filter(Move::isRecoilMove)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.mindBlown);
@@ -403,14 +404,14 @@ public class MoveSynergy {
             case Abilities.noGuard:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.hitratio > 0 && mv.hitratio <= 70)
+                        .filter(mv -> mv.accuracy > 0 && mv.accuracy <= 70)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
             case Abilities.technician:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> (mv.power >= 40 && mv.power <= 60) || mv.hitCount > 1)
+                        .filter(mv -> (mv.power >= 40 && mv.power <= 60) || mv.getHitCount(generation) > 1)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
@@ -435,7 +436,7 @@ public class MoveSynergy {
             case Abilities.reckless:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.recoilPercent > 0)
+                        .filter(Move::isRecoilMove)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.jumpKick);
@@ -444,17 +445,17 @@ public class MoveSynergy {
             case Abilities.badDreams:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.statusType == StatusType.SLEEP)
+                        .filter(mv -> mv.statusType == MoveStatusType.SLEEP)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
             case Abilities.sheerForce:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.statChangeMoveType == StatChangeMoveType.DAMAGE_TARGET ||
-                                (mv.statChangeMoveType == StatChangeMoveType.DAMAGE_USER &&
+                        .filter(mv -> mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET ||
+                                (mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER &&
                                         mv.statChanges[0].stages > 0) ||
-                                mv.statusMoveType == StatusMoveType.DAMAGE ||
+                                mv.getStatusMoveType() == StatusMoveType.DAMAGE ||
                                 mv.flinchPercentChance > 0)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
@@ -462,7 +463,7 @@ public class MoveSynergy {
             case Abilities.contrary:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.statChangeMoveType == StatChangeMoveType.DAMAGE_USER &&
+                        .filter(mv -> mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER &&
                                 mv.statChanges[0].stages < 0)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
@@ -491,7 +492,7 @@ public class MoveSynergy {
             case Abilities.prankster:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.statusMoveType == StatusMoveType.NO_DAMAGE)
+                        .filter(mv -> mv.getStatusMoveType() == StatusMoveType.NO_DAMAGE)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.destinyBond);
@@ -530,7 +531,7 @@ public class MoveSynergy {
             case Abilities.merciless:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.statusType == StatusType.POISON || mv.statusType == StatusType.TOXIC_POISON)
+                        .filter(mv -> mv.statusType == MoveStatusType.POISON || mv.statusType == MoveStatusType.TOXIC_POISON)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.banefulBunker);
@@ -547,7 +548,7 @@ public class MoveSynergy {
             case Abilities.triage:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.absorbPercent > 0)
+                        .filter(Move::isAbsorbMove)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
@@ -558,7 +559,7 @@ public class MoveSynergy {
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.category == MoveCategory.STATUS &&
-                                (mv.statusType == StatusType.POISON || mv.statusType == StatusType.TOXIC_POISON))
+                                (mv.statusType == MoveStatusType.POISON || mv.statusType == MoveStatusType.TOXIC_POISON))
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
@@ -599,7 +600,7 @@ public class MoveSynergy {
             case Abilities.speedBoost:
                 antiSynergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> (mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
+                        .filter(mv -> (mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_USER) &&
                                 mv.statChanges[0].type == StatChangeType.SPEED &&
                                 mv.statChanges[0].stages > 0)
                         .map(mv -> mv.number)
@@ -657,8 +658,8 @@ public class MoveSynergy {
             case Abilities.simple:
                 antiSynergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> (mv.statChangeMoveType == StatChangeMoveType.DAMAGE_USER ||
-                                mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
+                        .filter(mv -> (mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER ||
+                                mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_USER) &&
                                 mv.statChanges[0].stages < 0)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
@@ -666,8 +667,8 @@ public class MoveSynergy {
             case Abilities.contrary:
                 antiSynergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> (mv.statChangeMoveType == StatChangeMoveType.DAMAGE_USER ||
-                                mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
+                        .filter(mv -> (mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER ||
+                                mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_USER) &&
                                 mv.statChanges[0].stages > 0)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
@@ -680,7 +681,7 @@ public class MoveSynergy {
             case Abilities.electricSurge:
                 antiSynergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> (mv.category == MoveCategory.STATUS && mv.statusType == StatusType.SLEEP))
+                        .filter(mv -> (mv.category == MoveCategory.STATUS && mv.statusType == MoveStatusType.SLEEP))
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 antiSynergisticMoves.add(Moves.rest);
@@ -696,12 +697,12 @@ public class MoveSynergy {
                 antiSynergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> (mv.category == MoveCategory.STATUS &&
-                                (mv.statusType == StatusType.BURN ||
-                                mv.statusType == StatusType.FREEZE ||
-                                mv.statusType == StatusType.PARALYZE ||
-                                mv.statusType == StatusType.SLEEP ||
-                                mv.statusType == StatusType.POISON ||
-                                mv.statusType == StatusType.TOXIC_POISON)))
+                                (mv.statusType == MoveStatusType.BURN ||
+                                mv.statusType == MoveStatusType.FREEZE ||
+                                mv.statusType == MoveStatusType.PARALYZE ||
+                                mv.statusType == MoveStatusType.SLEEP ||
+                                mv.statusType == MoveStatusType.POISON ||
+                                mv.statusType == MoveStatusType.TOXIC_POISON)))
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 antiSynergisticMoves.add(Moves.rest);
@@ -799,13 +800,13 @@ public class MoveSynergy {
                 .collect(Collectors.toList());
     }
 
-    public static List<Move> getMoveSynergy(Move mv1, List<Move> moveList, int generation) {
+    public static List<Move> getMoveSynergy(Move mv1, List<Move> moveList) {
         List<Integer> synergisticMoves = new ArrayList<>();
 
-        if ((mv1.statChangeMoveType == StatChangeMoveType.DAMAGE_TARGET &&
+        if ((mv1.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET &&
                 mv1.hasSpecificStatChange(StatChangeType.SPEED, false)) ||
-                ((mv1.statChangeMoveType == StatChangeMoveType.DAMAGE_USER ||
-                        mv1.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
+                ((mv1.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER ||
+                        mv1.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_USER) &&
                         mv1.hasSpecificStatChange(StatChangeType.SPEED, true))) {
             synergisticMoves.addAll(moveList
                     .stream()
@@ -817,10 +818,10 @@ public class MoveSynergy {
         if (mv1.flinchPercentChance > 0 && mv1.priority == 0) {
             synergisticMoves.addAll(moveList
                     .stream()
-                    .filter(mv -> (mv.statChangeMoveType == StatChangeMoveType.DAMAGE_TARGET &&
+                    .filter(mv -> (mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET &&
                             mv.hasSpecificStatChange(StatChangeType.SPEED, false)) ||
-                            ((mv.statChangeMoveType == StatChangeMoveType.DAMAGE_USER ||
-                                    mv.statChangeMoveType == StatChangeMoveType.NO_DAMAGE_USER) &&
+                            ((mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER ||
+                                    mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_USER) &&
                                     mv.hasSpecificStatChange(StatChangeType.SPEED, true)))
                     .map(mv -> mv.number)
                     .collect(Collectors.toList()));
@@ -832,7 +833,7 @@ public class MoveSynergy {
             synergisticMoves.add(Moves.powerTrip);
         }
 
-        if (mv1.statusType == StatusType.SLEEP) {
+        if (mv1.statusType == MoveStatusType.SLEEP) {
             synergisticMoves.add(Moves.dreamEater);
             synergisticMoves.add(Moves.nightmare);
             synergisticMoves.add(Moves.hex);
@@ -849,7 +850,7 @@ public class MoveSynergy {
                 synergisticMoves.add(Moves.dive);
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> (mv.isTrapMove))
+                        .filter(Move::isTrapMove)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 // fallthrough
@@ -864,7 +865,7 @@ public class MoveSynergy {
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> mv.category == MoveCategory.STATUS &&
-                                (mv.statusType == StatusType.POISON || mv.statusType == StatusType.TOXIC_POISON))
+                                (mv.statusType == MoveStatusType.POISON || mv.statusType == MoveStatusType.TOXIC_POISON))
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
@@ -890,7 +891,7 @@ public class MoveSynergy {
             case Moves.mindReader:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> (mv.hitratio <= 50))
+                        .filter(mv -> (mv.accuracy <= 50))
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
@@ -905,7 +906,7 @@ public class MoveSynergy {
             case Moves.powerSwap:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.statChangeMoveType == StatChangeMoveType.DAMAGE_USER &&
+                        .filter(mv -> mv.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER &&
                                 (mv.hasSpecificStatChange(StatChangeType.ATTACK, false) ||
                                         mv.hasSpecificStatChange(StatChangeType.SPECIAL_ATTACK, false)))
                         .map(mv -> mv.number)
@@ -933,7 +934,7 @@ public class MoveSynergy {
                         .collect(Collectors.toList()));
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.category == MoveCategory.STATUS && mv.statusType == StatusType.CONFUSION)
+                        .filter(mv -> mv.category == MoveCategory.STATUS && mv.statusType == MoveStatusType.CONFUSION)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.hex);
@@ -954,7 +955,7 @@ public class MoveSynergy {
             case Moves.perishSong:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> (mv.isTrapMove))
+                        .filter(Move::isTrapMove)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
@@ -981,8 +982,8 @@ public class MoveSynergy {
             case Moves.nightmare:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.statusMoveType == StatusMoveType.NO_DAMAGE &&
-                                mv.statusType == StatusType.SLEEP)
+                        .filter(mv -> mv.getStatusMoveType() == StatusMoveType.NO_DAMAGE &&
+                                mv.statusType == MoveStatusType.SLEEP)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;
@@ -995,8 +996,8 @@ public class MoveSynergy {
             case Moves.hex:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.statusMoveType == StatusMoveType.NO_DAMAGE &&
-                                mv.statusType != StatusType.CONFUSION)
+                        .filter(mv -> mv.getStatusMoveType() == StatusMoveType.NO_DAMAGE &&
+                                mv.statusType != MoveStatusType.CONFUSION)
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 synergisticMoves.add(Moves.banefulBunker);
@@ -1029,14 +1030,14 @@ public class MoveSynergy {
     }
 
     public static List<Move> getSoftMoveSynergy(Move mv1, List<Move> moveList, int generation,
-                                                boolean effectivenessUpdated) {
+                                                boolean effectivenessUpdated, boolean custom, boolean addFairy) {
         List<Integer> synergisticMoves = new ArrayList<>();
 
         if (mv1.category != MoveCategory.STATUS) {
-            List<Type> notVeryEffective = Effectiveness.notVeryEffective(mv1.type, generation, effectivenessUpdated);
+            List<Type> notVeryEffective = Effectiveness.notVeryEffective(mv1.type, generation, effectivenessUpdated, custom, addFairy);
             for (Type nveType: notVeryEffective) {
                 List<Type> superEffectiveAgainstNVE =
-                        Effectiveness.against(nveType, null, generation, effectivenessUpdated)
+                        Objects.requireNonNull(Effectiveness.against(nveType, null, generation, effectivenessUpdated, custom, addFairy))
                                 .entrySet()
                                 .stream()
                                 .filter(entry -> entry.getValue() == Effectiveness.DOUBLE)
@@ -1080,12 +1081,12 @@ public class MoveSynergy {
         List<Integer> antiSynergisticMoves = new ArrayList<>();
 
 
-        if (mv1.category == MoveCategory.STATUS && mv1.statusType != StatusType.NONE) {
+        if (mv1.category == MoveCategory.STATUS && mv1.statusType != MoveStatusType.NONE) {
             antiSynergisticMoves.addAll(moveList
                     .stream()
-                    .filter(mv -> (mv.category == MoveCategory.STATUS && mv.statusType != StatusType.NONE &&
+                    .filter(mv -> (mv.category == MoveCategory.STATUS && mv.statusType != MoveStatusType.NONE &&
                             (mv.statusType == mv1.statusType ||
-                                    (mv1.statusType != StatusType.CONFUSION && mv.statusType != StatusType.CONFUSION))))
+                                    (mv1.statusType != MoveStatusType.CONFUSION && mv.statusType != MoveStatusType.CONFUSION))))
                     .map(mv -> mv.number)
                     .collect(Collectors.toList()));
         }
@@ -1195,7 +1196,7 @@ public class MoveSynergy {
             case Moves.nightmare:
                 requiresMove.addAll(moveList
                         .stream()
-                        .filter(mv -> (mv.category == MoveCategory.STATUS && mv.statusType == StatusType.SLEEP))
+                        .filter(mv -> (mv.category == MoveCategory.STATUS && mv.statusType == MoveStatusType.SLEEP))
                         .map(mv -> mv.number)
                         .collect(Collectors.toList()));
                 break;

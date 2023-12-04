@@ -24,7 +24,10 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class ItemList {
 
@@ -66,19 +69,59 @@ public class ItemList {
     }
 
     public int randomItem(Random random) {
-        int chosen = 0;
-        while (!items[chosen]) {
-            chosen = random.nextInt(items.length);
+        List<Integer> selectable = new ArrayList<>(items.length);
+        for (int i = 0; i < items.length; i++) {
+            if (items[i]) {
+                selectable.add(i);
+            }
         }
-        return chosen;
+
+        return selectable.get(random.nextInt(selectable.size()));
     }
 
     public int randomNonTM(Random random) {
-        int chosen = 0;
-        while (!items[chosen] || tms[chosen]) {
-            chosen = random.nextInt(items.length);
+        List<Integer> selectable = new ArrayList<>(items.length);
+        for (int i = 0; i < items.length; i++) {
+            if (items[i] && !tms[i]) {
+                selectable.add(i);
+            }
         }
-        return chosen;
+
+        if (selectable.isEmpty()) {
+            return -1;
+        }
+
+        return selectable.get(random.nextInt(selectable.size()));
+    }
+
+    public int randomNonTM(Random random, Set<Integer> banned) {
+        List<Integer> selectable = new ArrayList<>(items.length);
+        for (int i = 0; i < items.length; i++) {
+            if (items[i] && !tms[i] && !banned.contains(i)) {
+                selectable.add(i);
+            }
+        }
+
+        if (selectable.isEmpty()) {
+            return -1;
+        }
+
+        return selectable.get(random.nextInt(selectable.size()));
+    }
+
+    public int randomNonTM(Random random, List<Integer> banned) {
+        List<Integer> selectable = new ArrayList<>(items.length);
+        for (int i = 0; i < items.length; i++) {
+            if (items[i] && !tms[i] && !banned.contains(i)) {
+                selectable.add(i);
+            }
+        }
+
+        if (selectable.isEmpty()) {
+            return -1;
+        }
+
+        return selectable.get(random.nextInt(selectable.size()));
     }
 
     public int randomTM(Random random) {

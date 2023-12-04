@@ -29,6 +29,16 @@ public class MoveLearnt {
     public int move;
     public int level;
 
+    public MoveLearnt() {
+        move = 0;
+        level = 0;
+    }
+
+    public MoveLearnt(int move, int level) {
+        this.move = move;
+        this.level = level;
+    }
+
     public String toString() {
         return "move " + move + " at level " + level;
     }

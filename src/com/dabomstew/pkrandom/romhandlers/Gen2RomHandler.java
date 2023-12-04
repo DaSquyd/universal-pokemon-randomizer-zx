@@ -418,8 +418,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             moves[i].name = moveNames[i];
             moves[i].number = i;
             moves[i].internalId = i;
-            moves[i].effectIndex = rom[offs + (i - 1) * 7 + 1] & 0xFF;
-            moves[i].hitratio = ((rom[offs + (i - 1) * 7 + 4] & 0xFF)) / 255.0 * 100;
+            moves[i].effect = MoveEffect.fromIndex(generationOfPokemon(), rom[offs + (i - 1) * 7 + 1] & 0xFF);
+            moves[i].accuracy = ((rom[offs + (i - 1) * 7 + 4] & 0xFF)) / 255.0 * 100;
             moves[i].power = rom[offs + (i - 1) * 7 + 2] & 0xFF;
             moves[i].pp = rom[offs + (i - 1) * 7 + 5] & 0xFF;
             moves[i].type = Gen2Constants.typeTable[rom[offs + (i - 1) * 7 + 3]];
@@ -428,31 +428,19 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 moves[i].category = MoveCategory.STATUS;
             }
 
-            if (i == Moves.swift) {
-                perfectAccuracy = (int)moves[i].hitratio;
-            }
-
-            if (GlobalConstants.normalMultihitMoves.contains(i)) {
-                moves[i].hitCount = 3;
-            } else if (GlobalConstants.doubleHitMoves.contains(i)) {
-                moves[i].hitCount = 2;
-            } else if (i == Moves.tripleKick) {
-                moves[i].hitCount = 2.71; // this assumes the first hit lands
-            }
-
-            // Values taken from effect_priorities.asm from the Gen 2 disassemblies.
-            if (moves[i].effectIndex == Gen2Constants.priorityHitEffectIndex) {
-                moves[i].priority = 2;
-            } else if (moves[i].effectIndex == Gen2Constants.protectEffectIndex ||
-                       moves[i].effectIndex == Gen2Constants.endureEffectIndex) {
-                moves[i].priority = 3;
-            } else if (moves[i].effectIndex == Gen2Constants.forceSwitchEffectIndex ||
-                       moves[i].effectIndex == Gen2Constants.counterEffectIndex ||
-                       moves[i].effectIndex == Gen2Constants.mirrorCoatEffectIndex) {
-                moves[i].priority = 0;
-            } else {
-                moves[i].priority = 1;
-            }
+//            // Values taken from effect_priorities.asm from the Gen 2 disassemblies.
+//            if (moves[i].effectIndex == Gen2Constants.priorityHitEffectIndex) {
+//                moves[i].priority = 2;
+//            } else if (moves[i].effectIndex == Gen2Constants.protectEffectIndex ||
+//                       moves[i].effectIndex == Gen2Constants.endureEffectIndex) {
+//                moves[i].priority = 3;
+//            } else if (moves[i].effectIndex == Gen2Constants.forceSwitchEffectIndex ||
+//                       moves[i].effectIndex == Gen2Constants.counterEffectIndex ||
+//                       moves[i].effectIndex == Gen2Constants.mirrorCoatEffectIndex) {
+//                moves[i].priority = 0;
+//            } else {
+//                moves[i].priority = 1;
+//            }
 
             double secondaryEffectChance = ((rom[offs + (i - 1) * 7 + 6] & 0xFF)) / 255.0 * 100;
             loadStatChangesFromEffect(moves[i], secondaryEffectChance);
@@ -462,7 +450,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void loadStatChangesFromEffect(Move move, double secondaryEffectChance) {
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen2Constants.noDamageAtkPlusOneEffect:
             case Gen2Constants.damageUserAtkPlusOneEffect:
                 move.statChanges[0].type = StatChangeType.ATTACK;
@@ -552,7 +540,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 return;
         }
 
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen2Constants.noDamageAtkPlusOneEffect:
             case Gen2Constants.noDamageDefPlusOneEffect:
             case Gen2Constants.noDamageSpAtkPlusOneEffect:
@@ -572,10 +560,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             case Gen2Constants.noDamageSpDefMinusTwoEffect:
             case Gen2Constants.swaggerEffect:
             case Gen2Constants.defenseCurlEffect:
-                if (move.statChanges[0].stages < 0 || move.effectIndex == Gen2Constants.swaggerEffect) {
-                    move.statChangeMoveType = StatChangeMoveType.NO_DAMAGE_TARGET;
+                if (move.statChanges[0].stages < 0 || move.effect.getIndex(generationOfPokemon()) == Gen2Constants.swaggerEffect) {
+//                    move.statChangeMoveType = StatChangeMoveType.NO_DAMAGE_TARGET;
                 } else {
-                    move.statChangeMoveType = StatChangeMoveType.NO_DAMAGE_USER;
+//                    move.statChangeMoveType = StatChangeMoveType.NO_DAMAGE_USER;
                 }
                 break;
 
@@ -584,17 +572,17 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             case Gen2Constants.damageSpeMinusOneEffect:
             case Gen2Constants.damageSpDefMinusOneEffect:
             case Gen2Constants.damageAccuracyMinusOneEffect:
-                move.statChangeMoveType = StatChangeMoveType.DAMAGE_TARGET;
+//                move.statChangeMoveType = StatChangeMoveType.DAMAGE_TARGET;
                 break;
 
             case Gen2Constants.damageUserDefPlusOneEffect:
             case Gen2Constants.damageUserAtkPlusOneEffect:
             case Gen2Constants.damageUserAllPlusOneEffect:
-                move.statChangeMoveType = StatChangeMoveType.DAMAGE_USER;
+//                move.statChangeMoveType = StatChangeMoveType.DAMAGE_USER;
                 break;
         }
 
-        if (move.statChangeMoveType == StatChangeMoveType.DAMAGE_TARGET || move.statChangeMoveType == StatChangeMoveType.DAMAGE_USER) {
+        if (move.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET || move.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER) {
             for (int i = 0; i < move.statChanges.length; i++) {
                 if (move.statChanges[i].type != StatChangeType.NONE) {
                     move.statChanges[i].percentChance = secondaryEffectChance;
@@ -607,14 +595,14 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void loadStatusFromEffect(Move move, double secondaryEffectChance) {
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen2Constants.noDamageSleepEffect:
             case Gen2Constants.toxicEffect:
             case Gen2Constants.noDamageConfusionEffect:
             case Gen2Constants.noDamagePoisonEffect:
             case Gen2Constants.noDamageParalyzeEffect:
             case Gen2Constants.swaggerEffect:
-                move.statusMoveType = StatusMoveType.NO_DAMAGE;
+//                move.statusMoveType = StatusMoveType.NO_DAMAGE;
                 break;
 
             case Gen2Constants.damagePoisonEffect:
@@ -625,7 +613,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             case Gen2Constants.twineedleEffect:
             case Gen2Constants.damageBurnAndThawUserEffect:
             case Gen2Constants.thunderEffect:
-                move.statusMoveType = StatusMoveType.DAMAGE;
+//                move.statusMoveType = StatusMoveType.DAMAGE;
                 break;
 
             default:
@@ -633,38 +621,38 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 return;
         }
 
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen2Constants.noDamageSleepEffect:
-                move.statusType = StatusType.SLEEP;
+                move.statusType = MoveStatusType.SLEEP;
                 break;
             case Gen2Constants.damagePoisonEffect:
             case Gen2Constants.noDamagePoisonEffect:
             case Gen2Constants.twineedleEffect:
-                move.statusType = StatusType.POISON;
+                move.statusType = MoveStatusType.POISON;
                 break;
             case Gen2Constants.damageBurnEffect:
             case Gen2Constants.damageBurnAndThawUserEffect:
-                move.statusType = StatusType.BURN;
+                move.statusType = MoveStatusType.BURN;
                 break;
             case Gen2Constants.damageFreezeEffect:
-                move.statusType = StatusType.FREEZE;
+                move.statusType = MoveStatusType.FREEZE;
                 break;
             case Gen2Constants.damageParalyzeEffect:
             case Gen2Constants.noDamageParalyzeEffect:
             case Gen2Constants.thunderEffect:
-                move.statusType = StatusType.PARALYZE;
+                move.statusType = MoveStatusType.PARALYZE;
                 break;
             case Gen2Constants.toxicEffect:
-                move.statusType = StatusType.TOXIC_POISON;
+                move.statusType = MoveStatusType.TOXIC_POISON;
                 break;
             case Gen2Constants.noDamageConfusionEffect:
             case Gen2Constants.damageConfusionEffect:
             case Gen2Constants.swaggerEffect:
-                move.statusType = StatusType.CONFUSION;
+                move.statusType = MoveStatusType.CONFUSION;
                 break;
         }
 
-        if (move.statusMoveType == StatusMoveType.DAMAGE) {
+        if (move.getStatusMoveType() == StatusMoveType.DAMAGE) {
             move.statusPercentChance = secondaryEffectChance;
             if (move.statusPercentChance == 0.0) {
                 move.statusPercentChance = 100.0;
@@ -673,7 +661,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     private void loadMiscMoveInfoFromEffect(Move move, double secondaryEffectChance) {
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen2Constants.flinchEffect:
             case Gen2Constants.snoreEffect:
             case Gen2Constants.twisterEffect:
@@ -683,11 +671,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
             case Gen2Constants.damageAbsorbEffect:
             case Gen2Constants.dreamEaterEffect:
-                move.absorbPercent = 50;
+                move.recoil = 50;
                 break;
 
             case Gen2Constants.damageRecoilEffect:
-                move.recoilPercent = 25;
+                move.recoil = -25;
                 break;
 
             case Gen2Constants.flailAndReversalEffect:
@@ -697,7 +685,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
             case Gen2Constants.bindingEffect:
             case Gen2Constants.trappingEffect:
-                move.isTrapMove = true;
+//                move.isTrapMove = true;
                 break;
 
             case Gen2Constants.razorWindEffect:
@@ -721,10 +709,10 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     private void saveMoves() {
         int offs = romEntry.getValue("MoveDataOffset");
         for (int i = 1; i <= 251; i++) {
-            rom[offs + (i - 1) * 7 + 1] = (byte) moves[i].effectIndex;
+            rom[offs + (i - 1) * 7 + 1] = (byte) moves[i].effect.getIndex(generationOfPokemon());
             rom[offs + (i - 1) * 7 + 2] = (byte) moves[i].power;
             rom[offs + (i - 1) * 7 + 3] = Gen2Constants.typeToByte(moves[i].type);
-            int hitratio = (int) Math.round(moves[i].hitratio * 2.55);
+            int hitratio = (int) Math.round(moves[i].accuracy * 2.55);
             if (hitratio < 0) {
                 hitratio = 0;
             }
@@ -1633,6 +1621,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public void setTMHMPalettes() {
+        // TMs and HMs have no palettes
+    }
+
+    @Override
     public void setTMMoves(List<Integer> moveIndexes) {
         int offset = romEntry.getValue("TMMovesOffset");
         for (int i = 1; i <= Gen2Constants.tmCount; i++) {
@@ -1971,7 +1964,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public Map<Integer, Shop> getShopItems() {
+    public Map<Integer, Shop> getShopItems(int maxBadgesForEvoItem) {
         return null; // Not implemented
     }
 
@@ -2219,8 +2212,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public int miscTweaksAvailable() {
-        int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
+    public long miscTweaksAvailable() {
+        long available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
         available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
         if (romEntry.codeTweaks.get("BWXPTweak") != null) {
             available |= MiscTweak.BW_EXP_PATCH.getValue();

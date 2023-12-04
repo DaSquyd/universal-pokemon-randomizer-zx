@@ -31,7 +31,7 @@ import java.util.ResourceBundle;
 
 public class MiscTweak implements Comparable<MiscTweak> {
 
-    public static final int NO_MISC_TWEAKS = 0;
+    public static final long NO_MISC_TWEAKS = 0L;
 
     private static final ResourceBundle bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle");
 
@@ -62,14 +62,24 @@ public class MiscTweak implements Comparable<MiscTweak> {
     public static final MiscTweak FAST_DISTORTION_WORLD = new MiscTweak(1 << 20, "fastDistortionWorld", 0);
     public static final MiscTweak UPDATE_ROTOM_FORME_TYPING = new MiscTweak(1 << 21, "updateRotomFormeTyping", 0);
     public static final MiscTweak DISABLE_LOW_HP_MUSIC = new MiscTweak(1 << 22, "disableLowHpMusic", 0);
+    public static final MiscTweak CUSTOM_POKEMON_TYPES = new MiscTweak(1 << 23, "customPokemonTypes", 0);
+    public static final MiscTweak CUSTOM_TYPE_EFFECTIVENESS = new MiscTweak(1 << 24, "customTypeEffectiveness", 0);
+    public static final MiscTweak CUSTOM_POKEMON_STATS = new MiscTweak(1 << 25, "customPokemonStats", 0);
+    public static final MiscTweak CUSTOM_MOVE_CHANGES = new MiscTweak(1 << 26, "customMoveChanges", 0);
+    public static final MiscTweak CUSTOM_NO_EXP = new MiscTweak(1 << 27, "customNoExp", 0);
+    public static final MiscTweak CUSTOM_MAX_HAPPINESS = new MiscTweak(1 << 28, "customMaxHappiness", 0);
+    public static final MiscTweak CUSTOM_NO_EVS = new MiscTweak(1 << 29, "customNoEVs", 0);
+    public static final MiscTweak MODERNIZE_CRIT = new MiscTweak(1 << 30, "modernizeCrit", 0);
+    public static final MiscTweak NPC_SMART_AI = new MiscTweak(1L << 31, "npcSmartAI", 0);
+    public static final MiscTweak CUSTOM_ADD_FAIRY = new MiscTweak(1L << 32, "customAddFairy", 0);
     /* @formatter:on */
 
-    private final int value;
+    private final long value;
     private final String tweakName;
     private final String tooltipText;
     private final int priority;
 
-    private MiscTweak(int value, String tweakID, int priority) {
+    private MiscTweak(long value, String tweakID, int priority) {
         this.value = value;
         this.tweakName = bundle.getString("CodeTweaks." + tweakID + ".name"); // this feels really dumb
         this.tooltipText = bundle.getString("CodeTweaks." + tweakID + ".toolTipText");
@@ -77,7 +87,7 @@ public class MiscTweak implements Comparable<MiscTweak> {
         allTweaks.add(this);
     }
 
-    public int getValue() {
+    public long getValue() {
         return value;
     }
 

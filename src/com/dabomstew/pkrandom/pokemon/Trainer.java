@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.pokemon;
 /*----------------------------------------------------------------------------*/
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class Trainer implements Comparable<Trainer> {
@@ -100,6 +101,20 @@ public class Trainer implements Comparable<Trainer> {
     public boolean isBoss() {
         return tag != null && (tag.startsWith("ELITE") || tag.startsWith("CHAMPION")
                 || tag.startsWith("UBER") || tag.endsWith("LEADER"));
+    }
+
+    public boolean isLeader() {
+        return tag != null && tag.endsWith("LEADER");
+    }
+
+    public int getAceLevel() {
+        int highestLevel = 0;
+        for (TrainerPokemon pk : pokemon)
+        {
+            highestLevel = Math.max(highestLevel, pk.level);
+        }
+
+        return highestLevel;
     }
 
     public boolean isImportant() {

@@ -442,24 +442,14 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 moves[trueMoveIndex].name = moveNames[i];
                 moves[trueMoveIndex].internalId = i;
                 moves[trueMoveIndex].number = trueMoveIndex;
-                moves[trueMoveIndex].effectIndex = rom[movesOffset + (i - 1) * 6 + 1] & 0xFF;
-                moves[trueMoveIndex].hitratio = ((rom[movesOffset + (i - 1) * 6 + 4] & 0xFF)) / 255.0 * 100;
+                moves[trueMoveIndex].effect = MoveEffect.fromIndex(generationOfPokemon(), rom[movesOffset + (i - 1) * 6 + 1] & 0xFF);
+                moves[trueMoveIndex].accuracy = ((rom[movesOffset + (i - 1) * 6 + 4] & 0xFF)) / 255.0 * 100;
                 moves[trueMoveIndex].power = rom[movesOffset + (i - 1) * 6 + 2] & 0xFF;
                 moves[trueMoveIndex].pp = rom[movesOffset + (i - 1) * 6 + 5] & 0xFF;
                 moves[trueMoveIndex].type = idToType(rom[movesOffset + (i - 1) * 6 + 3] & 0xFF);
                 moves[trueMoveIndex].category = GBConstants.physicalTypes.contains(moves[trueMoveIndex].type) ? MoveCategory.PHYSICAL : MoveCategory.SPECIAL;
                 if (moves[trueMoveIndex].power == 0 && !GlobalConstants.noPowerNonStatusMoves.contains(trueMoveIndex)) {
                     moves[trueMoveIndex].category = MoveCategory.STATUS;
-                }
-
-                if (moves[trueMoveIndex].name.equals("Swift")) {
-                    perfectAccuracy = (int)moves[trueMoveIndex].hitratio;
-                }
-
-                if (GlobalConstants.normalMultihitMoves.contains(i)) {
-                    moves[trueMoveIndex].hitCount = 3;
-                } else if (GlobalConstants.doubleHitMoves.contains(i)) {
-                    moves[trueMoveIndex].hitCount = 2;
                 }
 
                 loadStatChangesFromEffect(moves[trueMoveIndex]);
@@ -470,7 +460,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     private void loadStatChangesFromEffect(Move move) {
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen1Constants.noDamageAtkPlusOneEffect:
                 move.statChanges[0].type = StatChangeType.ATTACK;
                 move.statChanges[0].stages = 1;
@@ -535,7 +525,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 return;
         }
 
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen1Constants.noDamageAtkPlusOneEffect:
             case Gen1Constants.noDamageDefPlusOneEffect:
             case Gen1Constants.noDamageSpecialPlusOneEffect:
@@ -549,22 +539,22 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             case Gen1Constants.noDamageSpePlusTwoEffect:
             case Gen1Constants.noDamageSpecialPlusTwoEffect:
             case Gen1Constants.noDamageDefMinusTwoEffect:
-                if (move.statChanges[0].stages < 0) {
-                    move.statChangeMoveType = StatChangeMoveType.NO_DAMAGE_TARGET;
-                } else {
-                    move.statChangeMoveType = StatChangeMoveType.NO_DAMAGE_USER;
-                }
+//                if (move.statChanges[0].stages < 0) {
+//                    move.getStatChangeMoveType() = StatChangeMoveType.NO_DAMAGE_TARGET;
+//                } else {
+//                    move.getStatChangeMoveType() = StatChangeMoveType.NO_DAMAGE_USER;
+//                }
                 break;
 
             case Gen1Constants.damageAtkMinusOneEffect:
             case Gen1Constants.damageDefMinusOneEffect:
             case Gen1Constants.damageSpeMinusOneEffect:
             case Gen1Constants.damageSpecialMinusOneEffect:
-                move.statChangeMoveType = StatChangeMoveType.DAMAGE_TARGET;
+//                move.statChangeMoveType = StatChangeMoveType.DAMAGE_TARGET;
                 break;
         }
 
-        if (move.statChangeMoveType == StatChangeMoveType.DAMAGE_TARGET) {
+        if (move.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET) {
             for (int i = 0; i < move.statChanges.length; i++) {
                 if (move.statChanges[i].type != StatChangeType.NONE) {
                     move.statChanges[i].percentChance = 85 / 256.0;
@@ -574,12 +564,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     private void loadStatusFromEffect(Move move) {
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen1Constants.noDamageSleepEffect:
             case Gen1Constants.noDamageConfusionEffect:
             case Gen1Constants.noDamagePoisonEffect:
             case Gen1Constants.noDamageParalyzeEffect:
-                move.statusMoveType = StatusMoveType.NO_DAMAGE;
+//                move.statusMoveType = StatusMoveType.NO_DAMAGE;
                 break;
 
             case Gen1Constants.damagePoison20PercentEffect:
@@ -592,7 +582,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
             case Gen1Constants.damageParalyze30PercentEffect:
             case Gen1Constants.damageConfusionEffect:
             case Gen1Constants.twineedleEffect:
-                move.statusMoveType = StatusMoveType.DAMAGE;
+//                move.statusMoveType = StatusMoveType.DAMAGE;
                 break;
 
             default:
@@ -600,40 +590,40 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 return;
         }
 
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen1Constants.noDamageSleepEffect:
-                move.statusType = StatusType.SLEEP;
+                move.statusType = MoveStatusType.SLEEP;
                 break;
             case Gen1Constants.damagePoison20PercentEffect:
             case Gen1Constants.damagePoison40PercentEffect:
             case Gen1Constants.noDamagePoisonEffect:
             case Gen1Constants.twineedleEffect:
-                move.statusType = StatusType.POISON;
+                move.statusType = MoveStatusType.POISON;
                 if (move.number == Moves.toxic) {
-                    move.statusType = StatusType.TOXIC_POISON;
+                    move.statusType = MoveStatusType.TOXIC_POISON;
                 }
                 break;
             case Gen1Constants.damageBurn10PercentEffect:
             case Gen1Constants.damageBurn30PercentEffect:
-                move.statusType = StatusType.BURN;
+                move.statusType = MoveStatusType.BURN;
                 break;
             case Gen1Constants.damageFreeze10PercentEffect:
             case Gen1Constants.damageFreeze30PercentEffect:
-                move.statusType = StatusType.FREEZE;
+                move.statusType = MoveStatusType.FREEZE;
                 break;
             case Gen1Constants.damageParalyze10PercentEffect:
             case Gen1Constants.damageParalyze30PercentEffect:
             case Gen1Constants.noDamageParalyzeEffect:
-                move.statusType = StatusType.PARALYZE;
+                move.statusType = MoveStatusType.PARALYZE;
                 break;
             case Gen1Constants.noDamageConfusionEffect:
             case Gen1Constants.damageConfusionEffect:
-                move.statusType = StatusType.CONFUSION;
+                move.statusType = MoveStatusType.CONFUSION;
                 break;
         }
 
-        if (move.statusMoveType == StatusMoveType.DAMAGE) {
-            switch (move.effectIndex) {
+        if (move.getStatusMoveType() == StatusMoveType.DAMAGE) {
+            switch (move.effect.getIndex(generationOfPokemon())) {
                 case Gen1Constants.damageBurn10PercentEffect:
                 case Gen1Constants.damageFreeze10PercentEffect:
                 case Gen1Constants.damageParalyze10PercentEffect:
@@ -657,7 +647,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     private void loadMiscMoveInfoFromEffect(Move move) {
-        switch (move.effectIndex) {
+        switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen1Constants.flinch10PercentEffect:
                 move.flinchPercentChance = 10.0;
                 break;
@@ -668,11 +658,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
             case Gen1Constants.damageAbsorbEffect:
             case Gen1Constants.dreamEaterEffect:
-                move.absorbPercent = 50;
+                move.recoil = 50;
                 break;
 
             case Gen1Constants.damageRecoilEffect:
-                move.recoilPercent = 25;
+                move.recoil = -25;
                 break;
 
             case Gen1Constants.chargeEffect:
@@ -695,10 +685,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         for (Move m : moves) {
             if (m != null) {
                 int i = m.internalId;
-                rom[movesOffset + (i - 1) * 6 + 1] = (byte) m.effectIndex;
+                rom[movesOffset + (i - 1) * 6 + 1] = (byte) m.effect.getIndex(generationOfPokemon());
                 rom[movesOffset + (i - 1) * 6 + 2] = (byte) m.power;
                 rom[movesOffset + (i - 1) * 6 + 3] = typeToByte(m.type);
-                int hitratio = (int) Math.round(m.hitratio * 2.55);
+                int hitratio = (int) Math.round(m.accuracy * 2.55);
                 if (hitratio < 0) {
                     hitratio = 0;
                 }
@@ -1705,6 +1695,9 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public void setTMHMPalettes() { }
+
+    @Override
     public void setTMMoves(List<Integer> moveIndexes) {
         int offset = romEntry.getValue("TMMovesOffset");
         for (int i = 1; i <= Gen1Constants.tmCount; i++) {
@@ -1906,7 +1899,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public Map<Integer, Shop> getShopItems() {
+    public Map<Integer, Shop> getShopItems(int maxBadgesForEvoItem) {
         return null; // Not implemented
     }
 
@@ -2081,8 +2074,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public int miscTweaksAvailable() {
-        int available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
+    public long miscTweaksAvailable() {
+        long available = MiscTweak.LOWER_CASE_POKEMON_NAMES.getValue();
         available |= MiscTweak.UPDATE_TYPE_EFFECTIVENESS.getValue();
 
         if (romEntry.tweakFiles.get("BWXPTweak") != null) {

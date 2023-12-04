@@ -24,14 +24,19 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-// This does not include statuses that are only inflicted by a single move, like Attract, Nightmare, etc.
-public enum StatusType {
-    NONE,
-    PARALYZE,
-    SLEEP,
-    FREEZE,
-    BURN,
-    POISON,
-    CONFUSION,
-    TOXIC_POISON
+public enum MoveQualities {
+    DAMAGE,
+    NO_DAMAGE_STATUS,
+    NO_DAMAGE_STAT_CHANGE,
+    HEAL,
+    DAMAGE_TARGET_STATUS,
+    NO_DAMAGE_STAT_CHANGE_STATUS, // Flatter and Swagger
+    DAMAGE_TARGET_STAT_CHANGE,
+    DAMAGE_USER_STAT_CHANGE,
+    DRAIN_HEALTH,
+    OHKO,
+    FIELD_EFFECT,
+    TEAM_EFFECT,
+    FORCE_SWITCH,
+    OTHER
 }
