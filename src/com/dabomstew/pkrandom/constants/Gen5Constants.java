@@ -891,11 +891,20 @@ public class Gen5Constants {
         nonBadItemsBW2.banSingles(Items.zinc); // Zinc
         nonBadItemsBW2.banRange(Items.powerBracer, 6); // power items
         nonBadItemsBW2.banSingles(Items.machoBrace); // macho brace
-        nonBadItemsBW2.banRange(Items.xAttack, 6); // xitems
+        nonBadItemsBW2.banRange(Items.guardSpec, 8); // xitems
         nonBadItemsBW2.banRange(Items.rootFossil, 7); // fossils
         nonBadItemsBW2.banSingles(Items.coverFossil, Items.plumeFossil); // fossils
         nonBadItemsBW2.banSingles(Items.potion, Items.plumeFossil); // fossils
         nonBadItemsBW2.banSingles(Items.luckIncense, Items.amuletCoin); // money
+        nonBadItemsBW2.banSingles(Items.pureIncense); // money
+        nonBadItemsBW2.banRange(Items.tinyMushroom, 7); // money
+        nonBadItemsBW2.banSingles(Items.expShare); // exp share
+        nonBadItemsBW2.banSingles(Items.pokeDoll, Items.fluffyTail);
+        nonBadItemsBW2.banRange(Items.blueFlute, 5); // flutes
+        nonBadItemsBW2.banSingles(Items.shoalSalt, Items.shoalShell);
+        nonBadItemsBW2.banSingles(Items.smokeBall, Items.everstone, Items.heartScale, Items.honey);
+        nonBadItemsBW2.banSingles(Items.sweetHeart, Items.rageCandyBar, Items.ringTarget, Items.sootheBell);
+
 
         nonBadItemsBW1 = nonBadItemsBW2.copy();
 
