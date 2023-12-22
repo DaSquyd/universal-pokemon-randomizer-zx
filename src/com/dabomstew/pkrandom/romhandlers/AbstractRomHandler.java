@@ -613,13 +613,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         return onlyLegendaryList.get(this.random.nextInt(onlyLegendaryList.size()));
     }
 
-    private List<Pokemon> twoEvoPokes;
+    private List<Pokemon> fullyEvolvedPokes;
 
     @Override
     public Pokemon random2EvosPokemon(boolean allowAltFormes) {
-        if (twoEvoPokes == null) {
+        if (fullyEvolvedPokes == null) {
             // Prepare the list
-            twoEvoPokes = new ArrayList<>();
+            fullyEvolvedPokes = new ArrayList<>();
             List<Pokemon> allPokes =
                     allowAltFormes ?
                             this.getPokemonInclFormes()
@@ -634,14 +634,36 @@ public abstract class AbstractRomHandler implements RomHandler {
                         // If any of the targets here evolve, the original
                         // Pokemon has 2+ stages.
                         if (ev.to.evolutionsFrom.size() > 0) {
-                            twoEvoPokes.add(pk);
+                            fullyEvolvedPokes.add(pk);
                             break;
                         }
                     }
                 }
             }
         }
-        return twoEvoPokes.get(this.random.nextInt(twoEvoPokes.size()));
+        return fullyEvolvedPokes.get(this.random.nextInt(fullyEvolvedPokes.size()));
+    }
+
+    @Override
+    public Pokemon randomFullyEvolvedPokemon(boolean allowAltFormes) {
+        if (fullyEvolvedPokes == null) {
+            // Prepare the list
+            fullyEvolvedPokes = new ArrayList<>();
+            List<Pokemon> allPokes =
+                    allowAltFormes ?
+                            this.getPokemonInclFormes()
+                                    .stream()
+                                    .filter(pk -> pk == null || !pk.actuallyCosmetic)
+                                    .collect(Collectors.toList()) :
+                            this.getPokemon();
+            for (Pokemon pk : allPokes) {
+                if (pk != null && pk.evolutionsFrom.isEmpty()) {
+                    fullyEvolvedPokes.add(pk);
+                }
+            }
+        }
+
+        return fullyEvolvedPokes.get(this.random.nextInt(fullyEvolvedPokes.size()));
     }
 
     @Override
@@ -838,27 +860,46 @@ public abstract class AbstractRomHandler implements RomHandler {
                     continue;
                 }
 
-                // Don't remove WG if already in place.
-                if (pk.ability1 != Abilities.wonderGuard
-                        && pk.ability2 != Abilities.wonderGuard
-                        && pk.ability3 != Abilities.wonderGuard) {
-                    // Pick first ability
-                    pk.ability1 = this.pickRandomAbility(pk, settings, maxAbility, bannedAbilities, weighDuplicatesTogether);
+//                // Don't remove WG if already in place.
+//                if (pk.ability1 == Abilities.wonderGuard
+//                        || pk.ability2 == Abilities.wonderGuard
+//                        || pk.ability3 == Abilities.wonderGuard)
+//                    continue;
 
-                    // Second ability?
-                    if (ensureTwoAbilities || this.random.nextDouble() < 0.5) {
-                        // Yes, second ability
-                        pk.ability2 = this.pickRandomAbility(pk, settings, maxAbility, bannedAbilities, weighDuplicatesTogether,
-                                pk.ability1);
-                    } else {
-                        // Nope
+                // Pick first ability
+                pk.ability1 = this.pickRandomAbility(pk, settings, maxAbility, bannedAbilities, weighDuplicatesTogether);
+
+                boolean isWeatherAbility = pk.ability1 == Abilities.drizzle || pk.ability1 == Abilities.sandStream
+                        || pk.ability1 == Abilities.drought || pk.ability1 == Abilities.snowWarning;
+
+                // Second ability?
+                if (!isWeatherAbility && (ensureTwoAbilities || this.random.nextDouble() < 0.5)) {
+                    // Yes, second ability
+                    pk.ability2 = this.pickRandomAbility(pk, settings, maxAbility, bannedAbilities,
+                            weighDuplicatesTogether, pk.ability1);
+                    if (pk.ability2 == Abilities.drizzle || pk.ability2 == Abilities.sandStream
+                            || pk.ability2 == Abilities.drought || pk.ability2 == Abilities.snowWarning) {
+                        pk.ability1 = pk.ability2;
                         pk.ability2 = 0;
+                        isWeatherAbility = true;
                     }
+                } else {
+                    // Nope
+                    pk.ability2 = 0;
+                }
 
-                    // Third ability?
-                    if (hasDWAbilities) {
-                        pk.ability3 = pickRandomAbility(pk, settings, maxAbility, bannedAbilities, weighDuplicatesTogether,
-                                pk.ability1, pk.ability2);
+                // Third ability?
+                if (hasDWAbilities) {
+                    if (isWeatherAbility) {
+                        pk.ability3 = pk.ability1;
+                    } else {
+                        pk.ability3 = pickRandomAbility(pk, settings, maxAbility, bannedAbilities,
+                                weighDuplicatesTogether, pk.ability1, pk.ability2);
+                        if (pk.ability3 == Abilities.drizzle || pk.ability3 == Abilities.sandStream
+                                || pk.ability3 == Abilities.drought || pk.ability3 == Abilities.snowWarning) {
+                            pk.ability1 = pk.ability3;
+                            pk.ability2 = 0;
+                        }
                     }
                 }
             }
@@ -938,11 +979,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         int bulk = Math.min(physicalBulk, specialBulk);
         boolean lowBulk = bulk <= 115;
 
-        int minAttack = (2 * pk.attack + 5);
-        int maxAttack = (2 * pk.attack + 36);
-        int minSpAtk = (2 * pk.spatk + 5);
-        int maxSpAtk = (2 * pk.spatk + 36);
-
         boolean higherOrEqualAttack = pk.attack >= pk.spatk; // minAttack >= maxSpAtk;
         boolean higherOrEqualSpAtk = pk.spatk >= pk.attack; // minSpAtk >= maxAttack;
 
@@ -999,10 +1035,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Doubles
             irrelevantAbilities.add(Abilities.plus); // 057
             irrelevantAbilities.add(Abilities.minus); // 058
-            irrelevantAbilities.add(Abilities.healer); // 131
-            irrelevantAbilities.add(Abilities.friendGuard); // 132
-            irrelevantAbilities.add(Abilities.telepathy); // 140
-            irrelevantAbilities.add(Abilities.symbiosis); // 180
+            if (!settings.isDoubleBattleMode()) {
+                irrelevantAbilities.add(Abilities.healer); // 131
+                irrelevantAbilities.add(Abilities.friendGuard); // 132
+                irrelevantAbilities.add(Abilities.telepathy); // 140
+                irrelevantAbilities.add(Abilities.symbiosis); // 180
+            }
 
             // No in-battle effect
             irrelevantAbilities.add(Abilities.illuminate);
@@ -1088,7 +1126,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (!isWater)
                 irrelevantAbilities.add(Abilities.torrent);
 
-            if (weakToWater) {
+            if (isFire || weakToWater) {
                 irrelevantAbilities.add(Abilities.drizzle);
             }
 
@@ -1107,21 +1145,24 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.thickFat); //047
                 irrelevantAbilities.add(Abilities.guts); // 062
                 irrelevantAbilities.add(Abilities.marvelScale); // 063
-                irrelevantAbilities.add(Abilities.liquidOoze);
-                irrelevantAbilities.add(Abilities.shellArmor);
-                irrelevantAbilities.add(Abilities.steadfast);
-                irrelevantAbilities.add(Abilities.heatproof);
-                irrelevantAbilities.add(Abilities.drySkin);
-                irrelevantAbilities.add(Abilities.filter);
-                irrelevantAbilities.add(Abilities.solidRock);
-                irrelevantAbilities.add(Abilities.cursedBody);
-                irrelevantAbilities.add(Abilities.multiscale);
-                irrelevantAbilities.add(Abilities.toxicBoost);
-                irrelevantAbilities.add(Abilities.harvest);
-                irrelevantAbilities.add(Abilities.regenerator);
-                irrelevantAbilities.add(Abilities.justified);
-                irrelevantAbilities.add(Abilities.rattled);
+                irrelevantAbilities.add(Abilities.liquidOoze); // 064
+                irrelevantAbilities.add(Abilities.shellArmor); // 075
+                irrelevantAbilities.add(Abilities.steadfast); // 080
+                irrelevantAbilities.add(Abilities.heatproof); // 085
+                irrelevantAbilities.add(Abilities.drySkin); // 087
+                irrelevantAbilities.add(Abilities.filter); // 111
+                irrelevantAbilities.add(Abilities.solidRock); // 116
+                irrelevantAbilities.add(Abilities.cursedBody); // 130
+                irrelevantAbilities.add(Abilities.multiscale); // 136
+                irrelevantAbilities.add(Abilities.toxicBoost); // 137
+                irrelevantAbilities.add(Abilities.harvest); // 139
+                irrelevantAbilities.add(Abilities.regenerator); // 144
+                irrelevantAbilities.add(Abilities.justified); // 154
+                irrelevantAbilities.add(Abilities.rattled); // 155
             }
+
+            if (pk.bst() > 550)
+                irrelevantAbilities.add(Abilities.magicGuard); // Magic Guard is far too powerful
 
             if (!(pk.primaryType == Type.NORMAL && pk.secondaryType == null)) {
                 irrelevantAbilities.add(Abilities.colorChange);
@@ -1206,7 +1247,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.blaze);
             }
 
-            if (weakToFire)
+            if (isWater || weakToFire)
                 irrelevantAbilities.add(Abilities.drought);
 
             if (!isBug)
@@ -4078,6 +4119,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 031 Fury Attack
         updateMoveAccuracy(moves, Moves.furyAttack, 100);
+        updateMoveType(moves, Moves.furyAttack, Type.DARK);
 
 //        // 032 Horn Drill
 //        moves.get(Moves.hornDrill).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
@@ -4091,17 +4133,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         // 042 Pin Missile
         updateMoveAccuracy(moves, Moves.pinMissile, 100);
 
-        // 210 Fury Cutter
-        updateMovePower(moves, Moves.furyCutter, 50);
-        updateMoveAccuracy(moves, Moves.furyCutter, 100);
-        updateMovePP(moves, Moves.furyCutter, 10);
-        moves.get(Moves.furyCutter).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-        moves.get(Moves.furyCutter).effect = MoveEffect.DMG_USER_ATK_PLUS_1;
-        moves.get(Moves.furyCutter).statChanges[0].type = StatChangeType.ATTACK;
-        moves.get(Moves.furyCutter).statChanges[0].stages = 1;
-        moves.get(Moves.furyCutter).statChanges[0].percentChance = 100.0;
-        moves.get(Moves.furyCutter).description = "The target is slashed with scythes or claws.\\xFFFEIt also raises the user's Attack stat.";
-
         // 049 Sonic Boom
         moves.get(Moves.sonicBoom).name = "Sonic Boom";
 
@@ -4110,9 +4141,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePower(moves, Moves.acid, 65);
         moves.get(Moves.acid).statChanges[0].percentChance = 100.0;
         moves.get(Moves.acid).description = "The opposing team is attacked with a spray of corrosive liquid. It also lowers the targets’ Sp. Def stats.";
-
-        // 060 Psybeam
-        moves.get(Moves.psybeam).statusPercentChance = 30.0;
 
         // 061 Bubble Beam
         moves.get(Moves.bubbleBeam).name = "Bubble Beam";
@@ -4137,9 +4165,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.submission).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
         moves.get(Moves.submission).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
         moves.get(Moves.submission).recoil = 0;
-        moves.get(Moves.submission).statChanges[0].type = StatChangeType.ATTACK;
-        moves.get(Moves.submission).statChanges[0].stages = -1;
-        moves.get(Moves.submission).statChanges[0].percentChance = 100;
+        moves.get(Moves.submission).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100);
         moves.get(Moves.submission).description = "The target is thrown using the power of gravity. It also lowers the target's Attack stat.";
 
         // 070 Strength
@@ -4200,18 +4226,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.meditate).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, 1, 0.0);
         moves.get(Moves.meditate).description = "The user meditates to awaken the power deep within its body and raise its Attack and Sp. Atk stats.";
 
-        // 189 Mud-Slap
-        updateMovePower(moves, Moves.mudSlap, 40);
-        moves.get(Moves.mudSlap).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -2, 100.0);
-        moves.get(Moves.mudSlap).description = "The user hurls mud in the target to inflict damage and harshly lower its Attack stat.";
-
-        // 101 Night Shade
-        moves.get(Moves.nightShade).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-        updateMovePower(moves, Moves.nightShade, 50);
-        updateMovePP(moves, Moves.nightShade, 10);
-        moves.get(Moves.nightShade).effect = MoveEffect.DMG_USER_SPA_PLUS_1;
-        moves.get(Moves.nightShade).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, 1, 100.0);
-        moves.get(Moves.nightShade).description = "The user makes the target see a frightening mirage. It inflicts damage matching the user’s level and raises the user's Sp. Atk stat.";
+//        // 101 Night Shade
+//        moves.get(Moves.nightShade).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
+//        updateMovePower(moves, Moves.nightShade, 50);
+//        updateMovePP(moves, Moves.nightShade, 10);
+//        moves.get(Moves.nightShade).effect = MoveEffect.DMG_USER_SPA_PLUS_1;
+//        moves.get(Moves.nightShade).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, 1, 100.0);
+//        moves.get(Moves.nightShade).description = "The user makes the target see a frightening mirage. It inflicts damage matching the user’s level and raises the user's Sp. Atk stat.";
 
         // 103 Screech
         updateMoveAccuracy(moves, Moves.screech, 100);
@@ -4313,6 +4334,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.feintAttack).name = "Feint Attack";
         moves.get(Moves.feintAttack).description = "The user approaches the target disarmingly, then throws a sucker punch. It also lowers the target's Defense stat.";
 
+        // 189 Mud-Slap
+        updateMovePower(moves, Moves.mudSlap, 40);
+        moves.get(Moves.mudSlap).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -2, 100.0);
+        moves.get(Moves.mudSlap).description = "The user hurls mud in the target to inflict damage and harshly lower its Attack stat.";
+
         // 190 Octazooka
         updateMovePower(moves, Moves.octazooka, 75);
         updateMoveAccuracy(moves, Moves.octazooka, 100);
@@ -4350,6 +4376,17 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 205 Rollout
         updateMoveAccuracy(moves, Moves.rollout, 95);
+
+        // 210 Fury Cutter
+        updateMovePower(moves, Moves.furyCutter, 50);
+        updateMoveAccuracy(moves, Moves.furyCutter, 100);
+        updateMovePP(moves, Moves.furyCutter, 10);
+        moves.get(Moves.furyCutter).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
+        moves.get(Moves.furyCutter).effect = MoveEffect.DMG_USER_ATK_PLUS_1;
+        moves.get(Moves.furyCutter).statChanges[0].type = StatChangeType.ATTACK;
+        moves.get(Moves.furyCutter).statChanges[0].stages = 1;
+        moves.get(Moves.furyCutter).statChanges[0].percentChance = 100.0;
+        moves.get(Moves.furyCutter).description = "The target is slashed with scythes or claws.\\xFFFEIt also raises the user's Attack stat.";
 
         // 211 Steel Wing
         updateMoveAccuracy(moves, Moves.steelWing, 100);
@@ -4671,7 +4708,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.leafTornado).effect = MoveEffect.DMG_TRGT_SPA_MINUS_1;
         moves.get(Moves.leafTornado).statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
         moves.get(Moves.leafTornado).statChanges[0].percentChance = 100.0;
-        moves.get(Moves.submission).description = "The user attacks its target by encircling it in sharp leaves. This attack also lowers the target's Sp. Atk stat.";
+        moves.get(Moves.leafTornado).description = "The user attacks its target by encircling it in sharp leaves. This attack also lowers the target's Sp. Atk stat.";
 
         // 539 Night Daze
         moves.get(Moves.nightDaze).qualities = MoveQualities.DAMAGE_TARGET_STATUS;
@@ -4953,8 +4990,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 //            if (pkmnNum == Species.kecleon) {
 //                moves.clear();
-//                moves.add(new MoveLearnt(Moves.swordsDance, 1));
-//                moves.add(new MoveLearnt(Moves.slash, 1));
+//                moves.add(new MoveLearnt(Moves.payDay, 1));
 //                continue;
 //            }
 //
@@ -5432,6 +5468,32 @@ public abstract class AbstractRomHandler implements RomHandler {
             Pokemon pkmn = random2EvosPokemon(allowAltFormes);
             while (pickedStarters.contains(pkmn) || banned.contains(pkmn)) {
                 pkmn = random2EvosPokemon(allowAltFormes);
+            }
+            pickedStarters.add(pkmn);
+        }
+        setStarters(pickedStarters);
+    }
+
+    @Override
+    public void randomizeFullyEvolvedStarters(Settings settings) {
+        boolean abilitiesUnchanged = settings.getAbilitiesMod() == Settings.AbilitiesMod.UNCHANGED;
+        boolean allowAltFormes = settings.isAllowStarterAltFormes();
+        boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
+
+        int starterCount = starterCount();
+        pickedStarters = new ArrayList<>();
+        List<Pokemon> banned = getBannedFormesForPlayerPokemon();
+        if (abilitiesUnchanged) {
+            List<Pokemon> abilityDependentFormes = getAbilityDependentFormes();
+            banned.addAll(abilityDependentFormes);
+        }
+        if (banIrregularAltFormes) {
+            banned.addAll(getIrregularFormes());
+        }
+        for (int i = 0; i < starterCount; i++) {
+            Pokemon pkmn = randomFullyEvolvedPokemon(allowAltFormes);
+            while (pickedStarters.contains(pkmn) || banned.contains(pkmn)) {
+                pkmn = randomFullyEvolvedPokemon(allowAltFormes);
             }
             pickedStarters.add(pkmn);
         }
@@ -8978,12 +9040,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public List<Integer> getGameBreakingMoves() {
-        return Arrays.asList(Moves.sonicBoom, Moves.dragonRage);
+        return Arrays.asList(Moves.sonicBoom, Moves.dragonRage, Moves.sketch);
     }
 
     @Override
     public List<Integer> getIllegalMoves() {
-        return new ArrayList<>();
+        return Collections.singletonList(Moves.struggle);
     }
 
     @Override

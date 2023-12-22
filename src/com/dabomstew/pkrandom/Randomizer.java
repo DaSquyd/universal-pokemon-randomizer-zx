@@ -271,6 +271,10 @@ public class Randomizer {
                 romHandler.randomizeBasicTwoEvosStarters(settings);
                 startersChanged = true;
                 break;
+            case RANDOM_FULLY_EVOLVED:
+                romHandler.randomizeFullyEvolvedStarters(settings);
+                startersChanged = true;
+                break;
             default:
                 break;
         }

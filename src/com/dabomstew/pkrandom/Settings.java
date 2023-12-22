@@ -101,7 +101,7 @@ public class Settings {
     private boolean ensureRelevantAbilities;
 
     public enum StartersMod {
-        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS
+        UNCHANGED, CUSTOM, COMPLETELY_RANDOM, RANDOM_WITH_TWO_EVOLUTIONS, RANDOM_FULLY_EVOLVED
     }
 
     private StartersMod startersMod = StartersMod.UNCHANGED;
@@ -393,9 +393,9 @@ public class Settings {
                 abilitiesFollowMegaEvolutions));
 
         // 4: starter pokemon stuff
-        out.write(makeByteSelected(startersMod == StartersMod.CUSTOM, startersMod == StartersMod.COMPLETELY_RANDOM,
-                startersMod == StartersMod.UNCHANGED, startersMod == StartersMod.RANDOM_WITH_TWO_EVOLUTIONS,
-                randomizeStartersHeldItems, banBadRandomStarterHeldItems, allowStarterAltFormes));
+        out.write(makeByteSelected((startersMod.ordinal() % 2) == 1, ((startersMod.ordinal() >> 1) % 2) == 1,
+                ((startersMod.ordinal() >> 2) % 2) == 1, randomizeStartersHeldItems, banBadRandomStarterHeldItems,
+                allowStarterAltFormes));
 
         // 5 - 10: dropdowns
         write2ByteInt(out, customStarters[0] - 1);
@@ -673,14 +673,10 @@ public class Settings {
         settings.setBanBadAbilities(restoreState(data[3], 6));
         settings.setAbilitiesFollowMegaEvolutions(restoreState(data[3],7));
 
-        settings.setStartersMod(restoreEnum(StartersMod.class, data[4], 2, // UNCHANGED
-                0, // CUSTOM
-                1, // COMPLETELY_RANDOM
-                3 // RANDOM_WITH_TWO_EVOLUTIONS
-        ));
-        settings.setRandomizeStartersHeldItems(restoreState(data[4], 4));
-        settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 5));
-        settings.setAllowStarterAltFormes(restoreState(data[4],6));
+        settings.setStartersMod(StartersMod.values()[data[4] & 0x7]);
+        settings.setRandomizeStartersHeldItems(restoreState(data[4], 3));
+        settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 4));
+        settings.setAllowStarterAltFormes(restoreState(data[4],5));
 
         settings.setCustomStarters(new int[] { FileFunctions.read2ByteInt(data, 5) + 1,
                 FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1 });
