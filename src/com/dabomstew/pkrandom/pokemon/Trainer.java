@@ -104,7 +104,7 @@ public class Trainer implements Comparable<Trainer> {
     }
 
     public boolean isLeader() {
-        return tag != null && tag.endsWith("LEADER");
+        return tag != null && !tag.startsWith("THEMED") && tag.endsWith("LEADER");
     }
 
     public int getAceLevel() {

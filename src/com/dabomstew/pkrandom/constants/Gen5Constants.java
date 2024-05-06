@@ -51,9 +51,9 @@ public class Gen5Constants {
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
             bsCatchRateOffset = 8, bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
-            bsDarkGrassHeldItemOffset = 16, bsBaseHappinessOffset = 20, bsGrowthCurveOffset = 21, bsAbility1Offset = 24, bsAbility2Offset = 25,
-            bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32,
-            bsExpYieldOffset = 34, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
+            bsDarkGrassHeldItemOffset = 16, bsGenderOffset = 18, bsBaseHappinessOffset = 20, bsGrowthCurveOffset = 21,
+            bsAbility1Offset = 24, bsAbility2Offset = 25, bsAbility3Offset = 26, bsFormeOffset = 28,
+            bsFormeSpriteOffset = 30, bsFormeCountOffset = 32, bsExpYieldOffset = 34, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
 
     public static final byte[] bw1NewStarterScript = {0x24, 0x00, (byte) 0xA7, 0x02, (byte) 0xE7, 0x00, 0x00, 0x00,
             (byte) 0xDE, 0x00, 0x00, 0x00, (byte) 0xF8, 0x01, 0x05, 0x00};
@@ -479,6 +479,7 @@ public class Gen5Constants {
         table[0x0E] = Type.ICE;
         table[0x0F] = Type.DRAGON;
         table[0x10] = Type.DARK;
+        table[0x11] = Type.FAIRY;
         return table;
     }
 
@@ -521,6 +522,8 @@ public class Gen5Constants {
                 return 0x08;
             case DARK:
                 return 0x10;
+            case FAIRY:
+                return 0x11;
             default:
                 return 0; // normal by default
         }
@@ -894,7 +897,6 @@ public class Gen5Constants {
         nonBadItemsBW2.banRange(Items.guardSpec, 8); // xitems
         nonBadItemsBW2.banRange(Items.rootFossil, 7); // fossils
         nonBadItemsBW2.banSingles(Items.coverFossil, Items.plumeFossil); // fossils
-        nonBadItemsBW2.banSingles(Items.potion, Items.plumeFossil); // fossils
         nonBadItemsBW2.banSingles(Items.luckIncense, Items.amuletCoin); // money
         nonBadItemsBW2.banSingles(Items.pureIncense); // money
         nonBadItemsBW2.banRange(Items.tinyMushroom, 7); // money

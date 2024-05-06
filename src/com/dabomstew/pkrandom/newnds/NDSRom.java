@@ -479,6 +479,12 @@ public class NDSRom {
         }
     }
 
+    public void setOverlayAddress(int overlayNumber, int newAddress) {
+        if (overlayNumber >= 0 && overlayNumber < arm9overlays.length) {
+            arm9overlays[overlayNumber].ram_address = newAddress;
+        }
+    }
+
     public byte[] getARM9() throws IOException {
         if (!arm9_open) {
             arm9_open = true;

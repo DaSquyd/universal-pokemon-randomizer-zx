@@ -449,7 +449,7 @@ public class Randomizer {
 
 
         if (settings.isDoubleBattleMode()) {
-            romHandler.doubleBattleMode();
+            romHandler.doubleBattleMode(settings);
             trainersChanged = true;
         }
 
@@ -473,7 +473,7 @@ public class Randomizer {
         if ((settings.getTrainersMod() != Settings.TrainersMod.UNCHANGED
                 || settings.getStartersMod() != Settings.StartersMod.UNCHANGED)
                 && settings.isRivalCarriesStarterThroughout()) {
-            romHandler.rivalCarriesStarter();
+            romHandler.rivalCarriesStarter(settings);
             trainersChanged = true;
         }
 

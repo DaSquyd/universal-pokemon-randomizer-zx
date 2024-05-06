@@ -256,7 +256,7 @@ public interface RomHandler {
 
     List<Integer> getEliteFourTrainers(boolean isChallengeMode);
 
-    void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode);
+    void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart);
 
     void randomizeTrainerPokes(Settings settings);
 
@@ -268,7 +268,7 @@ public interface RomHandler {
 
     List<Integer> getAllHeldItems();
 
-    void rivalCarriesStarter();
+    void rivalCarriesStarter(Settings settings);
 
     boolean hasRivalFinalBattle();
 
@@ -278,7 +278,7 @@ public interface RomHandler {
 
     void addTrainerPokemon(Settings settings);
 
-    void doubleBattleMode();
+    void doubleBattleMode(Settings settings);
 
     List<Move> getMoveSelectionPoolAtLevel(TrainerPokemon tp, boolean cyclicEvolutions);
 
@@ -653,7 +653,7 @@ public interface RomHandler {
 
     void applyMiscTweaks(Settings settings);
 
-    void applyMiscTweak(MiscTweak tweak);
+    void applyMiscTweak(Settings settings, MiscTweak tweak);
 
     boolean isEffectivenessUpdated();
 
@@ -670,4 +670,8 @@ public interface RomHandler {
     List<Pokemon> getBannedFormesForPlayerPokemon();
 
     List<Pokemon> getBannedFormesForTrainerPokemon();
+
+    int getTextCharPixels(char character);
+    String getLineBreakString();
+    String getLineBreakStringRegex();
 }

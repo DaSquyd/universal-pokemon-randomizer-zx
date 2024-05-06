@@ -1326,7 +1326,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new ArrayList<>();
     }
 
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
         int traineroffset = romEntry.getValue("TrainerDataTableOffset");
         int traineramount = Gen1Constants.trainerClassCount;
         int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
@@ -2104,7 +2104,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void applyMiscTweak(MiscTweak tweak) {
+    public void applyMiscTweak(Settings settings, MiscTweak tweak) {
         if (tweak == MiscTweak.BW_EXP_PATCH) {
             applyBWEXPPatch();
         } else if (tweak == MiscTweak.NERF_X_ACCURACY) {

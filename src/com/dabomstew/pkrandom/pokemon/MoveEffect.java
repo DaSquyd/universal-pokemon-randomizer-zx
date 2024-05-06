@@ -1,7 +1,7 @@
 package com.dabomstew.pkrandom.pokemon;
 
 public enum MoveEffect {
-    NONE(0), // Pound, Mega Punch, Scratch, etc.
+    DMG(0), // Pound, Mega Punch, Scratch, etc.
     NO_DMG_SLP(1), // Sing, SLP Powder, Hypnosis, Etc.
     DMG_POISON(2), // Poison Sting, Smog, Sludge, etc.
     DMG_RECOVER(3), // Absorb, Mega Drain, Leech Life, etc.
@@ -21,7 +21,7 @@ public enum MoveEffect {
     NEVER_MISSES(17), // Swift, Feint ATK, Shadow Punch, etc.
     TRGT_ATK_MINUS_1(18), // Growl
     TRGT_DEF_MINUS_1(19), // Tail Whip, Leer
-    TRGT_SPE_MINUS_1(20), // String Shot, Low Sweep, Electro Web
+    TRGT_SPE_MINUS_1(20), // String Shot (Gen V), Low Sweep, Electro Web
     TRGT_SPA_MINUS_1(21), // UNUSED
     TRGT_SPD_MINUS_1(22), // UNUSED
     TRGT_ACC_MINUS_1(23), // Sand ATK, Smokescreen, etc.
@@ -61,18 +61,18 @@ public enum MoveEffect {
     TRANSFORM(57),
     TRGT_ATK_MINUS_2(58), // Charm, Feather Dance
     TRGT_DEF_MINUS_2(59), // Screech
-    TRGT_SPE_MINUS_2(60), // Cotton Spore, Scary Face
-    TRGT_SPA_MINUS_2(61), // UNUSED
+    TRGT_SPE_MINUS_2(60), // String Shot (Gen VI+), Cotton Spore, Scary Face
+    TRGT_SPA_MINUS_2(61), // Eerie Impulse
     TRGT_SPD_MINUS_2(62), // Fake Tears, Metal Sound
     TRGT_ACC_MINUS_2(63), // UNUSED
     TRGT_EVA_MINUS_2(64), // UNUSED
     REFLECT(65),
     NO_DMG_POISON(66), // Poison Powder, Poison Gas
     NO_DMG_PARA(67), // Stun Spore, Thunder Wave, Glare
-    DMG_TRGT_ATK_MINUS_1(68), // Aurora Beam
+    DMG_TRGT_ATK_MINUS_1(68), // Aurora Beam, Play Rough
     DMG_TRGT_DEF_MINUS_1(69), // Iron Tail, Crunch, Rock Smash, etc.
     DMG_TRGT_SPE_MINUS_1(70), // Bubble Beam, Constrict, Bubble, etc.
-    DMG_TRGT_SPA_MINUS_1(71), // Mist Ball, Struggle Bug, Snarl
+    DMG_TRGT_SPA_MINUS_1(71), // Mist Ball, Struggle Bug, Snarl, Moon Blast, Mystical Fire
     DMG_TRGT_SPD_MINUS_1(72), // Acid, Psychic, Shadow Ball, etc.
     DMG_TRGT_ACC_MINUS_1(73), // Mud-Slap, Octazooka, Muddy Water, etc.
     DMG_TRGT_EVA_MINUS_1(74), // UNUSED
@@ -101,7 +101,7 @@ public enum MoveEffect {
     DESTINY_BOND(98),
     DMG_LOW_HP(99), // Flail, Reversal
     SPITE(100),
-    FALSE_SWIPE(101), // False Swipe
+    FALSE_SWIPE(101), // False Swipe, Hold Back
     HEAL_TEAM_STATUS(102), // Heal Bell, Aromatherapy
     DMG_INCR_PRIO(103), // Quick ATK, Mach Punch, Extreme SPE, etc.
     TRIPLE_KICK(104),
@@ -222,7 +222,7 @@ public enum MoveEffect {
     ACUPRESSURE(226),
     METAL_BURST(227),
     U_TURN(228), // U-turn, Volt Switch
-    DMG_USER_DEF_SPD_MINUS_1(229),
+    DMG_USER_DEF_SPD_MINUS_1(229), // Close Combat, Dragon Ascent
     PAYBACK(230),
     ASSURANCE(231),
     EMBARGO(232),
@@ -261,10 +261,10 @@ public enum MoveEffect {
     STEALTH_ROCK(266),
     CHATTER(267),
     JUDGMENT(268), // Judgment, Techno Blast
-    DMG_RECOIL_50(269), // Head Smash
+    DMG_RECOIL_50(269), // Head Smash, Light of Ruin
     LUNAR_DANCE(270),
     DMG_TRGT_SPD_MINUS_2(271), // Seed Flare
-    SHADOW_FORCE(272),
+    GHOST_FORCE(272), // Shadow Force, Phantom Force
     DMG_BRN_FLINCH(273), // Fire Fang
     DMG_FRZ_FLINCH(274), // Ice Fang
     DMG_PARA_FLINCH(275), // Thunder Fang
@@ -325,21 +325,74 @@ public enum MoveEffect {
     GLACIATE(330),
     FREEZE_SHOCK(331),
     ICE_BURN(332),
+    HURRICANE(337, 333),
     DMG_USER_SPE_DEF_SPD_MINUS_1(334), // V-create
     FUSION_FLARE(335),
-    FUSION_BOLD(336),
-    HURRICANE(337);
+    FUSION_BOLT(336),
+    FLYING_PRESS(337),
+    BELCH(338),
+    ROTOTILLER(339),
+    STICKY_WEB(340),
+    FELL_STINGER(341),
+    TRICK_OR_TREAT(342),
+    NOBLE_ROAR(343),
+    ION_DELUGE(344),
+    PARABOLIC_CHARGE(345),
+    PARTING_SHOT(346),
+    TOPSY_TURVY(347),
+    DMG_RECOIL_75(348), // Draining Kiss, Oblivion Wing
+    CRAFTY_SHIELD(349),
+    FLOWER_SHIELD(350),
+    GRASSY_TERRAIN(351),
+    MISTY_TERRAIN(352),
+    ELECTRIFY(353),
+    FAIRY_LOCK(354),
+    KINGS_SHIELD(355),
+    PLAY_NICE(356),
+    CONFIDE(357),
+    DIAMOND_STORM(358),
+    HYPERSPACE(359),
+    WATER_SHURIKEN(360),
+    SPIKY_SHIELD(361),
+    AROMATIC_MIST(362),
+    VENOM_DRENCH(363),
+    BABY_DOLL_EYES(364),
+    GEOMANCY(365),
+    MAGNETIC_FLUX(366),
+    HAPPY_HOUR(367),
+    ELECTRIC_TERRAIN(368),
+    CELEBRATE(369),
+    HOLD_HANDS(370),
+    NUZZLE(371),
+    THOUSAND_ARROWS(372),
+    THOUSAND_WAVES(373),
+    POWER_UP_PUNCH(374),
+    FORESTS_CURSE(375),
+    MAT_BLOCK(376),
+    POWDER(377),
+    BURST(378),
+    FREEZE_DRY(379),
+    DISARMING_VOICE(380);
 
     final int gen5;
+    final int gen6;
 
-    MoveEffect(int gen5) {
+    MoveEffect(int id) {
+        this.gen5 = id;
+        this.gen6 = id;
+    }
+
+    MoveEffect(int gen5, int gen6) {
         this.gen5 = gen5;
+        this.gen6 = gen6;
     }
 
     public int getIndex(int generation) {
         switch (generation) {
             case 5:
                 return gen5;
+            case 6:
+                return gen6;
             default:
                 return -1;
         }

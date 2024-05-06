@@ -401,6 +401,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             pkmn.secondaryType = null;
         }
         pkmn.catchRate = stats[Gen6Constants.bsCatchRateOffset] & 0xFF;
+        pkmn.baseHappiness = stats[Gen6Constants.bsBaseHappinessOffset] & 0xFF;
         pkmn.growthCurve = ExpCurve.fromByte(stats[Gen6Constants.bsGrowthCurveOffset]);
 
         pkmn.ability1 = stats[Gen6Constants.bsAbility1Offset] & 0xFF;
@@ -409,6 +410,14 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         if (pkmn.ability1 == pkmn.ability2) {
             pkmn.ability2 = 0;
         }
+
+        int evYield = FileFunctions.read2ByteInt(stats, Gen6Constants.bsEVYieldOffset);
+        pkmn.hpEVs = evYield & 0xFF;
+        pkmn.attackEVs = (evYield >> 2) & 0xFF;
+        pkmn.defenseEVs = (evYield >> 4) & 0xFF;
+        pkmn.speedEVs = (evYield >> 6) & 0xFF;
+        pkmn.spatkEVs = (evYield >> 8) & 0xFF;
+        pkmn.spdefEVs = (evYield >> 10) & 0xFF;
 
         // Held Items?
         int item1 = FileFunctions.read2ByteInt(stats, Gen6Constants.bsCommonHeldItemOffset);
@@ -426,6 +435,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             pkmn.rareHeldItem = item2;
             pkmn.darkGrassHeldItem = -1;
         }
+
+        pkmn.expYield = FileFunctions.read2ByteInt(stats, Gen6Constants.bsExpYieldOffset);
 
         int formeCount = stats[Gen6Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
@@ -591,6 +602,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             int moveCount = Gen6Constants.getMoveCount(romEntry.romType);
             moves = new Move[moveCount + 1];
             List<String> moveNames = getStrings(false, romEntry.getInt("MoveNamesTextOffset"));
+            List<String> moveDescriptions = getStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"));
             for (int i = 1; i <= moveCount; i++) {
                 byte[] moveData;
                 if (romEntry.romType == Gen6Constants.Type_ORAS) {
@@ -600,17 +612,25 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
                 moves[i] = new Move();
                 moves[i].name = moveNames.get(i);
+                moves[i].description = moveDescriptions.get(i);
                 moves[i].number = i;
                 moves[i].internalId = i;
-                moves[i].effect = MoveEffect.fromIndex(generationOfPokemon(), readWord(moveData, 16));
-                moves[i].accuracy = (moveData[4] & 0xFF);
-                moves[i].power = moveData[3] & 0xFF;
-                moves[i].pp = moveData[5] & 0xFF;
                 moves[i].type = Gen6Constants.typeTable[moveData[0] & 0xFF];
-                moves[i].flinchPercentChance = moveData[15] & 0xFF;
-                moves[i].target = MoveTarget.values()[moveData[20] & 0xFF];
+                moves[i].qualities = MoveQualities.values()[moveData[1]];
                 moves[i].category = Gen6Constants.moveCategoryIndices[moveData[2] & 0xFF];
+                moves[i].power = moveData[3] & 0xFF;
+                moves[i].accuracy = (moveData[4] & 0xFF);
+                moves[i].pp = moveData[5] & 0xFF;
                 moves[i].priority = moveData[6];
+                moves[i].minHits = moveData[7] % 16;
+                moves[i].maxHits = moveData[7] / 16;
+
+                int statusTypeIndex = readSignedWord(moveData, 8);
+                MoveStatusMode statusMode = MoveStatusMode.values()[moveData[11] & 0xFF];
+                int minStatusTurns = moveData[12] & 0xFF;
+                int maxStatusTurns = moveData[13] & 0xFF;
+                moves[i].statusType = MoveStatusType.fromValues(statusTypeIndex, statusMode, minStatusTurns, maxStatusTurns);
+                moves[i].statusPercentChance = moveData[10] & 0xFF;
 
                 int critStages = moveData[14] & 0xFF;
                 if (critStages == 6) {
@@ -619,52 +639,39 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     moves[i].criticalChance = CriticalChance.INCREASED;
                 }
 
-                int statusTypeIndex = readWord(moveData, 8);
-                MoveStatusMode statusMode = MoveStatusMode.values()[moveData[11] & 0xFF];
-                int minStatusTurns = moveData[12] & 0xFF;
-                int maxStatusTurns = moveData[13] & 0xFF;
-                moves[i].statusType = MoveStatusType.fromValues(statusTypeIndex, statusMode, minStatusTurns, maxStatusTurns);
+                moves[i].flinchPercentChance = moveData[15] & 0xFF;
 
-                int flags = FileFunctions.readFullInt(moveData, 32);
-                moves[i].makesContact = (flags & 0x001) != 0;
-                moves[i].isChargeMove = (flags & 0x002) != 0;
-                moves[i].isRechargeMove = (flags & 0x004) != 0;
-                moves[i].isPunchMove = (flags & 0x080) != 0;
-                moves[i].isSoundMove = (flags & 0x100) != 0;
+                moves[i].effect = MoveEffect.fromIndex(generationOfPokemon(), readWord(moveData, 16));
 
-                moves[i].qualities = MoveQualities.values()[moveData[1]];
                 moves[i].recoil = moveData[18];
+                moves[i].heal = moveData[19];
 
-//                switch (qualities) {
-//                    case Gen6Constants.noDamageStatChangeQuality:
-//                    case Gen6Constants.noDamageStatusAndStatChangeQuality:
-//                        // All Allies or Self
-//                        if (moves[i].target == 6 || moves[i].target == 7) {
-//                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_USER;
-//                        } else if (moves[i].target == 2) {
-//                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_ALLY;
-//                        } else if (moves[i].target == 8) {
-//                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_ALL;
-//                        } else {
-//                            moves[i].statChangeMoveType = StatChangeMoveType.NO_DAMAGE_TARGET;
-//                        }
-//                        break;
-//                    case Gen6Constants.damageTargetDebuffQuality:
-//                        moves[i].statChangeMoveType = StatChangeMoveType.DAMAGE_TARGET;
-//                        break;
-//                    case Gen6Constants.damageUserBuffQuality:
-//                        moves[i].statChangeMoveType = StatChangeMoveType.DAMAGE_USER;
-//                        break;
-//                    default:
-//                        moves[i].statChangeMoveType = StatChangeMoveType.NONE_OR_UNKNOWN;
-//                        break;
-//                }
+                moves[i].target = MoveTarget.values()[moveData[20] & 0xFF];
 
                 for (int statChange = 0; statChange < 3; statChange++) {
                     moves[i].statChanges[statChange].type = StatChangeType.values()[moveData[21 + statChange]];
                     moves[i].statChanges[statChange].stages = moveData[24 + statChange];
                     moves[i].statChanges[statChange].percentChance = moveData[27 + statChange];
                 }
+
+                // Flags
+                int flags = FileFunctions.readFullInt(moveData, 32);
+                moves[i].makesContact = (flags & 0x001) != 0;
+                moves[i].isChargeMove = (flags & 0x002) != 0;
+                moves[i].isRechargeMove = (flags & 0x004) != 0;
+                moves[i].isBlockedByProtect = (flags & 0x008) != 0;
+                moves[i].isReflectedByMagicCoat = (flags & 0x010) != 0;
+                moves[i].isStolenBySnatch = (flags & 0x020) != 0;
+                moves[i].isCopiedByMirrorMove = (flags & 0x040) != 0;
+                moves[i].isPunchMove = (flags & 0x080) != 0;
+                moves[i].isSoundMove = (flags & 0x100) != 0;
+                moves[i].isAffectedByGravity = (flags & 0x200) != 0;
+                moves[i].isThawingMove = (flags & 0x400) != 0;
+                moves[i].hitsNonAdjacentTargets = (flags & 0x800) != 0;
+                moves[i].isHealMove = (flags & 0x1000) != 0;
+                moves[i].hitsThroughSubstitute = (flags & 0x2000) != 0;
+                moves[i].unknownFlag1 = (flags & 0x4000) != 0;
+                moves[i].unknownFlag2 = (flags & 0x8000) != 0;
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -739,11 +746,22 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             stats[Gen6Constants.bsSecondaryTypeOffset] = Gen6Constants.typeToByte(pkmn.secondaryType);
         }
         stats[Gen6Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
+        stats[Gen6Constants.bsBaseHappinessOffset] = (byte) pkmn.baseHappiness;
         stats[Gen6Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
 
         stats[Gen6Constants.bsAbility1Offset] = (byte) pkmn.ability1;
         stats[Gen6Constants.bsAbility2Offset] = pkmn.ability2 != 0 ? (byte) pkmn.ability2 : (byte) pkmn.ability1;
         stats[Gen6Constants.bsAbility3Offset] = (byte) pkmn.ability3;
+
+        int evYield = 0;
+        evYield |= pkmn.hpEVs;
+        evYield |= pkmn.attackEVs << 2;
+        evYield |= pkmn.defenseEVs << 4;
+        evYield |= pkmn.speedEVs << 6;
+        evYield |= pkmn.spatkEVs << 8;
+        evYield |= pkmn.spdefEVs << 10;
+
+        writeWord(stats, Gen6Constants.bsEVYieldOffset, evYield);
 
         // Held items
         if (pkmn.guaranteedHeldItem > 0) {
@@ -755,6 +773,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             FileFunctions.write2ByteInt(stats, Gen6Constants.bsRareHeldItemOffset, pkmn.rareHeldItem);
             FileFunctions.write2ByteInt(stats, Gen6Constants.bsDarkGrassHeldItemOffset, 0);
         }
+
+        writeWord(stats, Gen6Constants.bsExpYieldOffset, pkmn.expYield);
 
         if (pkmn.fullName().equals("Meowstic")) {
             stats[Gen6Constants.bsGenderOffset] = 0;
@@ -890,31 +910,73 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     private void saveMoves() {
+        List<String> moveNames = getStrings(false, romEntry.getInt("MoveNamesTextOffset"));
+        List<String> moveDescriptions = getStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"));
+        List<String> moveUsages = getStrings(false, romEntry.getInt("MoveUsagesTextOffset"));
+
         int moveCount = Gen6Constants.getMoveCount(romEntry.romType);
         byte[][] miniArchive = new byte[0][0];
         if (romEntry.romType == Gen6Constants.Type_ORAS) {
             miniArchive = Mini.UnpackMini(moveGarc.files.get(0).get(0), "WD");
         }
         for (int i = 1; i <= moveCount; i++) {
+            moveNames.set(i, moves[i].name);
+            moveDescriptions.set(i, sortText(moves[i].description, 3, 394));
+            for (int j = 0; j < 3; j++) {
+                int index = i*3 + j;
+                String usage = moveUsages.get(index);
+                int lastSegment = usage.lastIndexOf(" used ") + 6;
+                moveUsages.set(index, usage.substring(0, lastSegment) + moves[i].name + "!");
+            }
+
             byte[] data;
             if (romEntry.romType == Gen6Constants.Type_ORAS) {
                 data = miniArchive[i];
             } else {
                 data = moveGarc.files.get(i).get(0);
             }
+            data[0] = Gen6Constants.typeToByte(moves[i].type);
+            data[1] = (byte) moves[i].qualities.ordinal();
             data[2] = Gen6Constants.moveCategoryToByte(moves[i].category);
             data[3] = (byte) moves[i].power;
-            data[0] = Gen6Constants.typeToByte(moves[i].type);
-            int hitratio = (int) Math.round(moves[i].accuracy);
-            if (hitratio < 0) {
-                hitratio = 0;
+            int accuracy = (int) Math.round(moves[i].accuracy);
+            if (accuracy < 0) {
+                accuracy = 0;
             }
-            if (hitratio > 101) {
-                hitratio = 100;
+            if (accuracy > 101) {
+                accuracy = 100;
             }
-            data[4] = (byte) hitratio;
+            data[4] = (byte) accuracy;
             data[5] = (byte) moves[i].pp;
+            data[6] = (byte) moves[i].priority;
+            data[7] = (byte) (moves[i].minHits | (moves[i].maxHits << 4));
+            writeWord(data, 8, moves[i].statusType.index);
+            data[10] = (byte) moves[i].statusPercentChance;
+            data[12] = (byte) moves[i].statusType.minTurns;
+            data[13] = (byte) moves[i].statusType.maxTurns;
+            if (moves[i].criticalChance == CriticalChance.GUARANTEED) {
+                data[14] = (byte) 6;
+            } else if (moves[i].criticalChance == CriticalChance.INCREASED) {
+                data[14] = 1;
+            }
+            data[15] = (byte) moves[i].flinchPercentChance;
+            writeWord(data, 16, moves[i].effect.getIndex(generationOfPokemon()));
+            data[18] = (byte) moves[i].recoil;
+            data[19] = (byte) moves[i].heal;
+            data[20] = (byte) moves[i].target.ordinal();
+            for (int statChange = 0; statChange < 3; statChange++) {
+                data[21 + statChange] = (byte) moves[i].statChanges[statChange].type.ordinal();
+                data[24 + statChange] = (byte) moves[i].statChanges[statChange].stages;
+                data[27 + statChange] = (byte) (moves[i].statChanges[statChange].percentChance);
+            }
+            int flags = getMoveFlags(i);
+            FileFunctions.writeFullInt(data, 32, flags);
         }
+
+        setStrings(false, romEntry.getInt("MoveNamesTextOffset"), moveNames);
+        setStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"), moveDescriptions);
+        setStrings(false, romEntry.getInt("MoveUsagesTextOffset"), moveUsages);
+
         try {
             if (romEntry.romType == Gen6Constants.Type_ORAS) {
                 moveGarc.setFile(0, Mini.PackMini(miniArchive, "WD"));
@@ -923,6 +985,27 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    private int getMoveFlags(int moveIndex) {
+        int flags = 0;
+        flags |= moves[moveIndex].makesContact ? 0x001 : 0;
+        flags |= moves[moveIndex].isChargeMove ? 0x002 : 0;
+        flags |= moves[moveIndex].isRechargeMove ? 0x004 : 0;
+        flags |= moves[moveIndex].isBlockedByProtect ? 0x008 : 0;
+        flags |= moves[moveIndex].isReflectedByMagicCoat ? 0x010 : 0;
+        flags |= moves[moveIndex].isStolenBySnatch ? 0x020 : 0;
+        flags |= moves[moveIndex].isCopiedByMirrorMove ? 0x040 : 0;
+        flags |= moves[moveIndex].isPunchMove ? 0x080 : 0;
+        flags |= moves[moveIndex].isSoundMove ? 0x100 : 0;
+        flags |= moves[moveIndex].isAffectedByGravity ? 0x200 : 0;
+        flags |= moves[moveIndex].isThawingMove ? 0x400 : 0;
+        flags |= moves[moveIndex].hitsNonAdjacentTargets ? 0x800 : 0;
+        flags |= moves[moveIndex].isHealMove ? 0x1000 : 0;
+        flags |= moves[moveIndex].hitsThroughSubstitute ? 0x2000 : 0;
+        flags |= moves[moveIndex].unknownFlag1 ? 0x4000 : 0;
+        flags |= moves[moveIndex].unknownFlag2 ? 0x8000 : 0;
+        return flags;
     }
 
     private void patchFormeReversion() throws IOException {
@@ -1913,11 +1996,11 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                     TrainerPokemon tpk = new TrainerPokemon();
                     tpk.level = level;
                     tpk.pokemon = pokes[species];
-                    tpk.strength = trpoke[pokeOffs];
+                    tpk.strength = trpoke[pokeOffs] & 0xFF;
                     if (isORAS) {
-                        tpk.IVs = (tpk.strength * 31 / 255);
+                        tpk.IVs = tpk.strength * 31 / 255; // 0-255 is scaled down to 0-31
                     } else {
-                        tpk.IVs = tpk.strength & 0x1F;
+                        tpk.IVs = tpk.strength & 0x1F; // direct IV value; 0-31
                     }
                     int abilityAndFlag = trpoke[pokeOffs + 1];
                     tpk.abilitySlot = (abilityAndFlag >>> 4) & 0xF;
@@ -1969,7 +2052,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         boolean isORAS = romEntry.romType == Gen6Constants.Type_ORAS;
         try {
@@ -2001,6 +2084,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         }
                     }
                 }
+
+                if (allSmart)
+                    trainer[offset+12] |= 0x7; // Make all trainers "smart"
 
                 int bytesNeeded = 8 * numPokes;
                 if (tr.pokemonHaveCustomMoves()) {
@@ -2595,7 +2681,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void applyMiscTweak(MiscTweak tweak) {
+    public void applyMiscTweak(Settings settings, MiscTweak tweak) {
         if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
@@ -2612,16 +2698,39 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         } else if (tweak == MiscTweak.CUSTOM_POKEMON_STATS) {
             customPokemonStats();
         } else if (tweak == MiscTweak.CUSTOM_POKEMON_TYPES) {
-            customPokemonTypes(6);
+            customPokemonTypes();
         } else if (tweak == MiscTweak.CUSTOM_MOVE_CHANGES) {
-            customMoveChanges();
+            customMoveChanges(settings);
         } else if (tweak == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS) {
             customTypeEffectiveness();
         } else if (tweak == MiscTweak.CUSTOM_NO_EXP) {
             List<Pokemon> pokes = getPokemonInclFormes();
 
             for (Pokemon pk : pokes) {
-                pk.expYield = 0;
+                if (pk != null)
+                    pk.expYield = 0;
+            }
+        }
+        else if (tweak == MiscTweak.CUSTOM_MAX_HAPPINESS) {
+            List<Pokemon> pokes = getPokemonInclFormes();
+
+            for (Pokemon pk : pokes) {
+                if (pk != null)
+                    pk.baseHappiness = 255;
+            }
+        }
+        else if (tweak == MiscTweak.CUSTOM_NO_EVS) {
+            List<Pokemon> pokes = getPokemonInclFormes();
+
+            for (Pokemon pk : pokes) {
+                if (pk != null) {
+                    pk.hpEVs = 0;
+                    pk.attackEVs = 0;
+                    pk.defenseEVs = 0;
+                    pk.spatkEVs = 0;
+                    pk.spdefEVs = 0;
+                    pk.speedEVs = 0;
+                }
             }
         }
         else if (tweak == MiscTweak.MODERNIZE_CRIT) {
@@ -2635,17 +2744,91 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     private void customTypeEffectiveness() {
-        // TODO
         try {
             byte[] battleFile = readFile(romEntry.getFile("Battle"));
+            int typeEffectivenessTableOffset = find(battleFile, Gen6Constants.typeEffectivenessTableLocator);
+            Effectiveness[][] typeEffectivenessTable = readTypeEffectivenessTable(battleFile, typeEffectivenessTableOffset);
+            customTypeEffectiveness(Gen5Constants.typeTable, typeEffectivenessTable);
+
+            writeTypeEffectivenessTable(typeEffectivenessTable, battleFile, typeEffectivenessTableOffset);
             writeFile(romEntry.getFile("Battle"), battleFile);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
     }
 
+    private Effectiveness[][] readTypeEffectivenessTable(byte[] battleOverlay, int typeEffectivenessTableOffset) {
+        int min = Type.NORMAL.ordinal();
+        int max = Type.FAIRY.ordinal();
+
+        Effectiveness[][] effectivenessTable = new Effectiveness[max + 1][max + 1];
+        for (int attacker = min; attacker <= max; attacker++) {
+            for (int defender = min; defender <= max; defender++) {
+                int offset = typeEffectivenessTableOffset + (attacker * (max + 1)) + defender;
+                int effectivenessInternal = battleOverlay[offset];
+                Effectiveness effectiveness = null;
+                switch (effectivenessInternal) {
+                    case 8:
+                        effectiveness = Effectiveness.DOUBLE;
+                        break;
+                    case 4:
+                        effectiveness = Effectiveness.NEUTRAL;
+                        break;
+                    case 2:
+                        effectiveness = Effectiveness.HALF;
+                        break;
+                    case 0:
+                        effectiveness = Effectiveness.ZERO;
+                        break;
+                }
+                effectivenessTable[attacker][defender] = effectiveness;
+            }
+        }
+        return effectivenessTable;
+    }
+
+    private void writeTypeEffectivenessTable(Effectiveness[][] typeEffectivenessTable, byte[] battleOverlay,
+                                             int typeEffectivenessTableOffset) {
+        int min = Type.NORMAL.ordinal();
+        int max = Type.FAIRY.ordinal();
+
+        for (int attacker = min; attacker <= max; attacker++) {
+            for (int defender = min; defender <= max; defender++) {
+                Effectiveness effectiveness = typeEffectivenessTable[attacker][defender];
+                int offset = typeEffectivenessTableOffset + (attacker * (max + 1)) + defender;
+                byte effectivenessInternal = 0;
+                switch (effectiveness) {
+                    case DOUBLE:
+                        effectivenessInternal = 8;
+                        break;
+                    case NEUTRAL:
+                        effectivenessInternal = 4;
+                        break;
+                    case HALF:
+                        effectivenessInternal = 2;
+                        break;
+                    case ZERO:
+                        effectivenessInternal = 0;
+                        break;
+                }
+                battleOverlay[offset] = effectivenessInternal;
+            }
+        }
+    }
+
     private void modernizeCrit() {
-        // TODO
+        try {
+            byte[] battleFile = readFile(romEntry.getFile("Battle"));
+
+            // Chance
+            int critChanceOffset = find(battleFile, Gen6Constants.critChanceLocator);
+            battleFile[critChanceOffset] = 24;
+
+            writeFile(romEntry.getFile("Battle"), battleFile);
+        }
+        catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     private void applyFastestText() {
@@ -2849,6 +3032,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         String tmDataPrefix = Gen6Constants.tmDataPrefix;
         int offset = find(code, tmDataPrefix);
         if (offset > 0) {
+            List<Integer> hmMoves = getHMMoves();
+
             offset += Gen6Constants.tmDataPrefix.length() / 2; // because it was a prefix
             for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
                 writeWord(code, offset + i * 2, moveIndexes.get(i));
@@ -2858,21 +3043,39 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 writeWord(code, offset + i * 2, moveIndexes.get(i + Gen6Constants.tmBlockOneCount));
             }
 
+            int maxLines = 3;
+            int maxLinePixels = 308; // TM item purchases
+
             // Update TM item descriptions
             List<String> itemDescriptions = getStrings(false, romEntry.getInt("ItemDescriptionsTextOffset"));
+
             // TM01 is item 328 and so on
             for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
-                itemDescriptions.set(i + Gen6Constants.tmBlockOneOffset, moves[moveIndexes.get(i)].description);
+                String description = sortText(moves[moveIndexes.get(i)].description, maxLines, maxLinePixels);
+                itemDescriptions.set(i + Gen6Constants.tmBlockOneOffset, description);
             }
             // TM93-95 are 618-620
             for (int i = 0; i < Gen6Constants.tmBlockTwoCount; i++) {
-                itemDescriptions.set(i + Gen6Constants.tmBlockTwoOffset,
-                        moves[moveIndexes.get(i + Gen6Constants.tmBlockOneCount)].description);
+                String description = sortText(moves[moveIndexes.get(i)].description, maxLines, maxLinePixels);
+                itemDescriptions.set(i + Gen6Constants.tmBlockTwoOffset, description);
             }
             // TM96-100 are 690 and so on
             for (int i = 0; i < Gen6Constants.tmBlockThreeCount; i++) {
-                itemDescriptions.set(i + Gen6Constants.tmBlockThreeOffset,
-                        moves[moveIndexes.get(i + Gen6Constants.tmBlockOneCount + Gen6Constants.tmBlockTwoCount)].description);
+                String description = sortText(moves[moveIndexes.get(i)].description, maxLines, maxLinePixels);
+                itemDescriptions.set(i + Gen6Constants.tmBlockThreeOffset, description);
+            }
+            // HM01-05
+            for (int i = 0; i < Gen6Constants.hmBlockOneCount; i++) {
+                String description = sortText(moves[hmMoves.get(i)].description, maxLines, maxLinePixels);
+                itemDescriptions.set(i + Gen6Constants.hmBlockOneOffset, description);
+            }
+            // HM06-07
+            if (isORAS) {
+                String rockSmashDescription = sortText(moves[Moves.rockSmash].description, maxLines, maxLinePixels);
+                String diveDescription = sortText(moves[Moves.dive].description, maxLines, maxLinePixels);
+
+                itemDescriptions.set(Items.hm06, rockSmashDescription);
+                itemDescriptions.set(Items.hm07ORAS, diveDescription);
             }
             // Save the new item descriptions
             setStrings(false, romEntry.getInt("ItemDescriptionsTextOffset"), itemDescriptions);
@@ -3181,7 +3384,59 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         evo.extraInfo = (evo.from.number == Species.karrablast ? Species.shelmet : Species.karrablast);
                         addEvoUpdateParty(impossibleEvolutionUpdates, evo, pokes[evo.extraInfo].fullName());
                     }
-                    // TBD: Pancham, Sliggoo? Sylveon?
+                    // Combee
+                    if (evo.type == EvolutionType.LEVEL_MALE_ONLY || evo.type == EvolutionType.LEVEL_FEMALE_ONLY) {
+                        evo.type = EvolutionType.LEVEL;
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
+                    }
+                    // Froslass, Gallade, etc.
+                    if (evo.type == EvolutionType.STONE_MALE_ONLY || evo.type == EvolutionType.STONE_FEMALE_ONLY) {
+                        evo.type = EvolutionType.STONE;
+                        addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
+                    }
+                    // Pancham
+                    if (evo.type == EvolutionType.LEVEL_WITH_DARK) {
+                        evo.type = EvolutionType.LEVEL;
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
+                    }
+                    // Sliggoo
+                    if (evo.type == EvolutionType.LEVEL_RAIN) {
+                        evo.type = EvolutionType.LEVEL;
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
+                    }
+                    // Sylveon
+                    if (evo.type == EvolutionType.FAIRY_AFFECTION) {
+                        evo.type = EvolutionType.LEVEL;
+                        addEvoUpdateLevel(impossibleEvolutionUpdates, evo);
+                    }
+                    // Espeon
+                    if (pkmn.number == Species.eevee && evo.type == EvolutionType.HAPPINESS_DAY) {
+                        // Replace w/ sun stone
+                        evo.type = EvolutionType.STONE;
+                        evo.extraInfo = Items.sunStone;
+                        addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
+                    }
+                    // Umbreon
+                    if (pkmn.number == Species.eevee && evo.type == EvolutionType.HAPPINESS_NIGHT) {
+                        // Replace w/ sun stone
+                        evo.type = EvolutionType.STONE;
+                        evo.extraInfo = Items.moonStone;
+                        addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
+                    }
+                    // moss rock (leafeon)
+                    if (evo.type == EvolutionType.LEVEL_MOSS_ROCK) {
+                        // Replace w/ leaf stone
+                        evo.type = EvolutionType.STONE;
+                        evo.extraInfo = Items.leafStone;
+                        addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
+                    }
+                    // icy rock (glaceon)
+                    if (evo.type == EvolutionType.LEVEL_ICY_ROCK) {
+                        // Replace w/ dawn stone
+                        evo.type = EvolutionType.STONE;
+                        evo.extraInfo = Items.dawnStone;
+                        addEvoUpdateStone(impossibleEvolutionUpdates, evo, itemNames.get(evo.extraInfo));
+                    }
                 }
 
                 pkmn.evolutionsFrom.addAll(extraEvolutions);
@@ -4060,7 +4315,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             for (int i = 1; i < itemPriceGarc.files.size(); i++) {
                 // TODO: Make this configurable
                 // writeWord(itemPriceGarc.files.get(i).get(0),0,Gen6Constants.balancedItemPrices.get(i));
-                writeWord(itemPriceGarc.files.get(i).get(0),0,0);
+                writeWord(itemPriceGarc.files.get(i).get(0),0,1);
             }
             writeGARC(romEntry.getFile("ItemData"),itemPriceGarc);
         } catch (IOException e) {
@@ -4292,5 +4547,35 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             }
         }
         return items;
+    }
+
+    public int getTextCharPixels(char character) {
+        switch (character) {
+            case 'i':
+                return 4;
+            case ' ':
+            case 'l':
+                return 5;
+            case 'f':
+            case ',':
+            case '.':
+            case '\'':
+            case '\"':
+            case ':':
+            case ';':
+                return 6;
+            default:
+                return 7; // All other characters are 6 pixels
+        }
+    }
+
+    @Override
+    public String getLineBreakString() {
+        return "\\n";
+    }
+
+    @Override
+    public String getLineBreakStringRegex() {
+        return "\\\\n";
     }
 }

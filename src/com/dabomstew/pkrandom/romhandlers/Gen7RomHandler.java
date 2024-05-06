@@ -1655,7 +1655,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
             GARCArchive trainers = this.readGARC(romEntry.getFile("TrainerData"),true);
@@ -1680,6 +1680,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         }
                     }
                 }
+
+                if (allSmart)
+                    trainer[offset+12] |= 0x7; // Make all trainers "smart"
 
                 int bytesNeeded = 32 * numPokes;
                 byte[] trpoke = new byte[bytesNeeded];
@@ -2345,7 +2348,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void applyMiscTweak(MiscTweak tweak) {
+    public void applyMiscTweak(Settings settings, MiscTweak tweak) {
         if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {

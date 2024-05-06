@@ -1924,7 +1924,7 @@ public class NewRandomizerGUI {
         settings.setPickupItemsMod(puUnchangedRadioButton.isSelected(), puRandomRadioButton.isSelected());
         settings.setBanBadRandomPickupItems(puBanBadItemsCheckBox.isSelected());
 
-        int currentMiscTweaks = 0;
+        long currentMiscTweaks = 0;
         int mtCount = MiscTweak.allTweaks.size();
 
         for (int mti = 0; mti < mtCount; mti++) {

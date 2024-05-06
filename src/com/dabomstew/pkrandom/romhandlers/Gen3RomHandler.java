@@ -1939,7 +1939,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
         int baseOffset = romEntry.getValue("TrainerData");
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
@@ -4153,7 +4153,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void applyMiscTweak(MiscTweak tweak) {
+    public void applyMiscTweak(Settings settings, MiscTweak tweak) {
         if (tweak == MiscTweak.RUNNING_SHOES_INDOORS) {
             applyRunningShoesIndoorsPatch();
         } else if (tweak == MiscTweak.FASTEST_TEXT) {

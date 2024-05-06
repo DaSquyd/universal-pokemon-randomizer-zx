@@ -90,6 +90,13 @@ public class Move {
     public boolean hitsNonAdjacentTargets; // 30 (0x0800)
     public boolean isHealMove; // 30 (0x1000)
     public boolean hitsThroughSubstitute; // 30 (0x2000)
+    // Used by: Slam, Stomp, Body Slam, Surf, Seismic Toss, Earthquake, Fissure, Dig, Substitute, Spikes, Magnitude,
+    // Ingrain, Dive, Mud Sport, Muddy Water, Frenzy Plant, Water Sport, Gravity, Toxic Spikes, Earth Power, Grass Knot,
+    // Smack Down, Heavy Slam, Water Pledge, Fire Pledge, Grass Pledge, Bulldoze, Heat Crash, Flying Press, Mat Block,
+    // Rototiller, Grassy Terrain, Misty Terrain, Geomancy, Electric Terrain, Thousand Arrows, Thousand Waves,
+    // Land's Wrath, and Precipice Blades
+    public boolean unknownFlag1; // 30 (0x4000)
+    public boolean unknownFlag2; // 30 (0x8000)
 
     public Move() {
         // Initialize all statStageChanges to something sensible so that we don't need to have

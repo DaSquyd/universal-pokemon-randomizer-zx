@@ -229,7 +229,9 @@ public class PPTxtHandler {
 
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
-            matcher.appendReplacement(sb, replacements.get(matcher.group(1)));
+            String group = matcher.group(1);
+            String replacement = replacements.get(group);
+            matcher.appendReplacement(sb, replacement);
         }
         matcher.appendTail(sb);
 

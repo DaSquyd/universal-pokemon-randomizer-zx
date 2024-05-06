@@ -218,6 +218,10 @@ public abstract class Abstract3DSRomHandler extends AbstractRomHandler {
         return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8);
     }
 
+    protected int readSignedWord(byte[] data, int offset) {
+        return (short)(((data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8)));
+    }
+
     protected void writeWord(byte[] data, int offset, int value) {
         data[offset] = (byte) (value & 0xFF);
         data[offset + 1] = (byte) ((value >> 8) & 0xFF);

@@ -123,6 +123,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private static List<RomEntry> roms;
 
     private static boolean isChallengeMode = false;
+    private static boolean wasFairyAdded = false;
 
     static {
         loadROMInfo();
@@ -436,7 +437,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             throw new RandomizerIOException(e);
         }
         try {
-            stringsNarc = readNARC(romEntry.getFile("TextStrings"));
+            String stringsNarcPath = romEntry.getFile("TextStrings");
+            stringsNarc = readNARC(stringsNarcPath);
             storyTextNarc = readNARC(romEntry.getFile("TextStory"));
 
 //            List<List<String>> allStrings = new ArrayList<>();
@@ -662,6 +664,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             pkmn.darkGrassHeldItem = readUnsignedWord(stats, Gen5Constants.bsDarkGrassHeldItemOffset);
         }
 
+        pkmn.expYield = readUnsignedWord(stats, Gen5Constants.bsExpYieldOffset);
+
         int formeCount = stats[Gen5Constants.bsFormeCountOffset] & 0xFF;
         if (formeCount > 1) {
             int firstFormeOffset = readUnsignedWord(stats, Gen5Constants.bsFormeOffset);
@@ -684,8 +688,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
             }
         }
-
-        pkmn.expYield = readUnsignedWord(stats, Gen5Constants.bsExpYieldOffset);
     }
 
     private String[] readPokemonNames() {
@@ -726,13 +728,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         List<String> moveUsages = getStrings(false, romEntry.getInt("MoveUsagesTextOffset"));
 
         for (int i = 1; i <= Gen5Constants.moveCount; i++) {
-            // TODO: Finish this shit
             moveNames.set(i, moves[i].name);
             moveDescriptions.set(i, sortText(moves[i].description, 3, 233));
             for (int j = 0; j < 3; j++) {
                 int index = i*3 + j;
                 String usage = moveUsages.get(index);
-                int lastSegment = usage.lastIndexOf("\\xFFFE") + 6;
+                int lastSegment = usage.lastIndexOf(getLineBreakString()) + 6;
                 moveUsages.set(index, usage.substring(0, lastSegment) + moves[i].name + "!");
             }
 
@@ -1577,7 +1578,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
             NARCArchive trainers = this.readNARC(romEntry.getFile("TrainerData"));
@@ -1605,10 +1606,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     }
                 }
 
-                // Temp
-                trainer[12] |= 0x7; // Make all trainers "smart"
-//                if ((trainer[12] & 0x4) != 0)
-//                    trainer[12] |= 0x10; // Flag to allow trainers to go for modified OHKO moves more frequently because AI doesn't recognize them
+                if (allSmart)
+                    trainer[12] |= 0x7; // Make all trainers "smart"
 
                 int bytesNeeded = 8 * numPokes;
                 if (tr.pokemonHaveCustomMoves()) {
@@ -2489,12 +2488,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         available |= MiscTweak.CUSTOM_NO_EVS.getValue();
         available |= MiscTweak.MODERNIZE_CRIT.getValue();
         available |= MiscTweak.NPC_SMART_AI.getValue();
-        available |= MiscTweak.CUSTOM_ADD_FAIRY.getValue();
+        if (romEntry.romType == Gen5Constants.Type_BW2) {
+            available |= MiscTweak.CUSTOM_ADD_FAIRY.getValue();
+        }
         return available;
     }
 
     @Override
-    public void applyMiscTweak(MiscTweak tweak) {
+    public void applyMiscTweak(Settings settings, MiscTweak tweak) {
         if (tweak == MiscTweak.FASTEST_TEXT) {
             applyFastestText();
         } else if (tweak == MiscTweak.BAN_LUCKY_EGG) {
@@ -2530,9 +2531,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } else if (tweak == MiscTweak.CUSTOM_POKEMON_STATS) {
             customPokemonStats();
         } else if (tweak == MiscTweak.CUSTOM_POKEMON_TYPES) {
-            customPokemonTypes(5);
+            customPokemonTypes();
         } else if (tweak == MiscTweak.CUSTOM_MOVE_CHANGES) {
-            customMoveChanges();
+            customMoveChanges(settings);
         } else if (tweak == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS) {
             customTypeEffectiveness();
         } else if (tweak == MiscTweak.CUSTOM_NO_EXP) {
@@ -2656,8 +2657,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private void updateTypeEffectiveness() {
         try {
             byte[] battleOverlay = readOverlay(romEntry.getInt("BattleOvlNumber"));
-            int typeEffectivenessTableOffset = find(battleOverlay, Gen5Constants.typeEffectivenessTableLocator);
-            if (typeEffectivenessTableOffset > 0) {
+            int typeEffectivenessTableOffset = wasFairyAdded ? 0 : find(battleOverlay, Gen5Constants.typeEffectivenessTableLocator);
+            if (typeEffectivenessTableOffset >= 0) {
                 Effectiveness[][] typeEffectivenessTable = readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
                 log("--Updating Type Effectiveness--");
                 int steel = Gen5Constants.typeToByte(Type.STEEL);
@@ -2680,104 +2681,26 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private void customTypeEffectiveness() {
         try {
             byte[] battleOverlay = readOverlay(romEntry.getInt("BattleOvlNumber"));
-            int typeEffectivenessTableOffset = find(battleOverlay, Gen5Constants.typeEffectivenessTableLocator);
-            if (typeEffectivenessTableOffset > 0) {
-                Effectiveness[][] typeEffectivenessTable = readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
-                log("--Custom Type Effectiveness--");
-                int fighting = Gen5Constants.typeToByte(Type.FIGHTING);
-                int flying = Gen5Constants.typeToByte(Type.FLYING);
-                int poison = Gen5Constants.typeToByte(Type.POISON);
-                int ground = Gen5Constants.typeToByte(Type.GROUND);
-                int rock = Gen5Constants.typeToByte(Type.ROCK);
-                int bug = Gen5Constants.typeToByte(Type.BUG);
-                int ghost = Gen5Constants.typeToByte(Type.GHOST);
-                int steel = Gen5Constants.typeToByte(Type.STEEL);
-                int water = Gen5Constants.typeToByte(Type.WATER);
-                int grass = Gen5Constants.typeToByte(Type.GRASS);
-                int electric = Gen5Constants.typeToByte(Type.ELECTRIC);
-                int psychic = Gen5Constants.typeToByte(Type.PSYCHIC);
-                int ice = Gen5Constants.typeToByte(Type.ICE);
-                int dragon = Gen5Constants.typeToByte(Type.DRAGON);
-                int dark = Gen5Constants.typeToByte(Type.DARK);
+            int typeEffectivenessTableOffset = wasFairyAdded ? 0 : find(battleOverlay, Gen5Constants.typeEffectivenessTableLocator);
+            Effectiveness[][] typeEffectivenessTable = readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
+            customTypeEffectiveness(Gen5Constants.typeTable, typeEffectivenessTable);
 
-                typeEffectivenessTable[fighting][bug] = Effectiveness.NEUTRAL;
-                log("Replaced: Fighting not very effective vs Bug => Fighting neutral vs Bug");
-
-                typeEffectivenessTable[fighting][grass] = Effectiveness.HALF;
-                log("Replaced: Fighting neutral vs Grass => Fighting not very effective vs Grass");
-
-                typeEffectivenessTable[flying][ice] = Effectiveness.HALF;
-                log("Replaced: Flying neutral vs Ice => Flying not very effective vs Ice");
-
-                typeEffectivenessTable[poison][ghost] = Effectiveness.NEUTRAL;
-                log("Replaced: Poison not very effective vs Ghost => Poison neutral vs Ghost");
-
-                typeEffectivenessTable[ground][ghost] = Effectiveness.HALF;
-                log("Replaced: Ground neutral vs Ghost => Ground no effect vs Ghost");
-
-                typeEffectivenessTable[ground][ice] = Effectiveness.HALF;
-                log("Replaced: Ground neutral vs Ice => Ground not very effective vs Ice");
-
-                typeEffectivenessTable[rock][rock] = Effectiveness.HALF;
-                log("Replaced: Rock neutral vs Rock => Rock not very effective vs Rock");
-
-                typeEffectivenessTable[rock][grass] = Effectiveness.HALF;
-                log("Replaced: Rock neutral vs Grass => Rock not very effective vs Grass");
-
-                typeEffectivenessTable[bug][fighting] = Effectiveness.NEUTRAL;
-                log("Replaced: Bug not very effective vs Fighting => Bug neutral vs Fighting");
-
-                typeEffectivenessTable[bug][poison] = Effectiveness.NEUTRAL;
-                log("Replaced: Bug not very effective vs Poison => Bug neutral vs Poison");
-
-                typeEffectivenessTable[ghost][steel] = Effectiveness.NEUTRAL;
-                log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-
-                typeEffectivenessTable[water][ice] = Effectiveness.HALF;
-                log("Replaced: Water neutral vs Ice => Water not very effective vs Ice");
-
-                typeEffectivenessTable[grass][flying] = Effectiveness.NEUTRAL;
-                log("Replaced: Grass not very effective vs Flying => Grass neutral vs Flying");
-
-                typeEffectivenessTable[grass][rock] = Effectiveness.HALF;
-                log("Replaced: Grass super effective vs Rock => Grass not very effective vs Rock");
-
-                typeEffectivenessTable[grass][bug] = Effectiveness.NEUTRAL;
-                log("Replaced: Grass not very effective vs Bug => Grass neutral vs Bug");
-
-                typeEffectivenessTable[electric][rock] = Effectiveness.HALF;
-                log("Replaced: Electric neutral vs Rock => Electric not very effective vs Rock");
-
-                typeEffectivenessTable[electric][dragon] = Effectiveness.NEUTRAL;
-                log("Replaced: Electric not very effective vs Dragon => Electric neutral vs Dragon");
-
-                typeEffectivenessTable[psychic][bug] = Effectiveness.HALF;
-                log("Replaced: Psychic neutral vs Bug => Psychic not very effective vs Bug");
-
-                typeEffectivenessTable[psychic][steel] = Effectiveness.NEUTRAL;
-                log("Replaced: Psychic not very effective vs Steel => Psychic neutral vs Steel");
-
-                typeEffectivenessTable[ice][rock] = Effectiveness.HALF;
-                log("Replaced: Ice neutral vs Rock => Ice not ver effective vs Rock");
-
-                typeEffectivenessTable[dark][steel] = Effectiveness.NEUTRAL;
-                log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
-
-                logBlankLine();
-                writeTypeEffectivenessTable(typeEffectivenessTable, battleOverlay, typeEffectivenessTableOffset);
-                writeOverlay(romEntry.getInt("BattleOvlNumber"), battleOverlay);
-                effectivenessUpdated = true;
-            }
+            writeTypeEffectivenessTable(typeEffectivenessTable, battleOverlay, typeEffectivenessTableOffset);
+            writeOverlay(romEntry.getInt("BattleOvlNumber"), battleOverlay);
+            effectivenessUpdated = true;
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
     }
 
     private Effectiveness[][] readTypeEffectivenessTable(byte[] battleOverlay, int typeEffectivenessTableOffset) {
-        Effectiveness[][] effectivenessTable = new Effectiveness[Type.DARK.ordinal() + 1][Type.DARK.ordinal() + 1];
-        for (int attacker = Type.NORMAL.ordinal(); attacker <= Type.DARK.ordinal(); attacker++) {
-            for (int defender = Type.NORMAL.ordinal(); defender <= Type.DARK.ordinal(); defender++) {
-                int offset = typeEffectivenessTableOffset + (attacker * (Type.DARK.ordinal() + 1)) + defender;
+        int min = Type.NORMAL.ordinal();
+        int max = typeInGame(Type.FAIRY) ? Type.FAIRY.ordinal() : Type.DARK.ordinal();
+
+        Effectiveness[][] effectivenessTable = new Effectiveness[max + 1][max + 1];
+        for (int attacker = min; attacker <= max; attacker++) {
+            for (int defender = min; defender <= max; defender++) {
+                int offset = typeEffectivenessTableOffset + (attacker * (max + 1)) + defender;
                 int effectivenessInternal = battleOverlay[offset];
                 Effectiveness effectiveness = null;
                 switch (effectivenessInternal) {
@@ -2802,10 +2725,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     private void writeTypeEffectivenessTable(Effectiveness[][] typeEffectivenessTable, byte[] battleOverlay,
                                              int typeEffectivenessTableOffset) {
-        for (int attacker = Type.NORMAL.ordinal(); attacker <= Type.DARK.ordinal(); attacker++) {
-            for (int defender = Type.NORMAL.ordinal(); defender <= Type.DARK.ordinal(); defender++) {
+        int min = Type.NORMAL.ordinal();
+        int max = typeInGame(Type.FAIRY) ? Type.FAIRY.ordinal() : Type.DARK.ordinal();
+
+        for (int attacker = min; attacker <= max; attacker++) {
+            for (int defender = min; defender <= max; defender++) {
                 Effectiveness effectiveness = typeEffectivenessTable[attacker][defender];
-                int offset = typeEffectivenessTableOffset + (attacker * (Type.DARK.ordinal() + 1)) + defender;
+                int offset = typeEffectivenessTableOffset + (attacker * (max + 1)) + defender;
                 byte effectivenessInternal = 0;
                 switch (effectiveness) {
                     case DOUBLE:
@@ -2840,9 +2766,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             battleOverlay[critChanceOffset + 4] = 1;
 
             // 1.5x damage
+            // R0        - available register
+            // R6 isCrit - 1 if crit, 0 otherwise
+            // R7 damage - running damage that must be effectively multiplied by 1.5 (truncated)
             int critLogicOffset = find(battleOverlay, Gen5Constants.critLogicLocator);
-            writeWord(battleOverlay, critLogicOffset, 0x0878); // LSRS R0, R7, #1 (R0 = damage/2)
-            writeWord(battleOverlay, critLogicOffset + 2, 0x4370); // MULS R0, R6 (R0 *= isCrit)
+            writeWord(battleOverlay, critLogicOffset, 0x0878); // LSRS R0, R7, #1 (R0 = damage >> 1)
+            writeWord(battleOverlay, critLogicOffset + 2, 0x4370); // MULS R0, R6 (R0 = R0 * isCrit)
             writeWord(battleOverlay, critLogicOffset + 4, 0x19C7); // ADDS R7, R0, R7 (damage += R0)
 
             writeOverlay(overlayNumber, battleOverlay);
@@ -2852,8 +2781,142 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
+    @Override
+    public boolean typeInGame(Type type) {
+        if (type == Type.FAIRY && wasFairyAdded)
+            return true;
+
+        return super.typeInGame(type);
+    }
+
     private void customAddFairy() {
-        // TODO
+        try {
+            // Arm9
+            writeFairy();
+
+            // Sprites
+            String smallShieldSpritesNarcPath = romEntry.getFile("SmallShieldSprites");
+            NARCArchive smallShieldSpritesNarc = readNARC(smallShieldSpritesNarcPath);
+
+            // https://code.google.com/archive/p/tinke/wikis/NCLR.wiki
+            // xbgr   hex
+            // 0x729C #E6A5E6 (Pink)
+            // 0x390E #734273 (Dark Pink)
+            byte[] paletteFile = smallShieldSpritesNarc.files.get(33);
+            writeWord(paletteFile, 0x78, 0xF29C);
+            writeWord(paletteFile, 0x7A, 0xB90E);
+
+            byte[] spriteFile = smallShieldSpritesNarc.files.get(51);
+            int spriteOffset = 0x30;
+            int[] newSprite = new int[] {
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x89, 0x88, 0x88, 0x88,
+                0x89, 0x88, 0xFF, 0xFF, 0x89, 0x88, 0xEF, 0xEE, 0x89, 0x88, 0xEF, 0x88, 0x89, 0x88, 0xFF, 0xEF,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x88, 0x88, 0x88, 0x88,
+                0x8E, 0xFF, 0x8E, 0xFF, 0xFE, 0xEE, 0xEF, 0xFE, 0xF8, 0x8E, 0xEF, 0xF8, 0xF8, 0x8E, 0xEF, 0xF8,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x88, 0x88, 0x88, 0x88,
+                0xEF, 0xFF, 0xEF, 0xF8, 0xEE, 0xEF, 0xFE, 0xFE, 0x8E, 0xEF, 0xF8, 0xEE, 0x8E, 0xFF, 0xEF, 0x88,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x88, 0x88, 0x88, 0x98,
+                0x8E, 0xF8, 0x8E, 0x98, 0x8E, 0xF8, 0x8E, 0x98, 0xEF, 0xEF, 0x88, 0x98, 0xFE, 0x8E, 0x88, 0x98,
+                0x89, 0x88, 0xEF, 0xEE, 0x89, 0x88, 0xEF, 0x88, 0x89, 0x88, 0xEF, 0x88, 0x89, 0x88, 0xEE, 0x88,
+                0x89, 0x88, 0x88, 0x88, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0xF8, 0xFF, 0xEF, 0xF8, 0xF8, 0xEE, 0xEF, 0xF8, 0xF8, 0x8E, 0xEF, 0xFF, 0xE8, 0x8E, 0xEE, 0xEE,
+                0x88, 0x88, 0x88, 0x88, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x8E, 0xEF, 0xEF, 0x88, 0x8E, 0xEF, 0xFE, 0x8E, 0xEF, 0xEF, 0xF8, 0x8E, 0xEE, 0xEE, 0xE8, 0x8E,
+                0x88, 0x88, 0x88, 0x88, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0xF8, 0x8E, 0x88, 0x98, 0xF8, 0x8E, 0x88, 0x98, 0xF8, 0x8E, 0x88, 0x98, 0xE8, 0x8E, 0x88, 0x98,
+                0x88, 0x88, 0x88, 0x98, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            };
+            for (int i = 0; i < newSprite.length; ++i) {
+                spriteFile[spriteOffset + i] = (byte)newSprite[i];
+            }
+
+            writeNARC(smallShieldSpritesNarcPath, smallShieldSpritesNarc);
+
+            String unusedSpritesNarcPath = romEntry.getFile("UnusedSprites");
+            NARCArchive unusedSpritesNarc = readNARC(unusedSpritesNarcPath);
+
+            paletteFile = unusedSpritesNarc.files.get(22);
+            writeWord(paletteFile, 0x78, 0xF29C);
+            writeWord(paletteFile, 0x7A, 0xB90E);
+
+            // 0xBE68
+            spriteFile = unusedSpritesNarc.files.get(23);
+            spriteOffset = 0x1130;
+            for (int i = 0; i < newSprite.length; ++i) {
+                spriteFile[spriteOffset + i] = (byte)(newSprite[i] & 0xFF);
+            }
+
+            writeNARC(unusedSpritesNarcPath, unusedSpritesNarc);
+
+            String battleGraphicsNarcPath = romEntry.getFile("BattleGraphics");
+            NARCArchive battleGraphicsNarc = readNARC(battleGraphicsNarcPath);
+
+            int newBattleGraphicFileIndex = battleGraphicsNarc.files.size();
+            battleGraphicsNarc.files.add(new byte[0x0228]);
+            int[] newBattleGraphicFileData = new int[] {
+                0x52, 0x4C, 0x43, 0x4E, 0xFF, 0xFE, 0x00, 0x01, 0x28, 0x02, 0x00, 0x00, 0x10, 0x00, 0x01, 0x00,
+                0x54, 0x54, 0x4C, 0x50, 0x18, 0x02, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x02, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0xCD, 0x75, 0x29, 0x25, 0x08, 0x21, 0xE7, 0x1C,
+                0xC6, 0x18, 0xA5, 0x14, 0x84, 0x10, 0x63, 0x0C, 0x7D, 0xEE, 0x5B, 0x66, 0x39, 0x5E, 0xF6, 0xD5,
+                0xD4, 0xC9, 0xB1, 0x41, 0x1F, 0x7C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            };
+            byte[] newBattleGraphicFile = battleGraphicsNarc.files.get(newBattleGraphicFileIndex);
+            for (int i = 0; i < newBattleGraphicFile.length; ++i) {
+                newBattleGraphicFile[i] = (byte)newBattleGraphicFileData[i];
+            }
+
+            writeNARC(battleGraphicsNarcPath, battleGraphicsNarc);
+
+            String hallOfFameGraphicsNarcPath = romEntry.getFile("HallOfFameGraphics");
+            NARCArchive hallOfFameGraphicsNarc = readNARC(hallOfFameGraphicsNarcPath);
+
+            int[] newHallOfFameGraphicsData = new int[] {
+                0x52, 0x4C, 0x43, 0x4E, 0xFF, 0xFE, 0x00, 0x01, 0x28, 0x02, 0x00, 0x00, 0x10, 0x00, 0x01, 0x00,
+                0x54, 0x54, 0x4C, 0x50, 0x18, 0x02, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x02, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x87, 0x1A, 0x9C, 0x72, 0xF5, 0x55, 0xB2, 0x49,
+                0x6F, 0x3D, 0x2D, 0x35, 0xEA, 0xA8, 0xA7, 0x9C, 0x65, 0x94, 0x22, 0x88, 0x00, 0x00, 0x1F, 0x7C,
+                0x1F, 0x7C, 0x1F, 0x7C, 0x1F, 0x7C, 0x1F, 0x7C
+            };
+            byte[] hallOfFameGraphicsNarcFile = hallOfFameGraphicsNarc.files.get(9);
+            for (int i = 0; i < newHallOfFameGraphicsData.length; ++i) {
+                hallOfFameGraphicsNarcFile[i] = (byte)(newHallOfFameGraphicsData[i]);
+            }
+
+            wasFairyAdded = true;
+        }
+        catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
     }
 
     private void forceChallengeMode() {
@@ -3042,6 +3105,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 String description = sortText(moves[moveIndexes.get(i + Gen5Constants.tmBlockOneCount)].description, maxLines, maxLinePixels);
                 itemDescriptions.set(i + Gen5Constants.tmBlockTwoOffset, description);
             }
+            // HMs
             for (int i = 0; i < (Gen5Constants.hmCount); i++) {
                 String description = sortText(moves[hmMoves.get(i)].description, maxLines, maxLinePixels);
                 itemDescriptions.set(i + Gen5Constants.hmOffset, description);
@@ -3385,6 +3449,38 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (offset > 0) {
             FileFunctions.writeFullInt(arm9, offset, extraEvolution.number);
         }
+    }
+
+    private void writeFairy() throws IOException {
+        byte[] ovl255 = readOverlay(255);
+        genericIPSPatch(ovl255, "FairyOvl255Tweak");
+        writeOverlay(255, ovl255);
+
+        byte[] ovl207 = readOverlay(207);
+        genericIPSPatch(ovl207, "FairyOvl207Tweak");
+        writeOverlay(207, ovl207);
+
+        byte[] ovl168 = readOverlay(168);
+        genericIPSPatch(ovl168, "FairyOvl168Tweak");
+        writeOverlay(168, ovl168);
+
+        genericIPSPatch(arm9, "FairyTweak");
+
+        byte[] ovl296 = readOverlay(296);
+        genericIPSPatch(ovl296, "FairyOvl296Tweak");
+        writeOverlay(296, ovl296);
+
+        byte[] ovl298 = readOverlay(298);
+        genericIPSPatch(ovl298, "FairyOvl298Tweak");
+        writeOverlay(296, ovl298);
+
+        // We need to use an expanded ovl167 (of known length 0x000418C0) because our modification results in a larger file
+        byte[] ovl167_old = readOverlay(167);
+        byte[] ovl167 = new byte[0x000418C0];
+        System.arraycopy(readOverlay(167), 0, ovl167, 0, ovl167_old.length);
+
+        genericIPSPatch(ovl167, "FairyOvl167Tweak");
+        writeOverlay(167, ovl167);
     }
 
     @Override
@@ -4454,114 +4550,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private int getLongestLinePixels(String inText) {
-        String[] inLines = inText.split("\\\\xFFFE");
-
-        int longestLinePixels = 0;
-        for (String string : inLines) {
-            int linePixels = getTextLineCharPixels(string);
-            if (linePixels > longestLinePixels)
-                longestLinePixels = linePixels;
-        }
-
-        return longestLinePixels;
-    }
-
-    private String sortText(String inText, int maxLines, int maxLinePixels) {
-        String[] inLines = inText.split("\\\\xFFFE");
-        if (validateTextLines(inLines, maxLines, maxLinePixels))
-            return inText; // Already valid
-
-        String[] words = inText.replace("\\xFFFE", " ").split(" ");
-        List<String> lines = new ArrayList<>();
-
-        for (int i = 0; i < words.length - 1; i++) {
-            if (words[i].equals("Sp.")) {
-                words[i] = String.join(" ", words[i], words[i + 1]);
-                words[i + 1] = "";
-            }
-        }
-
-        int word = 0;
-        int linePixels = 0;
-        StringBuilder stringBuilder = new StringBuilder();
-
-        while (word < words.length) {
-            if (words[word].isEmpty()) {
-                word++;
-                continue;
-            }
-
-            int spacePixels = linePixels == 0 ? 0 : getTextCharPixels(' ');
-            int wordPixels = getTextLineCharPixels(words[word]);
-
-            if (linePixels + spacePixels + wordPixels > maxLinePixels) {
-                // Next Line
-                linePixels = 0;
-                lines.add(stringBuilder.toString());
-                stringBuilder = new StringBuilder();
-                continue;
-            }
-
-            if (linePixels > 0)
-                stringBuilder.append(' ');
-            stringBuilder.append(words[word]);
-            linePixels += spacePixels + wordPixels;
-            word++;
-        }
-
-        lines.add(stringBuilder.toString());
-
-        if (lines.size() > maxLines) {
-            return String.join("\\xFFFE", lines); // TOO LONG! May happen with many TMs
-        }
-
-        return String.join("\\xFFFE", lines);
-    }
-
-    private boolean validateTextLines(String[] lines, int maxLines, int maxLinePixels) {
-        if (lines.length > maxLines)
-            return false;
-
-        for (String line : lines) {
-            if (getTextLineCharPixels(line) > maxLinePixels)
-                return false;
-        }
-
-        return true;
-    }
-
-    private int getTextLineCharPixels(String line) {
-        int pixelCount = 0;
-
-        char[] characters = line.toCharArray();
-        for (char character : characters) {
-            pixelCount += getTextCharPixels(character);
-        }
-
-        return pixelCount;
-    }
-
-    private int getTextCharPixels(char character) {
-        switch (character) {
-            case 'i':
-                return 3;
-            case ' ':
-            case 'l':
-                return 4;
-            case 'f':
-            case ',':
-            case '.':
-            case '\'':
-            case '\"':
-            case ':':
-            case ';':
-                return 5;
-            default:
-                return 6; // All other characters are 6 pixels
-        }
-    }
-
     private void computeCRC32sForRom() throws IOException {
         this.actualOverlayCRC32s = new HashMap<>();
         this.actualFileCRC32s = new HashMap<>();
@@ -4746,5 +4734,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
         }
         return items;
+    }
+
+    @Override
+    public String getLineBreakString() {
+        return "\\xFFFE";
+    }
+
+    @Override
+    public String getLineBreakStringRegex() {
+        return "\\\\xFFFE";
     }
 }

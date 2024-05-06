@@ -42,7 +42,7 @@ import com.dabomstew.pkrandom.pokemon.Type;
 public abstract class AbstractDSRomHandler extends AbstractRomHandler {
 
     protected String dataFolder;
-    private NDSRom baseRom;
+    protected NDSRom baseRom;
     private String loadedFN;
     private boolean arm9Extended = false;
 

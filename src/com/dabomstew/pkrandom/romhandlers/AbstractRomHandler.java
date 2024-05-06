@@ -357,8 +357,60 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         List<Pokemon> pokes = getPokemonInclFormes();
 
+        Map<Pokemon, int[]> formeStatChanges = new HashMap<>();
         for (int i = 1; i < pokes.size(); i++) {
             Pokemon pk = pokes.get(i);
+            if (pk.baseForme == null)
+                continue;
+
+            int hpDiff = pk.hp - pk.baseForme.hp;
+            int attackDiff = pk.attack - pk.baseForme.attack;
+            int defenseDiff = pk.defense - pk.baseForme.defense;
+            int spatkDiff = pk.spatk - pk.baseForme.spatk;
+            int spdefDiff = pk.spdef - pk.baseForme.spdef;
+            int speedDiff = pk.speed - pk.baseForme.speed;
+
+            formeStatChanges.put(pk, new int[] { hpDiff, attackDiff, defenseDiff, spatkDiff, spdefDiff, speedDiff });
+        }
+
+        for (int i = 1; i < pokes.size(); i++) {
+            Pokemon pk = pokes.get(i);
+
+            if (formeStatChanges.containsKey(pk)) {
+                int[] statChanges = formeStatChanges.get(pk);
+
+                int baseBst = pk.baseForme.bst();
+                int sum = Arrays.stream(statChanges).sum();
+                int newBst = baseBst + sum;
+
+                boolean mega = pk.formeSuffix.startsWith("-Mega");
+                boolean primal = pk.formeSuffix.equals("-P");
+
+                if (mega || primal) {
+                    for (int j = 1; j < 6; j++) {
+                        statChanges[j] -= 10; // We only want an increase of 50 instead of 100
+                    }
+                }
+                else if (newBst > 600) {
+                    int offset = (int) Math.round((600.0 - newBst) / 10.0);
+
+                    for (int j = 1; j < 6; j++) {
+                        statChanges[j] += offset;
+                    }
+                }
+
+                Pokemon baseForme = pk.baseForme;
+
+                pk.hp = baseForme.hp + statChanges[0];
+                pk.attack = baseForme.attack + statChanges[1];
+                pk.defense = baseForme.defense + statChanges[2];
+                pk.spatk = baseForme.spatk + statChanges[3];
+                pk.spdef = baseForme.spdef + statChanges[4];
+                pk.speed = baseForme.speed + statChanges[5];
+
+                continue;
+            }
+
             boolean isFullyEvolved = (pk.baseForme == null && pk.evolutionsFrom.isEmpty()) || (pk.baseForme != null && pk.baseForme.evolutionsFrom.isEmpty());
 
             double targetBst = (double)pk.bst() / 2.0 + 300.0;
@@ -366,86 +418,110 @@ public abstract class AbstractRomHandler implements RomHandler {
                 targetBst = Math.max(500, targetBst);
             }
 
-            Map<Type, Effectiveness> effectiveness = Effectiveness.against(pk.primaryType, pk.secondaryType, generationOfPokemon(), isEffectivenessUpdated(), true, false);
-            List<Type> types = Type.getAllTypes(generationOfPokemon());
-            int typeCount = types.size();
-            int quadWeaknesses = 0;
-            for (int j = 0; j < typeCount; j++)
-            {
-                Type type = types.get(j);
-                if (effectiveness.get(type) == Effectiveness.QUADRUPLE)
-                {
-                    // quadWeaknesses++;
-                }
-            }
-
-            targetBst = Math.min(targetBst * (1.0 + quadWeaknesses / 10.0), 600);
-
             int maxStatValue = 130;
-
-            int maxHp = Math.max(pk.hp, maxStatValue);
-            int maxAtk = Math.max(pk.attack, maxStatValue);
-            int maxDef = Math.max(pk.defense, maxStatValue);
-            int maxSpA = Math.max(pk.spatk, maxStatValue);
-            int maxSpD = Math.max(pk.spdef, maxStatValue);
-            int maxSpe = Math.max(pk.speed, maxStatValue);
-
-            if (mode == CustomStatMode.additive || pk.bst() > 600) {
-                int statDiff = targetBst > pk.bst() ? 1 : -1;
-                int previousBst = 0;
-                while(pk.bst() != previousBst && (targetBst - pk.bst()) * statDiff > 0)
-                {
-                    previousBst = pk.bst();
-
-                    pk.hp = pk.hp == 1 ? pk.hp : Math.min(pk.hp + statDiff, maxHp);
-                    pk.attack = Math.min(pk.attack + statDiff, maxAtk);
-                    pk.defense = pk.hp == 1 ? pk.defense : Math.min(pk.defense + statDiff, maxDef);
-                    pk.spatk = Math.min(pk.spatk + statDiff, maxSpA);
-                    pk.spdef = pk.hp == 1 ? pk.spdef : Math.min(pk.spdef + statDiff, maxSpD);
-                    pk.speed = Math.min(pk.speed + statDiff, maxSpe);
-                }
-            } else {
-                double[] stats = new double[]{pk.hp, pk.attack, pk.defense, pk.spatk, pk.spdef, pk.speed};
-                boolean[] maxedStats = new boolean[]{pk.hp == 255, pk.attack == 255, pk.defense == 255, pk.spatk == 255, pk.spdef == 255, pk.speed == 255};
-                int totalMaxedStats = 0;
-                for (int stat = 0; stat < 6; stat++) {
-                    if (maxedStats[stat])
-                        totalMaxedStats++;
-                }
-                double bst = pk.bst();
-                while (Math.abs(bst - targetBst) > 1.0) {
-                    double maxedStatReduction = totalMaxedStats * 255.0;
-                    double bstRatio = (targetBst - maxedStatReduction) / (bst - maxedStatReduction);
-                    for (int stat = 0; stat < 6; stat++) {
-                        double statValue = stats[stat];
-                        bst -= statValue;
-                        stats[stat] = (stat == 0 && stats[0] == 1) ? 1 : Math.min(statValue * bstRatio, 255.0);
-                        bst += stats[stat];
-
-                        if ((int) Math.round(stats[stat]) == 255 && !maxedStats[stat]) {
-                            maxedStats[stat] = true;
-                            totalMaxedStats++;
-                        }
-                    }
-                }
-                pk.hp = (int)Math.round(stats[0]);
-                pk.attack = (int)Math.round(stats[1]);
-                pk.defense = (int)Math.round(stats[2]);
-                pk.spatk = (int)Math.round(stats[3]);
-                pk.spdef = (int)Math.round(stats[4]);
-                pk.speed = (int)Math.round(stats[5]);
-            }
+            AdjustCustomStat(mode, pk, isFullyEvolved, targetBst, maxStatValue, 0);
         }
     }
 
-    protected void customPokemonTypes(int generation) {
+    private void AdjustCustomStat(CustomStatMode mode, Pokemon pk, boolean isFullyEvolved, double targetBst, int maxStatValue, int depth) {
+        Pokemon baseForm = pk.baseForme;
+        if (baseForm != null) {
+            int i = 0;
+        }
+
+        List<Type> types = Type.getAllTypes(generationOfPokemon());
+
+        targetBst = Math.min(targetBst, 600);
+
+        int maxHp = Math.max(pk.hp, maxStatValue);
+        int maxAtk = Math.max(pk.attack, maxStatValue);
+        int maxDef = Math.max(pk.defense, maxStatValue);
+        int maxSpA = Math.max(pk.spatk, maxStatValue);
+        int maxSpD = Math.max(pk.spdef, maxStatValue);
+        int maxSpe = Math.max(pk.speed, maxStatValue);
+
+        if (mode == CustomStatMode.additive || pk.bst() > 600) {
+            // Additive; always used to lower BST down to 600
+
+            int statDiff = targetBst > pk.bst() ? 1 : -1;
+            int previousBst = 0;
+            while(pk.bst() != previousBst && (targetBst - pk.bst()) * statDiff > 0)
+            {
+                previousBst = pk.bst();
+
+                pk.hp = pk.hp == 1 ? pk.hp : Math.min(pk.hp + statDiff, maxHp);
+                pk.attack = Math.min(pk.attack + statDiff, maxAtk);
+                pk.defense = pk.hp == 1 ? pk.defense : Math.min(pk.defense + statDiff, maxDef);
+                pk.spatk = Math.min(pk.spatk + statDiff, maxSpA);
+                pk.spdef = pk.hp == 1 ? pk.spdef : Math.min(pk.spdef + statDiff, maxSpD);
+                pk.speed = Math.min(pk.speed + statDiff, maxSpe);
+            }
+        } else {
+            // Multiplicative
+            double[] stats = new double[]{pk.hp, pk.attack, pk.defense, pk.spatk, pk.spdef, pk.speed};
+            boolean[] maxedStats = new boolean[]{pk.hp == 255, pk.attack == 255, pk.defense == 255, pk.spatk == 255, pk.spdef == 255, pk.speed == 255};
+            int totalMaxedStats = 0;
+            for (int stat = 0; stat < 6; stat++) {
+                if (maxedStats[stat])
+                    totalMaxedStats++;
+            }
+            double bst = pk.bst();
+            while (Math.abs(bst - targetBst) > 1.0) {
+                double maxedStatReduction = totalMaxedStats * 255.0;
+                double bstRatio = (targetBst - maxedStatReduction) / (bst - maxedStatReduction);
+                for (int stat = 0; stat < 6; stat++) {
+                    double statValue = stats[stat];
+                    bst -= statValue;
+                    stats[stat] = (stat == 0 && stats[0] == 1) ? 1 : Math.min(statValue * bstRatio, 255.0);
+                    bst += stats[stat];
+
+                    if ((int) Math.round(stats[stat]) == 255 && !maxedStats[stat]) {
+                        maxedStats[stat] = true;
+                        totalMaxedStats++;
+                    }
+                }
+            }
+            pk.hp = (int) Math.round(stats[0]);
+            pk.attack = (int) Math.round(stats[1]);
+            pk.defense = (int) Math.round(stats[2]);
+            pk.spatk = (int) Math.round(stats[3]);
+            pk.spdef = (int) Math.round(stats[4]);
+            pk.speed = (int) Math.round(stats[5]);
+        }
+
+        if (depth > 0)
+            return;
+
+        int minDefensiveBulk = 6000;
+        int emergencyBreak = 0;
+        boolean changed = false;
+        while (emergencyBreak < 100 && (isFullyEvolved && pk.hp > 1)
+                && (pk.hp * pk.defense < minDefensiveBulk || pk.hp * pk.spdef < minDefensiveBulk)) {
+            changed = true;
+
+            if (pk.hp < maxHp)
+                ++pk.hp;
+
+            if (pk.defense < maxDef)
+                ++pk.defense;
+
+            if (pk.spdef < maxSpD)
+                ++pk.spdef;
+
+            ++emergencyBreak;
+        }
+
+        // Recurse
+        if (changed)
+            AdjustCustomStat(mode, pk, true, targetBst, maxStatValue, depth + 1);
+    }
+
+    protected void customPokemonTypes() {
         List<Pokemon> pokes = getPokemonInclFormes();
 
         pokes.get(Species.charmander).secondaryType = Type.DRAGON;
         pokes.get(Species.charmeleon).secondaryType = Type.DRAGON;
         pokes.get(Species.charizard).secondaryType = Type.DRAGON;
-        pokes.get(Species.blastoise).secondaryType = Type.STEEL;
-        pokes.get(Species.arbok).secondaryType = Type.DARK;
         pokes.get(Species.ninetales).secondaryType = Type.PSYCHIC;
         pokes.get(Species.psyduck).secondaryType = Type.PSYCHIC;
         pokes.get(Species.golduck).secondaryType = Type.PSYCHIC;
@@ -457,12 +533,31 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokes.get(Species.doduo).primaryType = Type.FIGHTING;
         pokes.get(Species.doduo).secondaryType = null;
         pokes.get(Species.dodrio).primaryType = Type.FIGHTING;
-        pokes.get(Species.dodrio).secondaryType = Type.DARK;
         pokes.get(Species.marowak).secondaryType = Type.FIGHTING;
         pokes.get(Species.kangaskhan).secondaryType = Type.GROUND;
         pokes.get(Species.pinsir).secondaryType = Type.GROUND;
         pokes.get(Species.gyarados).secondaryType = Type.DRAGON;
         pokes.get(Species.aerodactyl).secondaryType = Type.DRAGON;
+        if (typeInGame(Type.STEEL)) {
+            pokes.get(Species.blastoise).secondaryType = Type.STEEL;
+        }
+        if (typeInGame(Type.DARK)) {
+            pokes.get(Species.arbok).secondaryType = Type.DARK;
+            pokes.get(Species.dodrio).secondaryType = Type.DARK;
+        }
+        if (typeInGame(Type.FAIRY)) {
+            pokes.get(Species.clefairy).primaryType = Type.FAIRY;
+            pokes.get(Species.clefable).primaryType = Type.FAIRY;
+            pokes.get(Species.jigglypuff).secondaryType = Type.FAIRY;
+            pokes.get(Species.wigglytuff).secondaryType = Type.FAIRY;
+            pokes.get(Species.diglett).secondaryType = Type.FAIRY;
+            pokes.get(Species.dugtrio).secondaryType = Type.FAIRY;
+            pokes.get(Species.rapidash).secondaryType = Type.FAIRY;
+            pokes.get(Species.mrMime).secondaryType = Type.FAIRY;
+        }
+        if (generationOfPokemon() < 2)
+            return;
+
         pokes.get(Species.croconaw).secondaryType = Type.DARK;
         pokes.get(Species.feraligatr).secondaryType = Type.DARK;
         pokes.get(Species.hoothoot).primaryType = Type.PSYCHIC;
@@ -476,13 +571,18 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokes.get(Species.ursaring).secondaryType = Type.FIGHTING;
         pokes.get(Species.octillery).secondaryType = Type.FIRE;
         if (typeInGame(Type.FAIRY)) {
-            pokes.get(Species.diglett).secondaryType = Type.FAIRY;
-            pokes.get(Species.dugtrio).secondaryType = Type.FAIRY;
-            pokes.get(Species.rapidash).secondaryType = Type.FAIRY;
             pokes.get(Species.meganium).secondaryType = Type.FAIRY;
+            pokes.get(Species.cleffa).primaryType = Type.FAIRY;
+            pokes.get(Species.igglybuff).secondaryType = Type.FAIRY;
+            pokes.get(Species.togepi).primaryType = Type.FAIRY;
+            pokes.get(Species.togetic).primaryType = Type.FAIRY;
+            pokes.get(Species.marill).secondaryType = Type.FAIRY;
+            pokes.get(Species.azumarill).secondaryType = Type.FAIRY;
             pokes.get(Species.misdreavus).secondaryType = Type.FAIRY;
+            pokes.get(Species.snubbull).primaryType = Type.FAIRY;
+            pokes.get(Species.granbull).primaryType = Type.FAIRY;
         }
-        if (generation < 3)
+        if (generationOfPokemon() < 3)
             return;
 
         pokes.get(Species.treecko).secondaryType = Type.DRAGON;
@@ -503,6 +603,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokes.get(Species.chimecho).secondaryType = Type.GHOST;
         pokes.get(Species.glalie).secondaryType = Type.ROCK;
         if (typeInGame(Type.FAIRY)) {
+            pokes.get(Species.ralts).secondaryType = Type.FAIRY;
+            pokes.get(Species.kirlia).secondaryType = Type.FAIRY;
+            pokes.get(Species.gardevoir).secondaryType = Type.FAIRY;
+            pokes.get(Species.azurill).secondaryType = Type.FAIRY;
+            pokes.get(Species.mawile).secondaryType = Type.FAIRY;
             pokes.get(Species.volbeat).secondaryType = Type.FAIRY;
             pokes.get(Species.illumise).secondaryType = Type.DARK;
             pokes.get(Species.swablu).primaryType = Type.FAIRY;
@@ -512,7 +617,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             pokes.get(Species.absol).secondaryType = Type.FAIRY;
             pokes.get(Species.luvdisc).secondaryType = Type.FAIRY;
         }
-        if (generation < 4)
+        if (generationOfPokemon() < 4)
             return;
 
         pokes.get(Species.luxray).secondaryType = Type.DARK;
@@ -527,8 +632,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (typeInGame(Type.FAIRY)) {
             pokes.get(Species.pachirisu).secondaryType = Type.FAIRY;
             pokes.get(Species.mismagius).secondaryType = Type.FAIRY;
+            pokes.get(Species.mimeJr).secondaryType = Type.FAIRY;
+            pokes.get(Species.togekiss).primaryType = Type.FAIRY;
         }
-        if (generation < 5)
+        if (generationOfPokemon() < 5)
             return;
 
         pokes.get(Species.pignite).secondaryType = Type.DARK;
@@ -555,11 +662,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokes.get(Species.druddigon).secondaryType = Type.FIGHTING;
         if (typeInGame(Type.FAIRY)) {
             pokes.get(Species.audino).secondaryType = Type.FAIRY;
+            pokes.get(Species.cottonee).secondaryType = Type.FAIRY;
+            pokes.get(Species.whimsicott).secondaryType = Type.FAIRY;
             pokes.get(Species.vanillite).secondaryType = Type.FAIRY;
             pokes.get(Species.vanillish).secondaryType = Type.FAIRY;
             pokes.get(Species.vanilluxe).secondaryType = Type.FAIRY;
         }
-        if (generation < 6)
+        if (generationOfPokemon() < 6)
             return;
 
         pokes.get(Species.flabébé).secondaryType = Type.GRASS;
@@ -568,7 +677,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokes.get(Species.goomy).secondaryType = Type.WATER;
         pokes.get(Species.sliggoo).secondaryType = Type.WATER;
         pokes.get(Species.goodra).secondaryType = Type.WATER;
-        pokes.get(Species.xerneas).secondaryType = Type.GRASS;
 
         if (hasMegaEvolutions()) {
             pokes.get(Species.Gen6Formes.kangaskhanMega).secondaryType = Type.GROUND;
@@ -960,6 +1068,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         boolean lowAtk = pk.attack <= 85;
         boolean highAtk = pk.attack > 110;
+
         boolean lowSpA = pk.spatk <= 85;
         boolean highSpA = pk.spatk > 110;
 
@@ -990,6 +1099,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean isNormal = pk.primaryType == Type.NORMAL || pk.secondaryType == Type.NORMAL;
 
         boolean isFighting = pk.primaryType == Type.FIGHTING || pk.secondaryType == Type.FIGHTING;
+
+        boolean isFlying = pk.primaryType == Type.FLYING || pk.secondaryType == Type.FLYING;
 
         boolean isPoison = pk.primaryType == Type.POISON || pk.secondaryType == Type.POISON;
 
@@ -1061,7 +1172,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.slowStart); // 112
             irrelevantAbilities.add(Abilities.defeatist); // 129
             irrelevantAbilities.add(Abilities.weakArmor); // 133
-            irrelevantAbilities.add(Abilities.infiltrator); // 151
+            if (generationOfPokemon() < 6)
+                irrelevantAbilities.add(Abilities.infiltrator); // 151
 
             // Too niche
             irrelevantAbilities.add(Abilities.damp); // 006
@@ -1076,6 +1188,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.heavyMetal); // 134
             irrelevantAbilities.add(Abilities.lightMetal); // 135
             irrelevantAbilities.add(Abilities.magician); // 170
+            irrelevantAbilities.add(Abilities.auraBreak); // 170
 
             // Weather
 //            irrelevantAbilities.add(Abilities.drizzle); // 002
@@ -1106,13 +1219,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.arenaTrap); // 071
             irrelevantAbilities.add(Abilities.angerPoint); // 083
             irrelevantAbilities.add(Abilities.moody); // 141
+            irrelevantAbilities.add(Abilities.parentalBond); // 141
 
             // Forme-changing
             irrelevantAbilities.add(Abilities.forecast); // 059
             irrelevantAbilities.add(Abilities.multitype); // 121
             irrelevantAbilities.add(Abilities.flowerGift); // 122
             irrelevantAbilities.add(Abilities.zenMode); // 161
-            irrelevantAbilities.add(Abilities.parentalBond); // 185
             irrelevantAbilities.add(Abilities.stanceChange); // 176
 
             if (weaknesses <= 1) {
@@ -1172,6 +1285,16 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (isElectric)
                 irrelevantAbilities.add(Abilities.limber);
 
+            // Avoid Flying-type STAB Gale Wings in Gen VI (other types are more reasonable)
+            if (isFlying && generationOfPokemon() < 7)
+                irrelevantAbilities.add(Abilities.galeWings);
+
+            // Protean and Libero are OP until Gen IX nerf
+            if (generationOfPokemon() < 9) {
+                irrelevantAbilities.add(Abilities.protean);
+                irrelevantAbilities.add(Abilities.libero);
+            }
+
             // Abilities that activate on contact
             if (lowPhysBulk) {
                 irrelevantAbilities.add(Abilities.staticTheAbilityNotTheKeyword);
@@ -1186,6 +1309,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (!isGrass)
                 irrelevantAbilities.add(Abilities.flowerVeil); // 166
+
+            if (isFlying || isGround)
+                irrelevantAbilities.add(Abilities.grassPelt);
 
             if (resistsElectric)
                 irrelevantAbilities.add(Abilities.voltAbsorb);
@@ -1213,6 +1339,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.purePower);
             }
 
+            if (isRock || isGround || isSteel || isIce)
+                irrelevantAbilities.add(Abilities.overcoat);
+
             if (isFire)
                 irrelevantAbilities.add(Abilities.waterVeil);
 
@@ -1235,6 +1364,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.defiant);
                 irrelevantAbilities.add(Abilities.poisonTouch);
                 irrelevantAbilities.add(Abilities.moxie);
+                irrelevantAbilities.add(Abilities.strongJaw);
+                irrelevantAbilities.add(Abilities.megaLauncher);
+            }
+
+            // only benefits special attackers
+            if (!higherOrEqualSpAtk) {
+                irrelevantAbilities.add(Abilities.competitive);
             }
 
             if (lowBulk)
@@ -1289,7 +1425,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (highAtk || highSpA)
                 irrelevantAbilities.add(Abilities.download);
 
-            if (isPoison || !higherOrEqualAttack)
+            if (isPoison || isSteel || !higherOrEqualAttack)
                 irrelevantAbilities.add(Abilities.toxicBoost);
 
             if (isFire || !higherOrEqualSpAtk)
@@ -2328,6 +2464,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         int forceFullyEvolvedLevel = settings.getTrainersForceFullyEvolvedLevel();
         boolean forceChallengeMode = (settings.getCurrentMiscTweaks() & MiscTweak.FORCE_CHALLENGE_MODE.getValue()) > 0;
         boolean rivalCarriesStarter = settings.isRivalCarriesStarterThroughout();
+        boolean allSmart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) > 0;
 
         checkPokemonRestrictions();
 
@@ -2608,7 +2745,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Save it all up
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, false, allSmart);
     }
 
     @Override
@@ -2617,6 +2754,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean giveToImportantPokemon = settings.isRandomizeHeldItemsForImportantTrainerPokemon();
         boolean giveToRegularPokemon = settings.isRandomizeHeldItemsForRegularTrainerPokemon();
         boolean highestLevelOnly = settings.isHighestLevelGetsItemsForTrainers();
+        boolean allSmart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) > 0;
 
         List<Move> moves = this.getMoves();
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
@@ -2671,7 +2809,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, false, allSmart);
     }
 
     private void randomizeHeldItem(TrainerPokemon tp, Settings settings, List<Move> moves, int[] moveset) {
@@ -2696,12 +2834,14 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void rivalCarriesStarter() {
+    public void rivalCarriesStarter(Settings settings) {
+        boolean smart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) > 0;
+
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         rivalCarriesStarterUpdate(currentTrainers, "RIVAL", isORAS ? 0 : 1);
         rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, false, smart);
     }
 
     @Override
@@ -2712,6 +2852,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public void forceFullyEvolvedTrainerPokes(Settings settings) {
         int minLevel = settings.getTrainersForceFullyEvolvedLevel();
+        boolean allSmart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) > 0;
 
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
@@ -2728,18 +2869,19 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, false, allSmart);
     }
 
     @Override
     public void onlyChangeTrainerLevels(Settings settings) {
         int levelModifier = settings.getTrainersLevelModifier();
+        boolean allSmart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) != 0;
 
         List<Trainer> currentTrainers = this.getTrainers();
         for (Trainer t: currentTrainers) {
             applyLevelModifierToTrainerPokemon(t, levelModifier);
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, false, allSmart);
     }
 
     @Override
@@ -2747,8 +2889,29 @@ public abstract class AbstractRomHandler implements RomHandler {
         int additionalNormal = settings.getAdditionalRegularTrainerPokemon();
         int additionalImportant = settings.getAdditionalImportantTrainerPokemon();
         int additionalBoss = settings.getAdditionalBossTrainerPokemon();
+        boolean allSmart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) > 0;
 
         List<Trainer> currentTrainers = this.getTrainers();
+
+        // Fix Tate & Liza
+        if (isORAS) {
+            int additional = additionalBoss == 1 ? 1 : 2;
+
+            Trainer tr = currentTrainers.get(551);
+            for (TrainerPokemon tpk : tr.pokemon) {
+                tpk.level = 44;
+                tpk.strength = 160;
+                tpk.IVs = 19;
+            }
+
+            int oldNum = tr.pokemon.size();
+            for (int i = 0; i < additional; ++i) {
+                TrainerPokemon tpk = tr.pokemon.get(i + i % oldNum).copy();
+                tpk.level = 42;
+                tr.pokemon.add(i, tpk);
+            }
+        }
+
         for (Trainer t: currentTrainers) {
             int additional;
             if (t.isBoss()) {
@@ -2799,11 +2962,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 t.pokemon.add(secondToLastIndex, newPokemon);
             }
         }
-        this.setTrainers(currentTrainers, false);
+        this.setTrainers(currentTrainers, false, allSmart);
     }
 
     @Override
-    public void doubleBattleMode() {
+    public void doubleBattleMode(Settings settings) {
+        boolean allSmart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) > 0;
+
         List<Trainer> currentTrainers = this.getTrainers();
         for (Trainer t: currentTrainers) {
             if (t.pokemon.size() != 1 || t.multiBattleStatus == Trainer.MultiBattleStatus.ALWAYS || this.trainerShouldNotGetBuffs(t)) {
@@ -2811,7 +2976,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
             t.pokemon.add(t.pokemon.get(0).copy());
         }
-        this.setTrainers(currentTrainers, true);
+        this.setTrainers(currentTrainers, true, allSmart);
     }
 
     private Map<Integer, List<MoveLearnt>> allLevelUpMoves;
@@ -2941,6 +3106,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void pickTrainerMovesets(Settings settings) {
         boolean isCyclicEvolutions = settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM_EVERY_LEVEL;
         boolean doubleBattleMode = settings.isDoubleBattleMode();
+        boolean allSmart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) > 0;
 
         List<Trainer> trainers = getTrainers();
 
@@ -3256,7 +3422,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        setTrainers(trainers, false);
+        setTrainers(trainers, false, allSmart);
     }
 
     private List<Move> trimMoveList(TrainerPokemon tp, List<Move> movesAtLevel, boolean doubleBattleMode) {
@@ -3822,6 +3988,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             updateMovePower(moves, Moves.blizzard, 110);
             // Growth 20 PP
             updateMovePP(moves, Moves.growth, 20);
+            // String Shot Speed -2
+            moves.get(Moves.stringShot).effect = MoveEffect.TRGT_SPE_MINUS_2;
+            moves.get(Moves.stringShot).statChanges[0].stages = -2;
+            moves.get(Moves.stringShot).description = removeLineBreaks(moves.get(Moves.stringShot).description)
+                    .replace("reduce", "harshly reduce")
+                    .replace("lower", "harshly lower");
             // Thunderbolt 90 Power
             updateMovePower(moves, Moves.thunderbolt, 90);
             // Thunder 110 Power
@@ -3873,6 +4045,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 updateMovePower(moves, Moves.smellingSalts, 70);
                 // Knock off 65 Power
                 updateMovePower(moves, Moves.knockOff, 65);
+                // Poison Fang 50% chance to badly poison
+                moves.get(Moves.poisonFang).statusPercentChance = 50;
                 // Meteor Mash 90 Power, 90% Accuracy
                 updateMovePower(moves, Moves.meteorMash, 90);
                 updateMoveAccuracy(moves, Moves.meteorMash, 90);
@@ -4053,27 +4227,35 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    protected void customMoveChanges() {
+    protected void customMoveChanges(Settings settings) {
+        boolean doubles = settings.isDoubleBattleMode();
+
         List<Move> moves = this.getMoves();
 
         // 003 Double Slap
-        moves.get(Moves.doubleSlap).name = "Double Slap";
+        if (generationOfPokemon() >= 3)
+            moves.get(Moves.doubleSlap).name = "Double Slap";
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.doubleSlap, Type.FAIRY);
         updateMoveAccuracy(moves, Moves.doubleSlap, 100);
 
         // 004 Comet Punch
         if (typeInGame(Type.FAIRY))
             updateMoveType(moves, Moves.cometPunch, Type.FAIRY);
+        updateMovePower(moves, Moves.cometPunch, 20);
         updateMoveAccuracy(moves, Moves.cometPunch, 100);
 
         // 005 Mega Punch
         updateMovePower(moves, Moves.megaPunch, 90);
+        updateMoveAccuracy(moves, Moves.megaPunch, 90);
 
         // 006 Pay Day
         updateMoveType(moves, Moves.payDay, Type.STEEL);
         updateMovePower(moves, Moves.payDay, 60);
 
         // 011 Vise Grip
-        moves.get(Moves.viseGrip).name = "Vise Grip";
+        if (generationOfPokemon() <= 8)
+            moves.get(Moves.viseGrip).name = "Vise Grip";
 
 //        // 012 Guillotine
 //        updateMoveType(moves, Moves.guillotine, Type.STEEL);
@@ -4106,7 +4288,24 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePP(moves, Moves.cut, 10);
         moves.get(Moves.cut).criticalChance = CriticalChance.GUARANTEED;
         moves.get(Moves.cut).effect = MoveEffect.DMG_ALWAYS_CRIT;
-        moves.get(Moves.cut).description = "The user slices the target, which always results in a critical hit. It can also be used to cut down thin trees.";
+        switch(generationOfPokemon()) {
+            case 2:
+            case 3:
+                moves.get(Moves.cut).description = "Always lands a critical hit.";
+                break;
+            case 4:
+            case 5:
+            case 6:
+                moves.get(Moves.cut).description = "It always results in a critical hit and can also be used to cut down thin trees.";
+                break;
+            default:
+                moves.get(Moves.cut).description = "The target is cut with scythe or claw. It always results in a critical hit.";
+                break;
+        }
+
+        // 017 Tail Whip
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.tailWhip, Type.FAIRY);
 
         // 019 Fly
         updateMoveAccuracy(moves, Moves.fly, 100);
@@ -4134,21 +4333,33 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMoveAccuracy(moves, Moves.pinMissile, 100);
 
         // 049 Sonic Boom
-        moves.get(Moves.sonicBoom).name = "Sonic Boom";
+        if (generationOfPokemon() <= 5)
+            moves.get(Moves.sonicBoom).name = "Sonic Boom";
 
         // 051 Acid
         moves.get(Moves.acid).name = "Corrosion";
-        updateMovePower(moves, Moves.acid, 65);
+        updateMovePower(moves, Moves.acid, 30);
         moves.get(Moves.acid).statChanges[0].percentChance = 100.0;
-        moves.get(Moves.acid).description = "The opposing team is attacked with a spray of corrosive liquid. It also lowers the targets’ Sp. Def stats.";
+        moves.get(Moves.acid).description = removeLineBreaks(moves.get(Moves.acid).description)
+                .replace("may lower", "also lowers")
+                .replace("may also lower", "also lowers");
+
+        // 057 Surf
+        if (doubles) {
+            moves.get(Moves.surf).target = MoveTarget.ALL_ADJACENT_FOES;
+            // TODO: moves.get(Moves.surf).description =
+        }
 
         // 061 Bubble Beam
-        moves.get(Moves.bubbleBeam).name = "Bubble Beam";
+        if (generationOfPokemon() >= 3)
+            moves.get(Moves.bubbleBeam).name = "Bubble Beam";
 
         // 062 Aurora Beam
         updateMovePower(moves, Moves.auroraBeam, 70);
         moves.get(Moves.auroraBeam).statChanges[0].percentChance = 100.0;
-        moves.get(Moves.auroraBeam).description = "The target is hit with a rainbow-colored beam. This also lowers the target's Attack stat.";
+        moves.get(Moves.auroraBeam).description = removeLineBreaks(moves.get(Moves.auroraBeam).description)
+                .replace("may lower", "lowers")
+                .replace("may also lower", "also lowers");
 
         // 063 Hyper Beam
         moves.get(Moves.hyperBeam).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
@@ -4161,12 +4372,25 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.hyperBeam).description = "The target is attacked with a powerful beam. It lowers the user’s Defense and Sp. Def stats.";
 
         // 066 Submission
-        updateMoveAccuracy(moves, Moves.submission, 100);
-        moves.get(Moves.submission).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
-        moves.get(Moves.submission).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
-        moves.get(Moves.submission).recoil = 0;
-        moves.get(Moves.submission).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100);
-        moves.get(Moves.submission).description = "The target is thrown using the power of gravity. It also lowers the target's Attack stat.";
+        if (generationOfPokemon() == 5 && typeInGame(Type.FAIRY)) {
+            updateMoveType(moves, Moves.submission, Type.FAIRY);
+            updateMovePower(moves, Moves.submission, 90);
+            updateMoveAccuracy(moves, Moves.submission, 90);
+            moves.get(Moves.submission).name = "Play Rough";
+            moves.get(Moves.submission).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
+            moves.get(Moves.submission).recoil = 0;
+            moves.get(Moves.submission).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 10);
+            moves.get(Moves.submission).description = "The user plays rough with the target and attacks it. This may also lower the target's Attack stat.";
+        }
+        else {
+            updateMovePower(moves, Moves.submission, 70);
+            updateMoveAccuracy(moves, Moves.submission, 100);
+            moves.get(Moves.submission).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+            moves.get(Moves.submission).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
+            moves.get(Moves.submission).recoil = 0;
+            moves.get(Moves.submission).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100);
+            moves.get(Moves.submission).description = "The target is thrown using the power of gravity. It also lowers the target's Attack stat.";
+        }
 
         // 070 Strength
         updateMoveType(moves, Moves.strength, Type.ROCK);
@@ -4178,20 +4402,18 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMoveAccuracy(moves, Moves.leechSeed, 100);
 
         // 075 Razor Leaf
-        updateMoveAccuracy(moves, Moves.razorLeaf, 100);
+        if (!doubles)
+            updateMoveAccuracy(moves, Moves.razorLeaf, 100);
 
         // 076 Solar Beam
-        moves.get(Moves.solarBeam).name = "Solar Beam";
+        if (generationOfPokemon() <= 5)
+            moves.get(Moves.solarBeam).name = "Solar Beam";
 
         // 077 Poison Powder
         updateMoveAccuracy(moves, Moves.poisonPowder, 100);
 
         // 078 Stun Spore
         updateMoveAccuracy(moves, Moves.stunSpore, 100);
-
-        // 081 String Shot
-        moves.get(Moves.stringShot).statChanges[0].stages = -2;
-        moves.get(Moves.stringShot).description = "The targets are bound with silk blown from the user's mouth. This silk harshly reduces the targets' Speed stat.";
 
 //        // 082 Dragon Rage
 //        moves.get(Moves.dragonRage).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
@@ -4209,7 +4431,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 088 Rock Throw
         updateMovePower(moves, Moves.rockThrow, 55);
-        updateMoveAccuracy(moves, Moves.rockThrow, 100);
+        updateMoveAccuracy(moves, Moves.rockThrow, 95);
 
 //        // 090 Fissure
 //        moves.get(Moves.fissure).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
@@ -4241,36 +4463,38 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePP(moves, Moves.doubleTeam, 30);
         moves.get(Moves.doubleTeam).effect = MoveEffect.USER_SPE_PLUS_2;
         moves.get(Moves.doubleTeam).statChanges[0] = new Move.StatChange(StatChangeType.SPEED, 2, 0.0);
-        moves.get(Moves.doubleTeam).description = "By moving rapidly, the user makes illusory copies of itself to sharply raise its Speed stat.";
+        moves.get(Moves.doubleTeam).description = removeLineBreaks(moves.get(Moves.doubleTeam).description).replace("evasiveness", "Speed stat");
 
         // 107 Minimize
         moves.get(Moves.minimize).statChanges[0].stages = 1;
 
         // 108 Smokescreen
-        moves.get(Moves.smokescreen).name = "Smokescreen";
+        if (generationOfPokemon() <= 5)
+            moves.get(Moves.smokescreen).name = "Smokescreen";
 
         // 120 Self-Destruct
-        moves.get(Moves.selfDestruct).name = "Self-Destruct";
+        if (generationOfPokemon() <= 5)
+            moves.get(Moves.selfDestruct).name = "SelfDestruct";
 
         // 121 Egg Bomb
         updateMoveCategory(moves, Moves.eggBomb, MoveCategory.SPECIAL);
         updateMovePower(moves, Moves.eggBomb, 110);
         updateMoveAccuracy(moves, Moves.eggBomb, 95);
-        // TODO: This doesn't work :(
+        // TODO: This doesn't work (at least in Gen V) :(
         // moves.get(Moves.eggBomb).effect = MoveEffect.PHYSICAL_DMG;
         // moves.get(Moves.eggBomb).description = "An explosive egg is hurled with maximum force at the foe. This attack does physical damage.";
 
         // 122 Lick
         moves.get(Moves.lick).statusPercentChance = 100.0;
-        moves.get(Moves.lick).description = "The target is licked with a long tongue,\\xFFFEcausing damage. It will also leave\\xFFFEthe target with paralysis.";
+        moves.get(Moves.lick).description = "The target is licked with a long tongue, causing damage. It will also leave the target with paralysis.";
 
         // 123 Smog
         updateMoveAccuracy(moves, Moves.smog, 100);
         moves.get(Moves.smog).statusPercentChance = 100.0;
-        moves.get(Moves.smog).description = "The target is attacked with a\\xFFFEdischarge of filthy gases.\\xFFFEIt also poisons the target.";
+        moves.get(Moves.smog).description = "The target is attacked with a discharge of filthy gases. It also poisons the target.";
 
         // 124 Sludge
-        updateMovePower(moves, Moves.sludge, 75);
+        updateMovePower(moves, Moves.sludge, 70);
 
         // 125 Bone Club
         updateMoveAccuracy(moves, Moves.boneClub, 100);
@@ -4287,14 +4511,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePP(moves, Moves.kinesis, 10);
         moves.get(Moves.kinesis).statusType = MoveStatusType.CONFUSION;
         moves.get(Moves.kinesis).effect = MoveEffect.NO_DMG_CNF;
-        moves.get(Moves.kinesis).description = "The user distracts the target\\xFFFEby bending a spoon\\xFFFEwhich causes confusion.";
+        moves.get(Moves.kinesis).description = "The user distracts the target by bending a spoon which causes confusion.";
 
         // 135 Soft-Boiled
-        moves.get(Moves.softBoiled).name = "Soft-Boiled";
+        if (generationOfPokemon() <= 2)
+            moves.get(Moves.softBoiled).name = "SoftBoiled";
+        else
+            moves.get(Moves.softBoiled).name = "Soft-Boiled";
 
         // 139 Poison Gas
-        updateMoveAccuracy(moves, Moves.poisonGas, 100);
-        moves.get(Moves.poisonGas).description = "A cloud of poison gas is sprayed\\xFFFEin the face of opposing Pokémon.\\xFFFEIt will poison those hit.";
+        if (!doubles)
+            updateMoveAccuracy(moves, Moves.poisonGas, 100);
 
         // 140 Barrage
         updateMovePower(moves, Moves.barrage, 25);
@@ -4308,15 +4535,18 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePower(moves, Moves.furySwipes, 20);
         updateMoveAccuracy(moves, Moves.furySwipes, 100);
 
-        // 157 Rock Slide
-        updateMoveAccuracy(moves, Moves.rockSlide, 95);
+        if (!doubles)
+            updateMoveAccuracy(moves, Moves.rockSlide, 95);
 
         // 158 Hyper Fang
-        updateMoveAccuracy(moves, Moves.hyperFang, 95);
         moves.get(Moves.hyperFang).flinchPercentChance = 30.0;
 
         // 162 Super Fang
         updateMoveAccuracy(moves, Moves.superFang, 95);
+
+        // Gen II
+        if (generationOfPokemon() < 2)
+            return;
 
         // 167 Triple Kick
         updateMoveAccuracy(moves, Moves.tripleKick, 95);
@@ -4331,8 +4561,19 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePP(moves, Moves.feintAttack, 15);
         moves.get(Moves.feintAttack).effect = MoveEffect.DMG_TRGT_DEF_MINUS_1;
         moves.get(Moves.feintAttack).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100.0);
-        moves.get(Moves.feintAttack).name = "Feint Attack";
+        if (generationOfPokemon() >= 3)
+            moves.get(Moves.feintAttack).name = "FeintAttack";
+        else
+            moves.get(Moves.feintAttack).name = "Feint Attack";
         moves.get(Moves.feintAttack).description = "The user approaches the target disarmingly, then throws a sucker punch. It also lowers the target's Defense stat.";
+
+        // 186 Sweet Kiss
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.sweetKiss, Type.FAIRY);
+
+        // 187 Belly Drum
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.bellyDrum, Type.FAIRY);
 
         // 189 Mud-Slap
         updateMovePower(moves, Moves.mudSlap, 40);
@@ -4345,6 +4586,16 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.octazooka).effect = MoveEffect.DMG_TRGT_SPA_MINUS_1;
         moves.get(Moves.octazooka).statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
         moves.get(Moves.octazooka).description = "The user attacks by spraying ink in the target's face or eyes. It also lowers the target's Sp. Atk stat.";
+
+        // 192 Zap Cannon
+        moves.get(Moves.zapCannon).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
+        updateMovePower(moves, Moves.zapCannon, 130);
+        updateMoveAccuracy(moves, Moves.zapCannon, 90);
+        moves.get(Moves.zapCannon).statusType = MoveStatusType.NONE;
+        moves.get(Moves.zapCannon).statusPercentChance = 0.0;
+        moves.get(Moves.zapCannon).effect = MoveEffect.DMG_USER_SPA_MINUS_2;
+        moves.get(Moves.zapCannon).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, -2, 100.0);
+        moves.get(Moves.zapCannon).description = "The user fires an electric blast like a cannon. This harshly reduces the user's Sp. Atk stat.";
 
         // 194 Destiny Bond
         moves.get(Moves.destinyBond).qualities = MoveQualities.NO_DAMAGE_STAT_CHANGE;
@@ -4364,15 +4615,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         // 198 Bone Rush
         updateMoveAccuracy(moves, Moves.boneRush, 100);
 
-        // 192 Zap Cannon
-        moves.get(Moves.zapCannon).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-        updateMovePower(moves, Moves.zapCannon, 130);
-        updateMoveAccuracy(moves, Moves.zapCannon, 90);
-        moves.get(Moves.zapCannon).statusType = MoveStatusType.NONE;
-        moves.get(Moves.zapCannon).statusPercentChance = 0.0;
-        moves.get(Moves.zapCannon).effect = MoveEffect.DMG_USER_SPA_MINUS_2;
-        moves.get(Moves.zapCannon).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, -2, 100.0);
-        moves.get(Moves.zapCannon).description = "The user fires an electric blast like a cannon. This harshly reduces the user's Sp. Atk stat.";
+        // 204 Charm
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.charm, Type.FAIRY);
 
         // 205 Rollout
         updateMoveAccuracy(moves, Moves.rollout, 95);
@@ -4386,15 +4631,36 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.furyCutter).statChanges[0].type = StatChangeType.ATTACK;
         moves.get(Moves.furyCutter).statChanges[0].stages = 1;
         moves.get(Moves.furyCutter).statChanges[0].percentChance = 100.0;
-        moves.get(Moves.furyCutter).description = "The target is slashed with scythes or claws.\\xFFFEIt also raises the user's Attack stat.";
+        moves.get(Moves.furyCutter).description = "The target is slashed with scythes or claws. It also raises the user's Attack stat.";
 
         // 211 Steel Wing
         updateMoveAccuracy(moves, Moves.steelWing, 100);
         moves.get(Moves.steelWing).statChanges[0].percentChance = 100.0;
-        moves.get(Moves.steelWing).description = "The target is hit with wings of steel.\\xFFFEIt also raises the user's Defense stat.";
+        moves.get(Moves.steelWing).description = "The target is hit with wings of steel. It also raises the user's Defense stat.";
+
+        // 213 Attract
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.attract, Type.FAIRY);
+
+        // 219 Safeguard
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.safeguard, Type.FAIRY);
+
+        // 219 Encore
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.encore, Type.FAIRY);
 
         // 220 Pain Split
         updateMoveType(moves, Moves.painSplit, Type.GHOST);
+
+        // 224 Megahorn
+        moves.get(Moves.megahorn).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
+        updateMoveAccuracy(moves, Moves.megahorn, 100);
+        updateMovePP(moves, Moves.megahorn, 5);
+        moves.get(Moves.megahorn).effect = MoveEffect.DMG_USER_DEF_SPD_MINUS_1;
+        moves.get(Moves.megahorn).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
+        moves.get(Moves.megahorn).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_DEFENSE, -1, 100);
+        moves.get(Moves.megahorn).description = "Using its tough and impressive horn, the user rams into the target. It lowers the user’s Defense and Sp. Def stats.";
 
         // 225 Dragon Breath
         updateMovePower(moves, Moves.dragonBreath, 70);
@@ -4410,13 +4676,20 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMoveAccuracy(moves, Moves.metalClaw, 100);
         updateMovePP(moves, Moves.metalClaw, 10);
         moves.get(Moves.metalClaw).statChanges[0].percentChance = 100.0;
-        moves.get(Moves.metalClaw).description = "The target is raked with steel claws.\\xFFFEIt also raises the user's Attack stat.";
+        moves.get(Moves.metalClaw).description = "The target is raked with steel claws. It also raises the user's Attack stat.";
 
         // 233 Vital Throw
         updateMovePower(moves, Moves.vitalThrow, 100);
 
+        // 236 Moonlight
+        if (generationOfPokemon() < 6 && typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.moonlight, Type.FAIRY);
+
         // 239 Twister
-        updateMovePower(moves, Moves.twister, 60);
+        if (doubles) {
+        updateMovePower(moves, Moves.twister, 75);
+        updateMoveAccuracy(moves, Moves.twister, 90);
+        }
         moves.get(Moves.twister).flinchPercentChance = 30.0;
 
 //        // 243 Mirror Coat
@@ -4429,43 +4702,106 @@ public abstract class AbstractRomHandler implements RomHandler {
 //        moves.get(Moves.mirrorCoat).isCopiedByMirrorMove = true;
 //        moves.get(Moves.mirrorCoat).description = "The user blasts the targets with a radiant sheen. The lower the user's HP, the less powerful it becomes.";
 
+        // 244 Psych Up
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.psychUp, Type.FAIRY);
+
         // 249 Rock Smash
-        moves.get(Moves.rockSmash).statChanges[0].stages = -2;
-        moves.get(Moves.rockSmash).statChanges[0].percentChance = 100.0;
-        moves.get(Moves.rockSmash).description = "The user attacks with a punch that can\\xFFFEshatter a rock. It also harshly lowers the\\xFFFEtarget's Defense stat.";
+        if (generationOfPokemon() == 6) {
+            updateMovePower(moves, Moves.rockSmash, 75);
+        }
+        else {
+            moves.get(Moves.rockSmash).statChanges[0].percentChance = 100.0;
+            moves.get(Moves.rockSmash).description = removeLineBreaks(moves.get(Moves.rockSmash).description)
+                    .replace("may lower", "harshly lowers")
+                    .replace("may also cut", "also harshly cuts")
+                    .replace("may also lower", "also harshly lowers");
+        }
 
         // 250 Whirlpool
         updateMoveAccuracy(moves, Moves.whirlpool, 100);
+
+        // Gen III
+        if (generationOfPokemon() < 3)
+            return;
+
+        // 260 Flatter
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.flatter, Type.FAIRY);
 
         // 261 Will-O-Wisp
         updateMoveAccuracy(moves, Moves.willOWisp, 100);
         updateMoveType(moves, Moves.willOWisp, Type.GHOST);
 
         // 262 Memento
-        updateMoveCategory(moves, Moves.memento, MoveCategory.SPECIAL);
-        updateMovePower(moves, Moves.memento, 70);
-        updateMovePP(moves, Moves.memento, 15);
-        moves.get(Moves.memento).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
-        moves.get(Moves.memento).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
-        moves.get(Moves.memento).statChanges[0].type = StatChangeType.ATTACK;
-        moves.get(Moves.memento).statChanges[0].stages = -1;
-        moves.get(Moves.memento).statChanges[0].percentChance = 100;
-        moves.get(Moves.memento).description = "The user reveals a dark energy and damages the target. It also lowers the target's Attack stat.";
+        if (generationOfPokemon() == 5) {
+            // There's a bug where this only seems to work in Gen V...
+            // Tested in ORAS, there's a cosmetic bug where HP bar doesn't visually drop
+
+            updateMoveCategory(moves, Moves.memento, MoveCategory.SPECIAL);
+            updateMovePower(moves, Moves.memento, 70);
+            updateMovePP(moves, Moves.memento, 15);
+            moves.get(Moves.memento).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+            moves.get(Moves.memento).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
+            moves.get(Moves.memento).statChanges[0].type = StatChangeType.ATTACK;
+            moves.get(Moves.memento).statChanges[0].stages = -1;
+            moves.get(Moves.memento).statChanges[0].percentChance = 100;
+            moves.get(Moves.memento).description = "The user reveals a dark energy and damages the target. It also lowers the target's Attack stat.";
+        }
+
+        // 266 Follow Me
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.followMe, Type.FAIRY);
+
+        // 270 Helping Hand
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.helpingHand, Type.FAIRY);
+
+        // 273 Wish
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.wish, Type.FAIRY);
 
         // 292 Arm Thrust
         updateMovePower(moves, Moves.armThrust, 25);
 
         // 295 Luster Purge
-        updateMovePower(moves, Moves.lusterPurge, 65);
-        updateMovePP(moves, Moves.lusterPurge, 10);
-        moves.get(Moves.lusterPurge).statChanges[0].percentChance = 100.0;
-        moves.get(Moves.lusterPurge).description = "The user lets loose a damaging burst of light. It also lowers the target's Sp. Def stat.";
+        if (generationOfPokemon() == 5 && typeInGame(Type.FAIRY)) {
+            updateMoveType(moves, Moves.lusterPurge, Type.FAIRY);
+            updateMovePower(moves, Moves.lusterPurge, 80);
+            updateMovePP(moves, Moves.lusterPurge, 10);
+            moves.get(Moves.lusterPurge).name = "DazzlingGleam";
+            moves.get(Moves.lusterPurge).qualities = MoveQualities.DAMAGE;
+            moves.get(Moves.lusterPurge).effect = MoveEffect.DMG;
+            moves.get(Moves.lusterPurge).target = MoveTarget.ALL_ADJACENT_FOES;
+            moves.get(Moves.lusterPurge).statChanges[0] = new Move.StatChange(StatChangeType.NONE, 0, 0);
+            moves.get(Moves.lusterPurge).description = "The user damages opposing Pokémon by emitting a powerful flash.";
+        }
+        else {
+            updateMovePower(moves, Moves.lusterPurge, 65);
+            updateMovePP(moves, Moves.lusterPurge, 10);
+            moves.get(Moves.lusterPurge).statChanges[0].percentChance = 100.0;
+            moves.get(Moves.lusterPurge).description = "The user lets loose a damaging burst of light. It also lowers the target's Sp. Def stat.";
+        }
 
         // 296 Mist Ball
-        updateMovePower(moves, Moves.mistBall, 75);
-        updateMovePP(moves, Moves.mistBall, 10);
-        moves.get(Moves.mistBall).statChanges[0].percentChance = 100.0;
-        moves.get(Moves.mistBall).description = "A mistlike flurry of down envelops and damages the target. It also lowers the target's Sp. Atk.";
+        if (generationOfPokemon() == 5 && typeInGame(Type.FAIRY)) {
+            updateMoveType(moves, Moves.mistBall, Type.FAIRY);
+            updateMovePower(moves, Moves.mistBall, 95);
+            updateMovePP(moves, Moves.mistBall, 15);
+            moves.get(Moves.mistBall).name = "Moonblast";
+            moves.get(Moves.mistBall).statChanges[0].percentChance = 30;
+            moves.get(Moves.mistBall).description = "Borrowing the power of the moon, the user attacks the target. This may also lower the target's Sp. Atk stat.";
+        }
+        else {
+            updateMovePower(moves, Moves.mistBall, 75);
+            updateMovePP(moves, Moves.mistBall, 10);
+            moves.get(Moves.mistBall).statChanges[0].percentChance = 100.0;
+            moves.get(Moves.mistBall).description = "A mistlike flurry of down envelops and damages the target. It also lowers the target's Sp. Atk.";
+        }
+
+        // 298 Teeter Dance
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.teeterDance, Type.FAIRY);
 
         // 299 Blaze Kick
         updateMoveAccuracy(moves, Moves.blazeKick, 95);
@@ -4491,6 +4827,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.hydroCannon).isRechargeMove = false;
         moves.get(Moves.hydroCannon).description = "The target is hit with a watery blast. It lowers the user’s Defense and Sp. Def stats.";
 
+        // 310 Astonish
+        // TODO Test this in gen 6... doesn't work in Gen V!
+        if (generationOfPokemon() != 5) {
+            updateMovePower(moves, Moves.astonish, 40);
+            updateMovePP(moves, Moves.astonish, 10);
+            moves.get(Moves.astonish).priority = 3;
+            moves.get(Moves.astonish).flinchPercentChance = 100;
+            moves.get(Moves.astonish).effect = MoveEffect.FAKE_OUT;
+            moves.get(Moves.astonish).description = "An attack that hits first and makes the target flinch. It only works the first turn the user is in battle.";
+        }
+
         // 314 Air Cutter
         updateMovePower(moves, Moves.airCutter, 70);
         updateMoveAccuracy(moves, Moves.airCutter, 100);
@@ -4502,6 +4849,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 319 Metal Sound
         updateMoveAccuracy(moves, Moves.metalSound, 100);
+
+        // 321 Tickle
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.tickle, Type.FAIRY);
 
         // 324 Signal Beam
         moves.get(Moves.signalBeam).statusPercentChance = 30.0;
@@ -4524,11 +4875,14 @@ public abstract class AbstractRomHandler implements RomHandler {
 //        updateMoveAccuracy(moves, Moves.sheerCold, 90);
 //        moves.get(Moves.sheerCold).effect = MoveEffect.DMG_USER_SPA_MINUS_2;
 //        moves.get(Moves.sheerCold).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, -2, 100.0);
-//        moves.get(Moves.sheerCold).description = "The target is attacked with a blast of\\xFFFEabsolute-zero cold. This harshly\\xFFFEreduces the user's Sp. Atk stat.";
+//        moves.get(Moves.sheerCold).description = "The target is attacked with a blast of absolute-zero cold. This harshly reduces the user's Sp. Atk stat.";
 
         // 330 Muddy Water
+        if (doubles)
+            updateMovePower(moves, Moves.muddyWater, 75);
         updateMoveAccuracy(moves, Moves.muddyWater, 90);
         moves.get(Moves.muddyWater).effect = MoveEffect.DMG_TRGT_SPE_MINUS_1;
+        moves.get(Moves.muddyWater).statChanges[0].type = StatChangeType.SPEED;
         moves.get(Moves.muddyWater).statChanges[0].percentChance = 100.0;
         moves.get(Moves.muddyWater).description = "The user attacks by shooting muddy water at the opposing team. It also lowers their Speed stats.";
 
@@ -4559,6 +4913,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         // 354 Psycho Boost
         updateMovePower(moves, Moves.psychoBoost, 130);
 
+        // Gen IV
+        if (generationOfPokemon() < 4)
+            return;
+
+        // 358 Wake-Up Slap
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.wakeUpSlap, Type.FAIRY);
+
         // 364 Feint
         updateMovePower(moves, Moves.feint, 50);
 
@@ -4570,10 +4932,20 @@ public abstract class AbstractRomHandler implements RomHandler {
 //        moves.get(Moves.metalBurst).description = "The user explodes chunks of metal toward the targets. The lower the user's HP, the less powerful it becomes.";
 
         // 381 Lucky Chant
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.luckyChant, Type.FAIRY);
         moves.get(Moves.luckyChant).qualities = MoveQualities.OTHER;
         moves.get(Moves.luckyChant).effect = MoveEffect.CRIT_RATIO_PLUS_2;
         moves.get(Moves.luckyChant).target = MoveTarget.USER;
-        moves.get(Moves.luckyChant).description = "The user chants an incantation toward\\xFFFEthe sky so that critical hits\\xFFFEland more easily.";
+        moves.get(Moves.luckyChant).description = "The user chants an incantation toward the sky so that critical hits land more easily.";
+
+        // 382 Me First
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.meFirst, Type.FAIRY);
+
+        // 383 Copycat
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.copycat, Type.FAIRY);
 
         // 401 Aqua Tail
         moves.get(Moves.aquaTail).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
@@ -4597,7 +4969,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.dragonRush).priority = 1;
         moves.get(Moves.dragonRush).flinchPercentChance = 0.0;
         moves.get(Moves.dragonRush).effect = MoveEffect.DMG_INCR_PRIO;
-        moves.get(Moves.dragonRush).description = "The user tackles the target while\\xFFFEexhibiting overwhelming menace.\\xFFFEThis move always goes first.";
+        moves.get(Moves.dragonRush).description = "The user tackles the target while exhibiting overwhelming menace. This move always goes first.";
 
         // 416 Giga Impact
         moves.get(Moves.gigaImpact).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
@@ -4640,7 +5012,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.mirrorShot).effect = MoveEffect.DMG_TRGT_SPA_MINUS_1;
         moves.get(Moves.mirrorShot).statChanges[0].type = StatChangeType.SPEED;
         moves.get(Moves.mirrorShot).statChanges[0].percentChance = 100.0;
-        moves.get(Moves.mirrorShot).description = "The user looses a flash of energy at\\xFFFEthe target from its polished body.\\xFFFEIt also lowers the target's Sp. Atk stat.";
+        moves.get(Moves.mirrorShot).description = "The user looses a flash of energy at the target from its polished body. It also lowers the target's Sp. Atk stat.";
 
         // 430 Flash Cannon
         moves.get(Moves.flashCannon).statChanges[0].percentChance = 30.0;
@@ -4659,6 +5031,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.rockWrecker).isRechargeMove = false;
         moves.get(Moves.rockWrecker).description = "The user launches a huge boulder at the target to attack. It lowers the user’s Defense and Sp. Def stats.";
 
+        // 443 Magnet Bomb
+        updateMoveCategory(moves, Moves.magnetBomb, MoveCategory.SPECIAL);
+
+        // 445 Captivate
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.captivate, Type.FAIRY);
+
         // 451 Charge Beam
         updateMoveAccuracy(moves, Moves.chargeBeam, 100);
         moves.get(Moves.chargeBeam).statChanges[0].percentChance = 100.0;
@@ -4674,14 +5053,34 @@ public abstract class AbstractRomHandler implements RomHandler {
         // 463 Magma Storm
         updateMoveAccuracy(moves, Moves.magmaStorm, 85);
 
+        // Gen V
+        if (generationOfPokemon() < 5)
+            return;
+
         // 473 Psyshock
         updateMovePower(moves, Moves.psyshock, 85);
+
+        // 494 Entrainment
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.entrainment, Type.FAIRY);
+
+        // 495 After You
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.afterYou, Type.FAIRY);
 
         // 499 Clear Smog
         updateMovePower(moves, Moves.clearSmog, 60);
 
+        // 505 Heal Pulse
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.healPulse, Type.FAIRY);
+
         // 509 Circle Throw
         updateMoveAccuracy(moves, Moves.circleThrow, 100);
+
+        // 516 Bestow
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.bestow, Type.FAIRY);
 
         // 522 Struggle Bug
         updateMovePower(moves, Moves.struggleBug, 60);
@@ -4751,15 +5150,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.roarOfTime).isRechargeMove = false;
         moves.get(Moves.roarOfTime).description = "The user blasts the target with power that distorts even time. It lowers the user’s Defense and Sp. Def stats.";
 
-        // 224 Megahorn
-        moves.get(Moves.megahorn).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-        updateMoveAccuracy(moves, Moves.megahorn, 100);
-        updateMovePP(moves, Moves.megahorn, 5);
-        moves.get(Moves.megahorn).effect = MoveEffect.DMG_USER_DEF_SPD_MINUS_1;
-        moves.get(Moves.megahorn).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
-        moves.get(Moves.megahorn).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_DEFENSE, -1, 100);
-        moves.get(Moves.megahorn).description = "Using its tough and impressive horn, the user rams into the target. It lowers the user’s Defense and Sp. Def stats.";
-
         // 550 Bolt Strike
         moves.get(Moves.boltStrike).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
         updateMovePower(moves, Moves.boltStrike, 120);
@@ -4770,6 +5160,69 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.boltStrike).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
         moves.get(Moves.boltStrike).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_DEFENSE, -1, 100);
         moves.get(Moves.boltStrike).description = "The user charges its target, surrounding itself with a electricity. It lowers the user’s Defense and Sp. Def stats.";
+
+        // Gen 6
+        if (generationOfPokemon() < 6)
+            return;
+
+//        TODO: Let's maybe keep Play Rough as a solid option
+//        // 583 Play Rough
+//        moves.get(Moves.playRough).power = 75;
+//        moves.get(Moves.playRough).statChanges[0].percentChance = 100;
+//        moves.get(Moves.playRough).description = removeLineBreaks(moves.get(Moves.playRough).description)
+//                .replace("may also lower", "also lowers");
+
+        // 584 Fairy Wind
+        updateMovePower(moves, Moves.fairyWind, 60);
+        updateMoveAccuracy(moves, Moves.fairyWind, Move.getPerfectAccuracy(MoveCategory.SPECIAL, generationOfPokemon()));
+
+        // 591 Diamond Storm
+        updateMovePower(moves, Moves.diamondStorm, 65);
+        updateMoveCategory(moves, Moves.diamondStorm, MoveCategory.SPECIAL);
+
+        // 592 Steam Eruption
+        updateMovePower(moves, Moves.steamEruption, 90);
+        updateMoveAccuracy(moves, Moves.steamEruption, 90);
+
+        // 595 Mystical Fire
+        updateMovePower(moves, Moves.mysticalFire, 70);
+
+        // 617 Light of Ruin
+        updateMovePower(moves, Moves.lightOfRuin, 120);
+        updateMoveAccuracy(moves, Moves.lightOfRuin, 95);
+        moves.get(Moves.lightOfRuin).effect = MoveEffect.DMG_RECOIL_33;
+        moves.get(Moves.lightOfRuin).recoil = -33;
+        moves.get(Moves.lightOfRuin).description = "Drawing power from the Eternal Flower, the user fires a powerful beam of light. The user also takes serious damage.";
+
+        // 613 Oblivion Wing
+        updateMovePower(moves, Moves.oblivionWing, 65);
+
+        // 614 Thousand Arrows
+        updateMovePower(moves, Moves.thousandArrows, 75);
+        if (doubles)
+            updateMoveAccuracy(moves, Moves.thousandArrows, 90);
+
+        // 615 Thousand Waves
+        updateMovePower(moves, Moves.thousandWaves, 75);
+        if (doubles)
+            updateMoveAccuracy(moves, Moves.thousandWaves, 90);
+        updateMoveCategory(moves, Moves.thousandWaves, MoveCategory.SPECIAL);
+
+        // 616 Land's Wrath
+        updateMovePower(moves, Moves.landsWrath, 80);
+        if (doubles)
+            updateMoveAccuracy(moves, Moves.landsWrath, 90);
+
+        // 618 Origin Pulse
+        updateMovePower(moves, Moves.originPulse, 95);
+        updateMoveAccuracy(moves, Moves.originPulse, 90);
+
+        // 619 Precipice Blades
+        updateMovePower(moves, Moves.precipiceBlades, 95);
+        updateMoveAccuracy(moves, Moves.precipiceBlades, 90);
+
+        // 621 Hyperspace Fury
+        updateMovePower(moves, Moves.hyperspaceFury, 80);
     }
 
     private Map<Integer, boolean[]> moveUpdates;
@@ -4782,6 +5235,167 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public Map<Integer, boolean[]> getMoveUpdates() {
         return moveUpdates;
+    }
+
+    protected void customTypeEffectiveness(Type[] typeTable, Effectiveness[][] typeEffectivenessTable) {
+        Map<Effectiveness, String> effectivenessStringMap = new HashMap<Effectiveness, String>() {{
+            put(Effectiveness.HALF, " not very effective");
+            put(Effectiveness.NEUTRAL, " neutral");
+            put(Effectiveness.DOUBLE, " super effective");
+        }};
+
+        log("--Custom Type Effectiveness--");
+
+        List<String> logStrings = new ArrayList<>();
+
+        for (int defendIndex = 0; defendIndex < typeEffectivenessTable.length; defendIndex++) {
+            Type defendType = typeTable[defendIndex];
+            Map<Type, Effectiveness> against = Effectiveness.against(defendType, null,
+                    generationOfPokemon(), true, true, true);
+
+            for (int attackIndex = 0; attackIndex < typeEffectivenessTable.length; attackIndex++) {
+                Type attackType = typeTable[attackIndex];
+                Effectiveness oldEffectiveness = typeEffectivenessTable[attackIndex][defendIndex];
+                Effectiveness newEffectiveness = against.get(attackType);
+
+                if (oldEffectiveness == newEffectiveness)
+                    continue;
+
+                typeEffectivenessTable[attackIndex][defendIndex] = newEffectiveness;
+                logStrings.add(attackType + effectivenessStringMap.get(oldEffectiveness) + " vs " + defendType
+                        + " => " + attackType + effectivenessStringMap.get(newEffectiveness) + " vs " + defendType);
+            }
+        }
+
+        Collections.sort(logStrings);
+        for (String str : logStrings) {
+            log("Replaced: " + str);
+        }
+
+        logBlankLine();
+    }
+
+    public String sortText(String inText, int maxLines, int maxLinePixels) {
+        String[] inLines = inText.split(getLineBreakStringRegex());
+        if (validateTextLines(inLines, maxLines, maxLinePixels))
+            return inText; // Already valid
+
+        String[] words = inText.replace(getLineBreakString(), " ").split(" ");
+        List<String> lines = new ArrayList<>();
+
+        for (int i = 0; i < words.length - 1; i++) {
+            if (words[i].equals("Sp.")) {
+                words[i] = String.join(" ", words[i], words[i + 1]);
+                words[i + 1] = "";
+            }
+        }
+
+        int word = 0;
+        int linePixels = 0;
+        StringBuilder stringBuilder = new StringBuilder();
+
+        while (word < words.length) {
+            if (words[word].isEmpty()) {
+                word++;
+                continue;
+            }
+
+            int spacePixels = linePixels == 0 ? 0 : getTextCharPixels(' ');
+            int wordPixels = getTextLineCharPixels(words[word]);
+
+            if (linePixels + spacePixels + wordPixels > maxLinePixels) {
+                // Next Line
+                linePixels = 0;
+                lines.add(stringBuilder.toString());
+                stringBuilder = new StringBuilder();
+                continue;
+            }
+
+            if (linePixels > 0)
+                stringBuilder.append(' ');
+            stringBuilder.append(words[word]);
+            linePixels += spacePixels + wordPixels;
+            word++;
+        }
+
+        lines.add(stringBuilder.toString());
+
+        if (lines.size() > maxLines) {
+            return String.join(getLineBreakString(), lines); // TOO LONG! May happen with many TMs
+        }
+
+        return String.join(getLineBreakString(), lines);
+    }
+
+    private String removeLineBreaks(String string) {
+        return string.replaceAll(getLineBreakStringRegex(), " ");
+    }
+
+    private boolean validateTextLines(String[] lines, int maxLines, int maxLinePixels) {
+        if (lines.length > maxLines)
+            return false;
+
+        for (String line : lines) {
+            if (getTextLineCharPixels(line) > maxLinePixels)
+                return false;
+        }
+
+        return true;
+    }
+
+    private int getTextLineCharPixels(String line) {
+        int pixelCount = 0;
+
+        char[] characters = line.toCharArray();
+        for (char character : characters) {
+            pixelCount += getTextCharPixels(character);
+        }
+
+        return pixelCount;
+    }
+
+    public int getLongestLinePixels(String inText) {
+        String[] inLines = inText.split(getLineBreakStringRegex());
+
+        int longestLinePixels = 0;
+        for (String string : inLines) {
+            int linePixels = getTextLineCharPixels(string);
+            if (linePixels > longestLinePixels)
+                longestLinePixels = linePixels;
+        }
+
+        return longestLinePixels;
+    }
+
+    @Override
+    public int getTextCharPixels(char character) {
+        switch (character) {
+            case 'i':
+                return 3;
+            case ' ':
+            case 'l':
+                return 4;
+            case 'f':
+            case ',':
+            case '.':
+            case '\'':
+            case '\"':
+            case ':':
+            case ';':
+                return 5;
+            default:
+                return 6; // All other characters are 6 pixels
+        }
+    }
+
+    @Override
+    public String getLineBreakString() {
+        return "\\n";
+    }
+
+    @Override
+    public String getLineBreakStringRegex() {
+        return "\\\\n";
     }
 
     @Override
@@ -4809,9 +5423,24 @@ public abstract class AbstractRomHandler implements RomHandler {
         int maxFinalMoveLevel = 0;
         double averageFinalMoveLevel = 0.0;
 
-        int eliteFourAceLevel = getTrainers().get(getEliteFourTrainers(isChallengeMode()).get(0)).getAceLevel();
+        List<Integer> eliteFourTrainers = getEliteFourTrainers(isChallengeMode());
+        int minEliteFourAceLevel = 100;
+        for (int e : eliteFourTrainers) {
+            Trainer tr = getTrainers().get(e - 1);
+            int aceLevel = tr.getAceLevel();
+
+            if (aceLevel < minEliteFourAceLevel) {
+                minEliteFourAceLevel = aceLevel;
+            }
+        }
+
+        if (settings.isTrainersLevelModified()) {
+            double mod = 1.0 + settings.getTrainersLevelModifier() / 100.0;
+            minEliteFourAceLevel = (int)Math.round(minEliteFourAceLevel * mod);
+        }
+
         if (isChallengeMode()) {
-            eliteFourAceLevel += 4;
+            minEliteFourAceLevel += 4;
         }
 
         for (Integer pkmnNum : movesets.keySet()) {
@@ -4851,7 +5480,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             int lastDouble = -1;
-            while (level <= eliteFourAceLevel && moves.size() < 22) {
+            while (level <= minEliteFourAceLevel && moves.size() < 22) {
                 MoveLearnt move = new MoveLearnt();
                 move.level = level;
                 move.move = 0;
@@ -4988,19 +5617,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
-//            if (pkmnNum == Species.kecleon) {
-//                moves.clear();
-//                moves.add(new MoveLearnt(Moves.payDay, 1));
-//                continue;
-//            }
-//
-//            if (pkmnNum == Species.snorlax) {
-//                moves.clear();
-//                moves.add(new MoveLearnt(Moves.quickAttack, 1));
-//                moves.add(new MoveLearnt(Moves.darkPulse, 1));
-//                continue;
-//            }
-
             // write all moves for the pokemon
             for (int i = 0; i < learnt.size(); i++) {
                 moves.get(i).move = learnt.get(i);
@@ -5009,6 +5625,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                     moves.get(i).level = 1;
                 }
             }
+
+//            // Poke Test
+//            if (pkmnNum == Species.dugtrio) {
+//                moves.clear();
+//                moves.add(new MoveLearnt(Moves.lusterPurge, 1));
+//                moves.add(new MoveLearnt(Moves.aquaJet, 1));
+//            }
         }
 
         // Done, save
@@ -5282,7 +5905,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void metronomeOnlyMode() {
-
         // movesets
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
 
@@ -5309,7 +5931,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        this.setTrainers(trainers, false);
+        this.setTrainers(trainers, false, false);
 
         // tms
         List<Integer> tmMoves = this.getTMMoves();
@@ -7582,7 +8204,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         {
             Trainer trainer = trainers.get(i);
             int index = trainer.index - 1;
-            if (trainer.isLeader() && mainPlaythroughTrainers.contains(index))
+            if (trainer.isLeader() && (mainPlaythroughTrainers.isEmpty() || mainPlaythroughTrainers.contains(index)))
             {
                 leaders.add(index);
             }
@@ -9082,12 +9704,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Now apply in order.
         for (MiscTweak mt : tweaksToApply) {
-            applyMiscTweak(mt);
+            applyMiscTweak(settings, mt);
         }
     }
 
     @Override
-    public void applyMiscTweak(MiscTweak tweak) {
+    public void applyMiscTweak(Settings settings, MiscTweak tweak) {
         // default: do nothing
     }
 

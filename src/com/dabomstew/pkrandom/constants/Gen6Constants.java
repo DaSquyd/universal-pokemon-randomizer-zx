@@ -206,8 +206,8 @@ public class Gen6Constants {
     // Copied from pk3DS. "Dark Grass Held Item" should probably be renamed
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
-            bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsDarkGrassHeldItemOffset = 16,
-            bsGenderOffset = 18, bsGrowthCurveOffset = 21, bsAbility1Offset = 24, bsAbility2Offset = 25,
+            bsCatchRateOffset = 8, bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsDarkGrassHeldItemOffset = 16,
+            bsGenderOffset = 18, bsBaseHappinessOffset = 20, bsGrowthCurveOffset = 21, bsAbility1Offset = 24, bsAbility2Offset = 25,
             bsAbility3Offset = 26, bsFormeOffset = 28, bsFormeSpriteOffset = 30, bsFormeCountOffset = 32,
             bsExpYieldOffset = 34, bsTMHMCompatOffset = 40, bsSpecialMTCompatOffset = 56, bsMTCompatOffset = 64;
 
@@ -227,7 +227,8 @@ public class Gen6Constants {
 
     public static final String tmDataPrefix = "D400AE02AF02B002";
     public static final int tmCount = 100, tmBlockOneCount = 92, tmBlockTwoCount = 3, tmBlockThreeCount = 5,
-            tmBlockOneOffset = Items.tm01, tmBlockTwoOffset = Items.tm93, tmBlockThreeOffset = Items.tm96, hmBlockOneCount = 5,
+            tmBlockOneOffset = Items.tm01, tmBlockTwoOffset = Items.tm93, tmBlockThreeOffset = Items.tm96,
+            hmBlockOneCount = 5, hmBlockOneOffset = Items.hm01,
             rockSmashOffsetORAS = 10, diveOffsetORAS = 28;
     private static final int tmBlockTwoStartingOffsetXY = 97, tmBlockTwoStartingOffsetORAS = 98,
             hmCountXY = 5, hmCountORAS = 7;
@@ -349,6 +350,9 @@ public class Gen6Constants {
     public static final String nationalDexFunctionLocator = "080094E5010000E21080BDE8170F122F", xyGetDexFlagFunctionLocator = "000055E30100A0030A00000A",
             orasGetHoennDexCaughtFunctionPrefix = "170F122F1CC15800";
     public static final int megastoneTableStartingOffsetORAS = 0xABA, megastoneTableEntrySizeORAS = 0x20, megastoneTableLengthORAS = 27;
+
+    public static final String typeEffectivenessTableLocator = "0404040404020400";
+    public static final String critChanceLocator = "1008020100";
 
     public static final String pickupTableLocator = "110012001A00";
     public static final int numberOfPickupItems = 29;
@@ -992,10 +996,29 @@ public class Gen6Constants {
         nonBadItemsORAS.banRange(Items.adamantOrb, 2); // orbs
         nonBadItemsORAS.banRange(Items.mail1, 12); // mails
         nonBadItemsORAS.banRange(Items.figyBerry, 25); // berries without useful battle effects
-        nonBadItemsORAS.banRange(Items.luckyPunch, 4); // pokemon specific
+        // nonBadItemsORAS.banRange(Items.luckyPunch, 4); // pokemon specific
         nonBadItemsORAS.banRange(Items.redScarf, 5); // contest scarves
         nonBadItemsORAS.banRange(Items.relicCopper,7); // relic items
         nonBadItemsORAS.banRange(Items.richMulch,4); // more mulch
+        nonBadItemsORAS.banRange(Items.redShard, 4); // shards
+        nonBadItemsORAS.banRange(Items.healthFeather, 6); // wings
+        nonBadItemsORAS.banRange(Items.potion, 28); // heal items
+        nonBadItemsORAS.banRange(Items.hpUp, 5); // vitamins
+        nonBadItemsORAS.banSingles(Items.zinc); // Zinc
+        nonBadItemsORAS.banRange(Items.powerBracer, 6); // power items
+        nonBadItemsORAS.banSingles(Items.machoBrace); // macho brace
+        nonBadItemsORAS.banRange(Items.guardSpec, 8); // xitems
+        nonBadItemsORAS.banRange(Items.rootFossil, 7); // fossils
+        nonBadItemsORAS.banSingles(Items.coverFossil, Items.plumeFossil); // fossils
+        nonBadItemsORAS.banSingles(Items.jawFossil, Items.sailFossil); // fossils
+        nonBadItemsORAS.banSingles(Items.luckIncense, Items.amuletCoin); // money
+        nonBadItemsORAS.banSingles(Items.pureIncense); // money
+        nonBadItemsORAS.banRange(Items.tinyMushroom, 7); // money
+        nonBadItemsORAS.banSingles(Items.pokeDoll, Items.fluffyTail);
+        nonBadItemsORAS.banRange(Items.blueFlute, 5); // flutes
+        nonBadItemsORAS.banSingles(Items.shoalSalt, Items.shoalShell);
+        nonBadItemsORAS.banSingles(Items.smokeBall, Items.everstone, Items.heartScale, Items.honey);
+        nonBadItemsORAS.banSingles(Items.sweetHeart, Items.rageCandyBar, Items.ringTarget, Items.sootheBell);
 
         regularShopItems = new ArrayList<>();
 

@@ -2894,7 +2894,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
         if (romEntry.romType == Gen4Constants.Type_HGSS) {
             fixAbilitySlotValuesForHGSS(trainerData);
         }
@@ -2929,6 +2929,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         }
                     }
                 }
+
+                // TODO
+                // if (allSmart)
+                //     trainer[16]
 
                 int bytesNeeded = 6 * numPokes;
                 if (romEntry.romType != Gen4Constants.Type_DP) {
@@ -5277,7 +5281,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void applyMiscTweak(MiscTweak tweak) {
+    public void applyMiscTweak(Settings settings, MiscTweak tweak) {
         if (tweak == MiscTweak.LOWER_CASE_POKEMON_NAMES) {
             applyCamelCaseNames();
         } else if (tweak == MiscTweak.RANDOMIZE_CATCHING_TUTORIAL) {
