@@ -769,6 +769,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             int flags = getMoveFlags(i);
             FileFunctions.writeFullInt(data, 32, flags);
+
+            // Explicitly set struggle to type 18
+            if (i == Moves.struggle && wasFairyAdded)
+                data[0] = 18;
         }
 
         setStrings(false, romEntry.getInt("MoveNamesTextOffset"), moveNames);
@@ -2912,6 +2916,62 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 hallOfFameGraphicsNarcFile[i] = (byte)(newHallOfFameGraphicsData[i]);
             }
 
+            pokes[Species.clefairy].primaryType = Type.FAIRY;
+            pokes[Species.clefable].primaryType = Type.FAIRY;
+            pokes[Species.jigglypuff].secondaryType = Type.FAIRY;
+            pokes[Species.wigglytuff].secondaryType = Type.FAIRY;
+            pokes[Species.mrMime].secondaryType = Type.FAIRY;
+            pokes[Species.igglybuff].secondaryType = Type.FAIRY;
+            pokes[Species.togepi].primaryType = Type.FAIRY;
+            pokes[Species.togetic].primaryType = Type.FAIRY;
+            pokes[Species.marill].secondaryType = Type.FAIRY;
+            pokes[Species.azumarill].secondaryType = Type.FAIRY;
+            pokes[Species.snubbull].primaryType = Type.FAIRY;
+            pokes[Species.granbull].primaryType = Type.FAIRY;
+            pokes[Species.ralts].secondaryType = Type.FAIRY;
+            pokes[Species.kirlia].secondaryType = Type.FAIRY;
+            pokes[Species.gardevoir].secondaryType = Type.FAIRY;
+            pokes[Species.azurill].secondaryType = Type.FAIRY;
+            pokes[Species.mawile].secondaryType = Type.FAIRY;
+            pokes[Species.mimeJr].secondaryType = Type.FAIRY;
+            pokes[Species.togekiss].primaryType = Type.FAIRY;
+            pokes[Species.cottonee].primaryType = Type.FAIRY;
+            pokes[Species.whimsicott].primaryType = Type.FAIRY;
+
+            moves[Moves.charm].type = Type.FAIRY;
+            moves[Moves.moonlight].type = Type.FAIRY;
+            moves[Moves.sweetKiss].type = Type.FAIRY;
+            
+            // Submission -> Play Rough
+            moves[Moves.submission].name = "Play Rough";
+            moves[Moves.submission].type = Type.FAIRY;
+            moves[Moves.submission].power = 90;
+            moves[Moves.submission].accuracy = 90;
+            moves[Moves.submission].qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+            moves[Moves.submission].effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
+            moves[Moves.submission].recoil = 0;
+            moves[Moves.submission].statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 10);
+            moves[Moves.submission].description = "The user plays rough with the target and attacks it. This may also lower the target's Attack stat.";
+
+            // Luster Purge -> Dazzling Gleam
+            moves[Moves.lusterPurge].name = "DazzlingGleam";
+            moves[Moves.lusterPurge].type = Type.FAIRY;
+            moves[Moves.lusterPurge].power = 80;
+            moves[Moves.lusterPurge].pp = 10;
+            moves[Moves.lusterPurge].qualities = MoveQualities.DAMAGE;
+            moves[Moves.lusterPurge].effect = MoveEffect.DMG;
+            moves[Moves.lusterPurge].target = MoveTarget.ALL_ADJACENT_FOES;
+            moves[Moves.lusterPurge].statChanges[0] = new Move.StatChange(StatChangeType.NONE, 0, 0);
+            moves[Moves.lusterPurge].description = "The user damages opposing Pokémon by emitting a powerful flash.";
+
+            // Mist Ball -> Moonblast
+            moves[Moves.mistBall].name = "Moonblast";
+            moves[Moves.mistBall].type = Type.FAIRY;
+            moves[Moves.mistBall].power = 95;
+            moves[Moves.mistBall].pp = 15;
+            moves[Moves.mistBall].statChanges[0].percentChance = 30;
+            moves[Moves.mistBall].description = "Borrowing the power of the moon, the user attacks the target. This may also lower the target's Sp. Atk stat.";
+
             wasFairyAdded = true;
         }
         catch (IOException e) {
@@ -3452,35 +3512,45 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private void writeFairy() throws IOException {
-        byte[] ovl255 = readOverlay(255);
-        genericIPSPatch(ovl255, "FairyOvl255Tweak");
-        writeOverlay(255, ovl255);
-
-        byte[] ovl207 = readOverlay(207);
-        genericIPSPatch(ovl207, "FairyOvl207Tweak");
-        writeOverlay(207, ovl207);
-
-        byte[] ovl168 = readOverlay(168);
-        genericIPSPatch(ovl168, "FairyOvl168Tweak");
-        writeOverlay(168, ovl168);
-
-        genericIPSPatch(arm9, "FairyTweak");
-
-        byte[] ovl296 = readOverlay(296);
-        genericIPSPatch(ovl296, "FairyOvl296Tweak");
-        writeOverlay(296, ovl296);
-
-        byte[] ovl298 = readOverlay(298);
-        genericIPSPatch(ovl298, "FairyOvl298Tweak");
-        writeOverlay(296, ovl298);
-
         // We need to use an expanded ovl167 (of known length 0x000418C0) because our modification results in a larger file
         byte[] ovl167_old = readOverlay(167);
         byte[] ovl167 = new byte[0x000418C0];
-        System.arraycopy(readOverlay(167), 0, ovl167, 0, ovl167_old.length);
+        System.arraycopy(ovl167_old, 0, ovl167, 0, ovl167_old.length);
+        writeOverlay(167, ovl167);
+
+        byte[] ovl168 = readOverlay(168);
+        byte[] ovl207 = readOverlay(207);
+        byte[] ovl255 = readOverlay(255);
+        byte[] ovl265 = readOverlay(265);
+        byte[] ovl296 = readOverlay(296);
+        byte[] ovl298 = readOverlay(298);
 
         genericIPSPatch(ovl167, "FairyOvl167Tweak");
         writeOverlay(167, ovl167);
+
+        genericIPSPatch(ovl168, "FairyOvl168Tweak");
+        writeOverlay(168, ovl168);
+
+        genericIPSPatch(ovl207, "FairyOvl207Tweak");
+        writeOverlay(207, ovl207);
+
+        genericIPSPatch(ovl255, "FairyOvl255Tweak");
+        writeOverlay(255, ovl255);
+
+        genericIPSPatch(ovl265, "FairyOvl265Tweak");
+        writeOverlay(265, ovl265);
+
+        genericIPSPatch(ovl296, "FairyOvl296Tweak");
+        writeOverlay(296, ovl296);
+
+        genericIPSPatch(ovl298, "FairyOvl298Tweak");
+        writeOverlay(298, ovl298);
+
+        genericIPSPatch(arm9, "FairyTweak");
+
+        boolean isBlack2 = romEntry.romCode.startsWith("IRE");
+        int new167address = isBlack2 ? 0x02199740 : 0x02199780;
+        baseRom.setOverlayAddress(167, new167address);
     }
 
     @Override

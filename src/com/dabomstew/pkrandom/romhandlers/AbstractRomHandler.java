@@ -546,14 +546,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             pokes.get(Species.dodrio).secondaryType = Type.DARK;
         }
         if (typeInGame(Type.FAIRY)) {
-            pokes.get(Species.clefairy).primaryType = Type.FAIRY;
-            pokes.get(Species.clefable).primaryType = Type.FAIRY;
-            pokes.get(Species.jigglypuff).secondaryType = Type.FAIRY;
-            pokes.get(Species.wigglytuff).secondaryType = Type.FAIRY;
             pokes.get(Species.diglett).secondaryType = Type.FAIRY;
             pokes.get(Species.dugtrio).secondaryType = Type.FAIRY;
             pokes.get(Species.rapidash).secondaryType = Type.FAIRY;
-            pokes.get(Species.mrMime).secondaryType = Type.FAIRY;
         }
         if (generationOfPokemon() < 2)
             return;
@@ -572,15 +567,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokes.get(Species.octillery).secondaryType = Type.FIRE;
         if (typeInGame(Type.FAIRY)) {
             pokes.get(Species.meganium).secondaryType = Type.FAIRY;
-            pokes.get(Species.cleffa).primaryType = Type.FAIRY;
-            pokes.get(Species.igglybuff).secondaryType = Type.FAIRY;
-            pokes.get(Species.togepi).primaryType = Type.FAIRY;
-            pokes.get(Species.togetic).primaryType = Type.FAIRY;
-            pokes.get(Species.marill).secondaryType = Type.FAIRY;
-            pokes.get(Species.azumarill).secondaryType = Type.FAIRY;
             pokes.get(Species.misdreavus).secondaryType = Type.FAIRY;
-            pokes.get(Species.snubbull).primaryType = Type.FAIRY;
-            pokes.get(Species.granbull).primaryType = Type.FAIRY;
         }
         if (generationOfPokemon() < 3)
             return;
@@ -603,11 +590,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokes.get(Species.chimecho).secondaryType = Type.GHOST;
         pokes.get(Species.glalie).secondaryType = Type.ROCK;
         if (typeInGame(Type.FAIRY)) {
-            pokes.get(Species.ralts).secondaryType = Type.FAIRY;
-            pokes.get(Species.kirlia).secondaryType = Type.FAIRY;
-            pokes.get(Species.gardevoir).secondaryType = Type.FAIRY;
-            pokes.get(Species.azurill).secondaryType = Type.FAIRY;
-            pokes.get(Species.mawile).secondaryType = Type.FAIRY;
             pokes.get(Species.volbeat).secondaryType = Type.FAIRY;
             pokes.get(Species.illumise).secondaryType = Type.DARK;
             pokes.get(Species.swablu).primaryType = Type.FAIRY;
@@ -632,8 +614,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (typeInGame(Type.FAIRY)) {
             pokes.get(Species.pachirisu).secondaryType = Type.FAIRY;
             pokes.get(Species.mismagius).secondaryType = Type.FAIRY;
-            pokes.get(Species.mimeJr).secondaryType = Type.FAIRY;
-            pokes.get(Species.togekiss).primaryType = Type.FAIRY;
         }
         if (generationOfPokemon() < 5)
             return;
@@ -662,8 +642,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokes.get(Species.druddigon).secondaryType = Type.FIGHTING;
         if (typeInGame(Type.FAIRY)) {
             pokes.get(Species.audino).secondaryType = Type.FAIRY;
-            pokes.get(Species.cottonee).secondaryType = Type.FAIRY;
-            pokes.get(Species.whimsicott).secondaryType = Type.FAIRY;
             pokes.get(Species.vanillite).secondaryType = Type.FAIRY;
             pokes.get(Species.vanillish).secondaryType = Type.FAIRY;
             pokes.get(Species.vanilluxe).secondaryType = Type.FAIRY;
@@ -4372,17 +4350,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.hyperBeam).description = "The target is attacked with a powerful beam. It lowers the user’s Defense and Sp. Def stats.";
 
         // 066 Submission
-        if (generationOfPokemon() == 5 && typeInGame(Type.FAIRY)) {
-            updateMoveType(moves, Moves.submission, Type.FAIRY);
-            updateMovePower(moves, Moves.submission, 90);
-            updateMoveAccuracy(moves, Moves.submission, 90);
-            moves.get(Moves.submission).name = "Play Rough";
-            moves.get(Moves.submission).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
-            moves.get(Moves.submission).recoil = 0;
-            moves.get(Moves.submission).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 10);
-            moves.get(Moves.submission).description = "The user plays rough with the target and attacks it. This may also lower the target's Attack stat.";
-        }
-        else {
+        if (generationOfPokemon() >= 6 || !typeInGame(Type.FAIRY)) {
             updateMovePower(moves, Moves.submission, 70);
             updateMoveAccuracy(moves, Moves.submission, 100);
             moves.get(Moves.submission).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
@@ -4567,10 +4535,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             moves.get(Moves.feintAttack).name = "Feint Attack";
         moves.get(Moves.feintAttack).description = "The user approaches the target disarmingly, then throws a sucker punch. It also lowers the target's Defense stat.";
 
-        // 186 Sweet Kiss
-        if (typeInGame(Type.FAIRY))
-            updateMoveType(moves, Moves.sweetKiss, Type.FAIRY);
-
         // 187 Belly Drum
         if (typeInGame(Type.FAIRY))
             updateMoveType(moves, Moves.bellyDrum, Type.FAIRY);
@@ -4614,10 +4578,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 198 Bone Rush
         updateMoveAccuracy(moves, Moves.boneRush, 100);
-
-        // 204 Charm
-        if (typeInGame(Type.FAIRY))
-            updateMoveType(moves, Moves.charm, Type.FAIRY);
 
         // 205 Rollout
         updateMoveAccuracy(moves, Moves.rollout, 95);
@@ -4680,10 +4640,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 233 Vital Throw
         updateMovePower(moves, Moves.vitalThrow, 100);
-
-        // 236 Moonlight
-        if (generationOfPokemon() < 6 && typeInGame(Type.FAIRY))
-            updateMoveType(moves, Moves.moonlight, Type.FAIRY);
 
         // 239 Twister
         if (doubles) {
@@ -4765,18 +4721,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePower(moves, Moves.armThrust, 25);
 
         // 295 Luster Purge
-        if (generationOfPokemon() == 5 && typeInGame(Type.FAIRY)) {
-            updateMoveType(moves, Moves.lusterPurge, Type.FAIRY);
-            updateMovePower(moves, Moves.lusterPurge, 80);
-            updateMovePP(moves, Moves.lusterPurge, 10);
-            moves.get(Moves.lusterPurge).name = "DazzlingGleam";
-            moves.get(Moves.lusterPurge).qualities = MoveQualities.DAMAGE;
-            moves.get(Moves.lusterPurge).effect = MoveEffect.DMG;
-            moves.get(Moves.lusterPurge).target = MoveTarget.ALL_ADJACENT_FOES;
-            moves.get(Moves.lusterPurge).statChanges[0] = new Move.StatChange(StatChangeType.NONE, 0, 0);
-            moves.get(Moves.lusterPurge).description = "The user damages opposing Pokémon by emitting a powerful flash.";
-        }
-        else {
+        if (generationOfPokemon() >= 6 || !typeInGame(Type.FAIRY)) {
             updateMovePower(moves, Moves.lusterPurge, 65);
             updateMovePP(moves, Moves.lusterPurge, 10);
             moves.get(Moves.lusterPurge).statChanges[0].percentChance = 100.0;
@@ -4784,15 +4729,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // 296 Mist Ball
-        if (generationOfPokemon() == 5 && typeInGame(Type.FAIRY)) {
-            updateMoveType(moves, Moves.mistBall, Type.FAIRY);
-            updateMovePower(moves, Moves.mistBall, 95);
-            updateMovePP(moves, Moves.mistBall, 15);
-            moves.get(Moves.mistBall).name = "Moonblast";
-            moves.get(Moves.mistBall).statChanges[0].percentChance = 30;
-            moves.get(Moves.mistBall).description = "Borrowing the power of the moon, the user attacks the target. This may also lower the target's Sp. Atk stat.";
-        }
-        else {
+        if (generationOfPokemon() >= 6 || !typeInGame(Type.FAIRY)) {
             updateMovePower(moves, Moves.mistBall, 75);
             updateMovePP(moves, Moves.mistBall, 10);
             moves.get(Moves.mistBall).statChanges[0].percentChance = 100.0;
@@ -5626,11 +5563,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
-//            // Poke Test
-//            if (pkmnNum == Species.dugtrio) {
+//            // Poke debug test
+//            if (pkmnNum == Species.arceus) {
 //                moves.clear();
-//                moves.add(new MoveLearnt(Moves.lusterPurge, 1));
-//                moves.add(new MoveLearnt(Moves.aquaJet, 1));
+//                moves.add(new MoveLearnt(Moves.recover, 1));
 //            }
         }
 
