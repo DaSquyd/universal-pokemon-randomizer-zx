@@ -2620,6 +2620,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
+            int index = 0;
             for (TrainerPokemon tp : trainerPokemonList) {
                 boolean swapThisMegaEvo = swapMegaEvos && tp.canMegaEvolve();
                 boolean wgAllowed = (!noEarlyWonderGuard) || tp.level >= 20;
@@ -2644,18 +2645,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     bannedList.addAll(evolvesIntoTheWrongType);
                 }
 
-                Pokemon newPK = pickTrainerPokeReplacement(
-                                oldPK,
-                                usePowerLevels,
-                                typeForTrainer,
-                                noLegendaries,
-                                wgAllowed,
-                                distributionSetting || (mainPlaythroughSetting && mainPlaythroughTrainers.contains(t.index)),
-                                swapThisMegaEvo,
-                                abilitiesAreRandomized,
-                                includeFormes,
-                                banIrregularAltFormes
-                        );
+                Pokemon newPK = cachedAllList.get(Species.arceus - 1);
 
                 // Chosen Pokemon is locked in past here
                 if (distributionSetting || (mainPlaythroughSetting && mainPlaythroughTrainers.contains(t.index))) {

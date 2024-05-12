@@ -96,7 +96,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         private List<StaticPokemon> staticPokemonFakeBall = new ArrayList<>();
         private List<RoamingPokemon> roamingPokemon = new ArrayList<>();
         private List<TradeScript> tradeScripts = new ArrayList<>();
-        
+
 
         private int getInt(String key) {
             if (!numbers.containsKey(key)) {
@@ -381,7 +381,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     // This ROM
     private Pokemon[] pokes;
-    private Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
+    private Map<Integer, FormeInfo> formeMappings = new TreeMap<>();
     private List<Pokemon> pokemonList;
     private List<Pokemon> pokemonListInclFormes;
     private Move[] moves;
@@ -403,7 +403,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private long actualArm9CRC32;
     private Map<Integer, Long> actualOverlayCRC32s;
     private Map<String, Long> actualFileCRC32s;
-    
+
     private NARCArchive pokeNarc, moveNarc, stringsNarc, storyTextNarc, scriptNarc, shopNarc;
 
     @Override
@@ -467,25 +467,22 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
         loadPokemonStats();
         pokemonListInclFormes = Arrays.asList(pokes);
-        pokemonList = Arrays.asList(Arrays.copyOfRange(pokes,0,Gen5Constants.pokemonCount + 1));
+        pokemonList = Arrays.asList(Arrays.copyOfRange(pokes, 0, Gen5Constants.pokemonCount + 1));
         loadMoves();
 
         abilityNames = getStrings(false, romEntry.getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(false, romEntry.getInt("ItemNamesTextOffset"));
         shopNames = new ArrayList<>();
         if (romEntry.romType == Gen5Constants.Type_BW) {
-            for (ShopData shopData : Gen5Constants.bw1ShopData)
-            {
+            for (ShopData shopData : Gen5Constants.bw1ShopData) {
+                shopNames.add(shopData.name);
+            }
+        } else if (romEntry.romType == Gen5Constants.Type_BW2) {
+            for (ShopData shopData : Gen5Constants.bw2ShopData) {
                 shopNames.add(shopData.name);
             }
         }
-        else if (romEntry.romType == Gen5Constants.Type_BW2) {
-            for (ShopData shopData : Gen5Constants.bw2ShopData)
-            {
-                shopNames.add(shopData.name);
-            }
-        }
-        
+
         loadedWildMapNames = false;
 
         allowedItems = Gen5Constants.allowedItems.copy();
@@ -522,7 +519,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
 
             int i = Gen5Constants.pokemonCount + 1;
-            for (int k: formeMappings.keySet()) {
+            for (int k : formeMappings.keySet()) {
                 pokes[i] = new Pokemon();
                 pokes[i].number = i;
                 loadBasicPokeStats(pokes[i], pokeNarc.files.get(k), formeMappings);
@@ -531,7 +528,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 pokes[i].baseForme = pokes[fi.baseForme];
                 pokes[i].formeNumber = fi.formeNumber;
                 pokes[i].formeSpriteIndex = fi.formeSpriteOffset + Gen5Constants.pokemonCount + Gen5Constants.getNonPokemonBattleSpriteCount(romEntry.romType);
-                pokes[i].formeSuffix = Gen5Constants.getFormeSuffix(k,romEntry.romType);
+                pokes[i].formeSuffix = Gen5Constants.getFormeSuffix(k, romEntry.romType);
                 i = i + 1;
             }
             populateEvolutions();
@@ -617,7 +614,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     }
 
-    private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer,FormeInfo> altFormes) {
+    private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer, FormeInfo> altFormes) {
         pkmn.hp = stats[Gen5Constants.bsHPOffset] & 0xFF;
         pkmn.attack = stats[Gen5Constants.bsAttackOffset] & 0xFF;
         pkmn.defense = stats[Gen5Constants.bsDefenseOffset] & 0xFF;
@@ -671,7 +668,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             int firstFormeOffset = readUnsignedWord(stats, Gen5Constants.bsFormeOffset);
             if (firstFormeOffset != 0) {
                 for (int i = 1; i < formeCount; i++) {
-                    altFormes.put(firstFormeOffset + i - 1,new FormeInfo(pkmn.number,i, readUnsignedWord(stats,Gen5Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
+                    altFormes.put(firstFormeOffset + i - 1, new FormeInfo(pkmn.number, i, readUnsignedWord(stats, Gen5Constants.bsFormeSpriteOffset))); // Assumes that formes are in memory in the same order as their numbers
                     if (pkmn.number == Species.keldeo) {
                         pkmn.cosmeticForms = formeCount;
                     }
@@ -731,7 +728,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             moveNames.set(i, moves[i].name);
             moveDescriptions.set(i, sortText(moves[i].description, 3, 233));
             for (int j = 0; j < 3; j++) {
-                int index = i*3 + j;
+                int index = i * 3 + j;
                 String usage = moveUsages.get(index);
                 int lastSegment = usage.lastIndexOf(getLineBreakString()) + 6;
                 moveUsages.set(index, usage.substring(0, lastSegment) + moves[i].name + "!");
@@ -898,7 +895,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
-        int pokeNum = Gen5Constants.getAbsolutePokeNumByBaseForme(pk.number,forme);
+        int pokeNum = Gen5Constants.getAbsolutePokeNumByBaseForme(pk.number, forme);
         return pokeNum != 0 ? pokes[pokeNum] : pk;
     }
 
@@ -996,7 +993,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
                 this.writeOverlay(romEntry.getInt("StarterCryOvlNumber"), starterCryOverlay);
             }
-        } catch (IOException  ex) {
+        } catch (IOException ex) {
             throw new RandomizerIOException(ex);
         }
         // Fix text depending on version
@@ -1071,7 +1068,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private void replaceStarterFiles(NARCArchive starterNARC, NARCArchive pokespritesNARC, int starterIndex,
-            int pokeNumber) {
+                                     int pokeNumber) {
         starterNARC.files.set(starterIndex * 2, pokespritesNARC.files.get(pokeNumber * 20 + 18));
         // Get the picture...
         byte[] compressedPic = pokespritesNARC.files.get(pokeNumber * 20);
@@ -1146,7 +1143,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             if (forme <= baseForme.cosmeticForms || forme == 30 || forme == 31) {
                 enc1.pokemon = pokes[species];
             } else {
-                int speciesWithForme = Gen5Constants.getAbsolutePokeNumByBaseForme(species,forme);
+                int speciesWithForme = Gen5Constants.getAbsolutePokeNumByBaseForme(species, forme);
                 if (speciesWithForme == 0) {
                     enc1.pokemon = pokes[species]; // Failsafe
                 } else {
@@ -1494,7 +1491,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     tpk.abilitySlot = (abilityAndFlag >>> 4) & 0xF;
                     tpk.forcedGenderFlag = (abilityAndFlag & 0xF);
                     tpk.forme = formnum;
-                    tpk.formeSuffix = Gen5Constants.getFormeSuffixByBaseForme(species,formnum);
+                    tpk.formeSuffix = Gen5Constants.getFormeSuffixByBaseForme(species, formnum);
                     pokeOffs += 8;
                     if (tr.pokemonHaveItems()) {
                         tpk.heldItem = readUnsignedWord(trpoke, pokeOffs);
@@ -1502,7 +1499,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     }
                     if (tr.pokemonHaveCustomMoves()) {
                         for (int move = 0; move < 4; move++) {
-                            tpk.moves[move] = readUnsignedWord(trpoke, pokeOffs + (move*2));
+                            tpk.moves[move] = readUnsignedWord(trpoke, pokeOffs + (move * 2));
                         }
                         pokeOffs += 8;
                     }
@@ -1536,7 +1533,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             tpk.IVs = 31;
                             tpk.heldItem = readUnsignedWord(pkmndata, 12);
                             for (int move = 0; move < 4; move++) {
-                                tpk.moves[move] = readUnsignedWord(pkmndata, 2 + (move*2));
+                                tpk.moves[move] = readUnsignedWord(pkmndata, 2 + (move * 2));
                             }
                             tr.pokemon.add(tpk);
                             currentFile++;
@@ -1558,11 +1555,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public List<Integer> getMainPlaythroughTrainers() {
         if (romEntry.romType == Gen5Constants.Type_BW) { // BW1
             return Gen5Constants.bw1MainPlaythroughTrainers;
-        }
-        else if (romEntry.romType == Gen5Constants.Type_BW2) { // BW2
+        } else if (romEntry.romType == Gen5Constants.Type_BW2) { // BW2
             return Gen5Constants.bw2MainPlaythroughTrainers;
-        }
-        else {
+        } else {
             return Gen5Constants.emptyPlaythroughTrainers;
         }
     }
@@ -1578,8 +1573,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public List<Integer> getEvolutionItems() {
-            return Gen5Constants.evolutionItems;
-        }
+        return Gen5Constants.evolutionItems;
+    }
 
     @Override
     public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
@@ -1591,11 +1586,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // trainer mons.
             Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
             // empty entry
-            trpokes.files.add(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 });
+            trpokes.files.add(new byte[]{0, 0, 0, 0, 0, 0, 0, 0});
             int trainernum = trainers.files.size();
             for (int i = 1; i < trainernum; i++) {
                 byte[] trainer = trainers.files.get(i);
-                Trainer tr = allTrainers.next();
+                Trainer tr = allTrainers.next();                
+                
                 // preserve original poketype for held item & moves
                 trainer[0] = (byte) tr.poketype;
                 int numPokes = tr.pokemon.size();
@@ -1605,7 +1601,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     if (!tr.skipImportant()) {
                         if (trainer[2] == 0) {
                             trainer[2] = 1;
-                            trainer[12] |= 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+                            trainer[12] |= (byte) 0x80; // Flag that needs to be set for trainers not to attack their own pokes
                         }
                     }
                 }
@@ -1627,7 +1623,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     TrainerPokemon tp = tpokes.next();
                     // Add 1 to offset integer division truncation
                     int difficulty = Math.min(255, 1 + (tp.IVs * 255) / 31);
-                    byte abilityAndFlag = (byte)((tp.abilitySlot << 4) | tp.forcedGenderFlag);
+                    byte abilityAndFlag = (byte) ((tp.abilitySlot << 4) | tp.forcedGenderFlag);
                     writeWord(trpoke, pokeOffs, difficulty | abilityAndFlag << 8);
                     writeWord(trpoke, pokeOffs + 2, tp.level);
                     writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
@@ -1665,13 +1661,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 for (int i = 0; i < data.length; i += 4) {
                     int trainerIndex = readUnsignedWord(data, i);
                     if (originalDoubleTrainers.contains(trainerIndex)) {
-                        int textBoxIndex = readUnsignedWord(data, i+2);
+                        int textBoxIndex = readUnsignedWord(data, i + 2);
                         if (textBoxIndex == 3) {
-                            writeWord(data, i+2, 0);
+                            writeWord(data, i + 2, 0);
                         } else if (textBoxIndex == 5) {
-                            writeWord(data, i+2, 2);
+                            writeWord(data, i + 2, 2);
                         } else if (textBoxIndex == 6) {
-                            writeWord(data, i+2, 0x18);
+                            writeWord(data, i + 2, 0x18);
                         }
                     }
                 }
@@ -1687,9 +1683,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     if (offset > 0) {
                         offset += trainerOverworldTextBoxPrefix.length() / 2; // because it was a prefix
                         // Overwrite text box values for trainer 1 in a doubles pair to use the same as a single trainer
-                        fieldOverlay[offset-2] = 0;
+                        fieldOverlay[offset - 2] = 0;
                         fieldOverlay[offset] = 2;
-                        fieldOverlay[offset+2] = 0x18;
+                        fieldOverlay[offset + 2] = 0x18;
                     } else {
                         throw new RandomizationException("Double Battle Mode not supported for this game");
                     }
@@ -1700,7 +1696,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         offset += trainerOverworldTextBoxPrefix.length() / 2; // because it was a prefix
                         // No limit for doubles trainers, i.e. they will spot you even if you have a single Pokemon
                         writeWord(fieldOverlay, offset, 0x46C0);           // nop
-                        writeWord(fieldOverlay, offset+2, 0x46C0);  // nop
+                        writeWord(fieldOverlay, offset + 2, 0x46C0);  // nop
                     } else {
                         throw new RandomizationException("Double Battle Mode not supported for this game");
                     }
@@ -1727,14 +1723,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
 
                 String textBoxChoicePrefix = romEntry.getString("TextBoxChoicePrefix");
-                int offset = find(arm9,textBoxChoicePrefix);
+                int offset = find(arm9, textBoxChoicePrefix);
 
                 if (offset > 0) {
                     // Change a branch destination in order to only check the relevant trainer instead of checking
                     // every trainer in the game (will result in incorrect text boxes when being spotted by doubles
                     // pairs, but this is better than the game freezing for half a second and getting a blank text box)
                     offset += textBoxChoicePrefix.length() / 2;
-                    arm9[offset-4] = 2;
+                    arm9[offset - 4] = 2;
                 } else {
                     throw new RandomizationException("Double Battle Mode not supported for this game");
                 }
@@ -2070,9 +2066,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         List<Integer> replaced = new ArrayList<>();
         int iMax = -1;
 
-        switch(romEntry.romType) {
+        switch (romEntry.romType) {
             case Gen5Constants.Type_BW:
-                for (int oldStatic: specialMusicStaticChanges.keySet()) {
+                for (int oldStatic : specialMusicStaticChanges.keySet()) {
                     int i = newIndexToMusicPoolOffset;
                     int index = readUnsignedWord(arm9, i);
                     while (index != oldStatic || replaced.contains(i)) {
@@ -2085,7 +2081,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
                 break;
             case Gen5Constants.Type_BW2:
-                for (int oldStatic: specialMusicStaticChanges.keySet()) {
+                for (int oldStatic : specialMusicStaticChanges.keySet()) {
                     int i = newIndexToMusicPoolOffset;
                     int index = readUnsignedWord(arm9, i);
                     while (index != oldStatic || replaced.contains(i)) {
@@ -2108,7 +2104,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         List<Integer> specialMusicStatics = getSpecialMusicStatics();
 
-        for (int i = newIndexToMusicPoolOffset; i <= iMax; i+= 4) {
+        for (int i = newIndexToMusicPoolOffset; i <= iMax; i += 4) {
             if (!replaced.contains(i)) {
                 int pkID = readUnsignedWord(arm9, i);
 
@@ -2158,7 +2154,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             newPK = getAltFormeOfPokemon(newPK, statP.getForme(scriptNARC));
             se.pkmn = newPK;
             se.level = statP.getLevel(scriptNARC, 0);
-            se.isEgg = Arrays.stream(staticEggOffsets).anyMatch(x-> x == currentOffset);
+            se.isEgg = Arrays.stream(staticEggOffsets).anyMatch(x -> x == currentOffset);
             for (int levelEntry = 1; levelEntry < statP.getLevelCount(); levelEntry++) {
                 StaticEncounter linkedStatic = new StaticEncounter();
                 linkedStatic.pkmn = newPK;
@@ -2192,7 +2188,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         // BW2 hidden grotto encounters
         if (romEntry.romType == Gen5Constants.Type_BW2) {
             List<Pokemon> allowedHiddenHollowPokemon = new ArrayList<>();
-            allowedHiddenHollowPokemon.addAll(Arrays.asList(Arrays.copyOfRange(pokes,1,494)));
+            allowedHiddenHollowPokemon.addAll(Arrays.asList(Arrays.copyOfRange(pokes, 1, 494)));
             allowedHiddenHollowPokemon.addAll(
                     Gen5Constants.bw2HiddenHollowUnovaPokemon.stream().map(i -> pokes[i]).collect(Collectors.toList()));
 
@@ -2214,7 +2210,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                                 se.restrictedPool = true;
                                 se.restrictedList = allowedHiddenHollowPokemon;
                                 boolean originalEncounter = true;
-                                for (StaticEncounter encounterInGroup: encountersInGroup) {
+                                for (StaticEncounter encounterInGroup : encountersInGroup) {
                                     if (encounterInGroup.pkmn.equals(se.pkmn)) {
                                         encounterInGroup.linkedEncounters.add(se);
                                         originalEncounter = false;
@@ -2521,7 +2517,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             nonBadItems.banRange(Items.lansatBerry, 7);
         } else if (tweak == MiscTweak.BALANCE_STATIC_LEVELS) {
             byte[] fossilFile = scriptNarc.files.get(Gen5Constants.fossilPokemonFile);
-            writeWord(fossilFile,Gen5Constants.fossilPokemonLevelOffset,20);
+            writeWord(fossilFile, Gen5Constants.fossilPokemonLevelOffset, 20);
         } else if (tweak == MiscTweak.NATIONAL_DEX_AT_START) {
             patchForNationalDex();
         } else if (tweak == MiscTweak.RUN_WITHOUT_RUNNING_SHOES) {
@@ -2547,16 +2543,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 if (pk != null)
                     pk.expYield = 0;
             }
-        }
-        else if (tweak == MiscTweak.CUSTOM_MAX_HAPPINESS) {
+        } else if (tweak == MiscTweak.CUSTOM_MAX_HAPPINESS) {
             List<Pokemon> pokes = getPokemonInclFormes();
 
             for (Pokemon pk : pokes) {
                 if (pk != null)
                     pk.baseHappiness = 255;
             }
-        }
-        else if (tweak == MiscTweak.CUSTOM_NO_EVS) {
+        } else if (tweak == MiscTweak.CUSTOM_NO_EVS) {
             List<Pokemon> pokes = getPokemonInclFormes();
 
             for (Pokemon pk : pokes) {
@@ -2571,8 +2565,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
         } else if (tweak == MiscTweak.MODERNIZE_CRIT) {
             modernizeCrit();
-        }
-        else if (tweak == MiscTweak.CUSTOM_ADD_FAIRY) {
+        } else if (tweak == MiscTweak.CUSTOM_ADD_FAIRY) {
             customAddFairy();
         }
     }
@@ -2608,7 +2601,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 int b = readByte(itemScripts, offsetInFile);
                 if (b == setVarGift) {
                     int command = readUnsignedWord(itemScripts, offsetInFile);
-                    int variable = readUnsignedWord(itemScripts,offsetInFile + 2);
+                    int variable = readUnsignedWord(itemScripts, offsetInFile + 2);
                     int item = readUnsignedWord(itemScripts, offsetInFile + 4);
                     if (command == setVarGift && variable == Gen5Constants.hiddenItemVarSet && item == Items.luckyEgg) {
 
@@ -2779,8 +2772,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             writeWord(battleOverlay, critLogicOffset + 4, 0x19C7); // ADDS R7, R0, R7 (damage += R0)
 
             writeOverlay(overlayNumber, battleOverlay);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
     }
@@ -2812,26 +2804,26 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             byte[] spriteFile = smallShieldSpritesNarc.files.get(51);
             int spriteOffset = 0x30;
-            int[] newSprite = new int[] {
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x89, 0x88, 0x88, 0x88,
-                0x89, 0x88, 0xFF, 0xFF, 0x89, 0x88, 0xEF, 0xEE, 0x89, 0x88, 0xEF, 0x88, 0x89, 0x88, 0xFF, 0xEF,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x88, 0x88, 0x88, 0x88,
-                0x8E, 0xFF, 0x8E, 0xFF, 0xFE, 0xEE, 0xEF, 0xFE, 0xF8, 0x8E, 0xEF, 0xF8, 0xF8, 0x8E, 0xEF, 0xF8,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x88, 0x88, 0x88, 0x88,
-                0xEF, 0xFF, 0xEF, 0xF8, 0xEE, 0xEF, 0xFE, 0xFE, 0x8E, 0xEF, 0xF8, 0xEE, 0x8E, 0xFF, 0xEF, 0x88,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x88, 0x88, 0x88, 0x98,
-                0x8E, 0xF8, 0x8E, 0x98, 0x8E, 0xF8, 0x8E, 0x98, 0xEF, 0xEF, 0x88, 0x98, 0xFE, 0x8E, 0x88, 0x98,
-                0x89, 0x88, 0xEF, 0xEE, 0x89, 0x88, 0xEF, 0x88, 0x89, 0x88, 0xEF, 0x88, 0x89, 0x88, 0xEE, 0x88,
-                0x89, 0x88, 0x88, 0x88, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0xF8, 0xFF, 0xEF, 0xF8, 0xF8, 0xEE, 0xEF, 0xF8, 0xF8, 0x8E, 0xEF, 0xFF, 0xE8, 0x8E, 0xEE, 0xEE,
-                0x88, 0x88, 0x88, 0x88, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x8E, 0xEF, 0xEF, 0x88, 0x8E, 0xEF, 0xFE, 0x8E, 0xEF, 0xEF, 0xF8, 0x8E, 0xEE, 0xEE, 0xE8, 0x8E,
-                0x88, 0x88, 0x88, 0x88, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0xF8, 0x8E, 0x88, 0x98, 0xF8, 0x8E, 0x88, 0x98, 0xF8, 0x8E, 0x88, 0x98, 0xE8, 0x8E, 0x88, 0x98,
-                0x88, 0x88, 0x88, 0x98, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            int[] newSprite = new int[]{
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x89, 0x88, 0x88, 0x88,
+                    0x89, 0x88, 0xFF, 0xFF, 0x89, 0x88, 0xEF, 0xEE, 0x89, 0x88, 0xEF, 0x88, 0x89, 0x88, 0xFF, 0xEF,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x88, 0x88, 0x88, 0x88,
+                    0x8E, 0xFF, 0x8E, 0xFF, 0xFE, 0xEE, 0xEF, 0xFE, 0xF8, 0x8E, 0xEF, 0xF8, 0xF8, 0x8E, 0xEF, 0xF8,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x88, 0x88, 0x88, 0x88,
+                    0xEF, 0xFF, 0xEF, 0xF8, 0xEE, 0xEF, 0xFE, 0xFE, 0x8E, 0xEF, 0xF8, 0xEE, 0x8E, 0xFF, 0xEF, 0x88,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, 0x88, 0x88, 0x88, 0x98,
+                    0x8E, 0xF8, 0x8E, 0x98, 0x8E, 0xF8, 0x8E, 0x98, 0xEF, 0xEF, 0x88, 0x98, 0xFE, 0x8E, 0x88, 0x98,
+                    0x89, 0x88, 0xEF, 0xEE, 0x89, 0x88, 0xEF, 0x88, 0x89, 0x88, 0xEF, 0x88, 0x89, 0x88, 0xEE, 0x88,
+                    0x89, 0x88, 0x88, 0x88, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0xF8, 0xFF, 0xEF, 0xF8, 0xF8, 0xEE, 0xEF, 0xF8, 0xF8, 0x8E, 0xEF, 0xFF, 0xE8, 0x8E, 0xEE, 0xEE,
+                    0x88, 0x88, 0x88, 0x88, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x8E, 0xEF, 0xEF, 0x88, 0x8E, 0xEF, 0xFE, 0x8E, 0xEF, 0xEF, 0xF8, 0x8E, 0xEE, 0xEE, 0xE8, 0x8E,
+                    0x88, 0x88, 0x88, 0x88, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0xF8, 0x8E, 0x88, 0x98, 0xF8, 0x8E, 0x88, 0x98, 0xF8, 0x8E, 0x88, 0x98, 0xE8, 0x8E, 0x88, 0x98,
+                    0x88, 0x88, 0x88, 0x98, 0x99, 0x99, 0x99, 0x99, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             };
             for (int i = 0; i < newSprite.length; ++i) {
-                spriteFile[spriteOffset + i] = (byte)newSprite[i];
+                spriteFile[spriteOffset + i] = (byte) newSprite[i];
             }
 
             writeNARC(smallShieldSpritesNarcPath, smallShieldSpritesNarc);
@@ -2847,7 +2839,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             spriteFile = unusedSpritesNarc.files.get(23);
             spriteOffset = 0x1130;
             for (int i = 0; i < newSprite.length; ++i) {
-                spriteFile[spriteOffset + i] = (byte)(newSprite[i] & 0xFF);
+                spriteFile[spriteOffset + i] = (byte) (newSprite[i] & 0xFF);
             }
 
             writeNARC(unusedSpritesNarcPath, unusedSpritesNarc);
@@ -2857,46 +2849,46 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             int newBattleGraphicFileIndex = battleGraphicsNarc.files.size();
             battleGraphicsNarc.files.add(new byte[0x0228]);
-            int[] newBattleGraphicFileData = new int[] {
-                0x52, 0x4C, 0x43, 0x4E, 0xFF, 0xFE, 0x00, 0x01, 0x28, 0x02, 0x00, 0x00, 0x10, 0x00, 0x01, 0x00,
-                0x54, 0x54, 0x4C, 0x50, 0x18, 0x02, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x02, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0xCD, 0x75, 0x29, 0x25, 0x08, 0x21, 0xE7, 0x1C,
-                0xC6, 0x18, 0xA5, 0x14, 0x84, 0x10, 0x63, 0x0C, 0x7D, 0xEE, 0x5B, 0x66, 0x39, 0x5E, 0xF6, 0xD5,
-                0xD4, 0xC9, 0xB1, 0x41, 0x1F, 0x7C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            int[] newBattleGraphicFileData = new int[]{
+                    0x52, 0x4C, 0x43, 0x4E, 0xFF, 0xFE, 0x00, 0x01, 0x28, 0x02, 0x00, 0x00, 0x10, 0x00, 0x01, 0x00,
+                    0x54, 0x54, 0x4C, 0x50, 0x18, 0x02, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x02, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0xCD, 0x75, 0x29, 0x25, 0x08, 0x21, 0xE7, 0x1C,
+                    0xC6, 0x18, 0xA5, 0x14, 0x84, 0x10, 0x63, 0x0C, 0x7D, 0xEE, 0x5B, 0x66, 0x39, 0x5E, 0xF6, 0xD5,
+                    0xD4, 0xC9, 0xB1, 0x41, 0x1F, 0x7C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             };
             byte[] newBattleGraphicFile = battleGraphicsNarc.files.get(newBattleGraphicFileIndex);
             for (int i = 0; i < newBattleGraphicFile.length; ++i) {
-                newBattleGraphicFile[i] = (byte)newBattleGraphicFileData[i];
+                newBattleGraphicFile[i] = (byte) newBattleGraphicFileData[i];
             }
 
             writeNARC(battleGraphicsNarcPath, battleGraphicsNarc);
@@ -2904,16 +2896,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             String hallOfFameGraphicsNarcPath = romEntry.getFile("HallOfFameGraphics");
             NARCArchive hallOfFameGraphicsNarc = readNARC(hallOfFameGraphicsNarcPath);
 
-            int[] newHallOfFameGraphicsData = new int[] {
-                0x52, 0x4C, 0x43, 0x4E, 0xFF, 0xFE, 0x00, 0x01, 0x28, 0x02, 0x00, 0x00, 0x10, 0x00, 0x01, 0x00,
-                0x54, 0x54, 0x4C, 0x50, 0x18, 0x02, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x02, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x87, 0x1A, 0x9C, 0x72, 0xF5, 0x55, 0xB2, 0x49,
-                0x6F, 0x3D, 0x2D, 0x35, 0xEA, 0xA8, 0xA7, 0x9C, 0x65, 0x94, 0x22, 0x88, 0x00, 0x00, 0x1F, 0x7C,
-                0x1F, 0x7C, 0x1F, 0x7C, 0x1F, 0x7C, 0x1F, 0x7C
+            int[] newHallOfFameGraphicsData = new int[]{
+                    0x52, 0x4C, 0x43, 0x4E, 0xFF, 0xFE, 0x00, 0x01, 0x28, 0x02, 0x00, 0x00, 0x10, 0x00, 0x01, 0x00,
+                    0x54, 0x54, 0x4C, 0x50, 0x18, 0x02, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x02, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x87, 0x1A, 0x9C, 0x72, 0xF5, 0x55, 0xB2, 0x49,
+                    0x6F, 0x3D, 0x2D, 0x35, 0xEA, 0xA8, 0xA7, 0x9C, 0x65, 0x94, 0x22, 0x88, 0x00, 0x00, 0x1F, 0x7C,
+                    0x1F, 0x7C, 0x1F, 0x7C, 0x1F, 0x7C, 0x1F, 0x7C
             };
             byte[] hallOfFameGraphicsNarcFile = hallOfFameGraphicsNarc.files.get(9);
             for (int i = 0; i < newHallOfFameGraphicsData.length; ++i) {
-                hallOfFameGraphicsNarcFile[i] = (byte)(newHallOfFameGraphicsData[i]);
+                hallOfFameGraphicsNarcFile[i] = (byte) (newHallOfFameGraphicsData[i]);
             }
 
             pokes[Species.clefairy].primaryType = Type.FAIRY;
@@ -2941,7 +2933,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             moves[Moves.charm].type = Type.FAIRY;
             moves[Moves.moonlight].type = Type.FAIRY;
             moves[Moves.sweetKiss].type = Type.FAIRY;
-            
+
             // Submission -> Play Rough
             moves[Moves.submission].name = "Play Rough";
             moves[Moves.submission].type = Type.FAIRY;
@@ -2973,8 +2965,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             moves[Moves.mistBall].description = "Borrowing the power of the moon, the user attacks the target. This may also lower the target's Sp. Atk stat.";
 
             wasFairyAdded = true;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
     }
@@ -3009,7 +3000,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 // mov r7, #0x1
                 // The offset variable is currently pointing at the bne instruction. If we change that bne to an unconditional
                 // branch, the game will never think the player's Pokemon has low HP (for the purposes of changing the music).
-                lowHealthMusicOverlay[offset + 1] = (byte)0xE0;
+                lowHealthMusicOverlay[offset + 1] = (byte) 0xE0;
                 writeOverlay(romEntry.getInt("LowHealthMusicOvlNumber"), lowHealthMusicOverlay);
             }
         } catch (IOException e) {
@@ -3061,7 +3052,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int offset = find(arm9, tmDataPrefix);
         if (offset > 0) {
             offset += Gen5Constants.tmDataPrefix.length() / 2; // because it was
-                                                               // a prefix
+            // a prefix
             List<Integer> tms = new ArrayList<>();
             for (int i = 0; i < Gen5Constants.tmBlockOneCount; i++) {
                 tms.add(readUnsignedWord(arm9, offset + i * 2));
@@ -3083,7 +3074,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int offset = find(arm9, tmDataPrefix);
         if (offset > 0) {
             offset += Gen5Constants.tmDataPrefix.length() / 2; // because it was
-                                                               // a prefix
+            // a prefix
             offset += Gen5Constants.tmBlockOneCount * 2; // TM data
             List<Integer> hms = new ArrayList<>();
             for (int i = 0; i < Gen5Constants.hmCount; i++) {
@@ -3139,7 +3130,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             List<Integer> hmMoves = getHMMoves();
 
             offset += Gen5Constants.tmDataPrefix.length() / 2; // because it was
-                                                               // a prefix
+            // a prefix
             for (int i = 0; i < Gen5Constants.tmBlockOneCount; i++) {
                 writeWord(arm9, offset + i * 2, moveIndexes.get(i));
             }
@@ -3287,9 +3278,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             return new TreeMap<>();
         }
         Map<Pokemon, boolean[]> compat = new TreeMap<>();
-        int[] countsPersonalOrder = new int[] { 15, 17, 13, 15 };
-        int[] countsMoveOrder = new int[] { 13, 15, 15, 17 };
-        int[] personalToMoveOrder = new int[] { 1, 3, 0, 2 };
+        int[] countsPersonalOrder = new int[]{15, 17, 13, 15};
+        int[] countsMoveOrder = new int[]{13, 15, 15, 17};
+        int[] personalToMoveOrder = new int[]{1, 3, 0, 2};
         int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
         int formeOffset = Gen5Constants.getFormeOffset(romEntry.romType);
         for (int i = 1; i <= Gen5Constants.pokemonCount + formeCount; i++) {
@@ -3326,9 +3317,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         // BW2 move tutor flags aren't using the same order as the move tutor
         // move data.
         // We unscramble them from move data order to personal.narc flag order.
-        int[] countsPersonalOrder = new int[] { 15, 17, 13, 15 };
-        int[] countsMoveOrder = new int[] { 13, 15, 15, 17 };
-        int[] personalToMoveOrder = new int[] { 1, 3, 0, 2 };
+        int[] countsPersonalOrder = new int[]{15, 17, 13, 15};
+        int[] countsMoveOrder = new int[]{13, 15, 15, 17};
+        int[] personalToMoveOrder = new int[]{1, 3, 0, 2};
         for (Map.Entry<Pokemon, boolean[]> compatEntry : compatData.entrySet()) {
             Pokemon pkmn = compatEntry.getKey();
             boolean[] flags = compatEntry.getValue();
@@ -3648,16 +3639,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int offset = find(arm9, Gen5Constants.friendshipValueForEvoLocator);
         if (offset > 0) {
             // Amount of required happiness for HAPPINESS evolutions.
-            if (arm9[offset] == (byte)220) {
-                arm9[offset] = (byte)160;
+            if (arm9[offset] == (byte) 220) {
+                arm9[offset] = (byte) 160;
             }
             // Amount of required happiness for HAPPINESS_DAY evolutions.
-            if (arm9[offset + 20] == (byte)220) {
-                arm9[offset + 20] = (byte)160;
+            if (arm9[offset + 20] == (byte) 220) {
+                arm9[offset + 20] = (byte) 160;
             }
             // Amount of required happiness for HAPPINESS_NIGHT evolutions.
-            if (arm9[offset + 38] == (byte)220) {
-                arm9[offset + 38] = (byte)160;
+            if (arm9[offset + 38] == (byte) 220) {
+                arm9[offset + 38] = (byte) 160;
             }
         }
 
@@ -3988,7 +3979,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public String[] getItemNames() {
         return itemNames.toArray(new String[0]);
     }
-    
+
     @Override
     public String abilityName(int number) {
         return abilityNames.get(number);
@@ -4319,7 +4310,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 writeLong(tfile, 0x4C, trade.item);
                 writeLong(tfile, 0x5C, trade.requestedPokemon.number);
                 if (romEntry.tradeScripts.size() > 0) {
-                    romEntry.tradeScripts.get(i - unusedOffset).setPokemon(this,scriptNarc,trade.requestedPokemon,trade.givenPokemon);
+                    romEntry.tradeScripts.get(i - unusedOffset).setPokemon(this, scriptNarc, trade.requestedPokemon, trade.givenPokemon);
                 }
             }
             this.writeNARC(romEntry.getFile("InGameTrades"), tradeNARC);
@@ -4329,16 +4320,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             if (romEntry.arrayEntries.containsKey("IngameTradePersonTextOffsets")) {
                 int[] textOffsets = romEntry.arrayEntries.get("IngameTradePersonTextOffsets");
                 for (int tr = 0; tr < textOffsets.length; tr++) {
-                    if (unusedOffset < unused.length && unused[unusedOffset] == tr+24) {
+                    if (unusedOffset < unused.length && unused[unusedOffset] == tr + 24) {
                         unusedOffset++;
                         continue;
                     }
                     if (textOffsets[tr] > 0) {
-                        if (tr+24 >= oldTrades.size() || tr+24 >= trades.size()) {
+                        if (tr + 24 >= oldTrades.size() || tr + 24 >= trades.size()) {
                             break;
                         }
-                        IngameTrade oldTrade = oldTrades.get(tr+24);
-                        IngameTrade newTrade = trades.get(tr+24);
+                        IngameTrade oldTrade = oldTrades.get(tr + 24);
+                        IngameTrade newTrade = trades.get(tr + 24);
                         Map<String, String> replacements = new TreeMap<>();
                         replacements.put(oldTrade.givenPokemon.name, newTrade.givenPokemon.name);
                         if (oldTrade.requestedPokemon != newTrade.requestedPokemon) {
@@ -4358,8 +4349,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int ttsCount = thisTradeStrings.size();
         for (int strNum = 0; strNum < ttsCount; strNum++) {
             String newString = thisTradeStrings.get(strNum);
-            for (String old: replacements.keySet()) {
-                newString = newString.replaceAll(old,replacements.get(old));
+            for (String old : replacements.keySet()) {
+                newString = newString.replaceAll(old, replacements.get(old));
             }
             thisTradeStrings.set(strNum, newString);
         }
@@ -4550,9 +4541,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             for (int i = 1; i < itemPriceNarc.files.size(); i++) {
                 // writeWord(itemPriceNarc.files.get(i),0,Gen5Constants.balancedItemPrices.get(i));
                 // TODO: Make this configurable
-                writeWord(itemPriceNarc.files.get(i),0,0);
+                writeWord(itemPriceNarc.files.get(i), 0, 0);
             }
-            writeNARC(romEntry.getFile("ItemData"),itemPriceNarc);
+            writeNARC(romEntry.getFile("ItemData"), itemPriceNarc);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -4763,7 +4754,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.primaryType, tp.pokemon.secondaryType,
                 5, effectivenessUpdated, customTypeEffectiveness, addFairy);
-        for(Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
+        for (Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
             Integer berry = Gen5Constants.weaknessReducingBerries.get(entry.getKey());
             if (entry.getValue() == Effectiveness.DOUBLE) {
                 items.add(berry);
