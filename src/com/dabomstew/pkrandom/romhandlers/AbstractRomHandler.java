@@ -424,13 +424,6 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private void AdjustCustomStat(CustomStatMode mode, Pokemon pk, boolean isFullyEvolved, double targetBst, int maxStatValue, int depth) {
-        Pokemon baseForm = pk.baseForme;
-        if (baseForm != null) {
-            int i = 0;
-        }
-
-        List<Type> types = Type.getAllTypes(generationOfPokemon());
-
         targetBst = Math.min(targetBst, 600);
 
         int maxHp = Math.max(pk.hp, maxStatValue);
@@ -533,6 +526,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokes.get(Species.doduo).primaryType = Type.FIGHTING;
         pokes.get(Species.doduo).secondaryType = null;
         pokes.get(Species.dodrio).primaryType = Type.FIGHTING;
+        pokes.get(Species.dodrio).secondaryType = null;
         pokes.get(Species.marowak).secondaryType = Type.FIGHTING;
         pokes.get(Species.kangaskhan).secondaryType = Type.GROUND;
         pokes.get(Species.pinsir).secondaryType = Type.GROUND;
@@ -550,7 +544,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             pokes.get(Species.dugtrio).secondaryType = Type.FAIRY;
             pokes.get(Species.rapidash).secondaryType = Type.FAIRY;
         }
-        if (generationOfPokemon() < 2)
+        if (generationOfPokemon() <= 1)
             return;
 
         pokes.get(Species.croconaw).secondaryType = Type.DARK;
@@ -569,7 +563,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             pokes.get(Species.meganium).secondaryType = Type.FAIRY;
             pokes.get(Species.misdreavus).secondaryType = Type.FAIRY;
         }
-        if (generationOfPokemon() < 3)
+        if (generationOfPokemon() <= 2)
             return;
 
         pokes.get(Species.treecko).secondaryType = Type.DRAGON;
@@ -599,7 +593,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             pokes.get(Species.absol).secondaryType = Type.FAIRY;
             pokes.get(Species.luvdisc).secondaryType = Type.FAIRY;
         }
-        if (generationOfPokemon() < 4)
+        if (generationOfPokemon() <= 3)
             return;
 
         pokes.get(Species.luxray).secondaryType = Type.DARK;
@@ -615,7 +609,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             pokes.get(Species.pachirisu).secondaryType = Type.FAIRY;
             pokes.get(Species.mismagius).secondaryType = Type.FAIRY;
         }
-        if (generationOfPokemon() < 5)
+        if (generationOfPokemon() <= 4)
             return;
 
         pokes.get(Species.pignite).secondaryType = Type.DARK;
@@ -646,7 +640,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             pokes.get(Species.vanillish).secondaryType = Type.FAIRY;
             pokes.get(Species.vanilluxe).secondaryType = Type.FAIRY;
         }
-        if (generationOfPokemon() < 6)
+        if (generationOfPokemon() <= 5)
             return;
 
         pokes.get(Species.flabébé).secondaryType = Type.GRASS;
@@ -655,20 +649,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         pokes.get(Species.goomy).secondaryType = Type.WATER;
         pokes.get(Species.sliggoo).secondaryType = Type.WATER;
         pokes.get(Species.goodra).secondaryType = Type.WATER;
-
-        if (hasMegaEvolutions()) {
-            pokes.get(Species.Gen6Formes.kangaskhanMega).secondaryType = Type.GROUND;
-            pokes.get(Species.Gen6Formes.gyaradosMega).secondaryType = Type.DRAGON;
-            pokes.get(Species.Gen6Formes.aerodactylMega).secondaryType = Type.DRAGON;
-            pokes.get(Species.Gen6Formes.banetteMega).secondaryType = Type.STEEL;
-            pokes.get(Species.Gen6Formes.glalieMega).secondaryType = Type.ROCK;
-        }
-
-        if (typeInGame(Type.FAIRY) && hasMegaEvolutions()) {
-            pokes.get(Species.Gen6Formes.altariaMega).primaryType = Type.FAIRY;
-            pokes.get(Species.Gen6Formes.altariaMega).secondaryType = Type.DRAGON;
-            pokes.get(Species.Gen6Formes.absolMega).secondaryType = Type.FAIRY;
-        }
+        pokes.get(Species.Gen6Formes.kangaskhanMega).secondaryType = Type.GROUND;
+        pokes.get(Species.Gen6Formes.gyaradosMega).secondaryType = Type.DRAGON;
+        pokes.get(Species.Gen6Formes.aerodactylMega).secondaryType = Type.DRAGON;
+        pokes.get(Species.Gen6Formes.banetteMega).secondaryType = Type.STEEL;
+        pokes.get(Species.Gen6Formes.absolMega).secondaryType = Type.FAIRY;
+        pokes.get(Species.Gen6Formes.altariaMega).primaryType = Type.FAIRY;
+        pokes.get(Species.Gen6Formes.altariaMega).secondaryType = Type.DRAGON;
+        pokes.get(Species.Gen6Formes.glalieMega).secondaryType = Type.ROCK;
     }
 
     public Pokemon randomPokemon() {
@@ -4295,8 +4283,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.sandAttack).name = "Sand Attack";
 
         // 031 Fury Attack
-        updateMoveAccuracy(moves, Moves.furyAttack, 100);
         updateMoveType(moves, Moves.furyAttack, Type.DARK);
+        updateMoveAccuracy(moves, Moves.furyAttack, 100);
 
 //        // 032 Horn Drill
 //        moves.get(Moves.hornDrill).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
@@ -4323,10 +4311,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 .replace("may also lower", "also lowers");
 
         // 057 Surf
-        if (doubles) {
-            moves.get(Moves.surf).target = MoveTarget.ALL_ADJACENT_FOES;
-            // TODO: moves.get(Moves.surf).description =
-        }
+        moves.get(Moves.surf).target = MoveTarget.ALL_ADJACENT_FOES;
+        // TODO: moves.get(Moves.surf).description =
 
         // 061 Bubble Beam
         if (generationOfPokemon() >= 3)
