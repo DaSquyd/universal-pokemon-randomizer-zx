@@ -69,13 +69,13 @@ public enum Effectiveness {
         List<Type> allTypes;
         if (generation == 1) {
             effectivenesses = custom ? customTable : effectivenessUpdated ? gen2Through5Table : gen1Table;
-            allTypes = Type.getAllTypes(1);
+            allTypes = Type.getAllTypes(1, addFairy);
         } else if (generation >= 2 && generation <= 5) {
             effectivenesses = custom ? customTable : effectivenessUpdated ? gen6PlusTable : gen2Through5Table;
             allTypes = addFairy ? Type.GEN6PLUS : Type.GEN2THROUGH5;
         } else {
             effectivenesses = custom ? customTable : gen6PlusTable;
-            allTypes = Type.getAllTypes(generation);
+            allTypes = Type.getAllTypes(generation, addFairy);
         }
 
         return allTypes
@@ -91,13 +91,13 @@ public enum Effectiveness {
         List<Type> allTypes;
         if (generation == 1) {
             effectivenesses = custom ? customTable : effectivenessUpdated ? gen2Through5Table : gen1Table;
-            allTypes = Type.getAllTypes(1);
+            allTypes = Type.getAllTypes(1, addFairy);
         } else if (generation >= 2 && generation <= 5) {
             effectivenesses = custom ? customTable : effectivenessUpdated ? gen6PlusTable : gen2Through5Table;
             allTypes = addFairy ? Type.GEN6PLUS : Type.GEN2THROUGH5;
         } else {
             effectivenesses = custom ? customTable : gen6PlusTable;
-            allTypes = Type.getAllTypes(generation);
+            allTypes = Type.getAllTypes(generation, addFairy);
         }
 
         return allTypes
@@ -171,15 +171,15 @@ public enum Effectiveness {
     private static final Effectiveness[][] customTable = {
             /*            NORMAL,FIGHTING, FLYING,   GRASS ,   WATER,   FIRE ,   ROCK , GROUND,  PSYCHIC,   BUG  ,  DRAGON,ELECTRIC,   GHOST , POISON,   ICE  ,  STEEL ,  DARK  , FAIRY */
             /*NORMAL */ {NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    ZERO, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL},
-            /*FIGHTING*/{ DOUBLE, NEUTRAL,    HALF,    HALF, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL,    HALF, NEUTRAL, NEUTRAL, NEUTRAL,    ZERO,    HALF,  DOUBLE,  DOUBLE,  DOUBLE,    HALF},
+            /*FIGHTING*/{ DOUBLE, NEUTRAL,    HALF,    HALF, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL,    HALF,    HALF, NEUTRAL, NEUTRAL,    ZERO,    HALF,  DOUBLE,  DOUBLE,  DOUBLE,    HALF},
             /*FLYING */ {NEUTRAL,  DOUBLE, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL,    HALF, NEUTRAL, NEUTRAL,    HALF,    HALF, NEUTRAL, NEUTRAL},
             /*GRASS  */ {NEUTRAL, NEUTRAL,    HALF,    HALF,  DOUBLE,    HALF,    HALF,  DOUBLE, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL,    HALF, NEUTRAL,    HALF, NEUTRAL, NEUTRAL},
             /*WATER  */ {NEUTRAL, NEUTRAL, NEUTRAL,    HALF,    HALF,  DOUBLE,  DOUBLE,  DOUBLE, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL, NEUTRAL},
             /*FIRE   */ {NEUTRAL, NEUTRAL, NEUTRAL,  DOUBLE,    HALF,    HALF,    HALF, NEUTRAL, NEUTRAL,  DOUBLE,    HALF, NEUTRAL, NEUTRAL, NEUTRAL,  DOUBLE,  DOUBLE, NEUTRAL, NEUTRAL},
-            /*ROCK   */ {NEUTRAL,    HALF,  DOUBLE,    HALF,    HALF,  DOUBLE, NEUTRAL,    HALF, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,  DOUBLE,    HALF, NEUTRAL, NEUTRAL},
+            /*ROCK   */ {NEUTRAL,    HALF,  DOUBLE,    HALF,    HALF,  DOUBLE,    HALF,    HALF, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,  DOUBLE,    HALF, NEUTRAL, NEUTRAL},
             /*GROUND */ {NEUTRAL, NEUTRAL,    ZERO,    HALF, NEUTRAL,  DOUBLE,  DOUBLE, NEUTRAL, NEUTRAL,    HALF, NEUTRAL,  DOUBLE,    ZERO,  DOUBLE,    HALF,  DOUBLE, NEUTRAL, NEUTRAL},
             /*PSYCHIC*/ {NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    HALF,    HALF, NEUTRAL, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL,    ZERO, NEUTRAL},
-            /*BUG    */ {NEUTRAL, NEUTRAL,    HALF,  DOUBLE, NEUTRAL,    HALF, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    HALF,  DOUBLE,  DOUBLE},
+            /*BUG    */ {NEUTRAL,    HALF,    HALF,  DOUBLE, NEUTRAL,    HALF, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    HALF,  DOUBLE,  DOUBLE},
             /*DRAGON */ {NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,    HALF, NEUTRAL,    ZERO},
             /*ELECTRIC*/{NEUTRAL, NEUTRAL,  DOUBLE,    HALF,  DOUBLE, NEUTRAL,    HALF,    ZERO, NEUTRAL, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL},
             /*GHOST  */ {   ZERO, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL,    HALF, NEUTRAL},

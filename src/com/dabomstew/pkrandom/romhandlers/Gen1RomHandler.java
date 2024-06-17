@@ -2054,12 +2054,12 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public int highestAbilityIndex() {
+    public int highestAbilityIndex(Settings settings) {
         return 0;
     }
 
     @Override
-    public Map<Integer, List<Integer>> getAbilityVariations() {
+    public Map<Integer, List<Integer>> getAbilityVariations(Settings settings) {
         return new HashMap<>();
     }
 

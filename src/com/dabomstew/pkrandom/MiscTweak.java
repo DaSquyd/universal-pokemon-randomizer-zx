@@ -70,8 +70,10 @@ public class MiscTweak implements Comparable<MiscTweak> {
     public static final MiscTweak CUSTOM_MAX_HAPPINESS = new MiscTweak(1 << 28, "customMaxHappiness", 0);
     public static final MiscTweak CUSTOM_NO_EVS = new MiscTweak(1 << 29, "customNoEVs", 0);
     public static final MiscTweak MODERNIZE_CRIT = new MiscTweak(1 << 30, "modernizeCrit", 0);
-    public static final MiscTweak NPC_SMART_AI = new MiscTweak(1L << 31, "npcSmartAI", 0);
-    public static final MiscTweak CUSTOM_ADD_FAIRY = new MiscTweak(1L << 32, "customAddFairy", 1);
+    public static final MiscTweak MODERNIZE_GEMS = new MiscTweak(1L << 31, "modernizeGems", 0);
+    public static final MiscTweak NPC_SMART_AI = new MiscTweak(1L << 32, "npcSmartAI", 0);
+    public static final MiscTweak CUSTOM_ADD_FAIRY = new MiscTweak(1L << 33, "customAddFairy", 1);
+    public static final MiscTweak PARAGON_LITE = new MiscTweak(1L << 63, "paragonLite", 10);
     /* @formatter:on */
 
     private final long value;

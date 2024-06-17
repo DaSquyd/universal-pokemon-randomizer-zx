@@ -53,7 +53,7 @@ public enum Type {
     public static final List<Type> GEN2THROUGH5 = Collections.unmodifiableList(Arrays.asList(values()).subList(0, DARK.ordinal()+1));
     public static final List<Type> GEN6PLUS = Collections.unmodifiableList(Arrays.asList(values()).subList(0, FAIRY.ordinal()+1));
 
-    public static List<Type> getAllTypes(int generation) {
+    public static List<Type> getAllTypes(int generation, boolean addFairy) {
         switch (generation) {
             case 1:
                 return GEN1;
@@ -61,7 +61,7 @@ public enum Type {
             case 3:
             case 4:
             case 5:
-                return GEN2THROUGH5;
+                return addFairy ? GEN6PLUS : GEN2THROUGH5;
             default:
                 return GEN6PLUS;
         }

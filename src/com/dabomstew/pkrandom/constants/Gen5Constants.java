@@ -50,7 +50,7 @@ public class Gen5Constants {
 
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
-            bsCatchRateOffset = 8, bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
+            bsCatchRateOffset = 8, bsStageOffset =9, bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
             bsDarkGrassHeldItemOffset = 16, bsGenderOffset = 18, bsBaseHappinessOffset = 20, bsGrowthCurveOffset = 21,
             bsAbility1Offset = 24, bsAbility2Offset = 25, bsAbility3Offset = 26, bsFormeOffset = 28,
             bsFormeSpriteOffset = 30, bsFormeCountOffset = 32, bsExpYieldOffset = 34, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
@@ -114,22 +114,6 @@ public class Gen5Constants {
 
     public static final int fossilPokemonFile = 877;
     public static final int fossilPokemonLevelOffset = 0x3F7;
-
-    public static final Map<Integer, List<Integer>> abilityVariations = setupAbilityVariations();
-
-    private static Map<Integer, List<Integer>> setupAbilityVariations() {
-        Map<Integer, List<Integer>> map = new HashMap<>();
-        map.put(Abilities.insomnia, Arrays.asList(Abilities.insomnia, Abilities.vitalSpirit));
-        map.put(Abilities.clearBody, Arrays.asList(Abilities.clearBody, Abilities.whiteSmoke));
-        map.put(Abilities.hugePower, Arrays.asList(Abilities.hugePower, Abilities.purePower));
-        map.put(Abilities.battleArmor, Arrays.asList(Abilities.battleArmor, Abilities.shellArmor));
-        map.put(Abilities.cloudNine, Arrays.asList(Abilities.cloudNine, Abilities.airLock));
-        map.put(Abilities.filter, Arrays.asList(Abilities.filter, Abilities.solidRock));
-        map.put(Abilities.roughSkin, Arrays.asList(Abilities.roughSkin, Abilities.ironBarbs));
-        map.put(Abilities.moldBreaker, Arrays.asList(Abilities.moldBreaker, Abilities.turboblaze, Abilities.teravolt));
-
-        return map;
-    }
 
     public static final List<Integer> uselessAbilities = Arrays.asList(Abilities.forecast, Abilities.multitype,
             Abilities.flowerGift, Abilities.zenMode);
@@ -357,9 +341,11 @@ public class Gen5Constants {
 
     public static final String introGraphicPrefix = "5A0000010000001700000001000000", bw1IntroCryPrefix = "0021009101910291", bw2IntroCryLocator = "3D020000F8B51C1C";
 
-    public static final String typeEffectivenessTableLocator = "0404040404020400";
+    public static final String typeEffectivenessTableLocator = "040404040402040002040404040404040408";
+    public static final String typeEffectivenessTableLocatorFairy = "04040404040204000204040404040404040408";
     public static final String critChanceLocator = "1008040302";
     public static final String critLogicLocator = "002E00D07F00";
+    public static final String gemDamageLocator = "062131208902";
 
     public static final String forceChallengeModeLocator = "816A406B0B1C07490022434090000858834201D1";
 
@@ -887,7 +873,6 @@ public class Gen5Constants {
         // nonBadItemsBW2.banRange(Items.luckyPunch, 4); // pokemon specific
         nonBadItemsBW2.banRange(Items.redScarf, 5); // contest scarves
         nonBadItemsBW2.banRange(Items.redShard, 4); // shards
-        nonBadItemsBW2.banRange(Items.fireGem, 17); // gems
         nonBadItemsBW2.banRange(Items.healthFeather, 6); // wings
         nonBadItemsBW2.banRange(Items.potion, 28); // heal items
         nonBadItemsBW2.banRange(Items.hpUp, 5); // vitamins

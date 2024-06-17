@@ -242,7 +242,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (megaEvolutionSanity) {
             List<MegaEvolution> allMegaEvos = getMegaEvolutions();
-            for (MegaEvolution megaEvo: allMegaEvos) {
+            for (MegaEvolution megaEvo : allMegaEvos) {
                 if (megaEvo.from.megaEvolutionsFrom.size() > 1) continue;
                 megaEvo.to.copyShuffledStatsUpEvolution(megaEvo.from);
             }
@@ -287,7 +287,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (megaEvolutionSanity) {
             List<MegaEvolution> allMegaEvos = getMegaEvolutions();
-            for (MegaEvolution megaEvo: allMegaEvos) {
+            for (MegaEvolution megaEvo : allMegaEvos) {
                 if (megaEvo.from.megaEvolutionsFrom.size() > 1 || assignEvoStatsRandomly) {
                     megaEvo.to.assignNewStatsForEvolution(megaEvo.from, this.random);
                 } else {
@@ -304,7 +304,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Pokemon> pokes = getPokemonInclFormes();
 
         for (int gen = 6; gen <= generation; gen++) {
-            Map<Integer,StatChange> statChanges = getUpdatedPokemonStats(gen);
+            Map<Integer, StatChange> statChanges = getUpdatedPokemonStats(gen);
 
             for (int i = 1; i < pokes.size(); i++) {
                 StatChange changedStats = statChanges.get(i);
@@ -370,7 +370,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             int spdefDiff = pk.spdef - pk.baseForme.spdef;
             int speedDiff = pk.speed - pk.baseForme.speed;
 
-            formeStatChanges.put(pk, new int[] { hpDiff, attackDiff, defenseDiff, spatkDiff, spdefDiff, speedDiff });
+            formeStatChanges.put(pk, new int[]{hpDiff, attackDiff, defenseDiff, spatkDiff, spdefDiff, speedDiff});
         }
 
         for (int i = 1; i < pokes.size(); i++) {
@@ -390,8 +390,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     for (int j = 1; j < 6; j++) {
                         statChanges[j] -= 10; // We only want an increase of 50 instead of 100
                     }
-                }
-                else if (newBst > 600) {
+                } else if (newBst > 600) {
                     int offset = (int) Math.round((600.0 - newBst) / 10.0);
 
                     for (int j = 1; j < 6; j++) {
@@ -413,7 +412,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             boolean isFullyEvolved = (pk.baseForme == null && pk.evolutionsFrom.isEmpty()) || (pk.baseForme != null && pk.baseForme.evolutionsFrom.isEmpty());
 
-            double targetBst = (double)pk.bst() / 2.0 + 300.0;
+            double targetBst = (double) pk.bst() / 2.0 + 300.0;
             if (isFullyEvolved) {
                 targetBst = Math.max(500, targetBst);
             }
@@ -438,8 +437,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             int statDiff = targetBst > pk.bst() ? 1 : -1;
             int previousBst = 0;
-            while(pk.bst() != previousBst && (targetBst - pk.bst()) * statDiff > 0)
-            {
+            while (pk.bst() != previousBst && (targetBst - pk.bst()) * statDiff > 0) {
                 previousBst = pk.bst();
 
                 pk.hp = pk.hp == 1 ? pk.hp : Math.min(pk.hp + statDiff, maxHp);
@@ -805,7 +803,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (pkmn != null) {
                     pkmn.primaryType = randomType();
                     pkmn.secondaryType = null;
-                    if (this.random.nextDouble() < 0.5||settings.isDualTypeOnly()) {
+                    if (this.random.nextDouble() < 0.5 || settings.isDualTypeOnly()) {
                         pkmn.secondaryType = randomType();
                         while (pkmn.secondaryType == pkmn.primaryType) {
                             pkmn.secondaryType = randomType();
@@ -824,7 +822,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (megaEvolutionSanity) {
             List<MegaEvolution> allMegaEvos = getMegaEvolutions();
-            for (MegaEvolution megaEvo: allMegaEvos) {
+            for (MegaEvolution megaEvo : allMegaEvos) {
                 if (megaEvo.from.megaEvolutionsFrom.size() > 1) continue;
                 megaEvo.to.primaryType = megaEvo.from.primaryType;
                 megaEvo.to.secondaryType = megaEvo.from.secondaryType;
@@ -888,7 +886,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        final int maxAbility = this.highestAbilityIndex();
+        final int maxAbility = this.highestAbilityIndex(settings);
 
         if (evolutionSanity) {
             // copy abilities straight up evolution lines
@@ -988,7 +986,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (megaEvolutionSanity) {
             List<MegaEvolution> allMegaEvos = this.getMegaEvolutions();
-            for (MegaEvolution megaEvo: allMegaEvos) {
+            for (MegaEvolution megaEvo : allMegaEvos) {
                 if (megaEvo.from.megaEvolutionsFrom.size() > 1) continue;
                 megaEvo.to.ability1 = megaEvo.from.ability1;
                 megaEvo.to.ability2 = megaEvo.from.ability2;
@@ -997,12 +995,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
-    private int pickRandomAbilityVariation(int selectedAbility, int... alreadySetAbilities) {
+    private int pickRandomAbilityVariation(Settings settings, int selectedAbility, int... alreadySetAbilities) {
         int newAbility = selectedAbility;
 
         while (true) {
-            Map<Integer, List<Integer>> abilityVariations = getAbilityVariations();
-            for (int baseAbility: abilityVariations.keySet()) {
+            Map<Integer, List<Integer>> abilityVariations = getAbilityVariations(settings);
+            for (int baseAbility : abilityVariations.keySet()) {
                 if (selectedAbility == baseAbility) {
                     List<Integer> variationsForThisAbility = abilityVariations.get(selectedAbility);
                     newAbility = variationsForThisAbility.get(this.random.nextInt(variationsForThisAbility.size()));
@@ -1032,6 +1030,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                                   int... alreadySetAbilities) {
         int newAbility;
 
+        boolean isParagonLite = (settings.getCurrentMiscTweaks() & MiscTweak.PARAGON_LITE.getValue()) != 0L;
+
         boolean lowAtk = pk.attack <= 85;
         boolean highAtk = pk.attack > 110;
 
@@ -1042,14 +1042,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean mediumSpeed = (pk.speed >= 85) && (pk.speed <= 110);
         boolean lowSpeed = pk.speed < 85;
 
-        double avgHpBuffFromIvs = (60.0 + 75.0)/2.0;
-        double avgStatBuffFromIvs = (5.0 + 20.0)/2.0;
+        double avgHpBuffFromIvs = (60.0 + 75.0) / 2.0;
+        double avgStatBuffFromIvs = (5.0 + 20.0) / 2.0;
 
-        int physicalBulk = (int)Math.sqrt((pk.hp + avgHpBuffFromIvs) * (pk.defense + avgStatBuffFromIvs));
+        int physicalBulk = (int) Math.sqrt((pk.hp + avgHpBuffFromIvs) * (pk.defense + avgStatBuffFromIvs));
         boolean highPhysBulk = physicalBulk > 135;
         boolean lowPhysBulk = physicalBulk <= 120;
 
-        int specialBulk = (int)Math.sqrt((pk.hp + avgHpBuffFromIvs) * (pk.spdef + avgStatBuffFromIvs));
+        int specialBulk = (int) Math.sqrt((pk.hp + avgHpBuffFromIvs) * (pk.spdef + avgStatBuffFromIvs));
 
         int bulk = Math.min(physicalBulk, specialBulk);
         boolean lowBulk = bulk <= 115;
@@ -1069,6 +1069,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean isFlying = pk.primaryType == Type.FLYING || pk.secondaryType == Type.FLYING;
 
         boolean isPoison = pk.primaryType == Type.POISON || pk.secondaryType == Type.POISON;
+        boolean resistsPoison = against.get(Type.POISON) == Effectiveness.HALF || against.get(Type.POISON) == Effectiveness.QUARTER || against.get(Type.POISON) == Effectiveness.ZERO;
 
         boolean isGround = pk.primaryType == Type.GROUND || pk.secondaryType == Type.GROUND;
         boolean resistsGround = against.get(Type.GROUND) == Effectiveness.HALF || against.get(Type.GROUND) == Effectiveness.QUARTER || against.get(Type.GROUND) == Effectiveness.ZERO;
@@ -1076,6 +1077,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean isRock = pk.primaryType == Type.ROCK || pk.secondaryType == Type.ROCK;
 
         boolean isBug = pk.primaryType == Type.BUG || pk.secondaryType == Type.BUG;
+        boolean resistsBug = against.get(Type.BUG) == Effectiveness.HALF || against.get(Type.BUG) == Effectiveness.QUARTER || against.get(Type.BUG) == Effectiveness.ZERO;
         boolean weakToBug = against.get(Type.BUG) == Effectiveness.DOUBLE || against.get(Type.BUG) == Effectiveness.QUADRUPLE;
 
         boolean weakToGhost = against.get(Type.GHOST) == Effectiveness.DOUBLE || against.get(Type.GHOST) == Effectiveness.QUADRUPLE;
@@ -1096,6 +1098,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean isElectric = pk.primaryType == Type.ELECTRIC || pk.secondaryType == Type.ELECTRIC;
         boolean resistsElectric = against.get(Type.ELECTRIC) == Effectiveness.HALF || against.get(Type.ELECTRIC) == Effectiveness.QUARTER || against.get(Type.ELECTRIC) == Effectiveness.ZERO;
 
+        boolean resistsPsychic = against.get(Type.PSYCHIC) == Effectiveness.HALF || against.get(Type.PSYCHIC) == Effectiveness.QUARTER || against.get(Type.PSYCHIC) == Effectiveness.ZERO;
+
         boolean isIce = pk.primaryType == Type.ICE || pk.secondaryType == Type.ICE;
         boolean resistsIce = against.get(Type.ICE) == Effectiveness.HALF || against.get(Type.ICE) == Effectiveness.QUARTER || against.get(Type.ICE) == Effectiveness.ZERO;
 
@@ -1109,9 +1113,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         HashSet<Integer> irrelevantAbilities = new HashSet<>();
 
         if (settings.isEnsureRelevantAbilities()) {
-            // Doubles
-            irrelevantAbilities.add(Abilities.plus); // 057
-            irrelevantAbilities.add(Abilities.minus); // 058
             if (!settings.isDoubleBattleMode()) {
                 irrelevantAbilities.add(Abilities.healer); // 131
                 irrelevantAbilities.add(Abilities.friendGuard); // 132
@@ -1120,18 +1121,16 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             // No in-battle effect
-            irrelevantAbilities.add(Abilities.illuminate);
-            irrelevantAbilities.add(Abilities.pickup);
+            irrelevantAbilities.add(Abilities.illuminate); // 035
+            irrelevantAbilities.add(Abilities.pickup); // 053
             irrelevantAbilities.add(Abilities.honeyGather); // 118
 
             // Useless in deathless random
             irrelevantAbilities.add(Abilities.aftermath); // 106
-            irrelevantAbilities.add(Abilities.frisk); // 119
 
             // Bad
+            irrelevantAbilities.add(Abilities.pressure); // 046
             irrelevantAbilities.add(Abilities.truant); // 054
-            irrelevantAbilities.add(Abilities.hustle); // 055
-            irrelevantAbilities.add(Abilities.rivalry); // 079
             irrelevantAbilities.add(Abilities.normalize); // 096
             irrelevantAbilities.add(Abilities.klutz); // 103
             irrelevantAbilities.add(Abilities.stall); // 100
@@ -1145,56 +1144,45 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.damp); // 006
             irrelevantAbilities.add(Abilities.oblivious); // 012
             irrelevantAbilities.add(Abilities.suctionCups); // 021
-            irrelevantAbilities.add(Abilities.magmaArmor); // 040
             irrelevantAbilities.add(Abilities.runAway); // 050
             irrelevantAbilities.add(Abilities.stickyHold); // 060
             irrelevantAbilities.add(Abilities.tangledFeet); // 077
             irrelevantAbilities.add(Abilities.badDreams); // 123
             irrelevantAbilities.add(Abilities.pickpocket); // 124
-            irrelevantAbilities.add(Abilities.heavyMetal); // 134
-            irrelevantAbilities.add(Abilities.lightMetal); // 135
-            irrelevantAbilities.add(Abilities.magician); // 170
-            irrelevantAbilities.add(Abilities.auraBreak); // 170
+            if (generationOfPokemon() >= 6) {
+                irrelevantAbilities.add(Abilities.magician); // 170
+                irrelevantAbilities.add(Abilities.auraBreak); // 170
+            }
 
             // Weather
-//            irrelevantAbilities.add(Abilities.drizzle); // 002
             irrelevantAbilities.add(Abilities.sandVeil); // 008
-//            irrelevantAbilities.add(Abilities.cloudNine); // 013
-//            irrelevantAbilities.add(Abilities.swiftSwim); // 033
-//            irrelevantAbilities.add(Abilities.chlorophyll); // 034
-//            irrelevantAbilities.add(Abilities.rainDish); // 044
-//            irrelevantAbilities.add(Abilities.drought); // 070
-//            irrelevantAbilities.add(Abilities.airLock); // 076
             irrelevantAbilities.add(Abilities.snowCloak); // 081
-//            irrelevantAbilities.add(Abilities.hydration); // 093
-            irrelevantAbilities.add(Abilities.solarPower); // 094
-            irrelevantAbilities.add(Abilities.leafGuard); // 102
-            irrelevantAbilities.add(Abilities.iceBody); // 115
-            irrelevantAbilities.add(Abilities.snowWarning); // 117
-//            irrelevantAbilities.add(Abilities.overcoat); // 142
-//            irrelevantAbilities.add(Abilities.sandRush); // 146
-//            irrelevantAbilities.add(Abilities.sandForce); // 159
-            irrelevantAbilities.add(Abilities.primordialSea); // 189
-            irrelevantAbilities.add(Abilities.desolateLand); // 190
-            irrelevantAbilities.add(Abilities.deltaStream); // 191
+            if (generationOfPokemon() >= 6) {
+                irrelevantAbilities.add(Abilities.primordialSea); // 189
+                irrelevantAbilities.add(Abilities.desolateLand); // 190
+                irrelevantAbilities.add(Abilities.deltaStream); // 191
+            }
 
             // Overpowered or too volatile
             irrelevantAbilities.add(Abilities.shadowTag); // 023
             irrelevantAbilities.add(Abilities.wonderGuard); // 025
             irrelevantAbilities.add(Abilities.magnetPull); // 042
             irrelevantAbilities.add(Abilities.arenaTrap); // 071
-            irrelevantAbilities.add(Abilities.angerPoint); // 083
             irrelevantAbilities.add(Abilities.moody); // 141
-            irrelevantAbilities.add(Abilities.parentalBond); // 141
+            if (generationOfPokemon() >= 6) {
+                irrelevantAbilities.add(Abilities.parentalBond); // 141
+            }
 
             // Forme-changing
             irrelevantAbilities.add(Abilities.forecast); // 059
             irrelevantAbilities.add(Abilities.multitype); // 121
             irrelevantAbilities.add(Abilities.flowerGift); // 122
             irrelevantAbilities.add(Abilities.zenMode); // 161
-            irrelevantAbilities.add(Abilities.stanceChange); // 176
+            if (generationOfPokemon() >= 6) {
+                irrelevantAbilities.add(Abilities.stanceChange); // 176
+            }
 
-            if (weaknesses <= 1) {
+            if (weaknesses < 2) {
                 irrelevantAbilities.add(Abilities.solidRock); // 116
                 irrelevantAbilities.add(Abilities.filter); // 111
             }
@@ -1227,7 +1215,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.liquidOoze); // 064
                 irrelevantAbilities.add(Abilities.shellArmor); // 075
                 irrelevantAbilities.add(Abilities.steadfast); // 080
-                irrelevantAbilities.add(Abilities.heatproof); // 085
                 irrelevantAbilities.add(Abilities.drySkin); // 087
                 irrelevantAbilities.add(Abilities.filter); // 111
                 irrelevantAbilities.add(Abilities.solidRock); // 116
@@ -1236,7 +1223,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.toxicBoost); // 137
                 irrelevantAbilities.add(Abilities.harvest); // 139
                 irrelevantAbilities.add(Abilities.regenerator); // 144
-                irrelevantAbilities.add(Abilities.justified); // 154
                 irrelevantAbilities.add(Abilities.rattled); // 155
             }
 
@@ -1248,15 +1234,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.imposter);
             }
 
-            if (isElectric)
+            if (isElectric || isGround)
                 irrelevantAbilities.add(Abilities.limber);
 
             // Avoid Flying-type STAB Gale Wings in Gen VI (other types are more reasonable)
-            if (isFlying && generationOfPokemon() < 7)
+            if (isFlying && generationOfPokemon() == 6)
                 irrelevantAbilities.add(Abilities.galeWings);
 
             // Protean and Libero are OP until Gen IX nerf
-            if (generationOfPokemon() < 9) {
+            if (generationOfPokemon() >= 6 && generationOfPokemon() < 9) {
                 irrelevantAbilities.add(Abilities.protean);
                 irrelevantAbilities.add(Abilities.libero);
             }
@@ -1274,10 +1260,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             if (!isGrass)
-                irrelevantAbilities.add(Abilities.flowerVeil); // 166
+                if (generationOfPokemon() >= 6) {
+                    irrelevantAbilities.add(Abilities.flowerVeil); // 166
+                }
 
             if (isFlying || isGround)
-                irrelevantAbilities.add(Abilities.grassPelt);
+                if (generationOfPokemon() >= 6) {
+                    irrelevantAbilities.add(Abilities.grassPelt);
+                }
 
             if (resistsElectric)
                 irrelevantAbilities.add(Abilities.voltAbsorb);
@@ -1290,6 +1280,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.poisonHeal);
             }
 
+            if (resistsPoison)
+                irrelevantAbilities.add(Abilities.immunity);
+
             if (!isFire && resistsFire)
                 irrelevantAbilities.add(Abilities.flashFire);
 
@@ -1299,9 +1292,17 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (isGround || (resistsElectric && !higherOrEqualSpAtk))
                 irrelevantAbilities.add(Abilities.lightningRod);
 
-            double hugePowerAtk = (pk.attack + 20) * 2.0 - 20;
+            double hugePowerAtk = (pk.attack + 20) * 1.5 - 20;
             if (hugePowerAtk > 160 || pk.bst() - pk.attack + hugePowerAtk > 650) {
                 irrelevantAbilities.add(Abilities.hugePower);
+
+                if (!isParagonLite)
+                    irrelevantAbilities.add(Abilities.purePower);
+
+            }
+
+            double purePowerSpa = (pk.spatk + 20) * 1.5 - 20;
+            if (isParagonLite && (purePowerSpa > 160 || pk.bst() - pk.spatk + purePowerSpa > 650)) {
                 irrelevantAbilities.add(Abilities.purePower);
             }
 
@@ -1313,9 +1314,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (!resistsWater || (isFire && !isWater))
                 irrelevantAbilities.add(Abilities.rainDish);
-
-            if (!(isGround || isRock || isSteel))
-                irrelevantAbilities.add(Abilities.sandStream);
 
             if (resistsFire && resistsIce)
                 irrelevantAbilities.add(Abilities.thickFat);
@@ -1330,13 +1328,22 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.defiant);
                 irrelevantAbilities.add(Abilities.poisonTouch);
                 irrelevantAbilities.add(Abilities.moxie);
-                irrelevantAbilities.add(Abilities.strongJaw);
-                irrelevantAbilities.add(Abilities.megaLauncher);
+
+                if (isParagonLite) {
+                    irrelevantAbilities.add(Abilities.strongJaw);
+                } else {
+                    irrelevantAbilities.add(ParagonLiteAbilities.strongJaw);
+                }
             }
 
             // only benefits special attackers
             if (!higherOrEqualSpAtk) {
-                irrelevantAbilities.add(Abilities.competitive);
+                if (isParagonLite) {
+                    irrelevantAbilities.add(ParagonLiteAbilities.competitive);
+                } else {
+                    irrelevantAbilities.add(Abilities.competitive);
+                    irrelevantAbilities.add(Abilities.megaLauncher);
+                }
             }
 
             if (lowBulk)
@@ -1378,9 +1385,6 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (resistsWater && !higherOrEqualSpAtk)
                 irrelevantAbilities.add(Abilities.stormDrain);
-
-            if (!isIce)
-                irrelevantAbilities.add(Abilities.snowWarning);
 
             if (lowBulk || !higherOrEqualAttack)
                 irrelevantAbilities.add(Abilities.reckless);
@@ -1424,6 +1428,42 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.innerFocus);
                 irrelevantAbilities.add(Abilities.prankster);
             }
+            
+            if (isParagonLite) {
+                if (isFlying)
+                    irrelevantAbilities.add(ParagonLiteAbilities.heavyWing);
+                
+                if (resistsBug)
+                    irrelevantAbilities.add(ParagonLiteAbilities.insectivore);
+                
+                if (!higherOrEqualSpAtk)
+                    irrelevantAbilities.add(ParagonLiteAbilities.prestige);
+                
+                if (!higherOrEqualAttack)
+                    irrelevantAbilities.add(ParagonLiteAbilities.luckyFoot);
+                
+                if (highSpeed)
+                    irrelevantAbilities.add(ParagonLiteAbilities.triage);
+
+                if (!higherOrEqualSpAtk)
+                    irrelevantAbilities.add(ParagonLiteAbilities.competitive);
+
+                if (!higherOrEqualAttack)
+                    irrelevantAbilities.add(ParagonLiteAbilities.strongJaw);
+
+                if (resistsPsychic)
+                    irrelevantAbilities.add(ParagonLiteAbilities.assimilate);
+
+                if (!higherOrEqualAttack)
+                    irrelevantAbilities.add(ParagonLiteAbilities.sharpness);
+
+                if (pk.primaryType == Type.NORMAL || pk.secondaryType == Type.NORMAL) {
+                    irrelevantAbilities.add(ParagonLiteAbilities.refrigerate);
+                    irrelevantAbilities.add(ParagonLiteAbilities.pixilate);
+                    irrelevantAbilities.add(ParagonLiteAbilities.aerilate);
+                    irrelevantAbilities.add(ParagonLiteAbilities.galvanize);
+                }
+            }
         }
 
         // TODO: Gen VI :)
@@ -1431,9 +1471,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         while (true) {
             newAbility = this.random.nextInt(maxAbility) + 1;
 
-             if (bannedAbilities.contains(newAbility) || irrelevantAbilities.contains(newAbility)) {
-                 continue;
-             }
+            if (bannedAbilities.contains(newAbility) || irrelevantAbilities.contains(newAbility)) {
+                continue;
+            }
 
             boolean repeat = false;
             for (int alreadySetAbility : alreadySetAbilities) {
@@ -1445,7 +1485,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (!repeat) {
                 if (useVariations) {
-                    newAbility = pickRandomAbilityVariation(newAbility, alreadySetAbilities);
+                    newAbility = pickRandomAbilityVariation(settings, newAbility, alreadySetAbilities);
                 }
                 break;
             }
@@ -1607,7 +1647,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         } else if (usePowerLevels) {
             List<Pokemon> allowedPokes;
             if (allowAltFormes) {
-                allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
+                allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
                         : new ArrayList<>(mainPokemonListInclFormes);
             } else {
                 allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
@@ -1835,7 +1875,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         } else if (usePowerLevels) {
             List<Pokemon> allowedPokes;
             if (allowAltFormes) {
-                allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
+                allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
                         : new ArrayList<>(mainPokemonListInclFormes);
             } else {
                 allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
@@ -2118,7 +2158,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     } else if (usePowerLevels) {
                         List<Pokemon> allowedPokes;
                         if (allowAltFormes) {
-                            allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
+                            allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
                                     : new ArrayList<>(mainPokemonListInclFormes);
                         } else {
                             allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
@@ -2199,7 +2239,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 } else if (usePowerLevels) {
                     List<Pokemon> allowedPokes;
                     if (allowAltFormes) {
-                        allowedPokes  = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
+                        allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryListInclFormes)
                                 : new ArrayList<>(mainPokemonListInclFormes);
                     } else {
                         allowedPokes = noLegendaries ? new ArrayList<>(noLegendaryList)
@@ -2352,7 +2392,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private void setIllegalPreEvos(Pokemon pk, List<Pokemon> illegalList) {
-        for (Evolution evo: pk.evolutionsTo) {
+        for (Evolution evo : pk.evolutionsTo) {
             pk = evo.from;
             illegalList.add(pk);
             setIllegalPreEvos(pk, illegalList);
@@ -2360,7 +2400,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private void setIllegalEvos(Pokemon pk, List<Pokemon> illegalList) {
-        for (Evolution evo: pk.evolutionsFrom) {
+        for (Evolution evo : pk.evolutionsFrom) {
             pk = evo.to;
             illegalList.add(pk);
             setIllegalEvos(pk, illegalList);
@@ -2375,7 +2415,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void traverseEvolutions(Pokemon pk, List<Pokemon> finalEvos) {
         if (!pk.evolutionsFrom.isEmpty()) {
-            for (Evolution evo: pk.evolutionsFrom) {
+            for (Evolution evo : pk.evolutionsFrom) {
                 pk = evo.to;
                 traverseEvolutions(pk, finalEvos);
             }
@@ -2545,11 +2585,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (eliteFourUniquePokemon) {
             // Sort Elite Four Trainers to the start of the list
             scrambledTrainers.sort((t1, t2) ->
-                    Boolean.compare(eliteFourIndices.contains(currentTrainers.indexOf(t2)+1),eliteFourIndices.contains(currentTrainers.indexOf(t1)+1)));
+                    Boolean.compare(eliteFourIndices.contains(currentTrainers.indexOf(t2) + 1), eliteFourIndices.contains(currentTrainers.indexOf(t1) + 1)));
             illegalEvoChains = forceFullyEvolved;
             if (rivalCarriesStarter) {
-                List<Pokemon> starterList = getStarters().subList(0,3);
-                for (Pokemon starter: starterList) {
+                List<Pokemon> starterList = getStarters().subList(0, 3);
+                for (Pokemon starter : starterList) {
                     // If rival/friend carries starter, the starters cannot be set as unique
                     bannedFromUniqueList.add(starter);
                     setEvoChainAsIllegal(starter, bannedFromUniqueList, true);
@@ -2645,23 +2685,24 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
 
                 Pokemon newPK = pickTrainerPokeReplacement(
-                                oldPK,
-                                usePowerLevels,
-                                typeForTrainer,
-                                noLegendaries,
-                                wgAllowed,
-                                distributionSetting || (mainPlaythroughSetting && mainPlaythroughTrainers.contains(t.index)),
-                                swapThisMegaEvo,
-                                abilitiesAreRandomized,
-                                includeFormes,
-                                banIrregularAltFormes
-                        );
+                        oldPK,
+                        usePowerLevels,
+                        typeForTrainer,
+                        noLegendaries,
+                        wgAllowed,
+                        distributionSetting || (mainPlaythroughSetting && mainPlaythroughTrainers.contains(t.index)),
+                        swapThisMegaEvo,
+                        abilitiesAreRandomized,
+                        includeFormes,
+                        banIrregularAltFormes
+                );
 
                 // Chosen Pokemon is locked in past here
                 if (distributionSetting || (mainPlaythroughSetting && mainPlaythroughTrainers.contains(t.index))) {
                     setPlacementHistory(newPK);
                 }
                 tp.pokemon = newPK;
+
                 setFormeForTrainerPokemon(tp, newPK);
                 tp.abilitySlot = getRandomAbilitySlot(newPK);
                 tp.resetMoves = true;
@@ -2676,7 +2717,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             actualPKList.add(newPK);
                         }
                         // If the unique Pokemon will evolve, we have to set all its potential evolutions as unique
-                        for (Pokemon actualPK: actualPKList) {
+                        for (Pokemon actualPK : actualPKList) {
                             usedAsUniqueList.add(actualPK);
                             if (illegalEvoChains) {
                                 setEvoChainAsIllegal(actualPK, illegalIfEvolvedList, willForceEvolve);
@@ -2697,9 +2738,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 if (swapThisMegaEvo) {
                     tp.heldItem = newPK
-                                    .megaEvolutionsFrom
-                                    .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
-                                    .argument;
+                            .megaEvolutionsFrom
+                            .get(this.random.nextInt(newPK.megaEvolutionsFrom.size()))
+                            .argument;
                 }
 
                 if (shinyChance) {
@@ -2753,7 +2794,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
                 int[] moveset = highestLevelPoke.resetMoves ?
                         RomFunctions.getMovesAtLevel(getAltFormeOfPokemon(
-                                highestLevelPoke.pokemon, highestLevelPoke.forme).number,
+                                        highestLevelPoke.pokemon, highestLevelPoke.forme).number,
                                 movesets,
                                 highestLevelPoke.level) :
                         highestLevelPoke.moves;
@@ -2762,7 +2803,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 for (TrainerPokemon tp : t.pokemon) {
                     int[] moveset = tp.resetMoves ?
                             RomFunctions.getMovesAtLevel(getAltFormeOfPokemon(
-                                    tp.pokemon, tp.forme).number,
+                                            tp.pokemon, tp.forme).number,
                                     movesets,
                                     tp.level) :
                             tp.moves;
@@ -2796,6 +2837,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         } else {
             toChooseFrom = getAllHeldItems();
         }
+        
         tp.heldItem = toChooseFrom.get(random.nextInt(toChooseFrom.size()));
     }
 
@@ -2844,7 +2886,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean allSmart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) != 0;
 
         List<Trainer> currentTrainers = this.getTrainers();
-        for (Trainer t: currentTrainers) {
+        for (Trainer t : currentTrainers) {
             applyLevelModifierToTrainerPokemon(t, levelModifier);
         }
         this.setTrainers(currentTrainers, false, allSmart);
@@ -2858,6 +2900,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean allSmart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) > 0;
 
         List<Trainer> currentTrainers = this.getTrainers();
+
+        // Improve difficulty of trainers
+        for (Trainer t : currentTrainers) {
+            int minIV = t.isBoss() || t.isImportant() ? 18 : 12;
+            for (TrainerPokemon tpk : t.pokemon) {
+                tpk.IVs = Math.max(minIV, tpk.IVs);
+            }
+        }
 
         // Fix Tate & Liza
         if (isORAS) {
@@ -2878,7 +2928,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        for (Trainer t: currentTrainers) {
+        for (Trainer t : currentTrainers) {
             int additional;
             if (t.isBoss()) {
                 additional = additionalBoss;
@@ -2897,14 +2947,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<TrainerPokemon> potentialPokes = new ArrayList<>();
 
             // First pass: find lowest level
-            for (TrainerPokemon tpk: t.pokemon) {
+            for (TrainerPokemon tpk : t.pokemon) {
                 if (tpk.level < lowest) {
                     lowest = tpk.level;
                 }
             }
 
             // Second pass: find all Pokemon at lowest level
-            for (TrainerPokemon tpk: t.pokemon) {
+            for (TrainerPokemon tpk : t.pokemon) {
                 if (tpk.level == lowest) {
                     potentialPokes.add(tpk);
                 }
@@ -2936,7 +2986,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean allSmart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) > 0;
 
         List<Trainer> currentTrainers = this.getTrainers();
-        for (Trainer t: currentTrainers) {
+        for (Trainer t : currentTrainers) {
             if (t.pokemon.size() != 1 || t.multiBattleStatus == Trainer.MultiBattleStatus.ALWAYS || this.trainerShouldNotGetBuffs(t)) {
                 continue;
             }
@@ -3013,7 +3063,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // TM Moves
         boolean[] tmCompat = allTMCompat.get(getAltFormeOfPokemon(tp.pokemon, tp.forme));
-        for (int tmMove: allTMMoves) {
+        for (int tmMove : allTMMoves) {
             if (tmCompat[allTMMoves.indexOf(tmMove) + 1]) {
                 Move thisMove = moves.get(tmMove);
                 if (thisMove.power > 1 && tp.level * 3 > thisMove.power * thisMove.getHitCount(generationOfPokemon()) &&
@@ -3029,7 +3079,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // Move Tutor Moves
         if (hasMoveTutors()) {
             boolean[] tutorCompat = allTutorCompat.get(getAltFormeOfPokemon(tp.pokemon, tp.forme));
-            for (int tutorMove: allTutorMoves) {
+            for (int tutorMove : allTutorMoves) {
                 if (tutorCompat[allTutorMoves.indexOf(tutorMove) + 1]) {
                     Move thisMove = moves.get(tutorMove);
                     if (thisMove.power > 1 && tp.level * 3 > thisMove.power * thisMove.getHitCount(generationOfPokemon()) &&
@@ -3064,7 +3114,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
 
-
         return moveSelectionPoolAtLevel.stream().distinct().collect(Collectors.toList());
     }
 
@@ -3076,10 +3125,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         List<Trainer> trainers = getTrainers();
 
-        for (Trainer t: trainers) {
+        for (Trainer t : trainers) {
             t.setPokemonHaveCustomMoves(true);
 
-            for (TrainerPokemon tp: t.pokemon) {
+            for (TrainerPokemon tp : t.pokemon) {
                 tp.resetMoves = false;
 
                 List<Move> movesAtLevel = getMoveSelectionPoolAtLevel(tp, isCyclicEvolutions);
@@ -3169,7 +3218,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 List<Move> softAbilityMoveAntiSynergyList = MoveSynergy.getSoftAbilityMoveAntiSynergy(
                         getAbilityForTrainerPokemon(tp), movesAtLevel);
                 List<Move> withoutSoftAntiSynergy = new ArrayList<>(movesAtLevel);
-                for (Move mv: softAbilityMoveAntiSynergyList) {
+                for (Move mv : softAbilityMoveAntiSynergyList) {
                     withoutSoftAntiSynergy.remove(mv);
                 }
                 if (withoutSoftAntiSynergy.size() > 0) {
@@ -3204,7 +3253,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 List<Move> statAntiSynergyList = MoveSynergy.getStatMoveAntiSynergy(pk, movesAtLevel);
                 List<Move> withoutStatAntiSynergy = new ArrayList<>(movesAtLevel);
-                for (Move mv: statAntiSynergyList) {
+                for (Move mv : statAntiSynergyList) {
                     withoutStatAntiSynergy.remove(mv);
                 }
                 if (withoutStatAntiSynergy.size() > 0) {
@@ -3228,8 +3277,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 // Add bias for atk/spatk ratio
 
-                double atkSpatkRatio = (double)pk.attack / (double)pk.spatk;
-                switch(getAbilityForTrainerPokemon(tp)) {
+                double atkSpatkRatio = (double) pk.attack / (double) pk.spatk;
+                switch (getAbilityForTrainerPokemon(tp)) {
                     case Abilities.hugePower:
                     case Abilities.purePower:
                         atkSpatkRatio *= 2;
@@ -3258,14 +3307,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (atkSpatkRatio < 1 && specialMoves.size() > 0) {
                     atkSpatkRatio = 1 / atkSpatkRatio;
                     double acceptedRatio = atkSpatkRatioModifier * atkSpatkRatio;
-                    int additionalMoves = (int)(physicalMoves.size() * acceptedRatio) - specialMoves.size();
+                    int additionalMoves = (int) (physicalMoves.size() * acceptedRatio) - specialMoves.size();
                     for (int i = 0; i < additionalMoves; i++) {
                         Move mv = specialMoves.get(this.random.nextInt(specialMoves.size()));
                         movesAtLevel.add(mv);
                     }
                 } else if (physicalMoves.size() > 0) {
                     double acceptedRatio = atkSpatkRatioModifier * atkSpatkRatio;
-                    int additionalMoves = (int)(specialMoves.size() * acceptedRatio) - physicalMoves.size();
+                    int additionalMoves = (int) (specialMoves.size() * acceptedRatio) - physicalMoves.size();
                     for (int i = 0; i < additionalMoves; i++) {
                         Move mv = physicalMoves.get(this.random.nextInt(physicalMoves.size()));
                         movesAtLevel.add(mv);
@@ -3299,9 +3348,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 .distinct()
                                 .collect(Collectors.toList());
 
-                        for (Move dependentMove: requiresOtherMove) {
+                        for (Move dependentMove : requiresOtherMove) {
                             boolean hasRequiredMove = false;
-                            for (Move requiredMove: MoveSynergy.requiresOtherMove(dependentMove, movesAtLevel)) {
+                            for (Move requiredMove : MoveSynergy.requiresOtherMove(dependentMove, movesAtLevel)) {
                                 if (pickedMoves.contains(requiredMove)) {
                                     hasRequiredMove = true;
                                     break;
@@ -3350,7 +3399,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                             isEffectivenessUpdated(),
                             customTypeEffectiveness,
                             addFairy
-                            );
+                    );
                     Collections.shuffle(softMoveSynergyList, this.random);
                     for (int j = 0; j < softMoveBias * softMoveSynergyList.size(); j++) {
                         int k = j % softMoveSynergyList.size();
@@ -3448,7 +3497,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 .filter(mv -> GlobalConstants.requiresOtherMove.contains(mv.number))
                 .collect(Collectors.toList());
 
-        for (Move dependentMove: requiresOtherMove) {
+        for (Move dependentMove : requiresOtherMove) {
             if (MoveSynergy.requiresOtherMove(dependentMove, movesAtLevel).isEmpty()) {
                 movesAtLevel.remove(dependentMove);
             }
@@ -3495,7 +3544,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private List<Move> getObsoleteMoves(List<Move> movesAtLevel) {
         List<Move> obsoletedMoves = new ArrayList<>();
-        for (Move mv: movesAtLevel) {
+        for (Move mv : movesAtLevel) {
             if (GlobalConstants.cannotObsoleteMoves.contains(mv.number)) {
                 continue;
             }
@@ -3511,14 +3560,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                                         mv.getAbsorbPercent() >= mv2.getAbsorbPercent() &&
                                         !mv.isChargeMove &&
                                         !mv.isRechargeMove) ||
-                                mv2.power * mv2.getHitCount(generationOfPokemon()) <= 30) &&
+                                        mv2.power * mv2.getHitCount(generationOfPokemon()) <= 30) &&
                                 mv.accuracy >= mv2.accuracy &&
                                 mv.category == mv2.category &&
                                 mv.priority >= mv2.priority &&
                                 mv2.power > 0 &&
                                 mv.power * mv.getHitCount(generationOfPokemon()) > mv2.power * mv2.getHitCount(generationOfPokemon()))
                         .collect(Collectors.toList());
-                for (Move obsoleted: obsoleteThis) {
+                for (Move obsoleted : obsoleteThis) {
                     //System.out.println(obsoleted.name + " obsoleted by " + mv.name);
                 }
                 obsoletedMoves.addAll(obsoleteThis);
@@ -3526,21 +3575,21 @@ public abstract class AbstractRomHandler implements RomHandler {
                     mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_TARGET) {
                 List<Move> obsoleteThis = new ArrayList<>();
                 List<Move.StatChange> statChanges1 = new ArrayList<>();
-                for (Move.StatChange sc: mv.statChanges) {
+                for (Move.StatChange sc : mv.statChanges) {
                     if (sc.type != StatChangeType.NONE) {
                         statChanges1.add(sc);
                     }
                 }
-                for (Move mv2: movesAtLevel
+                for (Move mv2 : movesAtLevel
                         .stream()
                         .filter(otherMv -> !otherMv.equals(mv) &&
                                 otherMv.power <= 0 &&
                                 otherMv.getStatChangeMoveType() == mv.getStatChangeMoveType() &&
                                 (otherMv.statusType == mv.statusType ||
-                                otherMv.statusType == MoveStatusType.NONE))
+                                        otherMv.statusType == MoveStatusType.NONE))
                         .collect(Collectors.toList())) {
                     List<Move.StatChange> statChanges2 = new ArrayList<>();
-                    for (Move.StatChange sc: mv2.statChanges) {
+                    for (Move.StatChange sc : mv2.statChanges) {
                         if (sc.type != StatChangeType.NONE) {
                             statChanges2.add(sc);
                         }
@@ -3563,9 +3612,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                         continue;
                     }
                     boolean maybeBetter = false;
-                    for (Move.StatChange sc1: statChanges1Filtered) {
+                    for (Move.StatChange sc1 : statChanges1Filtered) {
                         boolean canStillBeBetter = false;
-                        for (Move.StatChange sc2: statChanges2) {
+                        for (Move.StatChange sc2 : statChanges2) {
                             if (sc1.type == sc2.type) {
                                 canStillBeBetter = true;
                                 if ((mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_USER && sc1.stages > sc2.stages) ||
@@ -3587,7 +3636,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
                     }
                 }
-                for (Move obsoleted: obsoleteThis) {
+                for (Move obsoleted : obsoleteThis) {
                     //System.out.println(obsoleted.name + " obsoleted by " + mv.name);
                 }
                 obsoletedMoves.addAll(obsoleteThis);
@@ -4176,7 +4225,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // Roost 5 PP
                 updateMovePP(moves, Moves.roost, 5);
             }
-            
+
             if (generationOfPokemon() >= 7) {
                 // Shore Up 5 PP
                 updateMovePP(moves, Moves.shoreUp, 5);
@@ -4254,7 +4303,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePP(moves, Moves.cut, 10);
         moves.get(Moves.cut).criticalChance = CriticalChance.GUARANTEED;
         moves.get(Moves.cut).effect = MoveEffect.DMG_ALWAYS_CRIT;
-        switch(generationOfPokemon()) {
+        switch (generationOfPokemon()) {
             case 2:
             case 3:
                 moves.get(Moves.cut).description = "Always lands a critical hit.";
@@ -4269,9 +4318,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 break;
         }
 
-        // 017 Tail Whip
-        if (typeInGame(Type.FAIRY))
-            updateMoveType(moves, Moves.tailWhip, Type.FAIRY);
+//        // 017 Tail Whip
+//        if (typeInGame(Type.FAIRY))
+//            updateMoveType(moves, Moves.tailWhip, Type.FAIRY);
 
         // 019 Fly
         updateMoveAccuracy(moves, Moves.fly, 100);
@@ -4312,7 +4361,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 057 Surf
         moves.get(Moves.surf).target = MoveTarget.ALL_ADJACENT_FOES;
-        // TODO: moves.get(Moves.surf).description =
+        moves.get(Moves.surf).accuracy = 90;
 
         // 061 Bubble Beam
         if (generationOfPokemon() >= 3)
@@ -4588,13 +4637,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (typeInGame(Type.FAIRY))
             updateMoveType(moves, Moves.attract, Type.FAIRY);
 
-        // 219 Safeguard
-        if (typeInGame(Type.FAIRY))
-            updateMoveType(moves, Moves.safeguard, Type.FAIRY);
+//        // 219 Safeguard
+//        if (typeInGame(Type.FAIRY))
+//            updateMoveType(moves, Moves.safeguard, Type.FAIRY);
 
-        // 219 Encore
-        if (typeInGame(Type.FAIRY))
-            updateMoveType(moves, Moves.encore, Type.FAIRY);
+//        // 219 Encore
+//        if (typeInGame(Type.FAIRY))
+//            updateMoveType(moves, Moves.encore, Type.FAIRY);
 
         // 220 Pain Split
         updateMoveType(moves, Moves.painSplit, Type.GHOST);
@@ -4629,8 +4678,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 239 Twister
         if (doubles) {
-        updateMovePower(moves, Moves.twister, 75);
-        updateMoveAccuracy(moves, Moves.twister, 90);
+            updateMovePower(moves, Moves.twister, 75);
+            updateMoveAccuracy(moves, Moves.twister, 90);
         }
         moves.get(Moves.twister).flinchPercentChance = 30.0;
 
@@ -4651,8 +4700,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // 249 Rock Smash
         if (generationOfPokemon() == 6) {
             updateMovePower(moves, Moves.rockSmash, 75);
-        }
-        else {
+        } else {
             moves.get(Moves.rockSmash).statChanges[0].percentChance = 100.0;
             moves.get(Moves.rockSmash).description = removeLineBreaks(moves.get(Moves.rockSmash).description)
                     .replace("may lower", "harshly lowers")
@@ -4691,13 +4739,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             moves.get(Moves.memento).description = "The user reveals a dark energy and damages the target. It also lowers the target's Attack stat.";
         }
 
-        // 266 Follow Me
-        if (typeInGame(Type.FAIRY))
-            updateMoveType(moves, Moves.followMe, Type.FAIRY);
+//        // 266 Follow Me
+//        if (typeInGame(Type.FAIRY))
+//            updateMoveType(moves, Moves.followMe, Type.FAIRY);
 
-        // 270 Helping Hand
-        if (typeInGame(Type.FAIRY))
-            updateMoveType(moves, Moves.helpingHand, Type.FAIRY);
+//        // 270 Helping Hand
+//        if (typeInGame(Type.FAIRY))
+//            updateMoveType(moves, Moves.helpingHand, Type.FAIRY);
 
         // 273 Wish
         if (typeInGame(Type.FAIRY))
@@ -4802,8 +4850,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 330 Muddy Water
         if (doubles)
-            updateMovePower(moves, Moves.muddyWater, 75);
-        updateMoveAccuracy(moves, Moves.muddyWater, 90);
+            updateMovePower(moves, Moves.muddyWater, 65);
+        updateMoveAccuracy(moves, Moves.muddyWater, 95);
         moves.get(Moves.muddyWater).effect = MoveEffect.DMG_TRGT_SPE_MINUS_1;
         moves.get(Moves.muddyWater).statChanges[0].type = StatChangeType.SPEED;
         moves.get(Moves.muddyWater).statChanges[0].percentChance = 100.0;
@@ -5359,7 +5407,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (settings.isTrainersLevelModified()) {
             double mod = 1.0 + settings.getTrainersLevelModifier() / 100.0;
-            minEliteFourAceLevel = (int)Math.round(minEliteFourAceLevel * mod);
+            minEliteFourAceLevel = (int) Math.round(minEliteFourAceLevel * mod);
         }
 
         if (isChallengeMode()) {
@@ -5548,12 +5596,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                     moves.get(i).level = 1;
                 }
             }
-
-//            // Poke debug test
-//            if (pkmnNum == Species.arceus) {
-//                moves.clear();
-//                moves.add(new MoveLearnt(Moves.recover, 1));
-//            }
         }
 
         // Done, save
@@ -5595,7 +5637,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             // Force a certain amount of good damaging moves depending on the percentage
-            int goodDamagingLeft = (int)Math.round(goodDamagingPercentage * moves.size());
+            int goodDamagingLeft = (int) Math.round(goodDamagingPercentage * moves.size());
 
             // Replace moves as needed
             for (int i = 0; i < moves.size(); i++) {
@@ -5718,23 +5760,23 @@ public abstract class AbstractRomHandler implements RomHandler {
             validTypeDamagingMoves.get(mv.type).add(mv);
         }
 
-        Map<Type,Double> avgTypePowers = new TreeMap<>();
+        Map<Type, Double> avgTypePowers = new TreeMap<>();
         double totalAvgPower = 0;
 
-        for (Type type: validTypeMoves.keySet()) {
+        for (Type type : validTypeMoves.keySet()) {
             List<Move> typeMoves = validTypeMoves.get(type);
             int attackingSum = 0;
-            for (Move typeMove: typeMoves) {
+            for (Move typeMove : typeMoves) {
                 if (typeMove.power > 0) {
                     attackingSum += (typeMove.power * typeMove.getHitCount(generationOfPokemon()));
                 }
             }
-            double avgTypePower = (double)attackingSum / (double)typeMoves.size();
+            double avgTypePower = (double) attackingSum / (double) typeMoves.size();
             avgTypePowers.put(type, avgTypePower);
             totalAvgPower += (avgTypePower);
         }
 
-        totalAvgPower /= (double)validTypeMoves.keySet().size();
+        totalAvgPower /= (double) validTypeMoves.keySet().size();
 
         // Want the average power of each type to be within 25% both directions
         double minAvg = totalAvgPower * 0.75;
@@ -5742,7 +5784,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Add extra moves to type lists outside of the range to balance the average power of each type
 
-        for (Type type: avgTypePowers.keySet()) {
+        for (Type type : avgTypePowers.keySet()) {
             double avgPowerForType = avgTypePowers.get(type);
             List<Move> typeMoves = validTypeMoves.get(type);
             List<Move> alreadyPicked = new ArrayList<>();
@@ -5912,12 +5954,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             banned.addAll(getIrregularFormes());
         }
         // loop to add chosen pokemon to banned, preventing it from being a random option.
-        for (int i = 0; i < customStarters.length; i = i + 1){
-            if (!(customStarters[i] - 1 == 0)){
+        for (int i = 0; i < customStarters.length; i = i + 1) {
+            if (!(customStarters[i] - 1 == 0)) {
                 banned.add(romPokemon.get(customStarters[i] - 1));
             }
         }
-        if (customStarters[0] - 1 == 0){
+        if (customStarters[0] - 1 == 0) {
             Pokemon pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
             while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || pkmn.actuallyCosmetic) {
                 pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
@@ -5927,7 +5969,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             Pokemon pkmn1 = romPokemon.get(customStarters[0] - 1);
             pickedStarters.add(pkmn1);
         }
-        if (customStarters[1] - 1 == 0){
+        if (customStarters[1] - 1 == 0) {
             Pokemon pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
             while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || pkmn.actuallyCosmetic) {
                 pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
@@ -5941,7 +5983,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (isYellow()) {
             setStarters(pickedStarters);
         } else {
-            if (customStarters[2] - 1 == 0){
+            if (customStarters[2] - 1 == 0) {
                 Pokemon pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
                 while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || pkmn.actuallyCosmetic) {
                     pkmn = allowAltFormes ? randomPokemonInclFormes() : randomPokemon();
@@ -6078,7 +6120,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         boolean reallySwapMegaEvos = forceSwapStaticMegaEvos() || swapMegaEvos;
 
-        Map<Integer,Integer> specialMusicStaticChanges = new HashMap<>();
+        Map<Integer, Integer> specialMusicStaticChanges = new HashMap<>();
         List<Integer> changeMusicStatics = new ArrayList<>();
         if (correctStaticMusic) {
             changeMusicStatics = getSpecialMusicStatics();
@@ -6231,9 +6273,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     } else {
                         if (old.restrictedPool) {
                             List<Pokemon> restrictedPool = pokemonLeft
-                                            .stream()
-                                            .filter(pk -> old.restrictedList.contains(pk))
-                                            .collect(Collectors.toList());
+                                    .stream()
+                                    .filter(pk -> old.restrictedList.contains(pk))
+                                    .collect(Collectors.toList());
                             if (restrictedPool.isEmpty()) {
                                 restrictedPool = pokemonPool
                                         .stream()
@@ -6328,9 +6370,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Pokemon> restrictedPool = pokemonLeft.stream().filter(pk -> old.restrictedList.contains(pk)).collect(Collectors.toList());
         if (restrictedPool.isEmpty()) {
             restrictedPool = fullList
-                            .stream()
-                            .filter(pk -> old.restrictedList.contains(pk))
-                            .collect(Collectors.toList());
+                    .stream()
+                    .filter(pk -> old.restrictedList.contains(pk))
+                    .collect(Collectors.toList());
         }
         newPK = restrictedPool.remove(this.random.nextInt(restrictedPool.size()));
         pokemonLeft.remove(newPK);
@@ -6493,7 +6535,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> pickedMoves = new ArrayList<>();
 
         // Force a certain amount of good damaging moves depending on the percentage
-        int goodDamagingLeft = (int)Math.round(goodDamagingPercentage * (tmCount - preservedFieldMoveCount));
+        int goodDamagingLeft = (int) Math.round(goodDamagingPercentage * (tmCount - preservedFieldMoveCount));
 
         for (int i = 0; i < tmCount - preservedFieldMoveCount; i++) {
             Move chosenMove;
@@ -6542,12 +6584,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (followEvolutions) {
             copyUpEvolutionsHelper(pk -> randomizePokemonMoveCompatibility(
-                    pk, compat.get(pk), tmHMs, requiredEarlyOn, preferSameType),
-            (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
-                    evFrom, evTo, compat.get(evFrom), compat.get(evTo), tmHMs, preferSameType
-            ), null, true);
-        }
-        else {
+                            pk, compat.get(pk), tmHMs, requiredEarlyOn, preferSameType),
+                    (evFrom, evTo, toMonIsFinalEvo) -> copyPokemonMoveCompatibilityUpEvolutions(
+                            evFrom, evTo, compat.get(evFrom), compat.get(evTo), tmHMs, preferSameType
+                    ), null, true);
+        } else {
             for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
                 randomizePokemonMoveCompatibility(compatEntry.getKey(), compatEntry.getValue(), tmHMs,
                         requiredEarlyOn, preferSameType);
@@ -6597,30 +6638,29 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
                 toCompatibilityFlags[i] = (this.random.nextDouble() < probability);
-            }
-            else {
+            } else {
                 toCompatibilityFlags[i] = prevCompatibilityFlags[i];
             }
         }
     }
 
     private double getMoveCompatibilityProbability(Pokemon pkmn, Move mv, boolean requiredEarlyOn,
-                                                  boolean preferSameType) {
-            double probability = 0.5;
-            if (preferSameType) {
-                if (pkmn.primaryType.equals(mv.type)
-                        || (pkmn.secondaryType != null && pkmn.secondaryType.equals(mv.type))) {
-                    probability = 0.9;
-                } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
-                    probability = 0.5;
-                } else {
-                    probability = 0.25;
-                }
+                                                   boolean preferSameType) {
+        double probability = 0.5;
+        if (preferSameType) {
+            if (pkmn.primaryType.equals(mv.type)
+                    || (pkmn.secondaryType != null && pkmn.secondaryType.equals(mv.type))) {
+                probability = 0.9;
+            } else if (mv.type != null && mv.type.equals(Type.NORMAL)) {
+                probability = 0.5;
+            } else {
+                probability = 0.25;
             }
-            if (requiredEarlyOn) {
-                probability = Math.min(1.0, probability * 1.8);
-            }
-            return probability;
+        }
+        if (requiredEarlyOn) {
+            probability = Math.min(1.0, probability * 1.8);
+        }
+        return probability;
     }
 
     @Override
@@ -6660,7 +6700,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void ensureTMEvolutionSanity() {
         Map<Pokemon, boolean[]> compat = this.getTMHMCompatibility();
         // Don't do anything with the base, just copy upwards to ensure later evolutions retain learn compatibility
-        copyUpEvolutionsHelper(pk -> {}, ((evFrom, evTo, toMonIsFinalEvo) -> {
+        copyUpEvolutionsHelper(pk -> {
+        }, ((evFrom, evTo, toMonIsFinalEvo) -> {
             boolean[] fromCompat = compat.get(evFrom);
             boolean[] toCompat = compat.get(evTo);
             for (int i = 1; i < toCompat.length; i++) {
@@ -6756,7 +6797,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> pickedMoves = new ArrayList<>();
 
         // Force a certain amount of good damaging moves depending on the percentage
-        int goodDamagingLeft = (int)Math.round(goodDamagingPercentage * (mtCount - preservedFieldMoveCount));
+        int goodDamagingLeft = (int) Math.round(goodDamagingPercentage * (mtCount - preservedFieldMoveCount));
 
         for (int i = 0; i < mtCount - preservedFieldMoveCount; i++) {
             Move chosenMove;
@@ -6827,12 +6868,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         if (followEvolutions) {
             copyUpEvolutionsHelper(pk -> randomizePokemonMoveCompatibility(
-                    pk, compat.get(pk), mts, priorityTutors, preferSameType),
-                    (evFrom, evTo, toMonIsFinalEvo) ->  copyPokemonMoveCompatibilityUpEvolutions(
+                            pk, compat.get(pk), mts, priorityTutors, preferSameType),
+                    (evFrom, evTo, toMonIsFinalEvo) -> copyPokemonMoveCompatibilityUpEvolutions(
                             evFrom, evTo, compat.get(evFrom), compat.get(evTo), mts, preferSameType
                     ), null, true);
-        }
-        else {
+        } else {
             for (Map.Entry<Pokemon, boolean[]> compatEntry : compat.entrySet()) {
                 randomizePokemonMoveCompatibility(compatEntry.getKey(), compatEntry.getValue(), mts, priorityTutors, preferSameType);
             }
@@ -6888,7 +6928,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         Map<Pokemon, boolean[]> compat = this.getMoveTutorCompatibility();
         // Don't do anything with the base, just copy upwards to ensure later evolutions retain learn compatibility
-        copyUpEvolutionsHelper(pk -> {}, ((evFrom, evTo, toMonIsFinalEvo) -> {
+        copyUpEvolutionsHelper(pk -> {
+        }, ((evFrom, evTo, toMonIsFinalEvo) -> {
             boolean[] fromCompat = compat.get(evFrom);
             boolean[] toCompat = compat.get(evTo);
             for (int i = 1; i < toCompat.length; i++) {
@@ -6926,11 +6967,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // index 0 = singles, 1 = doubles
-        List<String>[] allTrainerNames = new List[] { new ArrayList<String>(), new ArrayList<String>() };
-        Map<Integer, List<String>> trainerNamesByLength[] = new Map[] { new TreeMap<Integer, List<String>>(),
-                new TreeMap<Integer, List<String>>() };
-        
-        List<String> repeatedTrainerNames = Arrays.asList(new String[] { "GRUNT", "EXECUTIVE", "SHADOW", "ADMIN", "GOON", "EMPLOYEE" });
+        List<String>[] allTrainerNames = new List[]{new ArrayList<String>(), new ArrayList<String>()};
+        Map<Integer, List<String>> trainerNamesByLength[] = new Map[]{new TreeMap<Integer, List<String>>(),
+                new TreeMap<Integer, List<String>>()};
+
+        List<String> repeatedTrainerNames = Arrays.asList(new String[]{"GRUNT", "EXECUTIVE", "SHADOW", "ADMIN", "GOON", "EMPLOYEE"});
 
         // Read name lists
         for (String trainername : customNames.getTrainerNames()) {
@@ -7052,9 +7093,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // index 0 = singles, index 1 = doubles
-        List<String> allTrainerClasses[] = new List[] { new ArrayList<String>(), new ArrayList<String>() };
-        Map<Integer, List<String>> trainerClassesByLength[] = new Map[] { new HashMap<Integer, List<String>>(),
-                new HashMap<Integer, List<String>>() };
+        List<String> allTrainerClasses[] = new List[]{new ArrayList<String>(), new ArrayList<String>()};
+        Map<Integer, List<String>> trainerClassesByLength[] = new Map[]{new HashMap<Integer, List<String>>(),
+                new HashMap<Integer, List<String>>()};
 
         // Read names data
         for (String trainerClassName : customNames.getTrainerClasses()) {
@@ -7277,7 +7318,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 int iterNum = 0;
                 while ((this.getItemPlacementHistory(chosenItem) > this.getItemPlacementAverage()) && iterNum < 100) {
                     chosenItem = possibleItems.randomNonTM(this.random);
-                    iterNum +=1;
+                    iterNum += 1;
                 }
                 newItems.add(chosenItem);
                 if (uniqueItems && uniqueNoSellItems.contains(chosenItem)) {
@@ -7309,7 +7350,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         Collections.shuffle(newItems, this.random);
         Collections.shuffle(newTMs, this.random);
-        
+
         this.setRegularFieldItems(newItems);
         this.setFieldTMs(newTMs);
     }
@@ -7546,11 +7587,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                     List<Pokemon> chosenList =
                             allowAltFormes ?
-                            mainPokemonListInclFormes
-                                    .stream()
-                                    .filter(pk -> !pk.actuallyCosmetic)
-                                    .collect(Collectors.toList()) :
-                            mainPokemonList;
+                                    mainPokemonListInclFormes
+                                            .stream()
+                                            .filter(pk -> !pk.actuallyCosmetic)
+                                            .collect(Collectors.toList()) :
+                                    mainPokemonList;
                     // Step 1: base filters
                     for (Pokemon pk : chosenList) {
                         // Prevent evolving into oneself (mandatory)
@@ -7695,7 +7736,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             // If no error, done and return
             if (!hadError) {
-                for (Pokemon pk: actuallyCosmeticPokemonPool) {
+                for (Pokemon pk : actuallyCosmeticPokemonPool) {
                     pk.copyBaseFormeEvolutions(pk.baseForme);
                 }
                 return;
@@ -7862,7 +7903,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             // If no error, done and return
             if (!hadError) {
-                for (Pokemon pk: actuallyCosmeticPokemonPool) {
+                for (Pokemon pk : actuallyCosmeticPokemonPool) {
                     pk.copyBaseFormeEvolutions(pk.baseForme);
                 }
                 return;
@@ -7911,14 +7952,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         Map<Integer, Shop> currentItems = this.getShopItems(badges);
         if (currentItems == null) return;
         List<Integer> itemList = new ArrayList<>();
-        for (Shop shop: currentItems.values()) {
+        for (Shop shop : currentItems.values()) {
             itemList.addAll(shop.items);
         }
         Collections.shuffle(itemList, this.random);
 
         Iterator<Integer> itemListIter = itemList.iterator();
 
-        for (Shop shop: currentItems.values()) {
+        for (Shop shop : currentItems.values()) {
             for (int i = 0; i < shop.items.size(); i++) {
                 shop.items.remove(i);
                 shop.items.add(i, itemListIter.next());
@@ -7983,7 +8024,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Integer> mainGameShops = new ArrayList<>();
             List<Integer> nfeMainGameShops = new ArrayList<>();
             List<Integer> nonMainGameShops = new ArrayList<>();
-            for (int i: currentItems.keySet()) {
+            for (int i : currentItems.keySet()) {
                 if (currentItems.get(i).isMainGame) {
                     if (currentItems.get(i).isBeforeFullyEvolved)
                         nfeMainGameShops.add(i);
@@ -7996,11 +8037,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             // Place items in non-main-game shops; skip over guaranteed items
             Collections.shuffle(newItems, this.random);
-            for (int i: nonMainGameShops) {
+            for (int i : nonMainGameShops) {
                 int j = 0;
                 List<Integer> newShopItems = new ArrayList<>();
                 Shop oldShop = currentItems.get(i);
-                for (Integer ignored: oldShop.items) {
+                for (Integer ignored : oldShop.items) {
                     Integer item = newItems.get(j);
                     while ((placeXItems && guaranteedXItems.contains(item))
                             || (placeEvoItems && guaranteedEvoItems.contains(item))) {
@@ -8017,15 +8058,24 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             // Place items in fe-main-game shops; skip over guaranteed evo items
             Collections.shuffle(newItems, this.random);
-            for (int i: mainGameShops) {
+            for (int i : mainGameShops) {
                 int j = 0;
                 List<Integer> newShopItems = new ArrayList<>();
                 Shop oldShop = currentItems.get(i);
-                for (Integer ignored: oldShop.items) {
-                    Integer item = newItems.get(j);
+                for (Integer ignored : oldShop.items) {
+                    Integer item;
+                    if (j < newItems.size())
+                        item = newItems.get(j);
+                    else
+                        item = possibleItems.randomNonTM(this.random, newItems);
+
                     while (placeEvoItems && guaranteedEvoItems.contains(item)) {
                         j++;
-                        item = newItems.get(j);
+
+                        if (j < newItems.size())
+                            item = newItems.get(j);
+                        else
+                            item = possibleItems.randomNonTM(this.random, newItems);
                     }
                     newShopItems.add(item);
                     newItems.remove(item);
@@ -8037,10 +8087,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             // Place items in nfe-main-game shops
             Collections.shuffle(newItems, this.random);
-            for (int i: nfeMainGameShops) {
+            for (int i : nfeMainGameShops) {
                 List<Integer> newShopItems = new ArrayList<>();
                 Shop oldShop = currentItems.get(i);
-                for (Integer ignored: oldShop.items) {
+                for (Integer ignored : oldShop.items) {
                     Integer item = newItems.get(0);
                     newShopItems.add(item);
                     newItems.remove(0);
@@ -8053,16 +8103,16 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         } else {
             for (int i = 0; i < shopItemCount; i++) {
-                while (newItems.contains(newItem = possibleItems.randomNonTM(this.random)));
+                while (newItems.contains(newItem = possibleItems.randomNonTM(this.random))) ;
                 newItems.add(newItem);
             }
 
             Iterator<Integer> newItemsIter = newItems.iterator();
 
-            for (int i: currentItems.keySet()) {
+            for (int i : currentItems.keySet()) {
                 List<Integer> newShopItems = new ArrayList<>();
                 Shop oldShop = currentItems.get(i);
-                for (Integer ignored: oldShop.items) {
+                for (Integer ignored : oldShop.items) {
                     newShopItems.add(newItemsIter.next());
                 }
                 Shop shop = new Shop(oldShop);
@@ -8086,8 +8136,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean isChallengeMode = isChallengeMode();
 
         int badges = 0;
-        for (int i : gymLeaders)
-        {
+        for (int i : gymLeaders) {
             // compensates for challenge mode
             int challengeAdd = isChallengeMode ? badges / 2 + 1 : 0;
 
@@ -8103,8 +8152,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         badges = 0;
-        for (int i : aceLevels)
-        {
+        for (int i : aceLevels) {
             if (i < level)
                 badges++;
         }
@@ -8122,12 +8170,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> mainPlaythroughTrainers = getMainPlaythroughTrainers();
         List<Integer> leaders = new ArrayList<>();
 
-        for (int i = 0; i < trainers.size(); i++)
-        {
-            Trainer trainer = trainers.get(i);
+        for (Trainer trainer : trainers) {
             int index = trainer.index - 1;
-            if (trainer.isLeader() && (mainPlaythroughTrainers.isEmpty() || mainPlaythroughTrainers.contains(index)))
-            {
+            if (trainer.isLeader() && (mainPlaythroughTrainers.isEmpty() || mainPlaythroughTrainers.contains(index))) {
                 leaders.add(index);
             }
         }
@@ -8253,7 +8298,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void addMoveUpdate(int moveNum, int updateType) {
         if (moveUpdates == null) {
-            return; // Fuck you!!!
+            return;
         }
 
         if (!moveUpdates.containsKey(moveNum)) {
@@ -8450,7 +8495,7 @@ public abstract class AbstractRomHandler implements RomHandler {
      * an evolution cycle.
      *
      * @param from Pokemon that is evolving
-     * @param to Pokemon to evolve to
+     * @param to   Pokemon to evolve to
      * @return True if there is an evolution cycle, else false
      */
     private boolean evoCycleCheck(Pokemon from, Pokemon to) {
@@ -8494,12 +8539,10 @@ public abstract class AbstractRomHandler implements RomHandler {
     /**
      * Universal implementation for things that have "copy X up evolutions"
      * support.
-     *  @param bpAction
-     *            Method to run on all base or no-copy Pokemon
-     * @param epAction
-     *            Method to run on all evolved Pokemon with a linear chain of
-     * @param copySplitEvos
-     *            If true, treat split evolutions the same way as base Pokemon
+     *
+     * @param bpAction      Method to run on all base or no-copy Pokemon
+     * @param epAction      Method to run on all evolved Pokemon with a linear chain of
+     * @param copySplitEvos If true, treat split evolutions the same way as base Pokemon
      */
     private void copyUpEvolutionsHelper(BasePokemonAction bpAction, EvolvedPokemonAction epAction,
                                         EvolvedPokemonAction splitAction, boolean copySplitEvos) {
@@ -8839,7 +8882,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
                 }
                 bestPoke.pokemon = starter;
-                setFormeForTrainerPokemon(bestPoke,starter);
+                setFormeForTrainerPokemon(bestPoke, starter);
                 bestPoke.resetMoves = true;
                 bestPoke.abilitySlot = abilitySlot;
             }
@@ -9032,7 +9075,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (pk.bstForPowerLevels() >= minTarget
                             && pk.bstForPowerLevels() <= maxTarget
                             && (wonderGuardAllowed || (pk.ability1 != Abilities.wonderGuard
-                                    && pk.ability2 != Abilities.wonderGuard && pk.ability3 != Abilities.wonderGuard))) {
+                            && pk.ability2 != Abilities.wonderGuard && pk.ability3 != Abilities.wonderGuard))) {
                         canPick.add(pk);
                     }
                 }
@@ -9074,7 +9117,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private Pokemon pickWildPowerLvlReplacement(List<Pokemon> pokemonPool, Pokemon current, boolean banSamePokemon,
-            List<Pokemon> usedUp, int bstBalanceLevel) {
+                                                List<Pokemon> usedUp, int bstBalanceLevel) {
         // start with within 10% and add 5% either direction till we find
         // something
         int balancedBST = bstBalanceLevel * 10 + 250;
@@ -9299,7 +9342,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             if (randomizeAllies) {
-                for (Integer oldAllyIndex: old.allies.keySet()) {
+                for (Integer oldAllyIndex : old.allies.keySet()) {
                     StaticEncounter oldAlly = old.allies.get(oldAllyIndex);
                     StaticEncounter newAlly = new StaticEncounter();
                     Pokemon newAllyPK;
@@ -9326,7 +9369,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         newAlly.level = Math.min(100, (int) Math.round(newAlly.level * (1 + levelModifier / 100.0)));
                     }
 
-                    newTotem.allies.put(oldAllyIndex,newAlly);
+                    newTotem.allies.put(oldAllyIndex, newAlly);
                     if (pokemonLeft.size() == 0) {
                         pokemonLeft.addAll(!allowAltFormes ? mainPokemonList : listInclFormesExclCosmetics);
                         pokemonLeft.removeAll(banned);
@@ -9334,7 +9377,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             } else {
                 newTotem.allies = old.allies;
-                for (StaticEncounter ally: newTotem.allies.values()) {
+                for (StaticEncounter ally : newTotem.allies.values()) {
                     if (levelModifier != 0) {
                         ally.level = Math.min(100, (int) Math.round(ally.level * (1 + levelModifier / 100.0)));
                         setFormeForStaticEncounter(ally, ally.pkmn);
@@ -9412,8 +9455,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Pokemon p : placedPK) {
             placedPKNum += placementHistory.get(p);
         }
-        float placedAverage = Math.round((float)placedPKNum / (float)placedPK.size());
-
+        float placedAverage = Math.round((float) placedPKNum / (float) placedPK.size());
 
 
         if (placedAverage != placedAverage) { // this is checking for NaN, should only happen on first call
@@ -9427,8 +9469,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (placementHistory.get(newPK) <= placedAverage) {
                     toPlacePK.add(newPK);
                 }
-            }
-            else {
+            } else {
                 toPlacePK.add(newPK); // if not placed at all, automatically flag true for placing
 
             }
@@ -9442,7 +9483,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     public void renderPlacementHistory() {
         List<Pokemon> placedPK = new ArrayList<>(placementHistory.keySet());
         for (Pokemon p : placedPK) {
-            System.out.println(p.name+": "+ placementHistory.get(p));
+            System.out.println(p.name + ": " + placementHistory.get(p));
         }
     }
 
@@ -9457,8 +9498,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Integer> placedItem = new ArrayList<>(itemPlacementHistory.keySet());
         if (placedItem.contains(newItem)) {
             return itemPlacementHistory.get(newItem);
-        }
-        else {
+        } else {
             return 0;
         }
     }
@@ -9474,14 +9514,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Integer p : placedPK) {
             placedPKNum += itemPlacementHistory.get(p);
         }
-        return (float)placedPKNum / (float)placedPK.size();
+        return (float) placedPKNum / (float) placedPK.size();
     }
 
     private void reportItemHistory() {
         String[] itemNames = this.getItemNames();
         List<Integer> placedItem = new ArrayList<>(itemPlacementHistory.keySet());
         for (Integer p : placedItem) {
-            System.out.println(itemNames[p]+": "+ itemPlacementHistory.get(p));
+            System.out.println(itemNames[p] + ": " + itemPlacementHistory.get(p));
         }
     }
 
@@ -9610,13 +9650,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public void applyMiscTweaks(Settings settings) {
-        long selectedMiscTweaks = settings.getCurrentMiscTweaks();
-
         long codeTweaksAvailable = miscTweaksAvailable();
         List<MiscTweak> tweaksToApply = new ArrayList<>();
 
         for (MiscTweak mt : MiscTweak.allTweaks) {
-            if ((codeTweaksAvailable & mt.getValue()) > 0L && (selectedMiscTweaks & mt.getValue()) > 0L) {
+            if ((codeTweaksAvailable & mt.getValue()) != 0L) {
                 tweaksToApply.add(mt);
             }
         }
@@ -9626,7 +9664,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Now apply in order.
         for (MiscTweak mt : tweaksToApply) {
-            applyMiscTweak(settings, mt);
+            if ((settings.getCurrentMiscTweaks() & mt.getValue()) != 0L)
+                applyMiscTweak(settings, mt);
         }
     }
 

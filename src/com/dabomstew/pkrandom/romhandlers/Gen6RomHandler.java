@@ -3656,7 +3656,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public int highestAbilityIndex() {
+    public int highestAbilityIndex(Settings settings) {
         return Gen6Constants.getHighestAbilityIndex(romEntry.romType);
     }
 
@@ -3799,8 +3799,21 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public Map<Integer, List<Integer>> getAbilityVariations() {
-        return Gen5Constants.abilityVariations;
+    public Map<Integer, List<Integer>> getAbilityVariations(Settings settings) {
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        map.put(Abilities.clearBody, Arrays.asList(Abilities.clearBody, Abilities.whiteSmoke));
+        map.put(Abilities.battleArmor, Arrays.asList(Abilities.battleArmor, Abilities.shellArmor));
+        map.put(Abilities.cloudNine, Arrays.asList(Abilities.cloudNine, Abilities.airLock));
+        map.put(Abilities.filter, Arrays.asList(Abilities.filter, Abilities.solidRock));
+        map.put(Abilities.roughSkin, Arrays.asList(Abilities.roughSkin, Abilities.ironBarbs));
+        map.put(Abilities.moldBreaker, Arrays.asList(Abilities.moldBreaker, Abilities.turboblaze, Abilities.teravolt));
+
+        if ((settings.getCurrentMiscTweaks() & MiscTweak.PARAGON_LITE.getValue()) == 0) {
+            map.put(Abilities.insomnia, Arrays.asList(Abilities.insomnia, Abilities.vitalSpirit));
+            map.put(Abilities.hugePower, Arrays.asList(Abilities.hugePower, Abilities.purePower));
+        }
+
+        return map;
     }
 
     @Override

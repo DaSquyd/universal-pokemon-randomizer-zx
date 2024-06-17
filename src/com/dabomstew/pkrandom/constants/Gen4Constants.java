@@ -30,6 +30,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.dabomstew.pkrandom.pokemon.*;
+import com.sun.xml.internal.ws.client.sei.ValueSetter;
 
 public class Gen4Constants {
 
@@ -1586,6 +1587,66 @@ public class Gen4Constants {
             return 0x11;
         default:
             return 0; // normal by default
+        }
+    }
+    
+    public static MoveTarget wordToMoveTarget(int word) {
+        switch (word) {
+            case 0x0001:
+                return MoveTarget.OTHER;
+            case 0x0002:
+                return MoveTarget.RANDOM_ADJACENT_FOE;
+            case 0x0004:
+                return MoveTarget.ALL_ADJACENT_FOES;
+            case 0x0008:
+                return MoveTarget.ALL_ADJACENT;
+            case 0x0010:
+                return MoveTarget.USER;
+            case 0x0020:
+                return MoveTarget.PARTY;
+            case 0x0040:
+                return MoveTarget.FIELD_EFFECT;
+            case 0x0080:
+                return MoveTarget.HAZARD;
+            case 0x0100:
+                return MoveTarget.ADJACENT_ALLY;
+            case 0x0200:
+                return MoveTarget.USER_OR_ALLY;
+            case 0x0400:
+                return MoveTarget.ADJACENT_FOE;
+            default:
+                return MoveTarget.ANY_ADJACENT;
+        }
+    }
+    
+    public static int moveTargetToWord(MoveTarget moveTarget) {
+        switch (moveTarget) {
+            case OTHER:
+                return 0x0001;
+            case RANDOM_ADJACENT_FOE:
+                return 0x0002;
+            case ALL_ADJACENT_FOES:
+                return 0x0004;
+            case ALL_ADJACENT:
+                return 0x0008;
+            case USER:
+                return 0x0010;
+            case PARTY:
+            case USER_AND_ALL_ALLIES:
+                return 0x0020;
+            case ALL_ON_FIELD:
+            case FIELD_EFFECT:
+                return 0x0040;
+            case HAZARD:
+                return 0x0080;
+            case ADJACENT_ALLY:
+                return 0x0100;
+            case USER_OR_ALLY:
+                return 0x0200;
+            case ADJACENT_FOE:
+                return 0x0400;
+            default:
+                return 0x0000;
         }
     }
 

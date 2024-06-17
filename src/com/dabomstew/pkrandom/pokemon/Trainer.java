@@ -43,6 +43,7 @@ public class Trainer implements Comparable<Trainer> {
     public int forceStarterPosition = -1;
     // Certain trainers (e.g., trainers in the PWT in BW2) require unique held items for all of their Pokemon to prevent a game crash.
     public boolean requiresUniqueHeldItems;
+    public int aiFlags;
 
     public String toString() {
         StringBuilder sb = new StringBuilder("[");

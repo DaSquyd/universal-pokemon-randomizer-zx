@@ -54,7 +54,7 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public int hpEVs, attackEVs, defenseEVs, spatkEVs, spdefEVs, speedEVs;
 
-    public int catchRate, baseHappiness, expYield;
+    public int catchRate, baseHappiness, expYield, stage;
 
     public int guaranteedHeldItem, commonHeldItem, rareHeldItem, darkGrassHeldItem;
 
@@ -77,11 +77,30 @@ public class Pokemon implements Comparable<Pokemon> {
     // A flag to use for things like recursive stats copying.
     // Must not rely on the state of this flag being preserved between calls.
     public boolean temporaryFlag;
-
+    
     public Pokemon() {
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4, 5);
     }
 
+    public int getStatByIndex(int statIndex) {
+        switch (statIndex) {
+            case 0:
+                return hp;
+            case 1:
+                return attack;
+            case 2:
+                return defense;
+            case 3:
+                return spatk;
+            case 4:
+                return spdef;
+            case 5:
+                return speed;
+            default:
+                throw new IndexOutOfBoundsException();
+        }
+    }
+    
     public void shuffleStats(Random random) {
         Collections.shuffle(shuffledStatsOrder, random);
         applyShuffledOrderToStats();
@@ -248,6 +267,12 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public String fullName() {
         return name + formeSuffix;
+    }
+    
+    public String getTypeString(boolean space) {
+        if (secondaryType == null)
+            return primaryType.camelCase();
+        return primaryType.camelCase() + (space ? " / " : "/") + secondaryType.camelCase();
     }
 
     @Override

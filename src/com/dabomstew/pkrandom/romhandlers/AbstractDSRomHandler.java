@@ -149,6 +149,14 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         // Handlers can override again in case of ROM hacks etc.
         return true;
     }
+    
+    int getOverlayAddress(int number) {
+        return baseRom.getOverlayAddress(number);
+    }
+    
+    void setOverlayAddress(int overlayNumber, int newAddress) {
+        baseRom.setOverlayAddress(overlayNumber, newAddress);
+    }
 
     public NARCArchive readNARC(String subpath) throws IOException {
         return new NARCArchive(readFile(subpath));

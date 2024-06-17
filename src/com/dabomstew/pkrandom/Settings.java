@@ -514,7 +514,8 @@ public class Settings {
 
         // 32 - 35: misc tweaks part 1
         try {
-            writeFullInt(out, (int)(currentMiscTweaks & 0xFFFFFFFFL));
+            int miscTweaksLow = (int)(currentMiscTweaks & 0xFFFFFFFFL);
+            writeFullInt(out, miscTweaksLow);
         } catch (IOException e) {
             e.printStackTrace(); // better than nothing
         }
@@ -602,7 +603,8 @@ public class Settings {
 
         // 52 - 55: misc tweaks part 2
         try {
-            writeFullInt(out, (int)(currentMiscTweaks >> 4));
+            int miscTweaksHigh = (int)(currentMiscTweaks >> 32);
+            writeFullInt(out, miscTweaksHigh);
         } catch (IOException e) {
             e.printStackTrace(); // better than nothing
         }
@@ -820,8 +822,9 @@ public class Settings {
         }
         settings.setCurrentRestrictions(restrictions);
 
-        long codeTweaks = FileFunctions.readFullIntBigEndian(data, 32);
-        codeTweaks |= ((long)(FileFunctions.readFullIntBigEndian(data, 52))) << 4;
+        long codeTweaksLow = FileFunctions.readFullIntBigEndian(data, 32);
+        long codeTweaksHigh = (FileFunctions.readFullIntBigEndian(data, 52));
+        long codeTweaks = codeTweaksLow | (codeTweaksHigh << 32);
         settings.setCurrentMiscTweaks(codeTweaks);
 
         settings.setTrainersLevelModified(restoreState(data[36], 7));

@@ -151,8 +151,7 @@ public class GlobalConstants {
     );
 
     public static final List<Integer> badAbilities = Arrays.asList(
-            Abilities.minus, Abilities.plus, Abilities.forewarn, Abilities.frisk,
-            Abilities.honeyGather, Abilities.auraBreak, Abilities.receiver, Abilities.powerOfAlchemy
+            Abilities.forewarn, Abilities.honeyGather, Abilities.auraBreak, Abilities.receiver, Abilities.powerOfAlchemy
     );
 
     public static final List<Integer> doubleBattleAbilities = Arrays.asList(
@@ -200,7 +199,7 @@ public class GlobalConstants {
             Moves.spitUp, Moves.swallow, Moves.dreamEater, Moves.nightmare
     );
 
-    public static final int MIN_DAMAGING_MOVE_POWER = 50;
+    public static final int MIN_DAMAGING_MOVE_POWER = 60;
 
     public static final int HIGHEST_POKEMON_GEN = 9;
 

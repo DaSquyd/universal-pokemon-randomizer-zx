@@ -572,7 +572,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 moves[i].power = moveData[3] & 0xFF;
                 moves[i].pp = moveData[6] & 0xFF;
                 moves[i].type = Gen4Constants.typeTable[moveData[4] & 0xFF];
-                moves[i].target = MoveTarget.values()[readUnsignedWord(moveData, 8)];
+                moves[i].target = Gen4Constants.wordToMoveTarget(readUnsignedWord(moveData, 8));
                 moves[i].category = Gen4Constants.moveCategoryIndices[moveData[2] & 0xFF];
                 moves[i].priority = moveData[10];
                 int flags = moveData[11] & 0xFF;
@@ -591,6 +591,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     private void loadStatChangesFromEffect(Move move, int secondaryEffectChance) {
+        if (move.effect == null)
+            return;
+        
         switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen4Constants.noDamageAtkPlusOneEffect:
             case Gen4Constants.noDamageDefPlusOneEffect:
@@ -813,6 +816,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     private void loadStatusFromEffect(Move move, int secondaryEffectChance) {
+        if (move.effect == null)
+            return;
+        
         switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen4Constants.noDamageSleepEffect:
             case Gen4Constants.toxicEffect:
@@ -911,6 +917,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     private void loadMiscMoveInfoFromEffect(Move move, int secondaryEffectChance) {
+        if (move.effect == null)
+            return;
+        
         switch (move.effect.getIndex(generationOfPokemon())) {
             case Gen4Constants.increasedCritEffect:
             case Gen4Constants.blazeKickEffect:
@@ -1116,6 +1125,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             }
             data[5] = (byte) hitratio;
             data[6] = (byte) moves[i].pp;
+            writeWord(data, 8, Gen4Constants.moveTargetToWord(moves[i].target));
         }
 
         try {
@@ -2814,6 +2824,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 int numPokes = trainer[3] & 0xFF;
                 int pokeOffs = 0;
                 tr.fullDisplayName = tclasses.get(tr.trainerclass) + " " + tnames.get(i - 1);
+                tr.aiFlags = readLong(trainer, 12);
                 for (int poke = 0; poke < numPokes; poke++) {
                     // Structure is
                     // IV SB LV LV SP SP FRM FRM
@@ -2930,6 +2941,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     }
                 }
 
+                writeLong(trainer, 12, tr.aiFlags);
+                
                 // TODO
                 // if (allSmart)
                 //     trainer[16]
@@ -4739,7 +4752,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public int highestAbilityIndex() {
+    public int highestAbilityIndex(Settings settings) {
         return Gen4Constants.highestAbilityIndex;
     }
 
@@ -4865,7 +4878,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public Map<Integer, List<Integer>> getAbilityVariations() {
+    public Map<Integer, List<Integer>> getAbilityVariations(Settings settings) {
         return Gen4Constants.abilityVariations;
     }
 

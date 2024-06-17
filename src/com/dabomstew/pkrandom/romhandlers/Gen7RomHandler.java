@@ -3018,7 +3018,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public int highestAbilityIndex() {
+    public int highestAbilityIndex(Settings settings) {
         return Gen7Constants.getHighestAbilityIndex(romEntry.romType);
     }
 
@@ -3068,7 +3068,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public Map<Integer, List<Integer>> getAbilityVariations() {
+    public Map<Integer, List<Integer>> getAbilityVariations(Settings settings) {
         return Gen7Constants.abilityVariations;
     }
 

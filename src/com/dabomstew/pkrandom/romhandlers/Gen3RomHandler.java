@@ -3587,7 +3587,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public int highestAbilityIndex() {
+    public int highestAbilityIndex(Settings settings) {
         return Gen3Constants.highestAbilityIndex;
     }
 
@@ -3606,7 +3606,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public Map<Integer, List<Integer>> getAbilityVariations() {
+    public Map<Integer, List<Integer>> getAbilityVariations(Settings settings) {
         return Gen3Constants.abilityVariations;
     }
 

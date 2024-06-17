@@ -202,13 +202,13 @@ public interface RomHandler {
 
     int abilitiesPerPokemon();
 
-    int highestAbilityIndex();
+    int highestAbilityIndex(Settings settings);
 
     String abilityName(int number);
 
     void randomizeAbilities(Settings settings);
 
-    Map<Integer,List<Integer>> getAbilityVariations();
+    Map<Integer,List<Integer>> getAbilityVariations(Settings settings);
 
     List<Integer> getUselessAbilities();
 

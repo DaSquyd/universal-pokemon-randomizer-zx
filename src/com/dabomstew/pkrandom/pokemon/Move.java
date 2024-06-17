@@ -97,6 +97,14 @@ public class Move {
     // Land's Wrath, and Precipice Blades
     public boolean unknownFlag1; // 30 (0x4000)
     public boolean unknownFlag2; // 30 (0x8000)
+    
+    // Custom
+    public boolean isCustomKickMove; // 30 (0x4000)
+    public boolean isCustomBiteMove; // 30 (0x8000)
+    public boolean isCustomSliceMove; // 30 (0x10000)
+    public boolean isCustomTriageMove; // 30 (0x20000)
+    public boolean isCustomPowderMove; // 30 (0x40000)
+    public boolean isCustomWindMove; // 30 (0x80000)
 
     public Move() {
         // Initialize all statStageChanges to something sensible so that we don't need to have
@@ -112,6 +120,12 @@ public class Move {
     }
 
     public StatChangeMoveType getStatChangeMoveType() {
+        if (qualities == null) {
+            // TODO: Finish this later for Gen IV
+            
+            return StatChangeMoveType.DAMAGE_TARGET;
+        }
+        
         switch (qualities) {
             case NO_DAMAGE_STAT_CHANGE:
             case NO_DAMAGE_STAT_CHANGE_STATUS:
@@ -223,6 +237,20 @@ public class Move {
     }
 
     public StatusMoveType getStatusMoveType() {
+        if (qualities == null) {
+            // TODO: Finish this later for Gen IV
+            
+            switch (category) {
+                case PHYSICAL:
+                case SPECIAL:
+                    return StatusMoveType.DAMAGE;
+                case STATUS:
+                    return StatusMoveType.NO_DAMAGE;
+                default:
+                    return StatusMoveType.NONE_OR_UNKNOWN;
+            }
+        }
+        
         switch (qualities) {
             case NO_DAMAGE_STATUS:
                 return StatusMoveType.NO_DAMAGE;
@@ -235,8 +263,7 @@ public class Move {
 
     public boolean isGoodDamaging(int generation) {
         double hitCount = getHitCount(generation);
-        return (power * hitCount) >= 2 * GlobalConstants.MIN_DAMAGING_MOVE_POWER
-                || ((power * hitCount) >= GlobalConstants.MIN_DAMAGING_MOVE_POWER && (accuracy >= 90 || hasPerfectAccuracy()));
+        return power * hitCount * (hasPerfectAccuracy() ? 1.0 : accuracy * accuracy / 10000.0) >= GlobalConstants.MIN_DAMAGING_MOVE_POWER;
     }
 
     public boolean isRecoilMove() {
