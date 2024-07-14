@@ -42,11 +42,14 @@ public class ParagonLiteAbilities {
     public static final int aerilate = 180;
     public static final int galvanize = 181;
     public static final int galeWings = 182;
-    public static final int ripTide = 183;
+    public static final int toughClaws = 183;
+    public static final int stoneHome = 184;
+    
+    public static final int ripTide = 185;
     
     public static final int specialized = Abilities.adaptability;
     public static final int xrayVision = Abilities.frisk;
     public static final int herbivore = Abilities.sapSipper;
     
-    public static final int MAX = galvanize;
+    public static final int MAX = stoneHome;
 }

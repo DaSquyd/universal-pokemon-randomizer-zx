@@ -3,7 +3,7 @@ package com.dabomstew.pkrandom.pokemon;
 public enum MoveEffect {
     DMG(0), // Pound, Mega Punch, Scratch, etc.
     NO_DMG_SLP(1), // Sing, SLP Powder, Hypnosis, Etc.
-    DMG_POISON(2), // Poison Sting, Smog, Sludge, etc.
+    DMG_PSN(2), // Poison Sting, Smog, Sludge, etc.
     DMG_RECOVER(3), // Absorb, Mega Drain, Leech Life, etc.
     DMG_BRN(4), // Fire Punch, Ember, Flamethrower, etc.
     DMG_FRZ(5), // Ice Punch, Ice Beam, Powder Snow, etc.
@@ -18,7 +18,7 @@ public enum MoveEffect {
     USER_SPD_PLUS_1(14), // UNUSED
     USER_ACC_PLUS_1(15), // UNUSED
     USER_EVA_PLUS_1(16), // Double Team
-    NEVER_MISSES(17), // Swift, Feint ATK, Shadow Punch, etc.
+    NEVER_MISSES(17), // Swift, Feint Attack, Shadow Punch, etc.
     TRGT_ATK_MINUS_1(18), // Growl
     TRGT_DEF_MINUS_1(19), // Tail Whip, Leer
     TRGT_SPE_MINUS_1(20), // String Shot (Gen V), Low Sweep, Electro Web

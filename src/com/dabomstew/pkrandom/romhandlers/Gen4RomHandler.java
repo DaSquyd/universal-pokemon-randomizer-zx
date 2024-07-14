@@ -1067,6 +1067,18 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         pkmn.darkGrassHeldItem = -1;
 
         pkmn.genderRatio = stats[Gen4Constants.bsGenderRatioOffset] & 0xFF;
+        
+        pkmn.expYield = stats[Gen4Constants.bsExpYieldOffset] & 0xFF;
+
+        int evYield = readUnsignedWord(stats, Gen4Constants.bsEVYieldOffset);
+        pkmn.hpEVs = evYield & 0xFF;
+        pkmn.attackEVs = (evYield >> 2) & 0xFF;
+        pkmn.defenseEVs = (evYield >> 4) & 0xFF;
+        pkmn.speedEVs = (evYield >> 6) & 0xFF;
+        pkmn.spatkEVs = (evYield >> 8) & 0xFF;
+        pkmn.spdefEVs = (evYield >> 10) & 0xFF;
+        
+        pkmn.baseHappiness = stats[Gen4Constants.bsBaseHappinessOffset];
 
         int cosmeticForms = Gen4Constants.cosmeticForms.getOrDefault(pkmn.number,0);
         if (cosmeticForms > 0 && romEntry.romType != Gen4Constants.Type_DP) {
@@ -1194,6 +1206,19 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
         stats[Gen4Constants.bsAbility1Offset] = (byte) pkmn.ability1;
         stats[Gen4Constants.bsAbility2Offset] = (byte) pkmn.ability2;
+        
+        stats[Gen4Constants.bsExpYieldOffset] = (byte) pkmn.expYield;
+        stats[Gen4Constants.bsBaseHappinessOffset] = (byte) pkmn.baseHappiness;
+
+        int evYield = 0;
+        evYield |= pkmn.hpEVs;
+        evYield |= pkmn.attackEVs << 2;
+        evYield |= pkmn.defenseEVs << 4;
+        evYield |= pkmn.speedEVs << 6;
+        evYield |= pkmn.spatkEVs << 8;
+        evYield |= pkmn.spdefEVs << 10;
+
+        writeWord(stats, Gen4Constants.bsEVYieldOffset, evYield);
 
         // Held items
         if (pkmn.guaranteedHeldItem > 0) {
@@ -5290,6 +5315,16 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         if (romEntry.romType == Gen4Constants.Type_Plat || romEntry.romType == Gen4Constants.Type_HGSS) {
             available |= MiscTweak.UPDATE_ROTOM_FORME_TYPING.getValue();
         }
+        
+        available |= MiscTweak.CUSTOM_POKEMON_STATS.getValue();
+        available |= MiscTweak.CUSTOM_POKEMON_TYPES.getValue();
+        available |= MiscTweak.CUSTOM_MOVE_CHANGES.getValue();
+        available |= MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
+        available |= MiscTweak.CUSTOM_NO_EXP.getValue();
+        available |= MiscTweak.CUSTOM_MAX_HAPPINESS.getValue();
+        available |= MiscTweak.CUSTOM_NO_EVS.getValue();
+        available |= MiscTweak.MODERNIZE_CRIT.getValue();
+        
         return available;
     }
 
@@ -5316,6 +5351,140 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
             applyFastDistortionWorld();
         } else if (tweak == MiscTweak.UPDATE_ROTOM_FORME_TYPING) {
             updateRotomFormeTyping();
+        } else if (tweak == MiscTweak.CUSTOM_POKEMON_STATS) {
+            customPokemonStats();
+        } else if (tweak == MiscTweak.CUSTOM_POKEMON_TYPES) {
+            customPokemonTypes();
+        } else if (tweak == MiscTweak.CUSTOM_MOVE_CHANGES) {
+            customMoveChanges(settings);
+        } else if (tweak == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS) {
+            customTypeEffectiveness();
+        } else if (tweak == MiscTweak.CUSTOM_NO_EXP) {
+            List<Pokemon> pokes = getPokemonInclFormes();
+    
+            for (Pokemon pk : pokes) {
+                if (pk != null)
+                    pk.expYield = 0;
+            }
+        } else if (tweak == MiscTweak.CUSTOM_MAX_HAPPINESS) {
+            List<Pokemon> pokes = getPokemonInclFormes();
+    
+            for (Pokemon pk : pokes) {
+                if (pk != null)
+                    pk.baseHappiness = 255;
+            }
+        } else if (tweak == MiscTweak.CUSTOM_NO_EVS) {
+            List<Pokemon> pokes = getPokemonInclFormes();
+    
+            for (Pokemon pk : pokes) {
+                if (pk != null) {
+                    pk.hpEVs = 0;
+                    pk.attackEVs = 0;
+                    pk.defenseEVs = 0;
+                    pk.spatkEVs = 0;
+                    pk.spdefEVs = 0;
+                    pk.speedEVs = 0;
+                }
+            }
+        } else if (tweak == MiscTweak.MODERNIZE_CRIT) {
+            modernizeCrit();
+        }
+    }
+
+    private void customTypeEffectiveness() {
+        try {
+            byte[] battleOverlay = readOverlay(romEntry.getInt("BattleOvlNumber"));
+            int typeEffectivenessTableOffset = find(battleOverlay, Gen4Constants.typeEffectivenessTableLocator);
+            List<TypeRelationship> typeEffectivenessTable = readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
+
+            for (TypeRelationship relationship : typeEffectivenessTable) {
+                if (relationship.attacker == Type.POISON && relationship.defender == Type.GHOST) {
+                    relationship.effectiveness = Effectiveness.NEUTRAL;
+                    return;
+                }
+
+                if (relationship.attacker == Type.BUG && relationship.defender == Type.POISON) {
+                    relationship.effectiveness = Effectiveness.NEUTRAL;
+                    return;
+                }
+
+                if (relationship.attacker == Type.BUG && relationship.defender == Type.GHOST) {
+                    relationship.effectiveness = Effectiveness.NEUTRAL;
+                    return;
+                }
+
+                if (relationship.attacker == Type.GHOST && relationship.defender == Type.STEEL) {
+                    relationship.effectiveness = Effectiveness.NEUTRAL;
+                    return;
+                }
+
+                if (relationship.attacker == Type.GRASS && relationship.defender == Type.BUG) {
+                    relationship.effectiveness = Effectiveness.NEUTRAL;
+                    return;
+                }
+
+                if (relationship.attacker == Type.ELECTRIC && relationship.defender == Type.DRAGON) {
+                    relationship.effectiveness = Effectiveness.NEUTRAL;
+                    return;
+                }
+
+                if (relationship.attacker == Type.PSYCHIC && relationship.defender == Type.STEEL) {
+                    relationship.effectiveness = Effectiveness.NEUTRAL;
+                    return;
+                }
+
+                if (relationship.attacker == Type.DARK && relationship.defender == Type.STEEL) {
+                    relationship.effectiveness = Effectiveness.NEUTRAL;
+                    return;
+                }
+            }
+            
+            typeEffectivenessTable.add(new TypeRelationship(Type.FIGHTING, Type.GRASS, Effectiveness.HALF));
+            typeEffectivenessTable.add(new TypeRelationship(Type.FLYING, Type.ICE, Effectiveness.HALF));
+            typeEffectivenessTable.add(new TypeRelationship(Type.POISON, Type.PSYCHIC, Effectiveness.HALF));
+            typeEffectivenessTable.add(new TypeRelationship(Type.GROUND, Type.GHOST, Effectiveness.HALF));
+            typeEffectivenessTable.add(new TypeRelationship(Type.GROUND, Type.ICE, Effectiveness.HALF));
+            typeEffectivenessTable.add(new TypeRelationship(Type.ROCK, Type.ROCK, Effectiveness.HALF));
+            typeEffectivenessTable.add(new TypeRelationship(Type.ROCK, Type.GRASS, Effectiveness.HALF));
+            typeEffectivenessTable.add(new TypeRelationship(Type.WATER, Type.ICE, Effectiveness.HALF));
+            typeEffectivenessTable.add(new TypeRelationship(Type.GRASS, Type.ROCK, Effectiveness.HALF));
+            typeEffectivenessTable.add(new TypeRelationship(Type.ELECTRIC, Type.ROCK, Effectiveness.HALF));
+            typeEffectivenessTable.add(new TypeRelationship(Type.PSYCHIC, Type.BUG, Effectiveness.HALF));
+            typeEffectivenessTable.add(new TypeRelationship(Type.ICE, Type.ROCK, Effectiveness.HALF));
+
+            writeTypeEffectivenessTable(typeEffectivenessTable, battleOverlay, typeEffectivenessTableOffset);
+            writeOverlay(romEntry.getInt("BattleOvlNumber"), battleOverlay);
+            effectivenessUpdated = true;
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
+        }
+    }
+    
+    private void modernizeCrit() {
+        try {
+            int overlayNumber = romEntry.getInt("BattleOvlNumber");
+            byte[] battleOverlay = readOverlay(overlayNumber);
+
+            // Chance
+            int critChanceOffset = find(battleOverlay, Gen5Constants.critChanceLocator);
+            battleOverlay[critChanceOffset] = 24;
+            battleOverlay[critChanceOffset + 1] = 8;
+            battleOverlay[critChanceOffset + 2] = 2;
+            battleOverlay[critChanceOffset + 3] = 1;
+            battleOverlay[critChanceOffset + 4] = 1;
+
+//            // 1.5x damage
+//            // R0        - available register
+//            // R6 isCrit - 1 if crit, 0 otherwise
+//            // R7 damage - running damage that must be effectively multiplied by 1.5 (truncated)
+//            int critLogicOffset = find(battleOverlay, Gen5Constants.critLogicLocator);
+//            writeWord(battleOverlay, critLogicOffset, 0x0878); // LSRS R0, R7, #1 (R0 = damage >> 1)
+//            writeWord(battleOverlay, critLogicOffset + 2, 0x4370); // MULS R0, R6 (R0 = R0 * isCrit)
+//            writeWord(battleOverlay, critLogicOffset + 4, 0x19C7); // ADDS R7, R0, R7 (damage += R0)
+
+            writeOverlay(overlayNumber, battleOverlay);
+        } catch (IOException e) {
+            throw new RandomizerIOException(e);
         }
     }
 

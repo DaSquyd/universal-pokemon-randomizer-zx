@@ -37,7 +37,7 @@ public class Move {
             if (obj.getClass() != StatChange.class)
                 return false;
 
-            StatChange other = (StatChange)obj;
+            StatChange other = (StatChange) obj;
             return this.type == other.type && this.stages == other.stages && this.percentChance == other.percentChance;
         }
 
@@ -51,6 +51,65 @@ public class Move {
             this.type = type;
             this.stages = stages;
             this.percentChance = percentChance;
+        }
+
+        public StatChange(String str, int defaultChance) {
+            if (str.startsWith("[") && str.endsWith("]"))
+                str = str.substring(1, str.length() - 1);
+
+            String[] components = str.split(" ");
+
+            if (components.length == 1 && components[0].trim().isEmpty()) {
+                type = StatChangeType.NONE;
+                stages = 0;
+                percentChance = 0;
+                return;
+            }
+
+            if (components.length > 3)
+                throw new RuntimeException("Incorrect length");
+
+            switch (components[0].trim().toLowerCase()) {
+                case "atk":
+                    type = StatChangeType.ATTACK;
+                    break;
+                case "def":
+                    type = StatChangeType.DEFENSE;
+                    break;
+                case "spa":
+                    type = StatChangeType.SPECIAL_ATTACK;
+                    break;
+                case "spd":
+                    type = StatChangeType.SPECIAL_DEFENSE;
+                    break;
+                case "spe":
+                    type = StatChangeType.SPEED;
+                    break;
+                case "acc":
+                    type = StatChangeType.ACCURACY;
+                    break;
+                case "eva":
+                    type = StatChangeType.EVASION;
+                    break;
+                case "all":
+                    type = StatChangeType.ALL;
+                    break;
+                default:
+                    throw new RuntimeException(String.format("Unrecognized StatChange type \"%s\"", components[0]));
+            }
+
+            stages = Integer.parseInt(components[1]);
+
+            if (components.length < 3) {
+                percentChance = defaultChance;
+                return;
+            }
+
+            components[2] = components[2].trim();
+            if (components[2].endsWith("%"))
+                components[2] = components[2].substring(0, components[2].length() - 1);
+
+            percentChance = Integer.parseInt(components[2]);
         }
     }
 
@@ -90,14 +149,9 @@ public class Move {
     public boolean hitsNonAdjacentTargets; // 30 (0x0800)
     public boolean isHealMove; // 30 (0x1000)
     public boolean hitsThroughSubstitute; // 30 (0x2000)
-    // Used by: Slam, Stomp, Body Slam, Surf, Seismic Toss, Earthquake, Fissure, Dig, Substitute, Spikes, Magnitude,
-    // Ingrain, Dive, Mud Sport, Muddy Water, Frenzy Plant, Water Sport, Gravity, Toxic Spikes, Earth Power, Grass Knot,
-    // Smack Down, Heavy Slam, Water Pledge, Fire Pledge, Grass Pledge, Bulldoze, Heat Crash, Flying Press, Mat Block,
-    // Rototiller, Grassy Terrain, Misty Terrain, Geomancy, Electric Terrain, Thousand Arrows, Thousand Waves,
-    // Land's Wrath, and Precipice Blades
     public boolean unknownFlag1; // 30 (0x4000)
     public boolean unknownFlag2; // 30 (0x8000)
-    
+
     // Custom
     public boolean isCustomKickMove; // 30 (0x4000)
     public boolean isCustomBiteMove; // 30 (0x8000)
@@ -116,16 +170,16 @@ public class Move {
     }
 
     public boolean isTrapMove() {
-            return statusType == MoveStatusType.TRAP || effect == MoveEffect.PREVENT_ESCAPE;
+        return statusType == MoveStatusType.TRAP || effect == MoveEffect.PREVENT_ESCAPE;
     }
 
     public StatChangeMoveType getStatChangeMoveType() {
         if (qualities == null) {
             // TODO: Finish this later for Gen IV
-            
+
             return StatChangeMoveType.DAMAGE_TARGET;
         }
-        
+
         switch (qualities) {
             case NO_DAMAGE_STAT_CHANGE:
             case NO_DAMAGE_STAT_CHANGE_STATUS:
@@ -150,7 +204,7 @@ public class Move {
     }
 
     public boolean hasSpecificStatChange(StatChangeType type, boolean isPositive) {
-        for (StatChange sc: this.statChanges) {
+        for (StatChange sc : this.statChanges) {
             if (sc.type == type && (isPositive ^ sc.stages < 0)) {
                 return true;
             }
@@ -164,15 +218,11 @@ public class Move {
     }
 
     public boolean hasPerfectAccuracy() {
-        return !(accuracy > 1 && accuracy <= 100);
+        return accuracy < 1 || accuracy > 100;
     }
 
-    public static int getPerfectAccuracy(MoveCategory category, int generation) {
-        switch (generation) {
-            case 5:
-            default:
-                return category == MoveCategory.STATUS ? 101 : 0;
-        }
+    public static int getPerfectAccuracy() {
+        return 101;
     }
 
     public boolean isCounterMove() {
@@ -188,6 +238,7 @@ public class Move {
                 || effect == MoveEffect.DIRECT_DMG_LEVEL || effect == MoveEffect.DIRECT_DMG_20
                 || effect == MoveEffect.PSYWAVE;
     }
+
     public boolean isOHKOMove() {
         return qualities == MoveQualities.OHKO || effect == MoveEffect.OHKO;
     }
@@ -212,7 +263,7 @@ public class Move {
             case RAGE:
             case ROLLOUT:
             case SYNCHRONOISE:
-            // case SHELL_TRAP; TODO
+                // case SHELL_TRAP; TODO
             case FOUL_PLAY:
             case SPIT_UP:
             case OHKO:
@@ -230,7 +281,8 @@ public class Move {
             case HIT_2_TIMES_POISON:
                 return 2.0;
             case TRIPLE_KICK:
-                return 2.71; // Assumes first hit lands
+                double acc = accuracy / 100.0;
+                return 1 + acc + (acc * acc); // Assumes first hit lands
             default:
                 return 1.0;
         }
@@ -239,7 +291,7 @@ public class Move {
     public StatusMoveType getStatusMoveType() {
         if (qualities == null) {
             // TODO: Finish this later for Gen IV
-            
+
             switch (category) {
                 case PHYSICAL:
                 case SPECIAL:
@@ -250,7 +302,7 @@ public class Move {
                     return StatusMoveType.NONE_OR_UNKNOWN;
             }
         }
-        
+
         switch (qualities) {
             case NO_DAMAGE_STATUS:
                 return StatusMoveType.NO_DAMAGE;
@@ -263,7 +315,12 @@ public class Move {
 
     public boolean isGoodDamaging(int generation) {
         double hitCount = getHitCount(generation);
-        return power * hitCount * (hasPerfectAccuracy() ? 1.0 : accuracy * accuracy / 10000.0) >= GlobalConstants.MIN_DAMAGING_MOVE_POWER;
+        double acc = hasPerfectAccuracy() ? 1.0 : accuracy / 100.0;
+        double damage = power * hitCount * acc;
+        if (effect == MoveEffect.TRIPLE_KICK)
+            damage += (10 * acc) + (20 * acc * acc); // 2nd and 3rd hit additional damages
+
+        return damage >= GlobalConstants.MIN_DAMAGING_MOVE_POWER;
     }
 
     public boolean isRecoilMove() {

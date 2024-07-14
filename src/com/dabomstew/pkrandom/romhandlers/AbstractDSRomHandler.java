@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  You should have received a copy of the GNU General Public License     --*/
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -149,11 +150,11 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         // Handlers can override again in case of ROM hacks etc.
         return true;
     }
-    
+
     int getOverlayAddress(int number) {
         return baseRom.getOverlayAddress(number);
     }
-    
+
     void setOverlayAddress(int overlayNumber, int newAddress) {
         baseRom.setOverlayAddress(overlayNumber, newAddress);
     }
@@ -190,14 +191,16 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         }
     }
 
-    protected int readByte(byte[] data, int offset) { return data[offset] & 0xFF; }
+    protected int readByte(byte[] data, int offset) {
+        return data[offset] & 0xFF;
+    }
 
     protected int readUnsignedWord(byte[] data, int offset) {
         return ((data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8));
     }
 
     protected int readSignedWord(byte[] data, int offset) {
-        return (short)(((data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8)));
+        return (short) (((data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8)));
     }
 
     protected int readLong(byte[] data, int offset) {
@@ -279,41 +282,41 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
             return 411; // CURSE
         }
         switch (t) {
-        case FIGHTING:
-            return 398;
-        case DRAGON:
-            return 399;
-        case WATER:
-            return 400;
-        case PSYCHIC:
-            return 401;
-        case NORMAL:
-            return 402;
-        case POISON:
-            return 403;
-        case ICE:
-            return 404;
-        case GRASS:
-            return 405;
-        case FIRE:
-            return 406;
-        case DARK:
-            return 407;
-        case STEEL:
-            return 408;
-        case ELECTRIC:
-            return 409;
-        case GROUND:
-            return 410;
-        case GHOST:
-        default:
-            return 411; // for CURSE
-        case ROCK:
-            return 412;
-        case FLYING:
-            return 413;
-        case BUG:
-            return 610;
+            case FIGHTING:
+                return 398;
+            case DRAGON:
+                return 399;
+            case WATER:
+                return 400;
+            case PSYCHIC:
+                return 401;
+            case NORMAL:
+                return 402;
+            case POISON:
+                return 403;
+            case ICE:
+                return 404;
+            case GRASS:
+                return 405;
+            case FIRE:
+                return 406;
+            case DARK:
+                return 407;
+            case STEEL:
+                return 408;
+            case ELECTRIC:
+                return 409;
+            case GROUND:
+                return 410;
+            case GHOST:
+            default:
+                return 411; // for CURSE
+            case ROCK:
+                return 412;
+            case FLYING:
+                return 413;
+            case BUG:
+                return 610;
         }
     }
 
@@ -372,8 +375,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         tcmCopyingPointersOffset += prefix.length() / 2; // because it was a prefix
 
         int oldDestPointersOffset = FileFunctions.readFullInt(arm9, tcmCopyingPointersOffset) - arm9Offset;
-        int itcmSrcOffset =
-                FileFunctions.readFullInt(arm9, tcmCopyingPointersOffset + 8) - arm9Offset;
+        int itcmSrcOffset = FileFunctions.readFullInt(arm9, tcmCopyingPointersOffset + 8) - arm9Offset;
         int itcmSizeOffset = oldDestPointersOffset + 4;
         int oldITCMSize = FileFunctions.readFullInt(arm9, itcmSizeOffset);
 

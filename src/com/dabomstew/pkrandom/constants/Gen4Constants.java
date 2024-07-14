@@ -44,36 +44,36 @@ public class Gen4Constants {
     private static final int dpFormeCount = 5, platHgSsFormeCount = 12;
     public static final int formeOffset = 2;
 
-    public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
-            bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
-            bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGenderRatioOffset = 16,
-            bsGrowthCurveOffset = 19, bsAbility1Offset = 22, bsAbility2Offset = 23, bsTMHMCompatOffset = 28;
+    public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3, bsSpAtkOffset = 4,
+            bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7, bsCatchRateOffset = 8, bsExpYieldOffset = 9,
+            bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGenderRatioOffset = 16,
+            bsBaseHappinessOffset = 18, bsGrowthCurveOffset = 19, bsAbility1Offset = 22, bsAbility2Offset = 23, bsTMHMCompatOffset = 28;
 
     public static final String starterCriesPrefix = "0004000C10BD0000000000000000000000E000000000000000E0000000000200";
 
-    public static final byte[] hgssStarterCodeSuffix = { 0x03, 0x03, 0x1A, 0x12, 0x1, 0x23, 0x0, 0x0 };
+    public static final byte[] hgssStarterCodeSuffix = {0x03, 0x03, 0x1A, 0x12, 0x1, 0x23, 0x0, 0x0};
 
-    public static final int[] hgssFilesWithRivalScript = { 7, 23, 96, 110, 819, 850, 866 };
+    public static final int[] hgssFilesWithRivalScript = {7, 23, 96, 110, 819, 850, 866};
 
-    public static final byte[] hgssRivalScriptMagic = { (byte) 0xCE, 0x00, 0x0C, (byte) 0x80, 0x11, 0x00, 0x0C,
-            (byte) 0x80, (byte) 152, 0, 0x1C, 0x00, 0x05 };
+    public static final byte[] hgssRivalScriptMagic = {(byte) 0xCE, 0x00, 0x0C, (byte) 0x80, 0x11, 0x00, 0x0C,
+            (byte) 0x80, (byte) 152, 0, 0x1C, 0x00, 0x05};
 
-    public static final int[] ptFilesWithRivalScript = { 31, 36, 112, 123, 186, 427, 429, 1096 };
+    public static final int[] ptFilesWithRivalScript = {31, 36, 112, 123, 186, 427, 429, 1096};
 
-    public static final int[] dpFilesWithRivalScript = { 34, 90, 118, 180, 195, 394 };
+    public static final int[] dpFilesWithRivalScript = {34, 90, 118, 180, 195, 394};
 
-    public static final byte[] dpptRivalScriptMagic = { (byte) 0xDE, 0x00, 0x0C, (byte) 0x80, 0x11, 0x00, 0x0C,
-            (byte) 0x80, (byte) 0x83, 0x01, 0x1C, 0x00, 0x01 };
+    public static final byte[] dpptRivalScriptMagic = {(byte) 0xDE, 0x00, 0x0C, (byte) 0x80, 0x11, 0x00, 0x0C,
+            (byte) 0x80, (byte) 0x83, 0x01, 0x1C, 0x00, 0x01};
 
-    public static final byte[] dpptTagBattleScriptMagic1 = { (byte) 0xDE, 0x00, 0x0C, (byte) 0x80, 0x28, 0x00, 0x04,
-            (byte) 0x80 };
+    public static final byte[] dpptTagBattleScriptMagic1 = {(byte) 0xDE, 0x00, 0x0C, (byte) 0x80, 0x28, 0x00, 0x04,
+            (byte) 0x80};
 
-    public static final byte[] dpptTagBattleScriptMagic2 = { 0x11, 0x00, 0x0C, (byte) 0x80, (byte) 0x86, 0x01, 0x1C,
-            0x00, 0x01 };
+    public static final byte[] dpptTagBattleScriptMagic2 = {0x11, 0x00, 0x0C, (byte) 0x80, (byte) 0x86, 0x01, 0x1C,
+            0x00, 0x01};
 
-    public static final int[] ptFilesWithTagScript = { 2, 136, 201, 236 };
+    public static final int[] ptFilesWithTagScript = {2, 136, 201, 236};
 
-    public static final int[] dpFilesWithTagScript = { 2, 131, 230 };
+    public static final int[] dpFilesWithTagScript = {2, 131, 230};
 
     public static final int dpStarterStringIndex = 19, ptStarterStringIndex = 36;
 
@@ -275,10 +275,10 @@ public class Gen4Constants {
         return Collections.unmodifiableMap(map);
     }
 
-    public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
+    public static final Map<Integer, List<Integer>> abilityVariations = setupAbilityVariations();
 
-    private static Map<Integer,List<Integer>> setupAbilityVariations() {
-        Map<Integer,List<Integer>> map = new HashMap<>();
+    private static Map<Integer, List<Integer>> setupAbilityVariations() {
+        Map<Integer, List<Integer>> map = new HashMap<>();
         map.put(Abilities.insomnia, Arrays.asList(Abilities.insomnia, Abilities.vitalSpirit));
         map.put(Abilities.clearBody, Arrays.asList(Abilities.clearBody, Abilities.whiteSmoke));
         map.put(Abilities.hugePower, Arrays.asList(Abilities.hugePower, Abilities.purePower));
@@ -442,22 +442,22 @@ public class Gen4Constants {
             Items.upgrade, Items.protector, Items.electirizer, Items.magmarizer, Items.dubiousDisc, Items.reaperCloth,
             Items.razorClaw, Items.razorFang);
 
-    public static final Map<Integer,String> formeSuffixes = setupFormeSuffixes();
-    public static final Map<Integer,FormeInfo> formeMappings = setupFormeMappings();
-    public static final Map<Integer,Integer> cosmeticForms = setupCosmeticForms();
+    public static final Map<Integer, String> formeSuffixes = setupFormeSuffixes();
+    public static final Map<Integer, FormeInfo> formeMappings = setupFormeMappings();
+    public static final Map<Integer, Integer> cosmeticForms = setupCosmeticForms();
 
-    private static final Map<Integer,Map<Integer,String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
-    private static final Map<Integer,String> dummyFormeSuffixes = setupDummyFormeSuffixes();
+    private static final Map<Integer, Map<Integer, String>> formeSuffixesByBaseForme = setupFormeSuffixesByBaseForme();
+    private static final Map<Integer, String> dummyFormeSuffixes = setupDummyFormeSuffixes();
 
-    private static final Map<Integer,Map<Integer,Integer>> absolutePokeNumsByBaseForme = setupAbsolutePokeNumsByBaseForme();
-    private static final Map<Integer,Integer> dummyAbsolutePokeNums = setupDummyAbsolutePokeNums();
+    private static final Map<Integer, Map<Integer, Integer>> absolutePokeNumsByBaseForme = setupAbsolutePokeNumsByBaseForme();
+    private static final Map<Integer, Integer> dummyAbsolutePokeNums = setupDummyAbsolutePokeNums();
 
     public static String getFormeSuffixByBaseForme(int baseForme, int formNum) {
-        return formeSuffixesByBaseForme.getOrDefault(baseForme,dummyFormeSuffixes).getOrDefault(formNum,"");
+        return formeSuffixesByBaseForme.getOrDefault(baseForme, dummyFormeSuffixes).getOrDefault(formNum, "");
     }
 
     public static Integer getAbsolutePokeNumByBaseForme(int baseForme, int formNum) {
-        return absolutePokeNumsByBaseForme.getOrDefault(baseForme,dummyAbsolutePokeNums).getOrDefault(formNum,baseForme);
+        return absolutePokeNumsByBaseForme.getOrDefault(baseForme, dummyAbsolutePokeNums).getOrDefault(formNum, baseForme);
     }
 
     public static final String lyraEthanMarillSpritePrefix = "274E0604C301274E0704E101274E0804";
@@ -675,30 +675,30 @@ public class Gen4Constants {
     // swarmx2, dayx2, nightx2, pokeradarx4, GBAx10
     // NOTE: in the game data there are 6 fillers between pokeradar and GBA
 
-    public static final int[] dpptAlternateSlots = new int[] { 0, 1, 2, 3, 2, 3, 4, 5, 10, 11, 8, 9, 8, 9, 8, 9, 8, 9,
-            8, 9 };
+    public static final int[] dpptAlternateSlots = new int[]{0, 1, 2, 3, 2, 3, 4, 5, 10, 11, 8, 9, 8, 9, 8, 9, 8, 9,
+            8, 9};
 
-    public static final String[] dpptWaterSlotSetNames = new String[] { "Surfing", "Filler", "Old Rod", "Good Rod",
-            "Super Rod" };
+    public static final String[] dpptWaterSlotSetNames = new String[]{"Surfing", "Filler", "Old Rod", "Good Rod",
+            "Super Rod"};
 
-    public static final String[] hgssTimeOfDayNames = new String[] { "Morning", "Day", "Night" };
+    public static final String[] hgssTimeOfDayNames = new String[]{"Morning", "Day", "Night"};
 
-    public static final String[] hgssNonGrassSetNames = new String[] { "", "Surfing", "Rock Smash", "Old Rod",
-            "Good Rod", "Super Rod" };
+    public static final String[] hgssNonGrassSetNames = new String[]{"", "Surfing", "Rock Smash", "Old Rod",
+            "Good Rod", "Super Rod"};
     public static final int hgssGoodRodReplacementIndex = 3, hgssSuperRodReplacementIndex = 1;
 
-    public static final MoveCategory[] moveCategoryIndices = { MoveCategory.PHYSICAL, MoveCategory.SPECIAL,
-            MoveCategory.STATUS };
+    public static final MoveCategory[] moveCategoryIndices = {MoveCategory.PHYSICAL, MoveCategory.SPECIAL,
+            MoveCategory.STATUS};
 
     public static byte moveCategoryToByte(MoveCategory cat) {
         switch (cat) {
-        case PHYSICAL:
-            return 0;
-        case SPECIAL:
-            return 1;
-        case STATUS:
-        default:
-            return 2;
+            case PHYSICAL:
+                return 0;
+            case SPECIAL:
+                return 1;
+            case STATUS:
+            default:
+                return 2;
         }
     }
 
@@ -793,19 +793,19 @@ public class Gen4Constants {
 
     public static final String perfectOddsBranchLocator = "FF2901D30425";
 
-    public static final int[] dpptOverworldDexMaps = new int[] {
-            1,  2,  3,  4,  5, -1, -1,  6, -1,  7, // 0-9 (cities, pkmn league, wind/ironworks)
+    public static final int[] dpptOverworldDexMaps = new int[]{
+            1, 2, 3, 4, 5, -1, -1, 6, -1, 7, // 0-9 (cities, pkmn league, wind/ironworks)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 10-19 (all mt coronet)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 20-29 (mt coronet, great marsh, solaceon ruins)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 30-39 (all solaceon ruins)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 40-49 (solaceon ruins/v.road)
-            -1, -1, -1, -1, -1, -1,  8, -1, -1, -1, // 50-59 (v.road, stark mountain outer then inner, sendoff spring)
+            -1, -1, -1, -1, -1, -1, 8, -1, -1, -1, // 50-59 (v.road, stark mountain outer then inner, sendoff spring)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 60-69 (unknown, turnback cave)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 70-79 (all turnback cave)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 80-89 (all unknown)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 90-99 (all unknown)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 100-109 (unknown, snowpoint temple)
-            -1, -1, -1, -1, -1, -1, -1, -1,  9, -1, // 110-119 (various dungeons, iron island outer/inner)
+            -1, -1, -1, -1, -1, -1, -1, -1, 9, -1, // 110-119 (various dungeons, iron island outer/inner)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 120-129 (rest of iron island inner, old chateau)
             -1, -1, -1, -1, -1, -1, -1, -1, 10, 11, // 130-139 (old chateau, inner lakes, lakefronts)
             12, 13, 14, 15, 16, 17, 18, 19, 20, 21, // 140-149 (first few routes)
@@ -815,13 +815,13 @@ public class Gen4Constants {
             47, 48, 49,                             // 180-182 (other sea routes)
     };
 
-    public static final int[] dpptDungeonDexMaps = new int[] {
-            -1, -1, -1, -1, -1,  1,  1, -1,  2, -1, // 0-9 (cities, pkmn league, wind/ironworks, mine/forest)
-            3,  3,  3,  3,  3,  3,  3,  3,  3,  3, // 10-19 (all mt coronet)
-            3,  3,  3,  4,  4,  4,  4,  4,  4,  5, // 20-29 (mt coronet, great marsh, solaceon ruins)
-            5,  5,  5,  5,  5,  5,  5,  5,  5,  5, // 30-39 (all solaceon ruins)
-            5,  5,  5,  5,  5,  5,  5,  6,  6,  6, // 40-49 (solaceon ruins/v.road)
-            6,  6,  6,  7,  8,  8, -1,  9,  9, 10, // 50-59 (v.road, stark mountain outer then inner, sendoff spring)
+    public static final int[] dpptDungeonDexMaps = new int[]{
+            -1, -1, -1, -1, -1, 1, 1, -1, 2, -1, // 0-9 (cities, pkmn league, wind/ironworks, mine/forest)
+            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, // 10-19 (all mt coronet)
+            3, 3, 3, 4, 4, 4, 4, 4, 4, 5, // 20-29 (mt coronet, great marsh, solaceon ruins)
+            5, 5, 5, 5, 5, 5, 5, 5, 5, 5, // 30-39 (all solaceon ruins)
+            5, 5, 5, 5, 5, 5, 5, 6, 6, 6, // 40-49 (solaceon ruins/v.road)
+            6, 6, 6, 7, 8, 8, -1, 9, 9, 10, // 50-59 (v.road, stark mountain outer then inner, sendoff spring)
             -1, -1, -1, 10, 10, 10, 10, 10, 10, 10, // 60-69 (unknown, turnback cave)
             10, 10, 10, 10, 10, 10, 10, 10, 10, 10, // 70-79 (all turnback cave)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 80-89 (all unknown)
@@ -837,10 +837,10 @@ public class Gen4Constants {
             -1, -1, -1,                             // 180-182 (other sea routes)
     };
 
-    public static final int[] hgssOverworldDexMaps = new int[] {
-            1,  2,  3,  4,  5,  6, -1, -1,  7, -1, // 0-9 (first few cities/routes, sprout tower + alph)
-            -1, -1, -1, -1, -1, -1, -1,  8, -1, -1, // 10-19 (more alph, union cave, r33, slowpoke)
-            -1,  9, 10, -1, -1, 11, 12, 13, -1, -1, // 20-29 (ilex, routes, natpark, routes, burned)
+    public static final int[] hgssOverworldDexMaps = new int[]{
+            1, 2, 3, 4, 5, 6, -1, -1, 7, -1, // 0-9 (first few cities/routes, sprout tower + alph)
+            -1, -1, -1, -1, -1, -1, -1, 8, -1, -1, // 10-19 (more alph, union cave, r33, slowpoke)
+            -1, 9, 10, -1, -1, 11, 12, 13, -1, -1, // 20-29 (ilex, routes, natpark, routes, burned)
             -1, -1, -1, -1, -1, -1, -1, -1, 14, 15, // 30-39 (bell tower, routes)
             16, 17, 18, -1, -1, -1, -1, -1, -1, -1, // 40-49 (olivine, routes, whirl islands, missing slots)
             -1, 19, 20, -1, -1, -1, -1, 21, 22, 23, // 50-59 (missing, cianwood, routes, mortar)
@@ -855,16 +855,16 @@ public class Gen4Constants {
             -1, -1,                                 // 140-141 (cerulean cave)
     };
 
-    public static final int[] hgssDungeonDexMaps = new int[] {
-            -1, -1, -1, -1, -1, -1,  1,  1, -1,  2, // 0-9 (first few cities/routes, sprout tower + alph)
-            2,  2,  2,  2,  3,  3,  3, -1,  4,  4, // 10-19 (more alph, union cave, r33, slowpoke)
-            5, -1, -1,  6,  -1, -1, -1, -1,  7,  7, // 20-29 (ilex, routes, natpark, routes, burned)
-            8,  8,  8,  8,  8,  8,  8,  8, -1, -1, // 30-39 (bell tower, routes)
-            -1, -1, -1,  9,  9, -1,  9, -1,  9, -1, // 40-49 (olivine, routes, whirl islands, missing slots)
+    public static final int[] hgssDungeonDexMaps = new int[]{
+            -1, -1, -1, -1, -1, -1, 1, 1, -1, 2, // 0-9 (first few cities/routes, sprout tower + alph)
+            2, 2, 2, 2, 3, 3, 3, -1, 4, 4, // 10-19 (more alph, union cave, r33, slowpoke)
+            5, -1, -1, 6, -1, -1, -1, -1, 7, 7, // 20-29 (ilex, routes, natpark, routes, burned)
+            8, 8, 8, 8, 8, 8, 8, 8, -1, -1, // 30-39 (bell tower, routes)
+            -1, -1, -1, 9, 9, -1, 9, -1, 9, -1, // 40-49 (olivine, routes, whirl islands, missing slots)
             -1, -1, -1, 10, 10, 10, 10, -1, -1, -1, // 50-59 (missing, cianwood, routes, mortar)
             11, 11, 11, 11, -1, -1, 12, -1, -1, 13, // 60-69 (ice path, missing, blackthorn, dragons, routes, dark)
             13, -1, 14, 14, 15, 15, 15, 15, 15, 16, // 70-79 (dark, route 47, moon, seafoam, silver cave)
-            16, 16, 17, 18,  8, -1, 16, 16, 16, 16, // 80-89 (more silver cave, cliff stuff, random bell tower)
+            16, 16, 17, 18, 8, -1, 16, 16, 16, 16, // 80-89 (more silver cave, cliff stuff, random bell tower)
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 90-99 (missing, saf zone, kanto routes/cities)
             -1, -1, -1, -1, -1, -1, 14, 14, 20, 20, // 100-109 (more cities, some routes, more moon, RT)
             21, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 110-119 (vroad, routes 1-9)
@@ -873,22 +873,22 @@ public class Gen4Constants {
             25, 25,                                 // 140-141 (cerulean cave)
     };
 
-    public static final int[] hgssHeadbuttOverworldDexMaps = new int[] {
+    public static final int[] hgssHeadbuttOverworldDexMaps = new int[]{
             43, 44, 45, 46, 47, 48, 49, 50, 53, 29, // Routes 1-12, skipping 9 and 10
-            54, 55, 56, 59, 61, 63, 40, 41, 42,  2, // Routes 13-15, Route 18, Route 22, Routes 25-29
-             4,  5,  7,  8,  9, 10, 11, 12, 14, 15, // Routes 30-39
+            54, 55, 56, 59, 61, 63, 40, 41, 42, 2, // Routes 13-15, Route 18, Route 22, Routes 25-29
+            4, 5, 7, 8, 9, 10, 11, 12, 14, 15, // Routes 30-39
             20, 21, 23, 25, 26, 32, 33, 65, 34, 35, // Routes 42-46, first five Kanto cities
-            36, 37,  1,  3,  6, 66, 13, 22, 28, 60, // Remaining Kanto cities, Johto cities, Lake of Rage, Mt Silver, Route 21
+            36, 37, 1, 3, 6, 66, 13, 22, 28, 60, // Remaining Kanto cities, Johto cities, Lake of Rage, Mt Silver, Route 21
             -1, -1, -1, 27, 39, 67, 64, 57, -1,     // National Park, Ilex/Viridian Forest, Routes 47-48, Safari Zone Gate, Routes 2 (north) and 16, Mt Silver Cave
     };
 
-    public static final int[] hgssHeadbuttDungeonDexMaps = new int[] {
+    public static final int[] hgssHeadbuttDungeonDexMaps = new int[]{
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // Routes 1-12, skipping 9 and 10
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // Routes 13-15, Route 18, Route 22, Routes 25-29
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // Routes 30-39
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // Routes 42-46, first five Kanto cities
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // Remaining Kanto cities, Johto cities, Lake of Rage, Mt Silver, Route 21
-             6,  5, 24, -1, -1, -1, -1, -1, 16,     // National Park, Ilex/Viridian Forest, Routes 47-48, Safari Zone Gate, Routes 2 (north) and 16, Mt Silver Cave
+            6, 5, 24, -1, -1, -1, -1, -1, 16,     // National Park, Ilex/Viridian Forest, Routes 47-48, Safari Zone Gate, Routes 2 (north) and 16, Mt Silver Cave
     };
 
     public static final int pokedexAreaDataSize = 495;
@@ -917,7 +917,7 @@ public class Gen4Constants {
 
         nonBadItems.banSingles(Items.oddKeystone, Items.griseousOrb, Items.soulDew, Items.lightBall,
                 Items.oranBerry, Items.quickPowder);
-        nonBadItems.banRange(Items.shoalSalt,2);
+        nonBadItems.banRange(Items.shoalSalt, 2);
         nonBadItems.banRange(Items.growthMulch, 4); // mulch
         nonBadItems.banRange(Items.adamantOrb, 2); // orbs
         nonBadItems.banRange(Items.mail1, 12); // mails
@@ -982,7 +982,7 @@ public class Gen4Constants {
         }
     }
 
-    public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
+    public static final Map<Integer, Integer> balancedItemPrices = Stream.of(new Integer[][]{
             // Skip item index 0. All prices divided by 10
             {Items.masterBall, 300},
             {Items.ultraBall, 120},
@@ -1551,45 +1551,45 @@ public class Gen4Constants {
             return 0x09; // ???-type
         }
         switch (type) {
-        case NORMAL:
-            return 0x00;
-        case FIGHTING:
-            return 0x01;
-        case FLYING:
-            return 0x02;
-        case POISON:
-            return 0x03;
-        case GROUND:
-            return 0x04;
-        case ROCK:
-            return 0x05;
-        case BUG:
-            return 0x06;
-        case GHOST:
-            return 0x07;
-        case FIRE:
-            return 0x0A;
-        case WATER:
-            return 0x0B;
-        case GRASS:
-            return 0x0C;
-        case ELECTRIC:
-            return 0x0D;
-        case PSYCHIC:
-            return 0x0E;
-        case ICE:
-            return 0x0F;
-        case DRAGON:
-            return 0x10;
-        case STEEL:
-            return 0x08;
-        case DARK:
-            return 0x11;
-        default:
-            return 0; // normal by default
+            case NORMAL:
+                return 0x00;
+            case FIGHTING:
+                return 0x01;
+            case FLYING:
+                return 0x02;
+            case POISON:
+                return 0x03;
+            case GROUND:
+                return 0x04;
+            case ROCK:
+                return 0x05;
+            case BUG:
+                return 0x06;
+            case GHOST:
+                return 0x07;
+            case FIRE:
+                return 0x0A;
+            case WATER:
+                return 0x0B;
+            case GRASS:
+                return 0x0C;
+            case ELECTRIC:
+                return 0x0D;
+            case PSYCHIC:
+                return 0x0E;
+            case ICE:
+                return 0x0F;
+            case DRAGON:
+                return 0x10;
+            case STEEL:
+                return 0x08;
+            case DARK:
+                return 0x11;
+            default:
+                return 0; // normal by default
         }
     }
-    
+
     public static MoveTarget wordToMoveTarget(int word) {
         switch (word) {
             case 0x0001:
@@ -1618,7 +1618,7 @@ public class Gen4Constants {
                 return MoveTarget.ANY_ADJACENT;
         }
     }
-    
+
     public static int moveTargetToWord(MoveTarget moveTarget) {
         switch (moveTarget) {
             case OTHER:
@@ -1659,44 +1659,44 @@ public class Gen4Constants {
         return 0;
     }
 
-    private static Map<Integer,String> setupFormeSuffixes() {
-        Map<Integer,String> formeSuffixes = new HashMap<>();
-        formeSuffixes.put(Species.Gen4Formes.deoxysA + formeOffset,"-A");
-        formeSuffixes.put(Species.Gen4Formes.deoxysD + formeOffset,"-D");
-        formeSuffixes.put(Species.Gen4Formes.deoxysS + formeOffset,"-S");
-        formeSuffixes.put(Species.Gen4Formes.wormadamS + formeOffset,"-S");
-        formeSuffixes.put(Species.Gen4Formes.wormadamT + formeOffset,"-T");
-        formeSuffixes.put(Species.Gen4Formes.giratinaO + formeOffset,"-O");
-        formeSuffixes.put(Species.Gen4Formes.shayminS + formeOffset,"-S");
-        formeSuffixes.put(Species.Gen4Formes.rotomH + formeOffset,"-H");
-        formeSuffixes.put(Species.Gen4Formes.rotomW + formeOffset,"-W");
-        formeSuffixes.put(Species.Gen4Formes.rotomFr + formeOffset,"-Fr");
-        formeSuffixes.put(Species.Gen4Formes.rotomFa + formeOffset,"-Fa");
-        formeSuffixes.put(Species.Gen4Formes.rotomM + formeOffset,"-M");
+    private static Map<Integer, String> setupFormeSuffixes() {
+        Map<Integer, String> formeSuffixes = new HashMap<>();
+        formeSuffixes.put(Species.Gen4Formes.deoxysA + formeOffset, "-A");
+        formeSuffixes.put(Species.Gen4Formes.deoxysD + formeOffset, "-D");
+        formeSuffixes.put(Species.Gen4Formes.deoxysS + formeOffset, "-S");
+        formeSuffixes.put(Species.Gen4Formes.wormadamS + formeOffset, "-S");
+        formeSuffixes.put(Species.Gen4Formes.wormadamT + formeOffset, "-T");
+        formeSuffixes.put(Species.Gen4Formes.giratinaO + formeOffset, "-O");
+        formeSuffixes.put(Species.Gen4Formes.shayminS + formeOffset, "-S");
+        formeSuffixes.put(Species.Gen4Formes.rotomH + formeOffset, "-H");
+        formeSuffixes.put(Species.Gen4Formes.rotomW + formeOffset, "-W");
+        formeSuffixes.put(Species.Gen4Formes.rotomFr + formeOffset, "-Fr");
+        formeSuffixes.put(Species.Gen4Formes.rotomFa + formeOffset, "-Fa");
+        formeSuffixes.put(Species.Gen4Formes.rotomM + formeOffset, "-M");
         return formeSuffixes;
     }
 
-    private static Map<Integer,FormeInfo> setupFormeMappings() {
-        Map<Integer,FormeInfo> formeMappings = new TreeMap<>();
+    private static Map<Integer, FormeInfo> setupFormeMappings() {
+        Map<Integer, FormeInfo> formeMappings = new TreeMap<>();
 
-        formeMappings.put(Species.Gen4Formes.deoxysA + formeOffset,new FormeInfo(Species.deoxys,1, 0));
-        formeMappings.put(Species.Gen4Formes.deoxysD + formeOffset,new FormeInfo(Species.deoxys,2, 0));
-        formeMappings.put(Species.Gen4Formes.deoxysS + formeOffset,new FormeInfo(Species.deoxys,3, 0));
-        formeMappings.put(Species.Gen4Formes.wormadamS + formeOffset,new FormeInfo(Species.wormadam,1, 0));
-        formeMappings.put(Species.Gen4Formes.wormadamT + formeOffset,new FormeInfo(Species.wormadam,2, 0));
-        formeMappings.put(Species.Gen4Formes.giratinaO + formeOffset,new FormeInfo(Species.giratina,1, 0));
-        formeMappings.put(Species.Gen4Formes.shayminS + formeOffset,new FormeInfo(Species.shaymin,1, 0));
-        formeMappings.put(Species.Gen4Formes.rotomH + formeOffset,new FormeInfo(Species.rotom,1, 0));
-        formeMappings.put(Species.Gen4Formes.rotomW + formeOffset,new FormeInfo(Species.rotom,2, 0));
-        formeMappings.put(Species.Gen4Formes.rotomFr + formeOffset,new FormeInfo(Species.rotom,3, 0));
-        formeMappings.put(Species.Gen4Formes.rotomFa + formeOffset,new FormeInfo(Species.rotom,4, 0));
-        formeMappings.put(Species.Gen4Formes.rotomM + formeOffset,new FormeInfo(Species.rotom,5, 0));
+        formeMappings.put(Species.Gen4Formes.deoxysA + formeOffset, new FormeInfo(Species.deoxys, 1, 0));
+        formeMappings.put(Species.Gen4Formes.deoxysD + formeOffset, new FormeInfo(Species.deoxys, 2, 0));
+        formeMappings.put(Species.Gen4Formes.deoxysS + formeOffset, new FormeInfo(Species.deoxys, 3, 0));
+        formeMappings.put(Species.Gen4Formes.wormadamS + formeOffset, new FormeInfo(Species.wormadam, 1, 0));
+        formeMappings.put(Species.Gen4Formes.wormadamT + formeOffset, new FormeInfo(Species.wormadam, 2, 0));
+        formeMappings.put(Species.Gen4Formes.giratinaO + formeOffset, new FormeInfo(Species.giratina, 1, 0));
+        formeMappings.put(Species.Gen4Formes.shayminS + formeOffset, new FormeInfo(Species.shaymin, 1, 0));
+        formeMappings.put(Species.Gen4Formes.rotomH + formeOffset, new FormeInfo(Species.rotom, 1, 0));
+        formeMappings.put(Species.Gen4Formes.rotomW + formeOffset, new FormeInfo(Species.rotom, 2, 0));
+        formeMappings.put(Species.Gen4Formes.rotomFr + formeOffset, new FormeInfo(Species.rotom, 3, 0));
+        formeMappings.put(Species.Gen4Formes.rotomFa + formeOffset, new FormeInfo(Species.rotom, 4, 0));
+        formeMappings.put(Species.Gen4Formes.rotomM + formeOffset, new FormeInfo(Species.rotom, 5, 0));
 
         return formeMappings;
     }
 
-    private static Map<Integer,Integer> setupCosmeticForms() {
-        Map<Integer,Integer> cosmeticForms = new TreeMap<>();
+    private static Map<Integer, Integer> setupCosmeticForms() {
+        Map<Integer, Integer> cosmeticForms = new TreeMap<>();
 
         cosmeticForms.put(Species.unown, 28);
         cosmeticForms.put(Species.burmy, 3);
@@ -1705,81 +1705,81 @@ public class Gen4Constants {
         return cosmeticForms;
     }
 
-    private static Map<Integer,Map<Integer,String>> setupFormeSuffixesByBaseForme() {
-        Map<Integer,Map<Integer,String>> map = new HashMap<>();
+    private static Map<Integer, Map<Integer, String>> setupFormeSuffixesByBaseForme() {
+        Map<Integer, Map<Integer, String>> map = new HashMap<>();
 
-        Map<Integer,String> deoxysMap = new HashMap<>();
-        deoxysMap.put(1,"-A");
-        deoxysMap.put(2,"-D");
-        deoxysMap.put(3,"-S");
-        map.put(Species.deoxys,deoxysMap);
-
-        Map<Integer,String> wormadamMap = new HashMap<>();
-        wormadamMap.put(1,"-S");
-        wormadamMap.put(2,"-T");
-        map.put(Species.wormadam,wormadamMap);
-
-        Map<Integer,String> shayminMap = new HashMap<>();
-        shayminMap.put(1,"-S");
-        map.put(Species.shaymin,shayminMap);
-
-        Map<Integer,String> giratinaMap = new HashMap<>();
-        giratinaMap.put(1,"-O");
-        map.put(Species.giratina,giratinaMap);
-
-        Map<Integer,String> rotomMap = new HashMap<>();
-        rotomMap.put(1,"-H");
-        rotomMap.put(2,"-W");
-        rotomMap.put(3,"-Fr");
-        rotomMap.put(4,"-Fa");
-        rotomMap.put(5,"-M");
-        map.put(Species.rotom,rotomMap);
-
-        return map;
-    }
-
-    private static Map<Integer,String> setupDummyFormeSuffixes() {
-        Map<Integer,String> m = new HashMap<>();
-        m.put(0,"");
-        return m;
-    }
-
-    private static Map<Integer,Map<Integer,Integer>> setupAbsolutePokeNumsByBaseForme() {
-        Map<Integer,Map<Integer,Integer>> map = new HashMap<>();
-
-        Map<Integer,Integer> deoxysMap = new HashMap<>();
-        deoxysMap.put(1,Species.Gen4Formes.deoxysA);
-        deoxysMap.put(2,Species.Gen4Formes.deoxysD);
-        deoxysMap.put(3,Species.Gen4Formes.deoxysS);
+        Map<Integer, String> deoxysMap = new HashMap<>();
+        deoxysMap.put(1, "-A");
+        deoxysMap.put(2, "-D");
+        deoxysMap.put(3, "-S");
         map.put(Species.deoxys, deoxysMap);
 
-        Map<Integer,Integer> wormadamMap = new HashMap<>();
-        wormadamMap.put(1,Species.Gen4Formes.wormadamS);
-        wormadamMap.put(2,Species.Gen4Formes.wormadamT);
+        Map<Integer, String> wormadamMap = new HashMap<>();
+        wormadamMap.put(1, "-S");
+        wormadamMap.put(2, "-T");
         map.put(Species.wormadam, wormadamMap);
 
-        Map<Integer,Integer> giratinaMap = new HashMap<>();
-        giratinaMap.put(1,Species.Gen4Formes.giratinaO);
-        map.put(Species.giratina, giratinaMap);
-
-        Map<Integer,Integer> shayminMap = new HashMap<>();
-        shayminMap.put(1,Species.Gen4Formes.shayminS);
+        Map<Integer, String> shayminMap = new HashMap<>();
+        shayminMap.put(1, "-S");
         map.put(Species.shaymin, shayminMap);
 
-        Map<Integer,Integer> rotomMap = new HashMap<>();
-        rotomMap.put(1,Species.Gen4Formes.rotomH);
-        rotomMap.put(2,Species.Gen4Formes.rotomW);
-        rotomMap.put(3,Species.Gen4Formes.rotomFr);
-        rotomMap.put(4,Species.Gen4Formes.rotomFa);
-        rotomMap.put(5,Species.Gen4Formes.rotomM);
+        Map<Integer, String> giratinaMap = new HashMap<>();
+        giratinaMap.put(1, "-O");
+        map.put(Species.giratina, giratinaMap);
+
+        Map<Integer, String> rotomMap = new HashMap<>();
+        rotomMap.put(1, "-H");
+        rotomMap.put(2, "-W");
+        rotomMap.put(3, "-Fr");
+        rotomMap.put(4, "-Fa");
+        rotomMap.put(5, "-M");
         map.put(Species.rotom, rotomMap);
 
         return map;
     }
 
-    private static Map<Integer,Integer> setupDummyAbsolutePokeNums() {
-        Map<Integer,Integer> m = new HashMap<>();
-        m.put(255,0);
+    private static Map<Integer, String> setupDummyFormeSuffixes() {
+        Map<Integer, String> m = new HashMap<>();
+        m.put(0, "");
+        return m;
+    }
+
+    private static Map<Integer, Map<Integer, Integer>> setupAbsolutePokeNumsByBaseForme() {
+        Map<Integer, Map<Integer, Integer>> map = new HashMap<>();
+
+        Map<Integer, Integer> deoxysMap = new HashMap<>();
+        deoxysMap.put(1, Species.Gen4Formes.deoxysA);
+        deoxysMap.put(2, Species.Gen4Formes.deoxysD);
+        deoxysMap.put(3, Species.Gen4Formes.deoxysS);
+        map.put(Species.deoxys, deoxysMap);
+
+        Map<Integer, Integer> wormadamMap = new HashMap<>();
+        wormadamMap.put(1, Species.Gen4Formes.wormadamS);
+        wormadamMap.put(2, Species.Gen4Formes.wormadamT);
+        map.put(Species.wormadam, wormadamMap);
+
+        Map<Integer, Integer> giratinaMap = new HashMap<>();
+        giratinaMap.put(1, Species.Gen4Formes.giratinaO);
+        map.put(Species.giratina, giratinaMap);
+
+        Map<Integer, Integer> shayminMap = new HashMap<>();
+        shayminMap.put(1, Species.Gen4Formes.shayminS);
+        map.put(Species.shaymin, shayminMap);
+
+        Map<Integer, Integer> rotomMap = new HashMap<>();
+        rotomMap.put(1, Species.Gen4Formes.rotomH);
+        rotomMap.put(2, Species.Gen4Formes.rotomW);
+        rotomMap.put(3, Species.Gen4Formes.rotomFr);
+        rotomMap.put(4, Species.Gen4Formes.rotomFa);
+        rotomMap.put(5, Species.Gen4Formes.rotomM);
+        map.put(Species.rotom, rotomMap);
+
+        return map;
+    }
+
+    private static Map<Integer, Integer> setupDummyAbsolutePokeNums() {
+        Map<Integer, Integer> m = new HashMap<>();
+        m.put(255, 0);
         return m;
     }
 
@@ -2031,7 +2031,7 @@ public class Gen4Constants {
         tag(trs, "THEMED:PROTON-STRONG", 0x1e6, 0x2c2);
         tag(trs, "THEMED:SPROUTTOWER", 0x2b, 0x33, 0x34, 0x35, 0x36, 0x37, 0x122);
 
-        tag(trs,"LEADER",485); // Archer
+        tag(trs, "LEADER", 485); // Archer
     }
 
     private static void tag(List<Trainer> allTrainers, int number, String tag) {

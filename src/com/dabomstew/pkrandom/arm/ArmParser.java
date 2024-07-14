@@ -1,35 +1,48 @@
 package com.dabomstew.pkrandom.arm;
 
-import com.sun.org.apache.xml.internal.resolver.helpers.Namespaces;
+import com.dabomstew.pkrandom.romhandlers.ParagonLiteAddressMap;
+import com.dabomstew.pkrandom.romhandlers.ParagonLiteOverlay;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.zip.DataFormatException;
 
 public class ArmParser {
-    Map<String, Map<String, Integer>> branchLinkRamAddressMap;
+    ParagonLiteAddressMap globalAddressMap;
+
     Map<String, Integer> labelAddressMap = new HashMap<>();
     Map<Integer, Integer> dataRamAddressMap = new HashMap<>();
-    int initialRamAddress = 0;
-    int currentRamAddress = 0;
+    ParagonLiteOverlay overlay;
+    int initialAddress = 0;
+    int currentAddress = 0;
     int size = 0;
 
+    ScriptEngine engine;
+
     public ArmParser() {
-        branchLinkRamAddressMap = new HashMap<>();
+        setupJavaScriptEngine();
     }
 
-    public ArmParser(Map<String, Map<String, Integer>> branchLinkRamAddressMap) {
-        this.branchLinkRamAddressMap = branchLinkRamAddressMap;
+    public ArmParser(ParagonLiteAddressMap globalAddressMap) {
+        this.globalAddressMap = globalAddressMap;
+        setupJavaScriptEngine();
+    }
+
+    private void setupJavaScriptEngine() {
+        ScriptEngineManager mgr = new ScriptEngineManager();
+        engine = mgr.getEngineByName("JavaScript");
     }
 
     public byte[] parse(List<String> lines) {
-        return parse(lines, 0);
+        return parse(lines, null, 0);
     }
 
-    public byte[] parse(List<String> lines, int inInitialRamOffset) {
-        if (!isWordAligned(inInitialRamOffset))
+    public byte[] parse(List<String> lines, ParagonLiteOverlay overlay, int initialAddress) {
+        if (!isWordAligned(initialAddress))
             throw new RuntimeException("Initial RAM offset must be word-aligned.");
 
         List<Byte> bytes = new ArrayList<>();
@@ -37,23 +50,24 @@ public class ArmParser {
         labelAddressMap.clear();
         dataRamAddressMap.clear();
 
-        initialRamAddress = inInitialRamOffset;
-        currentRamAddress = initialRamAddress;
+        this.overlay = overlay;
+        this.initialAddress = initialAddress;
+        this.currentAddress = initialAddress;
 
         for (String str : lines) {
             str = str.trim();
             if (str.endsWith(":")) {
                 // Label
                 String labelName = str.substring(0, str.length() - 1).trim();
-                labelAddressMap.put(labelName.toLowerCase(), currentRamAddress);
+                labelAddressMap.put(labelName.toLowerCase(), currentAddress);
             }
 
-            currentRamAddress += getLineByteLength(str);
+            currentAddress += getLineByteLength(str);
         }
 
-        size = alignNextWord(currentRamAddress - initialRamAddress);
+        size = alignNextWord(currentAddress - initialAddress);
 
-        currentRamAddress = initialRamAddress;
+        currentAddress = initialAddress;
         for (String str : lines) {
             int commentStartIndex = str.indexOf(';');
             if (commentStartIndex > -1)
@@ -78,21 +92,35 @@ public class ArmParser {
             for (byte instructionByte : instructionBytes)
                 bytes.add(instructionByte);
 
-            currentRamAddress += instructionBytes.length;
+            currentAddress += instructionBytes.length;
         }
 
         byte[] returnValue = new byte[size];
         for (int i = 0; i < bytes.size(); ++i)
             returnValue[i] = bytes.get(i);
 
+        // Add No Op
+        if (!isWordAligned(bytes.size()) && !dataRamAddressMap.isEmpty()) {
+            returnValue[bytes.size()] = (byte) 0xC0;
+            returnValue[bytes.size() + 1] = (byte) 0x46;
+        }
+
         for (Map.Entry<Integer, Integer> entry : dataRamAddressMap.entrySet()) {
             int dataValue = entry.getKey();
-            int offset = entry.getValue() - initialRamAddress;
 
+            int offset = entry.getValue() - initialAddress;
             returnValue[offset] = (byte) (dataValue & 0xFF);
             returnValue[offset + 1] = (byte) ((dataValue >> 8) & 0xFF);
             returnValue[offset + 2] = (byte) ((dataValue >> 16) & 0xFF);
             returnValue[offset + 3] = (byte) ((dataValue >> 24) & 0xFF);
+
+            // Assume function refs are between 0x02000000 and 0x08000000
+            if (globalAddressMap == null || overlay == null || !ParagonLiteAddressMap.isValidAddress(dataValue, true))
+                continue;
+
+            int targetAddress = alignWord(dataValue);
+
+            globalAddressMap.addReference(overlay, targetAddress, entry.getValue());
         }
 
         return returnValue;
@@ -103,83 +131,175 @@ public class ArmParser {
         return bytes.length;
     }
 
-    public int getFuncSize(byte[] bytes, int startingOffset) throws DataFormatException {
+    public int getFuncSize(byte[] bytes, int startingOffset) {
+        if (readWord(bytes, startingOffset) == 0)
+            throw new RuntimeException("Empty function");
+
+        final AtomicReference<Integer> maxOffset = new AtomicReference<>(startingOffset);
+
+        traverseData(bytes, startingOffset, (context) -> {
+            maxOffset.set(Math.max(maxOffset.get(), context.offset + 2));
+
+            // PC-relative load
+            if ((context.instruction & 0xF800) == 0x4800) {
+                int imm = context.instruction & 0x00FF;
+                int dataOffset = alignWord(context.offset + ((imm << 2) + 4));
+                maxOffset.set(Math.max(maxOffset.get(), dataOffset + 4));
+            }
+        });
+
+        return alignNextWord(maxOffset.get()) - startingOffset;
+    }
+
+    public Map<Integer, Set<Integer>> getOutgoingCodeReferences(final byte[] data, int startingOffset, final int overlayAddress) {
+        AtomicReference<Map<Integer, Set<Integer>>> mapRef = new AtomicReference<>(new HashMap<>());
+
+        traverseData(data, startingOffset, (context) -> {
+            Map<Integer, Set<Integer>> map = mapRef.get();
+
+            // PC-relative load
+            if ((context.instruction & 0xF800) == 0x4800) {
+                int imm = context.instruction & 0x00FF;
+                int dataOffset = alignWord(context.offset + ((imm << 2) + 4));
+
+                int value = readWord(data, dataOffset);
+                if (!ParagonLiteAddressMap.isValidAddress(value, true))
+                    return;
+
+                int address = alignWord(value);
+                if (!map.containsKey(address))
+                    map.put(address, new HashSet<>());
+                map.get(address).add(overlayAddress + context.offset);
+                return;
+            }
+
+            // long branch with link (high)
+            if ((context.instruction & 0xF800) == 0xF000) {
+                int nextInstruction = readUnsignedHalfword(data, context.offset + 2);
+
+                if ((nextInstruction & 0xE800) != 0xE800) // can be blx
+                    return;
+
+                int high = ((context.instruction & 0x07FF) << 21) >> 9;
+                int low = (nextInstruction & 0x07FF) << 1;
+                int offset = (high | low);
+
+                int value = overlayAddress + context.offset + offset + 4;
+                if (!ParagonLiteAddressMap.isValidAddress(value, false))
+                    return;
+
+                int address = alignWord(value);
+                if (!map.containsKey(address))
+                    map.put(address, new HashSet<>());
+                map.get(address).add(overlayAddress + context.offset);
+            }
+        });
+
+        return mapRef.get();
+    }
+
+    public Map<Integer, Set<Integer>> getOutgoingDataReferences(byte[] data, int startingOffset, int overlayAddress, int size, String refPattern) {
+        Map<Integer, Set<Integer>> map = new HashMap<>();
+
+        if (refPattern == null || !refPattern.contains("*")) {
+            return map;
+        }
+
+        if (refPattern.endsWith("*"))
+            refPattern += "0";
+
+        String[] patternSplit = refPattern.split("\\*");
+
+        int dataIndex = 0;
+        int patternOffset = 0;
+        while (dataIndex < size) {
+            if (patternOffset != 0) {
+                int offset = startingOffset + dataIndex;
+                if (offset < 0 || offset >= data.length)
+                    throw new RuntimeException();
+
+                int destinationAddress = alignWord(readWord(data, offset));
+                if (ParagonLiteAddressMap.isValidAddress(destinationAddress, false)) {
+                    if (!map.containsKey(destinationAddress))
+                        map.put(destinationAddress, new HashSet<>());
+                    map.get(destinationAddress).add(overlayAddress + offset);
+                }
+
+                dataIndex += 4;
+            }
+
+            String patternValue = patternSplit[patternOffset];
+            if (patternValue != null && !patternValue.isEmpty()) {
+                dataIndex += Integer.parseInt(patternValue);
+            }
+            patternOffset = (patternOffset + 1) % patternSplit.length;
+        }
+
+        return map;
+    }
+
+    private static class TraversalContext {
+        int offset;
+        int instruction = -1;
+
+        private TraversalContext(int offset) {
+            this.offset = offset;
+        }
+    }
+
+    private void traverseData(byte[] bytes, int startingOffset, Consumer<TraversalContext> action) {
         if (!isWordAligned(startingOffset))
-            throw new DataFormatException("StartingOffset must be word-aligned.");
+            throw new RuntimeException("StartingOffset must be word-aligned.");
 
-        Queue<Integer> queue = new LinkedList<>();
-        queue.add(startingOffset);
-
-        int pushCount = 0;
-        int maxOffset = startingOffset;
+        Queue<TraversalContext> queue = new LinkedList<>();
+        queue.add(new TraversalContext(startingOffset));
 
         Set<Integer> seen = new HashSet<>();
 
         while (!queue.isEmpty()) {
-            int offset = queue.poll();
-            if (!seen.add(offset))
+            TraversalContext context = queue.poll();
+            if (!seen.add(context.offset))
                 continue;
 
-            maxOffset = Math.max(maxOffset, offset + 2);
-
-            int instruction = readUnsignedHalfword(bytes, offset);
+            // read instruction
+            context.instruction = readUnsignedHalfword(bytes, context.offset);
+            action.accept(context); // process lambda
 
             // conditional branch
-            if ((instruction & 0xF000) == 0xD000) {
-                if (((instruction >> 8) & 0x0F) > 13)
+            if ((context.instruction & 0xF000) == 0xD000) {
+                if (((context.instruction >> 8) & 0x0F) > 13)
                     // undefined or swi
                     continue;
 
                 // signed
-                int branchOffset = (byte) (instruction & 0x00FF);
+                int branchOffset = (byte) (context.instruction & 0x00FF);
                 branchOffset = (branchOffset << 1) + 4;
 
-                queue.add(offset + branchOffset); // jump
+                TraversalContext newContext = new TraversalContext(context.offset + branchOffset);
+                queue.add(newContext); // jump
             }
 
             // unconditional branch
-            if ((instruction & 0xF800) == 0xE000) {
+            if ((context.instruction & 0xF800) == 0xE000) {
                 // two's compliment 12-bit
-                int branchOffset = (((instruction & 0x07FF) << 21) >> 20) + 4;
-
-                queue.add(offset + branchOffset);
+                context.offset += (((context.instruction & 0x07FF) << 21) >> 20) + 4;
+                queue.add(context);
                 continue;
             }
 
-            // PC-relative load
-            if ((instruction & 0xF800) == 0x4800) {
-                int imm = instruction & 0x00FF;
-                int dataOffset = alignWord(offset + ((imm << 2) + 4));
-                maxOffset = Math.max(maxOffset, dataOffset + 4);
-            }
-
-            // push
-            if ((instruction & 0xFE00) == 0xB400) {
-                ++pushCount;
-
-                if (maxOffset > offset + 2)
-                    throw new DataFormatException("Critical error: found push before max offset");
-
-                if (pushCount > 1) {
-                    maxOffset = offset;
-                    continue;
-                }
-            }
-
-            // pop
-            if ((instruction & 0xFE00) == 0xBC00) {
+            // pop (with PC)
+            if ((context.instruction & 0xFF00) == 0xBD00) {
                 continue;
             }
 
             // branch exchange
-            if ((instruction & 0xFF80) == 0x4700) {
+            if ((context.instruction & 0xFF80) == 0x4700) {
                 continue;
             }
 
-            queue.add(offset + 2);
+            context.offset += 2;
+            queue.add(context);
         }
-
-        return alignNextWord(maxOffset) - startingOffset;
     }
 
     private int getLineByteLength(String line) {
@@ -196,7 +316,7 @@ public class ArmParser {
         if (line.endsWith(":"))
             return 0;
 
-        if (line.startsWith("bl "))
+        if (line.startsWith("bl ") || line.startsWith("blx "))
             return 4;
 
         if (line.startsWith("dcb "))
@@ -223,7 +343,9 @@ public class ArmParser {
             case "bic":
                 return format4(args.split(","), 14);
             case "bl":
-                return format19(args.split(","));
+                return format19(args.split(","), false);
+            case "blx":
+                return format19(args.split(","), true);
             case "bx":
                 return format5(args.split(","), 3);
             case "cmn":
@@ -334,6 +456,13 @@ public class ArmParser {
             if (args[1].startsWith("#"))
                 return format3(args, 2);
 
+            int rd = parseRegister(args[0]);
+            int rs = parseRegister(args[1]);
+
+            // Prefer format2
+            if (rd < 8 && rs < 8)
+                return format2(new String[]{args[0], args[1], args[0]}, 0);
+
             return format5(args, 0);
         }
 
@@ -432,13 +561,13 @@ public class ArmParser {
             if (args[1].startsWith("=")) {
                 int imm = parseImmediate(args[1]);
                 if (!dataRamAddressMap.containsKey(imm)) {
-                    int dataAddress = alignNextWord(initialRamAddress + size);
+                    int dataAddress = alignNextWord(initialAddress + size);
 
                     dataRamAddressMap.put(imm, dataAddress);
-                    size = dataAddress - initialRamAddress + 4;
+                    size = dataAddress - initialAddress + 4;
                 }
 
-                imm = dataRamAddressMap.get(imm) - alignWord(currentRamAddress) - 4;
+                imm = dataRamAddressMap.get(imm) - alignWord(currentAddress) - 4;
                 return format6(new String[]{args[0], "PC", "#" + imm});
             }
 
@@ -645,8 +774,12 @@ public class ArmParser {
 
         String[] args = argsStr.split(",");
 
-        if (args.length == 2)
-            return format3(args, 3);
+        if (args.length == 2) {
+            if (args[1].startsWith("#"))
+                return format3(args, 3);
+
+            return format2(new String[]{args[0], args[1], args[0]}, 1);
+        }
 
         if (args.length == 3)
             return format2(args, 1);
@@ -698,13 +831,13 @@ public class ArmParser {
         if (imm < 0 || imm > 255) {
             // 0 when word-aligned, 1 when not word-aligned (but still halfword-aligned)
             if (!dataRamAddressMap.containsKey(imm)) {
-                int dataAddress = alignWord(initialRamAddress + size + 3);
+                int dataAddress = alignWord(initialAddress + size + 3);
 
                 dataRamAddressMap.put(imm, dataAddress);
-                size = dataAddress - initialRamAddress + 4;
+                size = dataAddress - initialAddress + 4;
             }
 
-            imm = dataRamAddressMap.get(imm) - alignWord(currentRamAddress) - 4;
+            imm = dataRamAddressMap.get(imm) - alignWord(currentAddress) - 4;
             return format6(new String[]{args[0], "PC", "#" + imm});
         }
 
@@ -780,7 +913,7 @@ public class ArmParser {
 
         int rd = parseRegister(args[0]);
         int rb = parseRegister(args[1]);
-        int ro = parseRegister(args[1]);
+        int ro = parseRegister(args[2]);
 
         if (rd < 0 || rd > 7 || rb < 0 || rb > 7 || ro < 0 || ro > 7)
             throw new DataFormatException();
@@ -1006,9 +1139,11 @@ public class ArmParser {
             throw new DataFormatException();
 
         int jumpAddress = labelAddressMap.get(args[0]);
-        int offset = jumpAddress - currentRamAddress;
+        int offset = jumpAddress - currentAddress - 4;
+        if (offset < -128 || offset > 127)
+            throw new DataFormatException("Offset is too large");
 
-        offset = ((offset - 4) >> 1) & 0xFF;
+        offset = (offset >> 1) & 0xFF;
 
         return halfwordToBytes(offset | (condition << 8) | 0xD000);
     }
@@ -1031,43 +1166,62 @@ public class ArmParser {
             throw new DataFormatException();
 
         int jumpAddress = labelAddressMap.get(args[0]);
-        int offset = ((jumpAddress - currentRamAddress - 4) >> 1) & 0x07FF;
+
+        int offset = (jumpAddress - currentAddress - 4);
+        if (offset < -2048 || offset > 2047)
+            throw new DataFormatException("Offset is too large");
+
+        offset = (offset >> 1) & 0x07FF;
 
         return halfwordToBytes(offset | 0xE000);
     }
 
     // Format 19: long branch with link
-    private byte[] format19(String[] args) throws DataFormatException {
-        if (branchLinkRamAddressMap.isEmpty()) {
+    private byte[] format19(String[] args, boolean exchangeInstructionSet) throws DataFormatException {
+        if (globalAddressMap == null || overlay == null) {
             // Expected for getFuncSize only
             return new byte[4];
         }
 
-        String[] funcStrs = args[0].split("::");
-        if (funcStrs.length != 2)
-            throw new DataFormatException("Expected Namespace::FuncName format but got " + args[0] + ".");
+        int funcAddress;
 
-        String namespace = funcStrs[0];
-        String funcName = funcStrs[1];
+        if (args[0].contains("::")) {
+            String[] funcStrs = args[0].split("::");
+            if (funcStrs.length != 2)
+                throw new DataFormatException("Expected Namespace::FuncName format but got " + args[0] + ".");
 
-        if (!branchLinkRamAddressMap.containsKey(namespace))
-            throw new DataFormatException("Namespace '" + namespace + "' was not found.");
+            String namespace = funcStrs[0];
+            String funcName = funcStrs[1];
 
-        Map<String, Integer> namespaceFunctions = branchLinkRamAddressMap.get(namespace);
-        if (!namespaceFunctions.containsKey(funcName))
-            throw new DataFormatException("Function '" + funcName + "' not found in namespace '" + namespace + "'.");
+            globalAddressMap.addReference(namespace, funcName, overlay, currentAddress);
+            ParagonLiteAddressMap.AddressBase addressBase = globalAddressMap.getAddressData(namespace, funcName);
+            if (!(addressBase instanceof ParagonLiteAddressMap.CodeAddress))
+                throw new DataFormatException();
 
-        int funcAddress = namespaceFunctions.get(funcName);
-        if (!isWordAligned(funcAddress))
-            throw new DataFormatException(String.format("Function address of %s (0x%X) is not word-aligned", args[0], funcAddress));
+            ParagonLiteAddressMap.CodeAddress codeAddress = (ParagonLiteAddressMap.CodeAddress) addressBase;
 
-        funcAddress = funcAddress - currentRamAddress - 4;
+            funcAddress = codeAddress.getAddress();
+            int encoding = codeAddress.getEncoding();
+            if (encoding == 2 && exchangeInstructionSet)
+                throw new DataFormatException("BLX was used on a Thumb function");
+            if (encoding == 4 && !exchangeInstructionSet)
+                throw new DataFormatException("BL was used on an ARM function");
+
+            if (!isWordAligned(funcAddress))
+                throw new DataFormatException(String.format("Function address of %s (0x%08X) is not word-aligned", args[0], funcAddress));
+
+            funcAddress = funcAddress - (currentAddress + 4);
+        } else {
+            if (!args[0].startsWith("#") || args[0].startsWith("="))
+                args[0] = "#" + args[0];
+            funcAddress = parseImmediate(args[0]);
+        }
 
         int offsetHigh = (funcAddress >> 12) & 0x07FF;
         int offsetLow = (funcAddress >> 1) & 0x07FF;
 
         int instruction1 = offsetHigh | 0xF000;
-        int instruction2 = offsetLow | 0xF800;
+        int instruction2 = offsetLow | (exchangeInstructionSet ? 0xE800 : 0xF800);
 
         return new byte[]{
                 (byte) (instruction1 & 0xFF),
@@ -1154,42 +1308,10 @@ public class ArmParser {
     }
 
     private int parseImmediate(String immediateStr) throws DataFormatException {
-        if (immediateStr.startsWith("=") && immediateStr.contains("::")) {
-            immediateStr = immediateStr.substring(1);
-            String[] strs = immediateStr.split("::", 2);
+        if (immediateStr.startsWith("=")) {
+            immediateStr = immediateStr.substring(1).trim(); // remove =
+            immediateStr = globalAddressMap.replaceLabelsInExpression(immediateStr);
 
-            Set<String> namespaces = branchLinkRamAddressMap.keySet();
-            String namespace = null;
-            for (String thisNamespace : namespaces) {
-                if (strs[0].endsWith(thisNamespace)) {
-                    int strLen = thisNamespace.length();
-                    namespace = thisNamespace;
-                    break;
-                }
-            }
-
-            if (namespace == null)
-                throw new DataFormatException(String.format("Could not parse %s", immediateStr));
-
-            Map<String, Integer> namespaceFuncs = branchLinkRamAddressMap.get(namespace);
-            Set<String> funcNames = namespaceFuncs.keySet();
-            String funcName = null;
-            for (String thisFuncName : funcNames) {
-                if (strs[1].startsWith(thisFuncName)) {
-                    funcName = thisFuncName;
-                    break;
-                }
-            }
-
-            if (funcName == null)
-                throw new DataFormatException(String.format("Could not parse %s", immediateStr));
-
-            String fullFuncName = String.format("%s::%s", namespace, funcName);
-            int funcAddress = namespaceFuncs.get(funcName);
-            immediateStr = immediateStr.replace(fullFuncName, Integer.toString(funcAddress));
-
-            ScriptEngineManager mgr = new ScriptEngineManager();
-            ScriptEngine engine = mgr.getEngineByName("JavaScript");
             try {
                 Object evalObj = engine.eval(immediateStr);
                 return (Integer) evalObj;
@@ -1219,18 +1341,30 @@ public class ArmParser {
     }
 
     private static int readByte(byte[] data, int offset) {
+        if (offset >= data.length)
+            throw new RuntimeException();
+
         return data[offset] & 0xFF;
     }
 
     private static int readUnsignedHalfword(byte[] data, int offset) {
+        if (offset + 1 >= data.length)
+            throw new RuntimeException();
+
         return ((data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8));
     }
 
     private static int readSignedHalfword(byte[] data, int offset) {
+        if (offset + 1 >= data.length)
+            throw new RuntimeException();
+
         return (short) (((data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8)));
     }
 
     private static int readWord(byte[] data, int offset) {
+        if (offset + 3 >= data.length)
+            throw new RuntimeException();
+
         return (data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8) | ((data[offset + 2] & 0xFF) << 16)
                 | ((data[offset + 3] & 0xFF) << 24);
     }

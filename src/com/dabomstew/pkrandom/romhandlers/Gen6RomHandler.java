@@ -952,6 +952,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             data[7] = (byte) (moves[i].minHits | (moves[i].maxHits << 4));
             writeWord(data, 8, moves[i].statusType.index);
             data[10] = (byte) moves[i].statusPercentChance;
+            data[11] = (byte) moves[i].statusType.mode.ordinal();
             data[12] = (byte) moves[i].statusType.minTurns;
             data[13] = (byte) moves[i].statusType.maxTurns;
             if (moves[i].criticalChance == CriticalChance.GUARANTEED) {

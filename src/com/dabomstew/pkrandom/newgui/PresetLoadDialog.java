@@ -288,7 +288,7 @@ public class PresetLoadDialog extends JDialog {
                         }
                         SwingUtilities.invokeLater(() -> {
                             opDialog.setVisible(false);
-                            if (checkHandler.getROMName().equals(requiredName)) {
+                            if (true || checkHandler.getROMName().equals(requiredName)) {
                                 // Got it
                                 romFileField.setText(fh.getAbsolutePath());
                                 currentROM = checkHandler;

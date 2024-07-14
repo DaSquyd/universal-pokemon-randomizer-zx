@@ -5,5 +5,5 @@ public enum MoveStatusMode {
     INDEFINITE,
     SET_TURNS,
     INFATUATION,
-    TRAP;
+    TRAP
 }

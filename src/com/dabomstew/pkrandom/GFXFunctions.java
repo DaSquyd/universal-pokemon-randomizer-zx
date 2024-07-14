@@ -125,6 +125,13 @@ public class GFXFunctions {
         int blue = (int) (((palValue & 0x7C00) >> 10) * 8.25);
         return 0xFF000000 | (red << 16) | (green << 8) | blue;
     }
+    
+    public static int convARGBTo16BitColor(int argb) {
+        int red = Math.min(((argb >> 16) & 0xFF) / 8, 31);
+        int green = Math.min(((argb >> 8) & 0xFF) / 8, 31);
+        int blue = Math.min((argb & 0xFF) / 8, 31);
+        return (blue << 10) | (green << 5) | red;
+    }
 
     public static int conv3DS16BitColorToARGB(int palValue) {
         int alpha = (int) ((palValue & 0x1) * 0xFF);

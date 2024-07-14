@@ -663,6 +663,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             pkmn.darkGrassHeldItem = readUnsignedWord(stats, Gen5Constants.bsDarkGrassHeldItemOffset);
         }
 
+        pkmn.genderRatio = stats[Gen5Constants.bsGenderRatioOffset] & 0xFF;
+
         pkmn.expYield = readUnsignedWord(stats, Gen5Constants.bsExpYieldOffset);
 
         int formeCount = stats[Gen5Constants.bsFormeCountOffset] & 0xFF;
@@ -749,6 +751,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             data[7] = (byte) (moves[i].minHits | (moves[i].maxHits << 4));
             writeWord(data, 8, moves[i].statusType.index);
             data[10] = (byte) moves[i].statusPercentChance;
+            data[11] = (byte) moves[i].statusType.mode.ordinal();
             data[12] = (byte) moves[i].statusType.minTurns;
             data[13] = (byte) moves[i].statusType.maxTurns;
             if (moves[i].criticalChance == CriticalChance.GUARANTEED) {
@@ -881,6 +884,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             writeWord(stats, Gen5Constants.bsRareHeldItemOffset, pkmn.rareHeldItem);
             writeWord(stats, Gen5Constants.bsDarkGrassHeldItemOffset, pkmn.darkGrassHeldItem);
         }
+
+        stats[Gen5Constants.bsGenderRatioOffset] = (byte) pkmn.genderRatio;
 
         writeWord(stats, Gen5Constants.bsExpYieldOffset, pkmn.expYield);
     }
@@ -1663,8 +1668,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 if (allSmart)
                     trainer[12] |= 0x07; // Make all trainers "smart"
 
-                // DEBUG - Remove all trainer AI except for test
-                // trainer[12] = (byte)(1 << 1);
+//                // DEBUG - Remove all trainer AI except for test
+//                trainer[12] = (byte) 1;
 
                 int bytesNeeded = 8 * numPokes;
                 if (tr.pokemonHaveCustomMoves()) {
@@ -3019,8 +3024,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             pokes[Species.mawile].secondaryType = Type.FAIRY;
             pokes[Species.mimeJr].secondaryType = Type.FAIRY;
             pokes[Species.togekiss].primaryType = Type.FAIRY;
-            pokes[Species.cottonee].primaryType = Type.FAIRY;
-            pokes[Species.whimsicott].primaryType = Type.FAIRY;
+            pokes[Species.cottonee].secondaryType = Type.FAIRY;
+            pokes[Species.whimsicott].secondaryType = Type.FAIRY;
 
             moves[Moves.charm].type = Type.FAIRY;
             moves[Moves.moonlight].type = Type.FAIRY;
@@ -3035,7 +3040,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             moves[Moves.submission].effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
             moves[Moves.submission].recoil = 0;
             moves[Moves.submission].statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 10);
-            moves[Moves.submission].description = "The user plays rough with the target and attacks it. This may also lower the target's Attack stat.";
+            moves[Moves.submission].description = "The user plays rough with the target and attacks it. It may also lower the target's Attack stat.";
 
             // Luster Purge -> Dazzling Gleam
             moves[Moves.lusterPurge].name = "DazzlingGleam";
@@ -3054,7 +3059,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             moves[Moves.mistBall].power = 95;
             moves[Moves.mistBall].pp = 15;
             moves[Moves.mistBall].statChanges[0].percentChance = 30;
-            moves[Moves.mistBall].description = "Borrowing the power of the moon, the user attacks the target. This may also lower the target's Sp. Atk stat.";
+            moves[Moves.mistBall].description = "Borrowing the power of the moon, the user attacks the target. It may also lower the target's Sp. Atk stat.";
 
             wasFairyAdded = true;
         } catch (IOException e) {
@@ -3633,9 +3638,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         genericIPSPatch(arm9, "FairyTweak");
 
-        boolean isBlack2 = romEntry.romCode.startsWith("IRE");
+        boolean isBlack2 = isBlack2();
         int new167address = isBlack2 ? 0x02199740 : 0x02199780;
-        baseRom.setOverlayAddress(167, new167address);
+        setOverlayAddress(167, new167address);
     }
 
     @Override
@@ -4929,7 +4934,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     private void applyParagonLite(Settings settings) {
 //        // Find String
-//        String searchKey = "radiating";
+//        String searchKey = "Data Card 01";
 //        List<String> strs = new ArrayList<>();
 //        List<Integer> counts = new ArrayList<>();
 //        int stringFileCount = stringsNarc.files.size();
@@ -4947,6 +4952,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 //            }
 //        }
 
+        ParagonLiteRemoveTweak(settings, MiscTweak.CUSTOM_MOVE_CHANGES);
 //        ParagonLiteRemoveTweak(settings, MiscTweak.CUSTOM_POKEMON_TYPES);
 //        ParagonLiteRemoveTweak(settings, MiscTweak.CUSTOM_POKEMON_STATS);
 //        ParagonLiteRemoveTweak(settings, MiscTweak.CUSTOM_TYPE_EFFECTIVENESS);
@@ -4955,56 +4961,105 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         ParagonLiteRemoveTweak(settings, MiscTweak.NPC_SMART_AI);
         ParagonLiteRemoveTweak(settings, MiscTweak.CUSTOM_ADD_FAIRY);
 
-        customAddFairy();
+        boolean debugMove = true;
+
+        if (!debugMove)
+            customAddFairy();
+
 
         int battleOvlNumber = romEntry.getInt("BattleOvlNumber");
+        int battleServerOvlNumber = romEntry.getInt("BattleServerOvlNumber");
         int trainerAIOvlNumber = romEntry.getInt("TrainerAIOvlNumber");
-        String trainerAIScriptsFilename = romEntry.getFile("TrainerAIScripts");
 
-        int battleEventTextOffset = romEntry.getInt("BattleEventTextOffset");
+        String trainerAIScriptsFilename = romEntry.getFile("TrainerAIScripts");
+        String itemDataFilename = romEntry.getFile("ItemData");
+        String itemGraphicsFilename = romEntry.getFile("ItemGraphics");
+        NARCArchive itemDataNarc;
+        NARCArchive itemGraphicsNarc;
+        try {
+            itemDataNarc = readNARC(itemGraphicsFilename);
+            itemGraphicsNarc = readNARC(itemGraphicsFilename);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        int battleEventTextOffset1 = romEntry.getInt("BattleEventText1Offset");
+        int battleEventTextOffset2 = romEntry.getInt("BattleEventText2Offset");
         int abilityNamesTextOffset = romEntry.getInt("AbilityNamesTextOffset");
         int abilityDescriptionsTextOffset = romEntry.getInt("AbilityDescriptionsTextOffset");
         int abilityExplanationsTextOffset = romEntry.getInt("AbilityExplanationsTextOffset");
         int moveNamesTextOffset = romEntry.getInt("MoveNamesTextOffset");
-        int moveNamesDescriptionsOffset = romEntry.getInt("MoveNamesDescriptionsOffset");
+        int moveDescriptionsTextOffset = romEntry.getInt("MoveDescriptionsTextOffset");
+        int itemNamesTextOffset = romEntry.getInt("ItemNamesTextOffset");
+        int itemNameMessagesTextOffset = romEntry.getInt("ItemNameMessagesTextOffset");
+        int itemPluralNamesTextOffset = romEntry.getInt("ItemPluralNamesTextOffset");
+        int itemDescriptionsTextOffset = romEntry.getInt("ItemDescriptionsTextOffset");
 
-        List<String> battleEventStrings = getStrings(false, battleEventTextOffset);
+
+        List<String> battleEventStrings1 = getStrings(false, battleEventTextOffset1);
+        List<String> battleEventStrings2 = getStrings(false, battleEventTextOffset2);
 
         List<String> abilityDescriptions = getStrings(false, abilityDescriptionsTextOffset);
         List<String> abilityExplanations = getStrings(false, abilityExplanationsTextOffset);
 
         List<String> moveNames = getStrings(false, moveNamesTextOffset);
-        List<String> moveDescriptions = getStrings(false, moveNamesDescriptionsOffset);
+        List<String> moveDescriptions = getStrings(false, moveDescriptionsTextOffset);
 
-        ParagonLiteHandler paragonLite = new ParagonLiteHandler(this, arm9, battleOvlNumber, trainerAIOvlNumber, pokes, moves,
-                battleEventStrings, abilityNames, abilityDescriptions, abilityExplanations, moveNames, moveDescriptions);
+        List<String> itemNames = getStrings(false, itemNamesTextOffset);
+        List<String> itemNameMessages = getStrings(false, itemNameMessagesTextOffset);
+        List<String> itemPluralNames = getStrings(false, itemPluralNamesTextOffset);
+        List<String> itemDescriptions = getStrings(false, itemDescriptionsTextOffset);
+
+        ParagonLiteHandler paragonLite = new ParagonLiteHandler(this, arm9, battleOvlNumber, battleServerOvlNumber,
+                trainerAIOvlNumber, pokes, moves, itemDataNarc, itemGraphicsNarc, battleEventStrings1, battleEventStrings2, abilityNames, abilityDescriptions,
+                abilityExplanations, moveNames, moveDescriptions, itemNames, itemNameMessages, itemPluralNames, itemDescriptions);
 
         paragonLite.setBattleEventStrings();
 
         paragonLite.setCritRatio();
         paragonLite.setCritDamage();
+        paragonLite.setBurnDamage();
+        paragonLite.setTrapDamage();
+        paragonLite.setMultiStrikeLoadedDice();
 
-        paragonLite.setAbilities();
+        paragonLite.setShinyRate();
+
         paragonLite.setMoves();
+        paragonLite.setItems();
+        paragonLite.setAbilities();
 
         paragonLite.setTypeEffectiveness();
 
-        // paragonLite.setPokemonData();
+        if (debugMove)
+            paragonLite.setPokemonData();
 
-//        paragonLite.setTrainerAIScripts(trainerAIScriptsFilename);
+        if (debugMove)
+            paragonLite.setTrainerAIScripts(trainerAIScriptsFilename);
+
         paragonLite.setTrainers();
 
-        // TODO: Disable this
-//        paragonLite.test();
+        if (debugMove)
+            paragonLite.test();
 
         paragonLite.writeOverlays();
 
-        setStrings(false, battleEventTextOffset, battleEventStrings);
+        setStrings(false, battleEventTextOffset1, battleEventStrings1);
+        setStrings(false, battleEventTextOffset2, battleEventStrings2);
         setStrings(false, abilityNamesTextOffset, abilityNames);
         setStrings(false, abilityDescriptionsTextOffset, abilityDescriptions);
         setStrings(false, abilityExplanationsTextOffset, abilityExplanations);
         setStrings(false, moveNamesTextOffset, moveNames);
-        setStrings(false, moveNamesDescriptionsOffset, moveDescriptions);
+        setStrings(false, moveDescriptionsTextOffset, moveDescriptions);
+        setStrings(false, itemNamesTextOffset, itemNames);
+        setStrings(false, itemNameMessagesTextOffset, itemNameMessages);
+        setStrings(false, itemPluralNamesTextOffset, itemPluralNames);
+        setStrings(false, itemDescriptionsTextOffset, itemDescriptions);
+
+        try {
+            writeNARC(itemGraphicsFilename, itemGraphicsNarc);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
 //        paragonLite.logUpdates(logStream);
     }

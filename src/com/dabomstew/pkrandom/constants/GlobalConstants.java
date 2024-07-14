@@ -156,21 +156,24 @@ public class GlobalConstants {
 
     public static final List<Integer> doubleBattleAbilities = Arrays.asList(
             Abilities.friendGuard, Abilities.healer, Abilities.telepathy, Abilities.symbiosis,
-            Abilities.battery
+            Abilities.battery,
+
+            Abilities.plus, Abilities.minus,
+            ParagonLiteAbilities.ripTide
     );
 
     public static final List<Integer> duplicateAbilities = Arrays.asList(
-            Abilities.vitalSpirit, Abilities.whiteSmoke, Abilities.purePower, Abilities.shellArmor, Abilities.airLock,
+            /*Abilities.vitalSpirit,*/ Abilities.whiteSmoke, /*Abilities.purePower,*/ Abilities.shellArmor, Abilities.airLock,
             Abilities.solidRock, Abilities.ironBarbs, Abilities.turboblaze, Abilities.teravolt, Abilities.emergencyExit,
             Abilities.dazzling, Abilities.tanglingHair, Abilities.powerOfAlchemy, Abilities.fullMetalBody,
             Abilities.shadowShield, Abilities.prismArmor, Abilities.libero, Abilities.stalwart
     );
 
     public static final List<Integer> noPowerNonStatusMoves = Arrays.asList(
-            Moves.guillotine, Moves.hornDrill, Moves.sonicBoom, Moves.lowKick, Moves.counter, Moves.seismicToss,
-            Moves.dragonRage, Moves.fissure, Moves.nightShade, Moves.bide, Moves.psywave, Moves.superFang,
+            /*Moves.guillotine,*/ /*Moves.hornDrill,*/ Moves.sonicBoom, Moves.lowKick, Moves.counter, Moves.seismicToss,
+            /*Moves.dragonRage,*/ /*Moves.fissure,*/ /*Moves.nightShade,*/ Moves.bide, /*Moves.psywave,*/ Moves.superFang,
             Moves.flail, Moves.revenge, Moves.returnTheMoveNotTheKeyword, Moves.present, Moves.frustration,
-            Moves.magnitude, Moves.mirrorCoat, Moves.beatUp, Moves.spitUp, Moves.sheerCold
+            Moves.magnitude, Moves.mirrorCoat, Moves.beatUp, Moves.spitUp//, /*Moves.sheerCold*/
     );
 
     public static final List<Integer> cannotBeObsoletedMoves = Arrays.asList(
@@ -193,6 +196,25 @@ public class GlobalConstants {
     public static final List<Integer> uselessMoves = Arrays.asList(
             Moves.splash, Moves.celebrate, Moves.holdHands, Moves.teleport,
             Moves.reflectType       // the AI does not know how to use this move properly
+
+    );
+
+    public static final Set<Integer> bannedMoves = new HashSet<>(Arrays.asList(
+            Moves.sandAttack, Moves.minimize, Moves.flash, Moves.sketch, Moves.assist, Moves.darkVoid, Moves.allySwitch,
+            Moves.returnTheMoveNotTheKeyword, Moves.frustration
+    ));
+
+    public static final List<Integer> tmBannedMoves = Arrays.asList(
+            Moves.sandAttack, Moves.rage, Moves.teleport, Moves.mimic, Moves.minimize, Moves.smokescreen, Moves.transform, Moves.flash,
+            Moves.splash, Moves.conversion, Moves.sketch, Moves.spiderWeb, Moves.mindReader, Moves.nightmare, Moves.snore, Moves.flail,
+            Moves.conversion2, Moves.spite, Moves.destinyBond, Moves.perishSong, Moves.lockOn, Moves.endure, Moves.charm, Moves.falseSwipe,
+            Moves.swagger, Moves.meanLook, Moves.sleepTalk, Moves.present, Moves.frustration, Moves.safeguard, Moves.sweetScent,
+            Moves.psychUp, Moves.flatter, Moves.charge, Moves.trick, Moves.rolePlay, Moves.assist, Moves.ingrain, Moves.magicCoat,
+            Moves.recycle, Moves.endeavor, Moves.skillSwap, Moves.imprison, Moves.refresh, Moves.grudge, Moves.snatch, Moves.camouflage,
+            Moves.teeterDance, Moves.mudSport, Moves.odorSleuth, Moves.block, Moves.miracleEye, Moves.healingWish, Moves.embargo,
+            Moves.trumpCard, Moves.powerTrick, Moves.copycat, Moves.powerSwap, Moves.guardSwap, Moves.lastResort, Moves.heartSwap,
+            Moves.magnetRise, Moves.switcheroo, Moves.captivate, Moves.lunarDance, Moves.guardSplit, Moves.powerSplit, Moves.wonderRoom,
+            Moves.telekinesis, Moves.magicRoom, Moves.entrainment, Moves.quash, Moves.reflectType, Moves.finalGambit, Moves.bestow
     );
 
     public static final List<Integer> requiresOtherMove = Arrays.asList(
