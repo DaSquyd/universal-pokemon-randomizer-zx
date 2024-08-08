@@ -1,6 +1,14 @@
 package com.dabomstew.pkrandom.pokemon;
 
 public class Item {    
+    public enum Pocket {
+        ITEMS,
+        MEDICINE,
+        TMS_HMS,
+        BERRIES,
+        KEY_ITEMS
+    }
+    
     public enum OverworldUseType {
         MEDICINE(1),
         TOWN_MAP(2),

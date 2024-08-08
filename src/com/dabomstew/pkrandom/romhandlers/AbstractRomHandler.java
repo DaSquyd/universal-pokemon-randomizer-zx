@@ -28,15 +28,14 @@ package com.dabomstew.pkrandom.romhandlers;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.PrintStream;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
-import javafx.scene.effect.Effect;
+
+import java.io.PrintStream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class AbstractRomHandler implements RomHandler {
 
@@ -942,20 +941,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // Pick first ability
                 pk.ability1 = this.pickRandomAbility(pk, settings, maxAbility, bannedAbilities, weighDuplicatesTogether);
 
-                boolean isWeatherAbility = pk.ability1 == Abilities.drizzle || pk.ability1 == Abilities.sandStream
-                        || pk.ability1 == Abilities.drought || pk.ability1 == Abilities.snowWarning;
-
                 // Second ability?
-                if (!isWeatherAbility && (ensureTwoAbilities || this.random.nextDouble() < 0.5)) {
+                if (ensureTwoAbilities || this.random.nextDouble() < 0.5) {
                     // Yes, second ability
                     pk.ability2 = this.pickRandomAbility(pk, settings, maxAbility, bannedAbilities,
                             weighDuplicatesTogether, pk.ability1);
-                    if (pk.ability2 == Abilities.drizzle || pk.ability2 == Abilities.sandStream
-                            || pk.ability2 == Abilities.drought || pk.ability2 == Abilities.snowWarning) {
-                        pk.ability1 = pk.ability2;
-                        pk.ability2 = 0;
-                        isWeatherAbility = true;
-                    }
                 } else {
                     // Nope
                     pk.ability2 = 0;
@@ -963,17 +953,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 // Third ability?
                 if (hasDWAbilities) {
-                    if (isWeatherAbility) {
-                        pk.ability3 = pk.ability1;
-                    } else {
-                        pk.ability3 = pickRandomAbility(pk, settings, maxAbility, bannedAbilities,
-                                weighDuplicatesTogether, pk.ability1, pk.ability2);
-                        if (pk.ability3 == Abilities.drizzle || pk.ability3 == Abilities.sandStream
-                                || pk.ability3 == Abilities.drought || pk.ability3 == Abilities.snowWarning) {
-                            pk.ability1 = pk.ability3;
-                            pk.ability2 = 0;
-                        }
-                    }
+                    pk.ability3 = pickRandomAbility(pk, settings, maxAbility, bannedAbilities,
+                            weighDuplicatesTogether, pk.ability1, pk.ability2);
                 }
             }
         }
@@ -1104,7 +1085,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean isIce = pk.primaryType == Type.ICE || pk.secondaryType == Type.ICE;
         boolean resistsIce = against.get(Type.ICE) == Effectiveness.HALF || against.get(Type.ICE) == Effectiveness.QUARTER || against.get(Type.ICE) == Effectiveness.ZERO;
 
+        boolean isDark = pk.primaryType == Type.DARK || pk.secondaryType == Type.DARK;
         boolean weakToDark = against.get(Type.DARK) == Effectiveness.DOUBLE || against.get(Type.DARK) == Effectiveness.QUADRUPLE;
+        boolean resistsDark = against.get(Type.DARK) == Effectiveness.HALF || against.get(Type.DARK) == Effectiveness.QUARTER || against.get(Type.ICE) == Effectiveness.ZERO;
+
+        boolean isFairy = pk.primaryType == Type.FAIRY || pk.secondaryType == Type.FAIRY;
 
         int weaknesses = 0;
         for (Effectiveness e : against.values()) {
@@ -1384,6 +1369,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (!(isNormal || isFighting))
                 irrelevantAbilities.add(Abilities.scrappy);
 
+            if (!(isNormal || isFighting || isGround || isRock || isBug || isSteel || isGrass || isIce || isDark || isFairy))
+                irrelevantAbilities.add(Abilities.skillLink);
+
             if (resistsWater && !higherOrEqualSpAtk)
                 irrelevantAbilities.add(Abilities.stormDrain);
 
@@ -1414,7 +1402,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (pk.hp < 85 || pk.hp > 100)
                 irrelevantAbilities.add(Abilities.imposter);
 
-            if (!higherOrEqualAttack)
+            if (!higherOrEqualAttack && !isParagonLite)
                 irrelevantAbilities.add(Abilities.justified);
 
             if (weakToBug || weakToGhost || weakToDark || !mediumSpeed)
@@ -1429,19 +1417,28 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.lightMetal);
                 irrelevantAbilities.add(Abilities.prankster);
             }
-            
+
             if (pk.genderRatio == 255)
                 irrelevantAbilities.add(Abilities.rivalry);
-            
+
             if (highPhysBulk)
                 irrelevantAbilities.add(Abilities.marvelScale);
 
-            if (isParagonLite) {                
+            if (isParagonLite) {
+                if (!higherOrEqualAttack && resistsDark)
+                    irrelevantAbilities.add(Abilities.justified);
+
+                if (resistsGround && resistsWater)
+                    irrelevantAbilities.add(Abilities.magmaArmor);
+
                 if (isFlying)
                     irrelevantAbilities.add(ParagonLiteAbilities.heavyWing);
 
                 if (resistsBug)
                     irrelevantAbilities.add(ParagonLiteAbilities.insectivore);
+
+                if (lowSpeed || highSpeed)
+                    irrelevantAbilities.add(ParagonLiteAbilities.slushRush);
 
                 if (!higherOrEqualSpAtk)
                     irrelevantAbilities.add(ParagonLiteAbilities.prestige);
@@ -1470,10 +1467,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                     irrelevantAbilities.add(ParagonLiteAbilities.aerilate);
                     irrelevantAbilities.add(ParagonLiteAbilities.galvanize);
                 }
-                
-                if (highSpeed)
+
+                if (highSpeed || isFlying)
                     irrelevantAbilities.add(ParagonLiteAbilities.galeWings);
-                
+
                 if (!higherOrEqualAttack)
                     irrelevantAbilities.add(ParagonLiteAbilities.toughClaws);
             }
@@ -2917,14 +2914,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         // TODO Move this?
         // Lock difficulty of trainers
         for (Trainer t : currentTrainers) {
-            int minIV = t.isBoss() || t.isImportant() ? 6 : 0;
-            int maxIV = t.isBoss() || t.isImportant() ? 18 : 12;
-            int minStrength = t.isBoss() || t.isImportant() ? 50 : 0;
-            int maxStrength = t.isBoss() || t.isImportant() ? 150 : 100;
-            for (TrainerPokemon tpk : t.pokemon) {
-                tpk.IVs = Math.max(minIV, Math.min(tpk.IVs, maxIV));
-                tpk.strength = Math.max(minStrength, Math.min(tpk.strength, maxStrength));
-            }
+//            int minIV = t.isBoss() || t.isImportant() ? 6 : 0;
+//            int maxIV = t.isBoss() || t.isImportant() ? 18 : 12;
+//            int minStrength = t.isBoss() || t.isImportant() ? 50 : 0;
+//            int maxStrength = t.isBoss() || t.isImportant() ? 150 : 100;
+//            for (TrainerPokemon tpk : t.pokemon) {
+//                tpk.IVs = Math.max(minIV, Math.min(tpk.IVs, maxIV));
+//                tpk.strength = Math.max(minStrength, Math.min(tpk.strength, maxStrength));
+//            }
         }
 
         // Fix Tate & Liza
@@ -5488,15 +5485,17 @@ public abstract class AbstractRomHandler implements RomHandler {
                 continue;
             }
 
-            int level = 1;
+            // TODO: Move these back to level 1
+            int level = 2;
 
             double atkSpAtkRatio = pkmn.getAttackSpecialAttackRatio();
 
+            // TODO: Move these back to level 1
             // 4 starting moves?
             if (forceStartingMoves) {
                 for (int i = 0; i < forceStartingMoveCount; i++) {
                     MoveLearnt level1Move = new MoveLearnt();
-                    level1Move.level = 1;
+                    level1Move.level = 2;
                     level1Move.move = 0;
                     moves.add(0, level1Move);
                 }
@@ -5647,7 +5646,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 moves.get(i).move = learnt.get(i);
                 if (i == lv1index) {
                     // just in case, set this to lv1
-                    moves.get(i).level = 1;
+                    moves.get(i).level = 2; // TODO: Set this back to 1 later
                 }
             }
         }
@@ -8086,7 +8085,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<Integer> nonMainGameShops = new ArrayList<>();
             for (int i : currentItems.keySet()) {
                 if (currentItems.get(i).isMainGame) {
-                    if (currentItems.get(i).isBeforeFullyEvolved)
+                    if (placeEvoItems && currentItems.get(i).isBeforeFullyEvolved)
                         nfeMainGameShops.add(i);
                     else
                         mainGameShops.add(i);
@@ -8163,7 +8162,17 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         } else {
             for (int i = 0; i < shopItemCount; i++) {
-                while (newItems.contains(newItem = possibleItems.randomNonTM(this.random))) ;
+                int j = 0;
+                do {
+                    newItem = possibleItems.randomNonTM(this.random);
+                    
+                    if (j > 100)
+                        break;
+                    
+                    ++j;
+                }
+                while (newItems.contains(newItem));
+
                 newItems.add(newItem);
             }
 

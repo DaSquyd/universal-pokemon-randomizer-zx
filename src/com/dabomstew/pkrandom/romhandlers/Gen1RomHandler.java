@@ -1283,7 +1283,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 int dataType = rom[offs] & 0xFF;
                 if (dataType == 0xFF) {
                     // "Special" trainer
-                    tr.poketype = 1;
+                    tr.partyFlags = 1;
                     offs++;
                     while (rom[offs] != 0x0) {
                         TrainerPokemon tpk = new TrainerPokemon();
@@ -1293,7 +1293,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                         offs += 2;
                     }
                 } else {
-                    tr.poketype = 0;
+                    tr.partyFlags = 0;
                     offs++;
                     while (rom[offs] != 0x0) {
                         TrainerPokemon tpk = new TrainerPokemon();
@@ -1348,7 +1348,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 }
                 Iterator<TrainerPokemon> tPokes = tr.pokemon.iterator();
                 // Write their pokemon based on poketype
-                if (tr.poketype == 0) {
+                if (tr.partyFlags == 0) {
                     // Regular trainer
                     int fixedLevel = tr.pokemon.get(0).level;
                     rom[offs] = (byte) fixedLevel;

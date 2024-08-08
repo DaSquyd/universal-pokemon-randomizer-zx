@@ -20,8 +20,8 @@
 
     mov     r1, r4
     bl      Battle::PokeHasType
-    cmp     r0, #1
-    beq     End
+    cmp     r0, #0
+    bne     End
     
     mov     r0, #53 ; damage
     ldr     r1, =5325 ; 1.3x

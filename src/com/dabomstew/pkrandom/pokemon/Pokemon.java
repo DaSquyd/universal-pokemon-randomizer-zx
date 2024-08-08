@@ -42,6 +42,7 @@ public class Pokemon implements Comparable<Pokemon> {
     public Pokemon baseForme = null;
     public int formeNumber = 0;
     public int cosmeticForms = 0;
+    public int specialForms = 0;
     public int formeSpriteIndex = 0;
     public boolean actuallyCosmetic = false;
     public List<Integer> realCosmeticFormNumbers = new ArrayList<>();
@@ -53,6 +54,8 @@ public class Pokemon implements Comparable<Pokemon> {
     public int ability1, ability2, ability3;
 
     public int hpEVs, attackEVs, defenseEVs, spatkEVs, spdefEVs, speedEVs;
+    
+    public boolean noFall;
 
     public int catchRate, baseHappiness, expYield, stage;
 

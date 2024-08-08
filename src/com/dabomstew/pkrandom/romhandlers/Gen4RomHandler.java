@@ -2843,7 +2843,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 byte[] trainer = trainers.files.get(i);
                 byte[] trpoke = trpokes.files.get(i);
                 Trainer tr = new Trainer();
-                tr.poketype = trainer[0] & 0xFF;
+                tr.partyFlags = trainer[0] & 0xFF;
                 tr.trainerclass = trainer[1] & 0xFF;
                 tr.index = i;
                 int numPokes = trainer[3] & 0xFF;
@@ -2950,7 +2950,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 byte[] trainer = trainers.files.get(i);
                 Trainer tr = allTrainers.next();
                 // preserve original poketype
-                trainer[0] = (byte) tr.poketype;
+                trainer[0] = (byte) tr.partyFlags;
                 int numPokes = tr.pokemon.size();
                 trainer[3] = (byte) numPokes;
 

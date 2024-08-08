@@ -27,14 +27,13 @@ package com.dabomstew.pkrandom;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.ConsoleHandler;
 import java.util.zip.CRC32;
 
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
@@ -42,6 +41,8 @@ import com.dabomstew.pkrandom.newgui.NewRandomizerGUI;
 
 public class Utils {
 
+    public static boolean debugMode;
+    
     public static void validateRomFile(File fh) throws InvalidROMException {
         // first, check for common filetypes that aren't ROMs
         // read first 10 bytes of the file to do this
@@ -76,11 +77,11 @@ public class Utils {
     // RomHandlers implicitly rely on these - call this before creating settings
     // etc.
     public static void testForRequiredConfigs() throws FileNotFoundException {
-        String[] required = new String[] { "gameboy_jpn.tbl", "rby_english.tbl", "rby_freger.tbl", "rby_espita.tbl",
+        String[] required = new String[]{"gameboy_jpn.tbl", "rby_english.tbl", "rby_freger.tbl", "rby_espita.tbl",
                 "green_translation.tbl", "gsc_english.tbl", "gsc_freger.tbl", "gsc_espita.tbl", "gba_english.tbl",
                 "gba_jpn.tbl", "Generation4.tbl", "Generation5.tbl", "gen1_offsets.ini", "gen2_offsets.ini",
                 "gen3_offsets.ini", "gen4_offsets.ini", "gen5_offsets.ini", "gen6_offsets.ini", "gen7_offsets.ini",
-                SysConstants.customNamesFile };
+                SysConstants.customNamesFile};
         for (String filename : required) {
             if (!FileFunctions.configExists(filename)) {
                 throw new FileNotFoundException(filename);
@@ -124,7 +125,7 @@ public class Utils {
 
     public static class InvalidROMException extends Exception {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 6568398515886021477L;
 
@@ -142,5 +143,25 @@ public class Utils {
         public Type getType() {
             return type;
         }
+    }
+
+    public static void printProgress(int total, int current, /* temporarily disabled */ String title) {
+        if (current > total)
+            throw new RuntimeException();
+
+        int percent = total == 0 ? 100 : current * 100 / total;
+        String bar = "█".repeat(percent / 2) + (percent % 2 == 0 ? "" : "▌");
+        if (debugMode) {
+            System.out.printf("\r%3d%% [%-50s] %3d/%-3d - %s", percent, bar, current, total, title);
+            return;
+        }
+
+        System.out.printf("\r%3d%% [%-50s] %3d/%-3d", percent, bar, current, total);
+    }
+
+    public static void printProgressFinished(long startTime, int total) {
+        System.out.printf("\r%3d/%-3d done: %d ms%80s", total, total, System.currentTimeMillis() - startTime, "");
+        System.out.println();
+        System.out.println();
     }
 }

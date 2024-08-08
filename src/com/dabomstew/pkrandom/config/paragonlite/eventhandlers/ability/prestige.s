@@ -37,12 +37,12 @@ LoopStart:
     orr     r0, r2
     str     r0, [r1, #0]
     mov     r0, #1
-    strb    r0, [r1, #15]
-    strb    r6, [r1, #16]
+    strb    r0, [r1, #0x0F]
+    strb    r6, [r1, #0x10]
     mov     r0, #3 ; Sp. Atk stat
-    str     r0, [r1, #4]
+    str     r0, [r1, #0x04]
     mov     r0, #1 ; boost amount
-    strb    r0, [r1, #12]
+    strb    r0, [r1, #0x0C]
     mov     r0, r5
     bl      Battle::Handler_PopWork
     

@@ -2,41 +2,22 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import com.dabomstew.pkrandom.BitmapFile;
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.GFXFunctions;
+import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.arm.ArmParser;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.sun.source.doctree.UnknownBlockTagTree;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.DataFormatException;
 
 public class ParagonLiteHandler {
 
     Gen5RomHandler romHandler;
-
-    private static class Reference {
-        ParagonLiteOverlay overlay;
-        int address;
-
-        Reference(ParagonLiteOverlay overlay, int address) {
-            this.overlay = overlay;
-            this.address = address;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof Reference && overlay == ((Reference) obj).overlay && address == ((Reference) obj).address;
-        }
-
-        @Override
-        public int hashCode() {
-            return address;
-        }
-    }
 
     ParagonLiteAddressMap globalAddressMap;
 
@@ -48,6 +29,7 @@ public class ParagonLiteHandler {
     Pokemon[] pokes;
     Move[] moves;
 
+    NARCArchive pokemonGraphicsNarc;
     NARCArchive itemDataNarc;
     NARCArchive itemGraphicsNarc;
 
@@ -71,6 +53,8 @@ public class ParagonLiteHandler {
     List<String> oldMoveNames;
     Map<Integer, String> abilityUpdates;
     PokeUpdate[] pokeUpdates;
+
+    boolean debugMode;
 
     private static class PokeUpdate {
         int type1;
@@ -96,20 +80,28 @@ public class ParagonLiteHandler {
         int spdefEVs;
         int speedEVs;
 
-        boolean hasAnyUpdate() {
-            return hasTypeUpdate() || hasAbilityUpdate() || hasStatsUpdate() || hasExpYieldUpdate();
+        boolean hasAnyUpdate(List<String> oldAbilityNames, List<String> newAbilityNames) {
+            return hasTypeUpdate() || hasAbilityUpdate(oldAbilityNames, newAbilityNames) || hasStatsUpdate() || hasExpYieldUpdate();
         }
 
         boolean hasTypeUpdate() {
             return type1 != 0 || type2 != 0;
         }
 
-        boolean hasAbilityUpdate() {
-            return ability1 != 0 || ability2 != 0 || ability3 != 0;
+        boolean hasAbilityUpdate(List<String> oldAbilityNames, List<String> newAbilityNames) {
+            return ability1 != 0 || ability2 != 0 || ability3 != 0
+                    // Ability name changed
+                    || !oldAbilityNames.get(ability1).equals(newAbilityNames.get(ability1))
+                    || !oldAbilityNames.get(ability2).equals(newAbilityNames.get(ability2))
+                    || !oldAbilityNames.get(ability3).equals(newAbilityNames.get(ability3));
         }
 
         boolean hasStatsUpdate() {
             return hp != 0 || attack != 0 || defense != 0 || spatk != 0 || spdef != 0 || speed != 0;
+        }
+
+        int bst() {
+            return hp + attack + defense + spatk + spdef + speed;
         }
 
         boolean hasExpYieldUpdate() {
@@ -122,47 +114,38 @@ public class ParagonLiteHandler {
     }
 
     ParagonLiteHandler(Gen5RomHandler romHandler, byte[] arm9Data, int battleOvlNumber, int battleServerOvlNumber, int trainerAIOvlNumber,
-                       Pokemon[] pokes, Move[] moves, NARCArchive itemDataNarc, NARCArchive itemGraphicsNarc, List<String> battleEventStrings1,
-                       List<String> battleEventStrings2, List<String> abilityNames, List<String> abilityDescriptions,
-                       List<String> abilityExplanations, List<String> moveNames, List<String> moveDescriptions, List<String> itemNames,
-                       List<String> itemNameMessages, List<String> itemPluralNames, List<String> itemDescriptions) {
+                       Pokemon[] pokes, Move[] moves, NARCArchive pokemonGraphicsNarc, NARCArchive itemDataNarc,
+                       NARCArchive itemGraphicsNarc, List<String> battleEventStrings1, List<String> battleEventStrings2,
+                       List<String> abilityNames, List<String> abilityDescriptions, List<String> abilityExplanations,
+                       List<String> moveNames, List<String> moveDescriptions, List<String> itemNames, List<String> itemNameMessages,
+                       List<String> itemPluralNames, List<String> itemDescriptions) {
         this.romHandler = romHandler;
 
         globalAddressMap = new ParagonLiteAddressMap();
         try {
-            arm9 = new ParagonLiteArm9(arm9Data, globalAddressMap);
+            arm9 = new ParagonLiteArm9(romHandler, arm9Data, globalAddressMap);
 
             byte[] battleOvlData = romHandler.readOverlay(battleOvlNumber);
             int battleOvlAddress = romHandler.getOverlayAddress(battleOvlNumber);
-            battleOvl = new ParagonLiteOverlay(battleOvlNumber, "Battle", battleOvlData, battleOvlAddress,
+            battleOvl = new ParagonLiteOverlay(romHandler, battleOvlNumber, "Battle", battleOvlData, battleOvlAddress,
                     ParagonLiteOverlay.Insertion.Front, globalAddressMap);
 
             byte[] battleServerOvlData = romHandler.readOverlay(battleServerOvlNumber);
             int battleServerOvlAddress = romHandler.getOverlayAddress(battleServerOvlNumber);
-            battleServerOvl = new ParagonLiteOverlay(battleServerOvlNumber, "BattleServer", battleServerOvlData, battleServerOvlAddress,
-                    ParagonLiteOverlay.Insertion.Front, globalAddressMap);
+            battleServerOvl = new ParagonLiteOverlay(romHandler, battleServerOvlNumber, "BattleServer", battleServerOvlData,
+                    battleServerOvlAddress, ParagonLiteOverlay.Insertion.Front, globalAddressMap);
 
             byte[] trainerAIOvlData = romHandler.readOverlay(trainerAIOvlNumber);
             int trainerAIOvlAddress = romHandler.getOverlayAddress(trainerAIOvlNumber);
-            trainerAIOvl = new ParagonLiteOverlay(trainerAIOvlNumber, "TrainerAI", trainerAIOvlData, trainerAIOvlAddress,
+            trainerAIOvl = new ParagonLiteOverlay(romHandler, trainerAIOvlNumber, "TrainerAI", trainerAIOvlData, trainerAIOvlAddress,
                     ParagonLiteOverlay.Insertion.Back, globalAddressMap);
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        Scanner sc;
-        try {
-            sc = new Scanner(FileFunctions.openConfig("paragonlite/offsets.tsv"), "UTF-8");
-        } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
 
         int gameIndex = romHandler.getGen5GameIndex();
         if (gameIndex < 0 || gameIndex > 3)
             throw new RuntimeException();
-
-        // Skip header
-        sc.nextLine();
 
         int namespaceColumn = 0;
         int funcNameColumn = 1;
@@ -171,45 +154,60 @@ public class ParagonLiteHandler {
         int encodingColumn = 4;
         int addressStartColumn = 5;
 
-        while (sc.hasNextLine()) {
-            String line = sc.nextLine();
+        List<String> lines = readLines("offsets.tsv");
+        int total = lines.size() - 1;
+
+        System.out.println("parsing offsets...");
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < total; ++i) {
+            String line = lines.get(i + 1);
             String[] values = line.split("\t");
 
-            String namespace = values[namespaceColumn].toLowerCase();
-            String label = values[funcNameColumn].toLowerCase();
+            Utils.printProgress(total, i, String.format("%s::%s", values[namespaceColumn], values[funcNameColumn]));
+
+            String namespace = values[namespaceColumn];
+            String label = values[funcNameColumn];
             if (addressStartColumn + gameIndex >= values.length)
                 throw new RuntimeException();
 
             String offsetStr = values[addressStartColumn + gameIndex];
-            if (offsetStr.startsWith("0x"))
-                offsetStr = offsetStr.substring(2);
-            int address = Integer.parseUnsignedInt(offsetStr, 16);
+            if (offsetStr.equals("--"))
+                continue;
+
+            if (!offsetStr.startsWith("0x"))
+                throw new RuntimeException();
+
+            offsetStr = offsetStr.substring(2); // remove 0x
+            int romAddress = Integer.parseUnsignedInt(offsetStr, 16);
+            // TODO: Get RAM Address instead
 
             int dataLen;
             switch (values[typeColumn].toLowerCase()) {
                 case "code":
                     int encoding = Integer.parseInt(values[encodingColumn]);
-                    globalAddressMap.registerCodeAddress(namespace, label, address, encoding, false);
+                    globalAddressMap.registerCodeAddress(namespace, label, romAddress, encoding, false);
                     break;
                 case "data":
                     dataLen = Integer.parseInt(values[dataLenColumn]);
                     String refPattern = values[encodingColumn];
-                    globalAddressMap.registerDataAddress(namespace, label, address, dataLen, refPattern, false);
+                    globalAddressMap.registerDataAddress(namespace, label, romAddress, dataLen, refPattern, false);
                     break;
                 case "inst":
                     dataLen = Integer.parseInt(values[dataLenColumn]);
-                    globalAddressMap.registerDataAddress(namespace, label, address, dataLen, "", false);
+                    globalAddressMap.registerDataAddress(namespace, label, romAddress, dataLen, "", false);
                     break;
                 default:
                     throw new RuntimeException(String.format("Unknown type \"%s\"", values[typeColumn]));
             }
         }
+        Utils.printProgressFinished(startTime, total);
 
         globalAddressMap.addAllReferences();
 
         this.pokes = pokes;
         this.moves = moves;
 
+        this.pokemonGraphicsNarc = pokemonGraphicsNarc;
         this.itemDataNarc = itemDataNarc;
         this.itemGraphicsNarc = itemGraphicsNarc;
 
@@ -243,10 +241,13 @@ public class ParagonLiteHandler {
     }
 
     public void writeOverlays() {
+        System.out.print("Writing overlays");
+        long startTime = System.currentTimeMillis();
         arm9.save(romHandler);
         battleOvl.save(romHandler);
         battleServerOvl.save(romHandler);
         trainerAIOvl.save(romHandler);
+        System.out.printf(" - done, time=%dms\n", System.currentTimeMillis() - startTime);
     }
 
     public void setBattleEventStrings() {
@@ -255,6 +256,9 @@ public class ParagonLiteHandler {
     }
 
     private void setBattleEventStrings1() {
+        while (battleEventStrings1.size() < 221)
+            battleEventStrings1.add("");
+
         // Assault Vest
         battleEventStrings1.add /* 221 */("The effects of the Assault Vest prevent\\xFFFEstatus moves from being used!");
         battleEventStrings1.add /* 222 */("\uF000Č\\x0001\\x0000 can't use status moves!");
@@ -314,69 +318,164 @@ public class ParagonLiteHandler {
         // Assault Vest
         battleEventStrings2.add/* 1189 */("The effects of the Assault Vest prevent\\xFFFEstatus moves from being used!");
         battleEventStrings2.add/* 1190 */("\uF000Č\\x0001\\x0000 can't use status moves!");
+
+        // Weather Rocks
+        battleEventStrings2.add/* 1191 */("\uF000Ă\\x0001\\x0000's \uF000Ć\\x0001\\x0001\\xFFFEbegan to glow!");
+        battleEventStrings2.add/* 1192 */("The wild \uF000Ă\\x0001\\x0000's \uF000Ć\\x0001\\x0001\\xFFFEbegan to glow!");
+        battleEventStrings2.add/* 1193 */("The foe's \uF000Ă\\x0001\\x0000's \uF000Ć\\x0001\\x0001\\xFFFEbegan to glow!");
+
+        // Stone Home
+        battleEventStrings2.add/* 1194 */("\uF000Ă\\x0001\\x0000 provided its allies with\\xFFFEits stone home!");
+        battleEventStrings2.add/* 1195 */("The wild \uF000Ă\\x0001\\x0000 provided its allies with\\xFFFEits stone home!");
+        battleEventStrings2.add/* 1196 */("The foe's \uF000Ă\\x0001\\x0000 provided its allies with\\xFFFEits stone home!");
+    }
+
+    public void setDamageCalcDefensiveStat() {
+        // Grants Ice-type Pokémon a 1.5x Defense boost in hail
+        // Makes Fighting-type Pokémon immune to hail damage
+        List<String> lines = readLines("damage_calc_get_defensive_stat.s");
+        battleOvl.replaceCode(lines, "DamageCalc_GetDefensiveStat");
+        System.out.println("Set damage calc defensive stat");
     }
 
     public void setCritRatio() {
-        int critChanceAddress = battleOvl.find(Gen5Constants.critChanceLocator);
         byte[] critChanceData = new byte[]{24, 8, 2, 1, 1};
         battleOvl.writeData(critChanceData, "Data_CriticalHitChances");
+
+        System.out.println("Set critical hit ratios");
     }
 
     public void setCritDamage() {
+        // Modernizes critical hit damage
+        // 2.0x -> 1.5x
+
         int critLogicAddress = battleOvl.find(Gen5Constants.critLogicLocator);
 
         ArmParser armParser = new ArmParser(globalAddressMap);
 
-        List<String> lines = readLines("crit");
+        List<String> lines = readLines("crit.s");
         byte[] critLogicData = armParser.parse(lines);
 
         battleOvl.writeBytes(critLogicAddress, critLogicData);
+        System.out.println("Set critical hit damage");
     }
 
     public void setBurnDamage() {
-        if (!(romHandler.isBlack2() || romHandler.isWhite2()))
-            throw new RuntimeException();
-
-        // TODO: Burn damage => 1/16 HP
-
-        int address;
-        switch (romHandler.getGen5GameIndex()) {
-            case 2:
-                address = 0x021BBBC6;
-                break;
-            case 3:
-                address = 0x021BBB86;
-                break;
-            default:
-                throw new RuntimeException();
-        }
-
-        battleOvl.writeByte(address, 16);
+        // Modernizes Burn damage
+        // 1/8 -> 1/16
+        List<String> lines = readLines("get_status_damage.s");
+        battleOvl.writeCodeForceInline(lines, "GetStatusDamage");
+        System.out.println("Set Burn damage");
     }
 
     public void setTrapDamage() {
-        if (!(romHandler.isBlack2() || romHandler.isWhite2()))
-            throw new RuntimeException();
+        // Modernizes the damage of the Trapped condition
+        // 1/16 -> 1/8 without Binding Band
+        // 1/8  -> 1/6 with Binding Band
+
+        int runTrappedFuncAddress = globalAddressMap.getRamAddress(battleServerOvl, "RunTrapped");
 
         // TODO: Trap damage => 1/8 (1/6 with Binding Band)
-        battleServerOvl.writeByte(0x0689BE4E, 6);
-        battleServerOvl.writeByte(0x0689BE54, 8);
+        battleServerOvl.writeByte(runTrappedFuncAddress + 0x8E, 6);
+        battleServerOvl.writeByte(runTrappedFuncAddress + 0x94, 8);
+        System.out.println("Set Trapped damage");
+    }
+
+    public void setTypeForPlate() {
+        // Adds Pixie Plate functionality for Judgment and Arceus
+        List<String> lines = readLines("get_type_for_plate.s");
+        arm9.writeCodeForceInline(lines, "GetTypeForPlate");
+
+        int[] arceusFairyStandard = new int[]{
+                // Background (Transparent)
+                GFXFunctions.makeARGBColor(104, 200, 152),
+                
+                // Body Main
+                GFXFunctions.makeARGBColor(224, 224, 232),
+                GFXFunctions.makeARGBColor(176, 176, 184),
+                GFXFunctions.makeARGBColor(128, 128, 136),
+                GFXFunctions.makeARGBColor(88, 88, 88),
+                
+                // Body Highlight
+                GFXFunctions.makeARGBColor(176, 112, 136),
+                GFXFunctions.makeARGBColor(152, 80, 112),
+                GFXFunctions.makeARGBColor(96, 48, 72),
+                
+                // Ring
+                GFXFunctions.makeARGBColor(248, 208, 216),
+                GFXFunctions.makeARGBColor(240, 184, 196),
+                GFXFunctions.makeARGBColor(184, 128, 152),
+                GFXFunctions.makeARGBColor(120, 88, 104),
+                
+                // Gems/Eye
+                GFXFunctions.makeARGBColor(240, 128, 184),
+                GFXFunctions.makeARGBColor(160, 56, 104),
+                
+                // Iris
+                GFXFunctions.makeARGBColor(152, 160, 168),
+        };
+        int[] arceusFairyShiny = Arrays.copyOf(arceusFairyStandard, arceusFairyStandard.length);
+        arceusFairyShiny[1] = GFXFunctions.makeARGBColor(248, 240, 136);
+        arceusFairyShiny[2] = GFXFunctions.makeARGBColor(216, 192, 56);
+        arceusFairyShiny[3] = GFXFunctions.makeARGBColor(168, 128, 64);
+        arceusFairyShiny[4] = GFXFunctions.makeARGBColor(104, 80, 32);
+
+        byte[] arceusFairyStandardPalette = BitmapFile.writePaletteFileFromColors(arceusFairyStandard);
+        byte[] arceusFairyShinyPalette = BitmapFile.writePaletteFileFromColors(arceusFairyShiny);
+        pokemonGraphicsNarc.files.add(arceusFairyStandardPalette);
+        pokemonGraphicsNarc.files.add(arceusFairyShinyPalette);
+        
+        pokes[Species.arceus].specialForms = 18;
+        
+        System.out.println("Set Types for Plates");
+    }
+
+    public void setGemDamageBoost() {
+        // Modernizes Gem damage
+        // 1.5x -> 1.3x
+        List<String> lines = readLines("gem_damage_boost.s");
+        battleOvl.replaceCode(lines, "CommonGemDamageBoost");
+        System.out.println("Set Gem damage boost");
     }
 
     public void setMultiStrikeLoadedDice() {
-        List<String> lines = readLines("set_multi_strike_data");
+        // Implements logic for Loaded Dice
+        // Multi-strike moves with multiple accuracy checks (like Triple Kick) only evaluate once
+        // Moves that hit 2-5 times will always do 4 or 5 hits
+        List<String> lines = readLines("set_multi_strike_data.s");
         battleOvl.replaceCode(lines, "SetMultiStrikeData");
+
+        System.out.println("Set multi-strike");
+    }
+
+    public void setMoveRestrictions() {
+        // Implements logic for Assault Vest
+        List<String> lines = readLines("move_restriction_new.s");
+        battleOvl.replaceCode(lines, "TryMoveRestriction");
+
+        System.out.println("Set move restrictions");
+    }
+
+    public void setWeatherDamage() {
+        // Grants Fighting-type Pokémon immunity to hail
+        List<String> lines = readLines("is_poke_damaged_by_weather.s");
+        battleOvl.replaceCode(lines, "IsPokeDamagedByWeather");
+
+        System.out.println("Set weather damage");
     }
 
     public void setShinyRate() {
-        List<String> lines = readLines("shiny_32");
+        // Increases shiny odds
+        List<String> lines = readLines("shiny_32.s");
         arm9.writeCodeForceInline(lines, "IsShiny");
+
+        System.out.println("Set shiny rate");
     }
 
     public void setPokemonData() {
         Scanner sc;
         try {
-            sc = new Scanner(FileFunctions.openConfig("paragonlite/pokes.ini"), "UTF-8");
+            sc = new Scanner(FileFunctions.openConfig("paragonlite/pokes.ini"), StandardCharsets.UTF_8);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -489,11 +588,11 @@ public class ParagonLiteHandler {
                     }
 
                     pokeUpdate.ability1 += newAbility - poke.ability1;
-                    pokeUpdate.ability2 -= poke.ability1;
+                    pokeUpdate.ability2 += newAbility - poke.ability2;
                     pokeUpdate.ability3 += newAbility - poke.ability3;
 
                     poke.ability1 = newAbility;
-                    poke.ability2 = 0;
+                    poke.ability2 = newAbility;
                     poke.ability3 = newAbility;
 
                     break;
@@ -510,19 +609,19 @@ public class ParagonLiteHandler {
                         abilityStrs[i] = abilityStrs[i].trim();
 
                     int newAbility1 = Math.max(0, abilityNames.indexOf(abilityStrs[0]));
-                    if (!abilityStrs[0].isEmpty() && newAbility1 == 0) {
+                    if (newAbility1 == 0) {
                         System.err.println("invalid ability \"" + abilityStrs[0] + "\" on " + poke.name);
                         continue;
                     }
 
                     int newAbility2 = Math.max(0, abilityNames.indexOf(abilityStrs[1]));
-                    if (!abilityStrs[1].isEmpty() && newAbility2 == 0) {
+                    if (newAbility2 == 0) {
                         System.err.println("invalid ability \"" + abilityStrs[1] + "\" on " + poke.name);
                         continue;
                     }
 
                     int newAbility3 = Math.max(0, abilityNames.indexOf(abilityStrs[2]));
-                    if (!abilityStrs[2].isEmpty() && newAbility3 == 0) {
+                    if (newAbility3 == 0) {
                         System.err.println("invalid ability \"" + abilityStrs[2] + "\" on " + poke.name);
                         continue;
                     }
@@ -574,6 +673,8 @@ public class ParagonLiteHandler {
                 }
             }
         }
+
+        System.out.println("Set Pokémon data");
     }
 
     private static void setEVYield(Pokemon poke, PokeUpdate pokeUpdate) {
@@ -639,27 +740,32 @@ public class ParagonLiteHandler {
             throw new RuntimeException(e);
         }
 
-        ArmParser armParser = new ArmParser(globalAddressMap);
-
 //        // New OP: Add Stored to Score (0x2B)
-//        List<String> addStoredToScorelines = readLines("traineraiscripts/add_stored_to_score");
+//        List<String> addStoredToScorelines = readLines("traineraiscripts/add_stored_to_score.s");
 //        int addStoredToScoreAddress = trainerAIOvl.writeArm(addStoredToScorelines, armParser);
 //        trainerAIOvl.writeWord(0x02181DA0, addStoredToScoreAddress + 1);
 
 //        // New OP: Get Damage Prediction (0x2B)
-//        List<String> getDamageLines = readLines("traineraiscripts/get_damage");
+//        List<String> getDamageLines = readLines("traineraiscripts/get_damage.s");
 //        int getDamageAddress = trainerAIOvl.writeArm(getDamageLines, armParser);
 //        trainerAIOvl.writeWord(0x02181DE4, getDamageAddress + 1);
+
+        System.out.println("Set trainer AI scripts");
     }
 
     public void setTrainers() {
-        List<Trainer> trainers = romHandler.getTrainers();
+        arm9.writeCode(readLines("lcg.s"), "LCG");
+        arm9.writeCode(readLines("lcg_seed.s"), "SeedLCG");
+
+        arm9.writeCodeForceInline(readLines("get_trainer_data.s"), "GetTrainerData");
+
+        System.out.println("Set trainers");
     }
 
     public void setAbilities() {
         registerAbilityEffects();
 
-        int newAbilityCount = 19;
+        int newAbilityCount = 20;
 
         // Move AbilityList
         relocateAbilityListRamAddress(newAbilityCount);
@@ -667,107 +773,147 @@ public class ParagonLiteHandler {
         List<String> newStrs = Arrays.asList(new String[newAbilityCount]);
         abilityNames.addAll(newStrs);
         abilityDescriptions.addAll(newStrs);
-        String eggExplanation = abilityExplanations.remove(abilityExplanations.size() - 1);
-        abilityExplanations.addAll(newStrs);
-        abilityExplanations.add(eggExplanation);
+        if (romHandler.isWhite2() || romHandler.isBlack2()) {
+            String eggExplanation = abilityExplanations.remove(abilityExplanations.size() - 1);
+            abilityExplanations.addAll(newStrs);
+            abilityExplanations.add(eggExplanation);
+        }
+
+        int totalChanges = 53;
+        int currentChanges = 0;
+        long startTime = System.currentTimeMillis();
+        System.out.println("setting abilities...");
 
         // #007 Limber (+ no speed drop)
+        Utils.printProgress(totalChanges, currentChanges++, "Limber");
         setLimber();
 
         // #012 Oblivious
+        Utils.printProgress(totalChanges, currentChanges++, "Oblivious");
         setOblivious();
 
         // #014 Compoundeyes -> Compound Eyes
+        Utils.printProgress(totalChanges, currentChanges++, "Compound Eyes");
         setCompoundEyes();
 
         // #017 Immunity (+ Poison-type immunity)
+        Utils.printProgress(totalChanges, currentChanges++, "Immunity");
         setImmunity();
 
         // #023 Shadow Tag
+        Utils.printProgress(totalChanges, currentChanges++, "Shadow Tag");
         setShadowTag();
 
         // #025 Wonder Guard
+        Utils.printProgress(totalChanges, currentChanges++, "Wonder Guard");
         setWonderGuard();
 
         // #031 Lightningrod -> Lightning Rod
+        Utils.printProgress(totalChanges, currentChanges++, "Lightning Rod");
         setLightningRod();
 
         // #037 Huge Power (1.5x Attack)
+        Utils.printProgress(totalChanges, currentChanges++, "Huge Power");
         setHugePower();
 
         // #040 Magma Armor (Water/Ground resist + 10% chance to burn on contact)
+        Utils.printProgress(totalChanges, currentChanges++, "Magma Armor");
         setMagmaArmor();
 
         // #042 Magnet Pull
+        Utils.printProgress(totalChanges, currentChanges++, "Magnet Pull");
         setMagnetPull();
 
         // #045 Sand Stream (+ no sandstorm damage)
+        Utils.printProgress(totalChanges, currentChanges++, "Sand Stream");
         setSandStream();
 
         // #055 Hustle (Moves with BP 60 or under gain +1 priority)
+        Utils.printProgress(totalChanges, currentChanges++, "Hustle");
         setHustle();
 
         // #057 Plus (4/3 ally Sp. Atk)
+        Utils.printProgress(totalChanges, currentChanges++, "Plus");
         setPlus();
 
         // #058 Minus (4/3 ally Sp. Def)
+        Utils.printProgress(totalChanges, currentChanges++, "Minus");
         setMinus();
 
         // #071 Arena Trap
+        Utils.printProgress(totalChanges, currentChanges++, "Arena Trap");
         setArenaTrap();
 
         // #072 Vital Spirit (boosts Sp. Def on hit)
+        Utils.printProgress(totalChanges, currentChanges++, "Vital Spirit");
         setVitalSpirit();
 
         // #074 Pure Power (1.5x Sp. Atk)
+        Utils.printProgress(totalChanges, currentChanges++, "Pure Power");
         setPurePower();
 
         // #079 Rivalry (1.0x opposite gender, 1.2x same gender)
+        Utils.printProgress(totalChanges, currentChanges++, "Rivalry");
         setRivalry();
 
         // #083 Anger Point (Boost Attack on miss, crit, or flinch)
+        Utils.printProgress(totalChanges, currentChanges++, "Anger Point");
         setAngerPoint();
 
         // #089 Iron Fist (1.2x -> 1.3x)
+        Utils.printProgress(totalChanges, currentChanges++, "Iron Fist");
         setIronFist();
 
         // #091 Adaptability -> Specialized
+        Utils.printProgress(totalChanges, currentChanges++, "Specialized");
         setSpecialized();
 
         // #094 Solar Power (1.5x -> 1.3x Sp. Atk; 1/8 -> 1/10 HP per turn)
+        Utils.printProgress(totalChanges, currentChanges++, "Solar Power");
         setSolarPower();
 
         // #102 Leaf Guard (2/3x damage received in sun)
+        Utils.printProgress(totalChanges, currentChanges++, "Leaf Guard");
         setLeafGuard();
 
         // #105 Super Luck
+        Utils.printProgress(totalChanges, currentChanges++, "Super Luck");
         setSuperLuck();
 
         // #115 Ice Body (+ Ice-type immunity)
+        Utils.printProgress(totalChanges, currentChanges++, "Ice Body");
         setIceBody();
 
         // #117 Snow Warning (+ no hail damage)
+        Utils.printProgress(totalChanges, currentChanges++, "Snow Warning");
         setSnowWarning();
 
         // #119 Frisk -> X-ray Vision
+        Utils.printProgress(totalChanges, currentChanges++, "X-ray Vision");
         setXrayVision();
 
         // #132 Friend Guard (25% -> 20% reduction)
+        Utils.printProgress(totalChanges, currentChanges++, "Friend Guard");
         setFriendGuard();
 
         // #134 Heavy Metal (+ 1.2x Defense, 0.9x Speed)
+        Utils.printProgress(totalChanges, currentChanges++, "Heavy Metal");
         setHeavyMetal();
 
         // #135 Light Metal (+ 0.9x Defense, 1.2x Speed)
+        Utils.printProgress(totalChanges, currentChanges++, "Light Metal");
         setLightMetal();
 
         // #142 Overcoat (+ immunity to spore moves)
+        Utils.printProgress(totalChanges, currentChanges++, "Overcoat");
         setOvercoat();
 
         // #154 Justified (+ immunity to Dark-type moves)
+        Utils.printProgress(totalChanges, currentChanges++, "Justified");
         setJustified();
 
         // #157 Sap Sipper -> Herbivore
+        Utils.printProgress(totalChanges, currentChanges++, "Herbivore");
         setHerbivore();
 
         // #163 Turbo Blaze (Fire-type attacks are always effective)
@@ -777,61 +923,86 @@ public class ParagonLiteHandler {
 //        // NEW ABILITIES...
 
         // #165 Heavy Wing
+        Utils.printProgress(totalChanges, currentChanges++, "Heavy Wing");
         addHeavyWing();
 
         // #166 Adaptability (no STAB, 1.3x for all moves)
+        Utils.printProgress(totalChanges, currentChanges++, "Adaptability");
         addAdaptability();
 
         // #167 Insectivore
+        Utils.printProgress(totalChanges, currentChanges++, "Insectivore");
         addInsectivore();
 
         // #168 Slush Rush
+        Utils.printProgress(totalChanges, currentChanges++, "Slush Rush");
         addSlushRush();
 
         // #169 Prestige
+        Utils.printProgress(totalChanges, currentChanges++, "Prestige");
         addPrestige();
 
         // #170 Lucky Foot
+        Utils.printProgress(totalChanges, currentChanges++, "Lucky Foot");
         addLuckyFoot();
 
         // #171 Triage
+        Utils.printProgress(totalChanges, currentChanges++, "Triage");
         addTriage();
 
         // #172 Competitive
+        Utils.printProgress(totalChanges, currentChanges++, "Competitive");
         addCompetitive();
 
         // #173 Strong Jaw
+        Utils.printProgress(totalChanges, currentChanges++, "Strong Jaw");
         addStrongJaw();
 
         // #174 Stamina
+        Utils.printProgress(totalChanges, currentChanges++, "Stamina");
         addStamina();
 
         // #175 Assimilate
+        Utils.printProgress(totalChanges, currentChanges++, "Assimilate");
         addAssimilate();
 
         // #176 Sharpness
+        Utils.printProgress(totalChanges, currentChanges++, "Sharpness");
         addSharpness();
 
         // #177 Wind Rider
+        Utils.printProgress(totalChanges, currentChanges++, "Wind Rider");
         addWindRider();
 
         // #178 Refrigerate
+        Utils.printProgress(totalChanges, currentChanges++, "Refrigerate");
         addRefrigerate();
 
-        // #179 Refrigerate
+        // #179 Pixilate
+        Utils.printProgress(totalChanges, currentChanges++, "Pixilate");
         addPixilate();
 
         // #180 Aerilate
+        Utils.printProgress(totalChanges, currentChanges++, "Aerilate");
         addAerilate();
 
         // #181 Galvanize
+        Utils.printProgress(totalChanges, currentChanges++, "Galvanize");
         addGalvanize();
 
         // #182 Gale Wings
+        Utils.printProgress(totalChanges, currentChanges++, "Gale Wings");
         addGaleWings();
 
         // #183 Tough Claws
+        Utils.printProgress(totalChanges, currentChanges++, "Tough Claws");
         addToughClaws();
+
+        // #184 Stone Home
+        Utils.printProgress(totalChanges, currentChanges, "Stone Home");
+        addStoneHome();
+
+        Utils.printProgressFinished(startTime, totalChanges);
 
         // Fixes ALL weather ability duration (normally it's indefinite)
         int weatherAbilityAddress = battleOvl.find("FF 20 48 71 28 1C");
@@ -845,6 +1016,8 @@ public class ParagonLiteHandler {
             if (abilityName == null)
                 throw new RuntimeException("Failed at " + i);
         }
+
+        System.out.println("Set abilities");
     }
 
     private void setLimber() {
@@ -863,11 +1036,13 @@ public class ParagonLiteHandler {
     private void setOblivious() {
         int number = Abilities.oblivious;
 
-        // Description
+        // TODO Description
         String description = abilityDescriptions.get(number);
 
-        // Explanation
-        String explanation = abilityExplanations.get(number);
+        // TODO Explanation
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(number);
+        }
 
         // Data
         setAbilityEventHandlers(number,
@@ -885,9 +1060,11 @@ public class ParagonLiteHandler {
         abilityNames.set(number, "Compound Eyes");
 
         // Explanation
-        String explanation = abilityExplanations.get(number)
-                .replace("Compoundeyes", "Compound Eyes");
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(number)
+                    .replace("Compoundeyes", "Compound Eyes");
+            abilityExplanations.set(number, explanation);
+        }
     }
 
     private void setImmunity() {
@@ -931,17 +1108,21 @@ public class ParagonLiteHandler {
         abilityNames.set(number, "Lightning Rod");
 
         // Explanation
-        String explanation = abilityExplanations.get(number)
-                .replace("Lightningrod", "Lightning Rod");
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(number)
+                    .replace("Lightningrod", "Lightning Rod");
+            abilityExplanations.set(number, explanation);
+        }
     }
 
     private void setHugePower() {
         int number = Abilities.hugePower;
 
         // Explanation
-        String explanation = "Huge Power, huh...\uF000븁\\x0000\\xFFFEThis Ability increases a Pokémon's\\xFFFEAttack stat by half.\uF000븁\\x0000\n";
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "Huge Power, huh...\uF000븁\\x0000\\xFFFEThis Ability increases a Pokémon's\\xFFFEAttack stat by half.\uF000븁\\x0000\n";
+            abilityExplanations.set(number, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(number,
@@ -958,12 +1139,19 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, description);
 
         // Explanation
-        String explanation = "Magma Armor, huh...\uF000븁\\x0000\\xFFFEThis Ability halves damage from\\xFFFEWater- and Ground-type moves.\uF000븁\\x0000It also has a small chance to inflict\\xFFFEthe burned status condition\uF000븀\\x0000\\xFFFEwhen hit with a direct attack.\uF000븁\\x0000\\xFFFEWhat's more...\uF000븁\\x0000\\xFFFEIt makes Eggs in your party hatch faster.\uF000븁\\x0000\n";
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "Magma Armor, huh...\uF000븁\\x0000\\xFFFE" +
+                    "This Ability halves damage from\\xFFFEWater- and Ground-type moves.\uF000븁\\x0000" +
+                    "It also has a small chance to inflict\\xFFFEthe burned status condition\uF000븀\\x0000\\xFFFE" +
+                    "when hit with a direct attack.\uF000븁\\x0000\\xFFFE" +
+                    "What's more...\uF000븁\\x0000\\xFFFE" +
+                    "It makes Eggs in your party hatch faster.\uF000븁\\x0000\n";
+            abilityExplanations.set(number, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onHit, "magma_armor_burn"),
+                new AbilityEventHandler(Gen5BattleEventType.onHit2, "magma_armor_burn"),
                 new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStat, "magma_armor_resist"));
     }
 
@@ -995,8 +1183,15 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, description);
 
         // Explanation
-        String explanation = "Hustle, huh...\uF000븁\\x0000\\xFFFEPokémon with this Ability can\\xFFFEuse weaker moves earlier\uF000븀\\x0000\\xFFFEthan usual.\uF000븁\\x0000\\xFFFEWhat's more...\uF000븁\\x0000\\xFFFEIt raises the chance to encounter\\xFFFEhigh-level wild Pokémon\uF000븀\\x0000\\xFFFEwhen the leading party member has it.\uF000븁\\x0000";
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "Hustle, huh...\uF000븁\\x0000\\xFFFE" +
+                    "Pokémon with this Ability can\\xFFFEuse weaker moves earlier\uF000븀\\x0000\\xFFFE" +
+                    "than usual.\uF000븁\\x0000\\xFFFE" +
+                    "What's more...\uF000븁\\x0000\\xFFFE" +
+                    "It raises the chance to encounter\\xFFFEhigh-level wild Pokémon\uF000븀\\x0000\\xFFFE" +
+                    "when the leading party member has it.\uF000븁\\x0000";
+            abilityExplanations.set(number, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetPriority, "hustle"));
@@ -1047,7 +1242,7 @@ public class ParagonLiteHandler {
         // TODO: Explanation
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onHit, "vital_spirit"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onHit2, "vital_spirit"));
     }
 
     private void setPurePower() {
@@ -1059,8 +1254,11 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, description);
 
         // Explanation
-        String explanation = "Pure Power, huh...\uF000븁\\x0000\\xFFFEThis Ability increases a Pokémon's\\xFFFESp. Atk stat by half.\uF000븁\\x0000\n";
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "Pure Power, huh...\uF000븁\\x0000\\xFFFE" +
+                    "This Ability increases a Pokémon's\\xFFFESp. Atk stat by half.\uF000븁\\x0000\n";
+            abilityExplanations.set(number, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(number,
@@ -1073,7 +1271,11 @@ public class ParagonLiteHandler {
         int number = Abilities.rivalry;
 
         // Name
-        abilityExplanations.set(number, "Rivalry, huh...\uF000븁\\x0000\\xFFFEThis Ability raises the power of\\xFFFEthe Pokémon's move when the target is\uF000븀\\x0000\\xFFFEof the same gender.\uF000븁\\x0000");
+        if (abilityExplanations != null) {
+            abilityExplanations.set(number, "Rivalry, huh...\uF000븁\\x0000\\xFFFE" +
+                    "This Ability raises the power of\\xFFFEthe Pokémon's move when the target is\uF000븀\\x0000\\xFFFE" +
+                    "of the same gender.\uF000븁\\x0000");
+        }
 
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "rivalry"));
@@ -1082,9 +1284,12 @@ public class ParagonLiteHandler {
     private void setAngerPoint() {
         int number = Abilities.angerPoint;
 
+        // Description
+        abilityDescriptions.set(number, "Boosts Attack when moves\\xFFFEfail or miss.");
+
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onHit, "anger_point_crit"),
+                new AbilityEventHandler(Gen5BattleEventType.onHit2, "anger_point_crit"),
                 new AbilityEventHandler(Gen5BattleEventType.onFlinch, "anger_point_flinch"),
                 new AbilityEventHandler(Gen5BattleEventType.OnMoveMiss, "anger_point_miss"));
     }
@@ -1101,9 +1306,11 @@ public class ParagonLiteHandler {
         abilityNames.set(number, "Specialized");
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.adaptability)
-                .replace("Adaptability", "Specialized");
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.adaptability)
+                    .replace("Adaptability", "Specialized");
+            abilityExplanations.set(number, explanation);
+        }
     }
 
     private void setSolarPower() {
@@ -1143,8 +1350,10 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, description);
 
         // TODO: Explanation
-        String explanation = abilityExplanations.get(number);
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(number);
+            abilityExplanations.set(number, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(number,
@@ -1168,9 +1377,11 @@ public class ParagonLiteHandler {
         abilityNames.set(number, "X-ray Vision");
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.frisk)
-                .replace("Frisk", "X-ray Vision");
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.frisk)
+                    .replace("Frisk", "X-ray Vision");
+            abilityExplanations.set(number, explanation);
+        }
 
         battleEventStrings2.set(439, "\uF000Ă\\x0001\\x0000 scanned its\\xFFFEtarget and found one \uF000ĉ\\x0001\\x0001!");
         battleEventStrings2.set(440, "The wild \uF000Ă\\x0001\\x0000 scanned its\\xFFFEtarget and found one \uF000ĉ\\x0001\\x0001!");
@@ -1234,10 +1445,12 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, description);
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.sapSipper)
-                .replace("Sap Sipper", "Justified")
-                .replace("Grass", "Dark");
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.sapSipper)
+                    .replace("Sap Sipper", "Justified")
+                    .replace("Grass", "Dark");
+            abilityExplanations.set(number, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onPreMove, "justified"));
@@ -1250,9 +1463,11 @@ public class ParagonLiteHandler {
         abilityNames.set(number, "Herbivore");
 
         // Explanation
-        String explanation = abilityExplanations.get(number)
-                .replace("Sap Sipper", "Herbivore");
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(number)
+                    .replace("Sap Sipper", "Herbivore");
+            abilityExplanations.set(number, explanation);
+        }
     }
 
     private void setTurboblaze() {
@@ -1283,10 +1498,12 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, description);
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.ironFist)
-                .replace("Iron Fist", "Heavy Wing")
-                .replace("moves that punch", "Flying-type moves");
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.ironFist)
+                    .replace("Iron Fist", "Heavy Wing")
+                    .replace("moves that punch", "Flying-type moves");
+            abilityExplanations.set(number, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStat, "heavy_wing"));
@@ -1304,8 +1521,12 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, description);
 
         // Explanation
-        String explanation = "Adaptability, huh...\uF000븁\\x0000\\xFFFEThis ability gives a power boost to\\xFFFEall moves, even if the move doesn't\uF000븀\\x0000\\xFFFEmatch the Pokémon's type.\uF000븁\\x0000";
-        abilityExplanations.set(number, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "Adaptability, huh...\uF000븁\\x0000\\xFFFE" +
+                    "This ability gives a power boost to\\xFFFEall moves, even if the move doesn't\uF000븀\\x0000\\xFFFE" +
+                    "match the Pokémon's type.\uF000븁\\x0000";
+            abilityExplanations.set(number, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetDamage, "adaptability"));
@@ -1323,10 +1544,12 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.waterAbsorb)
-                .replace("Water Absorb", "Insectivore")
-                .replace("Water", "Bug");
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.waterAbsorb)
+                    .replace("Water Absorb", "Insectivore")
+                    .replace("Water", "Bug");
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onPreMove, "insectivore"));
@@ -1344,10 +1567,12 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.snowCloak)
-                .replace("Snow Cloak", "Slush Rush")
-                .replace("evasiveness", "Speed");
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.snowCloak)
+                    .replace("Snow Cloak", "Slush Rush")
+                    .replace("evasiveness", "Speed");
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index,
@@ -1367,13 +1592,15 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.moxie)
-                .replace("Moxie", "Prestige")
-                .replace("Attack", "Sp. Atk");
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.moxie)
+                    .replace("Moxie", "Prestige")
+                    .replace("Attack", "Sp. Atk");
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
-        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onPostHit, "prestige"));
+        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onPostHit2, "prestige"));
     }
 
     private void addLuckyFoot() {
@@ -1388,10 +1615,12 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.ironFist)
-                .replace("Iron Fist", "Lucky Foot")
-                .replace("punch", "kick");
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.ironFist)
+                    .replace("Iron Fist", "Lucky Foot")
+                    .replace("punch", "kick");
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "lucky_foot"));
@@ -1409,10 +1638,12 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.prankster)
-                .replace("Prankster", "Triage")
-                .replace("status moves", "moves that heal");
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.prankster)
+                    .replace("Prankster", "Triage")
+                    .replace("status moves", "moves that heal");
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onGetPriority, "triage"));
@@ -1430,10 +1661,12 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.defiant)
-                .replace("Defiant", "Competitive")
-                .replace("Attack", "Sp. Atk");
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.defiant)
+                    .replace("Defiant", "Competitive")
+                    .replace("Attack", "Sp. Atk");
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onPostStatChange, "competitive"));
@@ -1451,10 +1684,12 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.ironFist)
-                .replace("Iron Fist", "Strong Jaw")
-                .replace("moves that punch", "moves that bite");
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.ironFist)
+                    .replace("Iron Fist", "Strong Jaw")
+                    .replace("moves that punch", "moves that bite");
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "strong_jaw"));
@@ -1470,10 +1705,12 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, "Boosts the Defense stat\\xFFFEwhen hit by an attack.");
 
         // TODO: Explanation
-        abilityExplanations.set(index, "A");
+        if (abilityExplanations != null) {
+            abilityExplanations.set(index, "A");
+        }
 
         // Data
-        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onHit, "stamina"));
+        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onHit2, "stamina"));
     }
 
     private void addAssimilate() {
@@ -1489,11 +1726,13 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.sapSipper)
-                .replace("Sap Sipper", "Assimilate")
-                .replace("Grass", "Psychic")
-                .replace("Attack", "Sp. Atk");
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.sapSipper)
+                    .replace("Sap Sipper", "Assimilate")
+                    .replace("Grass", "Psychic")
+                    .replace("Attack", "Sp. Atk");
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onPreMove, "assimilate"));
@@ -1511,10 +1750,12 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // Explanation
-        String explanation = abilityExplanations.get(Abilities.ironFist)
-                .replace("Iron Fist", "Sharpness")
-                .replace("moves that punch", "moves that slice");
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.ironFist)
+                    .replace("Iron Fist", "Sharpness")
+                    .replace("moves that punch", "moves that slice");
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "sharpness"));
@@ -1531,8 +1772,10 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // TODO: Explanation
-        String explanation = "";
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "";
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onPreMove, "wind_rider"));
@@ -1549,8 +1792,10 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // TODO: Explanation
-        String explanation = "";
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "";
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index,
@@ -1569,8 +1814,10 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // TODO: Explanation
-        String explanation = "";
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "";
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index,
@@ -1589,8 +1836,10 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // TODO: Explanation
-        String explanation = "";
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "";
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index,
@@ -1609,8 +1858,10 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // TODO: Explanation
-        String explanation = "";
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "";
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index,
@@ -1629,8 +1880,10 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // TODO: Explanation
-        String explanation = "";
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "";
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onGetPriority, "gale_wings"));
@@ -1647,17 +1900,37 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(index, description);
 
         // Explanation
-        String explanation = "Iron Fist, huh...\uF000븁\\x0000\\xFFFEThis Ability increases the power of\\xFFFEmoves that make direct contact\uF000븀\\x0000\\xFFFEwith the target.";
-        abilityExplanations.set(index, explanation);
+        if (abilityExplanations != null) {
+            String explanation = "Iron Fist, huh...\uF000븁\\x0000\\xFFFE" +
+                    "This Ability increases the power of\\xFFFEmoves that make direct contact\uF000븀\\x0000\\xFFFE" +
+                    "with the target.";
+            abilityExplanations.set(index, explanation);
+        }
 
         // Data
         setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "tough_claws"));
     }
 
+    private void addStoneHome() {
+        int number = ParagonLiteAbilities.stoneHome;
+
+        // Name
+        abilityNames.set(number, "Stone Home");
+
+        // Description
+        abilityDescriptions.set(number, "Boosts the Defense stat\\xFFFEof allies.");
+
+        // Data
+        setAbilityEventHandlers(number,
+                new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStat, "stone_home_defense"),
+                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "stone_home_message"),
+                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "stone_home_message"));
+    }
+
     private void setLowHpTypeBoostAbility() {
         int ramAddress = battleOvl.find("F8 B5 06 1C 03 20 0D 1C 14 1C 03 27");
 
-        List<String> lines = readLines("eventhandlers/ability/low_hp_type_boost");
+        List<String> lines = readLines("eventhandlers/ability/low_hp_type_boost.s");
 
         ArmParser armParser = new ArmParser(globalAddressMap);
         byte[] data = armParser.parse(lines, battleOvl, ramAddress);
@@ -1754,7 +2027,7 @@ public class ParagonLiteHandler {
 
         Scanner sc;
         try {
-            sc = new Scanner(FileFunctions.openConfig("paragonlite/moves.ini"), "UTF-8");
+            sc = new Scanner(FileFunctions.openConfig("paragonlite/moves.ini"), StandardCharsets.UTF_8);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -1970,16 +2243,15 @@ public class ParagonLiteHandler {
             }
         }
 
-        int[] newMoves = {
-                Moves.astonish, // #310
-                Moves.eggBomb, // #121
-        };
+        int newMoves = 2; // #310 Astonish, #121 Egg Bomb
 
         int[] movesToClear = {
                 Moves.dragonRage, // #082
                 Moves.nightShade, // #101
                 Moves.psywave, // #149
+                Moves.rollout, // #205
                 Moves.memento, // #262
+                Moves.iceBall, // #301
                 Moves.chatter, // #448
         };
 
@@ -1988,40 +2260,45 @@ public class ParagonLiteHandler {
         }
 
         // TODO: For some reason the relocator addresses values are wrong
-        relocateMoveListRamAddress(newMoves.length - movesToClear.length);
+        relocateMoveListRamAddress(newMoves - movesToClear.length);
 
 //        // #018 Whirlwind
 //        setMoveData(Moves.whirlwind, new MoveEventHandler(Gen5BattleEventType.onPostHit, Moves.circleThrow));
 
         // + #310 Astonish
-        setMoveEventHandlers(Moves.astonish, new MoveEventHandler(Gen5BattleEventType.unknown1F, Moves.fakeOut));
+        cloneMoveEventHandlers(Moves.astonish, Moves.fakeOut);
 
         // + #121 Egg Bomb
-        setMoveEventHandlers(Moves.eggBomb, new MoveEventHandler(Gen5BattleEventType.onGetDefendingStatFlip, Moves.psystrike));
+        cloneMoveEventHandlers(Moves.eggBomb, Moves.psystrike);
 
         // #167 Triple Kick
         setMoveEventHandlers(Moves.tripleKick, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "triple_kick"));
 
         // #200 Outrage
-        setMoveEventHandlers(Moves.outrage, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, Moves.revenge));
+        cloneMoveEventHandlers(Moves.outrage, Moves.revenge);
 
         // #237 Hidden Power
         setMoveEventHandlers(Moves.hiddenPower, new MoveEventHandler(Gen5BattleEventType.onGetMoveType));
 
         // #243 Mirror Coat
-        setMoveEventHandlers(Moves.mirrorCoat, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, Moves.eruption));
+        cloneMoveEventHandlers(Moves.mirrorCoat, Moves.eruption);
 
         // #360 Gyro Ball
         setMoveEventHandlers(Moves.gyroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "gyro_ball"));
 
         // #368 Metal Burst
-        setMoveEventHandlers(Moves.metalBurst, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, Moves.eruption));
+        cloneMoveEventHandlers(Moves.metalBurst, Moves.eruption);
 
         // #381 Lucky Chant
-        setMoveEventHandlers(Moves.luckyChant, new MoveEventHandler(Gen5BattleEventType.unknownA0, Moves.focusEnergy));
+        cloneMoveEventHandlers(Moves.luckyChant, Moves.focusEnergy);
+
+        // #449 Judgment
+        setMoveEventHandlers(Moves.judgment, new MoveEventHandler(Gen5BattleEventType.onGetMoveType, "judgment"));
 
         // #486 Electro Ball
         setMoveEventHandlers(Moves.electroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "electro_ball"));
+
+        System.out.println("Set moves");
     }
 
     public void setItems() {
@@ -2029,18 +2306,54 @@ public class ParagonLiteHandler {
 
         updateNaturalGiftPowers();
 
-//        List<String> moveRestrictionLines = readLines("move_restriction_new");
-//        battleOvl.replaceCode(moveRestrictionLines, "TryMoveRestriction");
+        relocateItemListRamAddress(9);
 
-//        battleOvl.replaceBranchWithLinkReferences(newFuncAddress, 0x021B3D7C, 0x021B3ECE, 0x021B4798, 0x021B4A9C, 0x021B5918);
+        // Weather change item
+        List<String> weatherRockCommonLines = readLines("eventhandlers/item/common_weather_change_item.s");
+        battleOvl.writeCode(weatherRockCommonLines, "CommonWeatherChangeItem");
 
-        relocateItemListRamAddress(2);
+        // #282 Icy Rock
+        setIcyRock();
+
+        // #283 Smooth Rock
+        setSmoothRock();
+
+        // #284 Heat Rock
+        setHeatRock();
+
+        // #285 Damp Rock
+        setDampRock();
+
+        /* NEW */
+
+        // #113 Weakness Policy
+        addWeaknessPolicy();
 
         // #114 Assault Vest
         addAssaultVest();
 
+        // #115 Pixie Plate
+        addPixiePlate();
+
+        // #122 Roseli Berry
+        addRoseliBerry();
+
+        // #125 Fairy Gem
+        addFairyGem();
+
+        // #518 Blank Plate
+        addBlankPlate();
+
+        // #521 Clear Amulet
+        addClearAmulet();
+
+        // #524 Covert Cloak
+        addCovertCloak();
+
         // #525 Loaded Dice
         addLoadedDice();
+
+        System.out.println("Set items");
     }
 
     // In Gen VI, all Berries got a +20 boost to power for Natural Gift across the board.
@@ -2054,62 +2367,314 @@ public class ParagonLiteHandler {
         }
     }
 
+    void setIcyRock() {
+        int index = Items.icyRock;
+
+        itemDescriptions.set(index, "An item to be held by a Pokémon.\\xFFFEThis rock summons a hailstorm\\xFFFEwhen the holder enters battle.");
+
+        setItemEventHandlers(index,
+                new ItemEventHandler(Gen5BattleEventType.onPokeEnter, "icy_rock_hail"),
+                new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "icy_rock_hail"),
+                new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "icy_rock_immune"));
+    }
+
+    void setSmoothRock() {
+        int number = Items.smoothRock;
+
+        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock summons a sandstorm\\xFFFEwhen the holder enters battle.");
+
+        setItemEventHandlers(number,
+                new ItemEventHandler(Gen5BattleEventType.onPokeEnter, "smooth_rock_sandstorm"),
+                new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "smooth_rock_sandstorm"),
+                new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "smooth_rock_immune"));
+    }
+
+    void setHeatRock() {
+        int number = Items.heatRock;
+
+        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock turns the sunlight harsh\\xFFFEwhen the holder enters battle.");
+
+        setItemEventHandlers(number,
+                new ItemEventHandler(Gen5BattleEventType.onPokeEnter, "heat_rock"),
+                new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "heat_rock"));
+    }
+
+    void setDampRock() {
+        int number = Items.dampRock;
+
+        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock makes it rain\\xFFFEwhen the holder enters battle.");
+
+        setItemEventHandlers(number,
+                new ItemEventHandler(Gen5BattleEventType.onPokeEnter, "damp_rock"),
+                new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "damp_rock"));
+    }
+
+    void addWeaknessPolicy() {
+        int index = ParagonLiteItems.weaknessPolicy;
+
+        setItemName(index, "Weakness Policy", "Weakness Policies");
+        itemDescriptions.set(index, "An item to be held by a Pokémon. Attack\\xFFFEand Sp. Atk sharply increase if the\\xFFFEholder is hit with a move it's weak to.");
+
+        setItemPocket(index, Item.Pocket.ITEMS);
+        setItemPrice(index, 100);
+        setItemBattleEffect(index, 147);
+        setItemFlingPower(index, 80);
+        setItemNaturalGiftType(index, null);
+        setItemIsOneTimeUse(index, true);
+        setItemType(index, Item.ItemType.HELD);
+
+        setItemSprite(index, "weakness_policy");
+
+        setItemEventHandlers(index,
+                new ItemEventHandler(Gen5BattleEventType.onHit2, "weakness_policy_on_hit"),
+                new ItemEventHandler(Gen5BattleEventType.unknown72, "weakness_policy_boost"));
+    }
+
     void addAssaultVest() {
         int index = ParagonLiteItems.assaultVest;
 
         setItemName(index, "Assault Vest", "Assault Vests");
-        itemDescriptions.set(index, "An item to be held by a Pokémon.\\xFFFEThis offensive vest boosts the holder's Sp. Def\\xFFFEstat but prevents the use of status moves.");
-        
+        itemDescriptions.set(index, "An item to be held by a Pokémon. This\\xFFFEvest boosts the holder's Sp. Def stat\\xFFFEbut prevents the use of status moves.");
+
+        setItemPocket(index, Item.Pocket.ITEMS);
         setItemPrice(index, 100);
+        setItemBattleEffect(index, 147);
         setItemFlingPower(index, 80);
+        setItemNaturalGiftType(index, null);
         setItemType(index, Item.ItemType.HELD);
+
+        setItemSprite(index, "assault_vest");
+    }
+
+    void addPixiePlate() {
+        int index = ParagonLiteItems.pixiePlate;
+
+        setItemName(index, "Pixie Plate", "Pixie Plates");
+        itemDescriptions.set(index, "An item to be held by a Pokémon.\\xFFFEIt is a stone tablet that boosts the\\xFFFEpower of Fairy-type moves.");
+
+        setItemPocket(index, Item.Pocket.ITEMS);
+        setItemPrice(index, 1000);
+        setItemBattleEffect(index, 147); // TODO
+        setItemValueVar(index, 20); // 1.2x
+        setItemFlingPower(index, 90);
+        setItemNaturalGiftType(index, null);
+        setItemType(index, Item.ItemType.HELD);
+
+        setItemSprite(index, Items.flamePlate, "pixie_plate");
+
+        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onGetMovePower, "pixie_plate"));
+    }
+
+    void addRoseliBerry() {
+        int index = ParagonLiteItems.roseliBerry;
+
+        setItemName(index, "Roseli Berry", "Roseli Berries");
+        itemDescriptions.set(index, "Weakens a supereffective Fairy-type\\xFFFEattack against the holding Pokémon.");
+
+        setItemPocket(index, Item.Pocket.BERRIES);
+        setItemPrice(index, 100);
+        setItemBattleEffect(index, 147); // TODO
+        setItemFlingPower(index, 10);
+        setItemNaturalGiftPower(index, 90);
+        setItemNaturalGiftType(index, Type.FAIRY);
+        setItemIsOneTimeUse(index, true);
+
+        setItemSprite(index, "roseli_berry");
+
+        setItemEventHandlers(index,
+                new ItemEventHandler(Gen5BattleEventType.onGetDamage, "roseli_berry_super_effective_check"),
+                new ItemEventHandler(Gen5BattleEventType.unknown44, Items.occaBerry));
+    }
+
+    void addFairyGem() {
+        int index = ParagonLiteItems.fairyGem;
+
+        setItemName(index, "Fairy Gem", "Fairy Gems");
+        itemDescriptions.set(index, "A gem with an essence of fairies. When\\xFFFEheld, it strengthens the power of a\\xFFFEFairy-type move only once.");
+
+        setItemPocket(index, Item.Pocket.ITEMS);
+        setItemPrice(index, 200);
+        setItemBattleEffect(index, 147); // TODO
+        setItemFlingPower(index, 0);
+        setItemNaturalGiftType(index, null);
+        setItemIsOneTimeUse(index, true);
+
+        setItemSprite(index, Items.fireGem, "fairy_gem");
+
+        setItemEventHandlers(index,
+                new ItemEventHandler(Gen5BattleEventType.unknown81, "fairy_gem_work"),
+                new ItemEventHandler(Gen5BattleEventType.onGetMovePower, "fairy_gem_damage_boost"),
+                new ItemEventHandler(Gen5BattleEventType.unknown88, Items.fireGem));
+    }
+
+    void addBlankPlate() {
+        int index = ParagonLiteItems.blankPlate;
+
+        setItemName(index, "Blank Plate", "Blank Plates");
+        itemDescriptions.set(index, "An item to be held by a Pokémon.\\xFFFEIt is a stone tablet that boosts the\\xFFFEpower of Normal-type moves.");
+
+        setItemPocket(index, Item.Pocket.ITEMS);
+        setItemPrice(index, 1000);
+        setItemBattleEffect(index, 147); // TODO
+        setItemValueVar(index, 20); // 1.2x
+        setItemFlingPower(index, 90);
+        setItemNaturalGiftType(index, null);
+        setItemType(index, Item.ItemType.HELD);
+
+        setItemSprite(index, Items.flamePlate, "blank_plate");
+
+        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onGetMovePower, "blank_plate"));
+    }
+
+    void addClearAmulet() {
+        int index = ParagonLiteItems.clearAmulet;
+
+        setItemName(index, "Clear Amulet", "Clear Amulets");
+        itemDescriptions.set(index, "An item to be held by a Pokémon.\\xFFFEThis amulet prevents other Pokémon\\xFFFEfrom lowering the holder's stats.");
+
+        setItemPocket(index, Item.Pocket.ITEMS);
+        setItemPrice(index, 100);
+        setItemBattleEffect(index, 147);
+        setItemFlingPower(index, 30);
+        setItemNaturalGiftType(index, null);
+        setItemType(index, Item.ItemType.HELD);
+
+        setItemSprite(index, "clear_amulet");
+
+        setItemEventHandlers(index,
+                new ItemEventHandler(0x5B, "clear_amulet_5B"),
+                new ItemEventHandler(0x5C, "clear_amulet_5C"));
+    }
+
+    void addCovertCloak() {
+        int index = ParagonLiteItems.covertCloak;
+
+        setItemName(index, "Covert Cloak", "Covert Cloaks");
+        itemDescriptions.set(index, "An item to be held by a Pokémon. This\\xFFFEcloak conceals the holder, protecting\\xFFFEit from the additional effects of moves.");
+
+        setItemPocket(index, Item.Pocket.ITEMS);
+        setItemPrice(index, 100);
+        setItemBattleEffect(index, 147);
+        setItemFlingPower(index, 30);
+        setItemNaturalGiftType(index, null);
+        setItemType(index, Item.ItemType.HELD);
+
+        setItemSprite(index, "covert_cloak");
+
+        cloneItemEventHandlersFromAbility(index, Abilities.shieldDust);
     }
 
     void addLoadedDice() {
         int index = ParagonLiteItems.loadedDice;
-        
+
         setItemName(index, "Loaded Dice", "Loaded Dice");
         itemDescriptions.set(index, "An item to be held by a Pokémon.\\xFFFEIt always rolls a good number, ensuring\\xFFFEthat multistrike moves hit more times.");
 
+        setItemPocket(index, Item.Pocket.ITEMS);
         setItemPrice(index, 100);
+        setItemBattleEffect(index, 147);
         setItemFlingPower(index, 30);
+        setItemNaturalGiftType(index, null);
         setItemType(index, Item.ItemType.HELD);
 
-        setItemEventHandlers(ParagonLiteItems.loadedDice, "loaded_dice",
-                new ItemEventHandler(Gen5BattleEventType.onGetMoveHits, "loaded_dice"));
+        setItemSprite(index, "loaded_dice");
+
+        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onGetMoveHits, "loaded_dice"));
     }
-    
+
     private void setItemName(int itemNumber, String name, String pluralName) {
         itemNames.set(itemNumber, name);
         itemNameMessages.set(itemNumber, "\uF000봁\\x0000a \uF000\uFF00\\x0001ÿ" + name);
         itemPluralNames.set(itemNumber, pluralName);
     }
 
+    private void setItemPocket(int itemNumber, Item.Pocket pocket) {
+        if (romHandler.isWhite() || romHandler.isBlack())
+            // TODO: Item pockets are seemingly somewhere else in BW?
+            return;
+
+        ParagonLiteAddressMap.AddressBase addressBase = globalAddressMap.getAddressData(arm9, "Data_ItemPockets");
+        arm9.writeByte(addressBase.address + itemNumber, (byte) pocket.ordinal());
+    }
+
+    // 0x00
     private void setItemPrice(int itemNumber, int price) {
         if (price % 10 != 0)
             throw new RuntimeException("Price must be a multiple of 10");
 
-        byte[] data = itemDataNarc.files.get(ParagonLiteItems.loadedDice);
+        byte[] data = itemDataNarc.files.get(itemNumber);
         writeHalf(data, 0x00, price / 10);
     }
 
+    // 0x02
+    private void setItemBattleEffect(int itemNumber, int battleEffectId) {
+        byte[] data = itemDataNarc.files.get(itemNumber);
+        data[0x02] = (byte) battleEffectId;
+    }
+
+    // 0x03
+    private void setItemValueVar(int itemNumber, int value) {
+        byte[] data = itemDataNarc.files.get(itemNumber);
+        data[0x03] = (byte) value;
+    }
+
+    // 0x06
     private void setItemFlingPower(int itemNumber, int power) {
         setItemFlingData(itemNumber, power, 0);
     }
 
+    // 0x05, 0x06
     private void setItemFlingData(int itemNumber, int power, int effect) {
         byte[] data = itemDataNarc.files.get(itemNumber);
         data[0x05] = (byte) effect;
         data[0x06] = (byte) power;
     }
 
+    // 0x07
+    private void setItemNaturalGiftPower(int itemNumber, int power) {
+        byte[] data = itemDataNarc.files.get(itemNumber);
+        data[0x07] = (byte) power;
+    }
+
+    // 0x08 [0-4]
+    private void setItemNaturalGiftType(int itemNumber, Type type) {
+        byte[] data = itemDataNarc.files.get(itemNumber);
+
+        if (type == null)
+            data[0x08] |= (byte) 0b00011111;
+    }
+
+    // 0x08 [6]
+    private void setCanRegister(int itemNumber, boolean canRegister) {
+        byte[] data = itemDataNarc.files.get(itemNumber);
+        if (canRegister)
+            data[0x08] |= (byte) 0b01000000;
+        else
+            data[0x08] &= (byte) 0b10111111;
+    }
+
+    // 0x0A
+    private void setOverworldUseEffect(int itemNumber, int effectNumber) {
+        byte[] data = itemDataNarc.files.get(itemNumber);
+        data[0x0A] = (byte) effectNumber;
+    }
+
+    // 0x0E
+    private void setItemIsOneTimeUse(int itemNumber, boolean isOneTimeUse) {
+        byte[] data = itemDataNarc.files.get(itemNumber);
+        data[0x0E] = (byte) (isOneTimeUse ? 1 : 0);
+    }
+
+    // 0x0D
     private void setItemType(int itemNumber, Item.ItemType itemType) {
         byte[] data = itemDataNarc.files.get(itemNumber);
         data[0x0D] = (byte) itemType.ordinal();
     }
 
     public void test() {
-//        disableRandomness();
+        System.out.println("- test");
+
+        disableRandomness();
 
 //        // TODO: Frostbite 1/6 HP
 //        battleOvl.writeByte(0x021BBB88, 64);
@@ -2121,27 +2686,75 @@ public class ParagonLiteHandler {
             tr.setPokemonHaveItems(true);
 
             TrainerPokemon poke1 = tr.pokemon.get(0);
-            poke1.pokemon = romHandler.getPokemon().get(Species.reuniclus);
-            poke1.level = 15;
+            poke1.pokemon = romHandler.getPokemon().get(Species.emolga);
+            poke1.level = 37;
+            pokes[Species.emolga].ability1 = Abilities.motorDrive;
             poke1.abilitySlot = 1;
-            poke1.moves = new int[]{Moves.recover, 0, 0, 0};
-            poke1.strength = 255;
-//            poke1.heldItem = Items.razorClaw;
+            poke1.moves = new int[]{Moves.airSlash, Moves.discharge, Moves.energyBall, Moves.tailwind};
+            poke1.IVs = 30;
+            poke1.heldItem = Items.focusSash;
 
-            if (tr.pokemon.size() == 1) {
+            if (tr.pokemon.size() < 2)
                 tr.pokemon.add(tr.pokemon.get(0).copy());
-            }
-
             TrainerPokemon poke2 = tr.pokemon.get(1);
-            poke2.pokemon = romHandler.getPokemon().get(Species.reuniclus);
-            poke2.level = 15;
+            poke2.pokemon = romHandler.getPokemon().get(Species.lanturn);
+            poke2.level = 37;
+            pokes[Species.lanturn].ability1 = Abilities.voltAbsorb;
             poke2.abilitySlot = 1;
-            poke2.moves = new int[]{Moves.fakeOut, Moves.recover, 0, 0};
-            poke2.strength = 255;
-            poke2.heldItem = Items.scopeLens;
+            poke2.moves = new int[]{Moves.muddyWater, Moves.icyWind, Moves.discharge, Moves.tailGlow};
+            poke1.IVs = 30;
+            poke2.heldItem = Items.rindoBerry;
+
+            if (tr.pokemon.size() < 3)
+                tr.pokemon.add(tr.pokemon.get(0).copy());
+            TrainerPokemon poke3 = tr.pokemon.get(2);
+            poke3.pokemon = romHandler.getPokemon().get(Species.electivire);
+            pokes[Species.electivire].secondaryType = Type.FIGHTING;
+            poke3.level = 37;
+            pokes[Species.electivire].ability1 = Abilities.motorDrive;
+            poke3.abilitySlot = 1;
+            poke3.moves = new int[]{Moves.discharge, Moves.closeCombat, Moves.rockSlide, Moves.icePunch};
+            poke3.IVs = 30;
+            poke3.heldItem = Items.shucaBerry;
+
+            if (tr.pokemon.size() < 4)
+                tr.pokemon.add(tr.pokemon.get(0).copy());
+            TrainerPokemon poke4 = tr.pokemon.get(3);
+            poke4.pokemon = romHandler.getPokemon().get(Species.raichu);
+            poke4.level = 37;
+            pokes[Species.raichu].ability1 = Abilities.lightningRod;
+            poke4.abilitySlot = 1;
+            poke4.moves = new int[]{Moves.grassKnot, Moves.extremeSpeed, Moves.thunderbolt, Moves.icicleCrash};
+            poke4.IVs = 30;
+            poke4.heldItem = Items.airBalloon;
+
+            if (tr.pokemon.size() < 5)
+                tr.pokemon.add(tr.pokemon.get(0).copy());
+            TrainerPokemon poke5 = tr.pokemon.get(4);
+            poke5.pokemon = romHandler.getPokemon().get(Species.stunfisk);
+            poke5.level = 37;
+            pokes[Species.stunfisk].ability1 = Abilities.lightningRod;
+            poke5.abilitySlot = 1;
+            poke5.moves = new int[]{Moves.muddyWater, Moves.discharge, Moves.earthPower, Moves.sludgeBomb};
+            poke5.IVs = 30;
+            poke5.heldItem = Items.sitrusBerry;
+
+            if (tr.pokemon.size() < 6)
+                tr.pokemon.add(tr.pokemon.get(0).copy());
+            TrainerPokemon poke6 = tr.pokemon.get(5);
+            poke6.pokemon = romHandler.getPokemon().get(Species.zebstrika);
+            poke6.level = 38;
+            pokes[Species.zebstrika].ability1 = Abilities.motorDrive;
+            poke6.abilitySlot = 1;
+            poke6.moves = new int[]{Moves.wildCharge, Moves.flareBlitz, Moves.earthquake, Moves.xScissor};
+            poke6.IVs = 30;
+            poke6.heldItem = Items.lifeOrb;
+
+//            tr.pokemon.set(0, poke2);
+//            tr.pokemon.set(1, poke1);
         }
 
-        romHandler.setTrainers(trainers, false, true);
+        romHandler.setTrainers(trainers, true, true);
 
 //        // Set debug AI Flag
 //        for (Trainer tr : trainers) {
@@ -2228,36 +2841,43 @@ public class ParagonLiteHandler {
 //            battleOvl.writeByte(critChanceAddress, 0);
 
         // Remove bonus/drawback from natures
-        int natureStatAdjustAddress = globalAddressMap.getAddress(arm9, "Data_StatNatureAdjust");
-        int natureStatAddress = globalAddressMap.getAddress(arm9, "Data_NatureStat");
+        int natureStatAdjustAddress = globalAddressMap.getRamAddress(arm9, "Data_StatNatureAdjust");
+        int natureStatAddress = globalAddressMap.getRamAddress(arm9, "Data_NatureStat");
         for (int i = 0; i < 5 * 25; ++i) {
             arm9.writeByte(natureStatAdjustAddress + i, 0);
             arm9.writeByte(natureStatAddress + i, 0);
         }
+
+        System.out.println("disabled randomness");
     }
 
     private void registerAbilityEffects() {
+        System.out.println("registering abilities...");
         registerBattleObjects("Ability", getAbilityListAddress(), getAbilityListCount());
     }
 
     private void registerMoveEffects() {
+        System.out.println("registering moves...");
         registerBattleObjects("Move", getMoveListAddress(), getMoveListCount());
     }
 
     private void registerItemEffects() {
+        System.out.println("registering items...");
         registerBattleObjects("Item", getItemListAddress(), getItemListCount());
     }
 
     private void registerBattleObjects(String name, int listAddress, int listCount) {
+        long startTime = System.currentTimeMillis();
         for (int i = 0; i < listCount; ++i) {
             int objectNumberAddress = listAddress + i * 8;
             int sourceAddress = objectNumberAddress + 4;
 
             int objectNumber = battleOvl.readWord(objectNumberAddress);
+            int redirectorAddress = battleOvl.readWord(sourceAddress) - 1;
+            Utils.printProgress(listCount, i, String.format("%3d -> 0x%08X", objectNumber, redirectorAddress));
+
             if (objectNumber == 0)
                 continue;
-
-            int redirectorAddress = battleOvl.readWord(sourceAddress) - 1;
 
             int eventHandlerListCount = getEventHandlerListCountFromRedirector(redirectorAddress);
             int listReferenceAddress = getRedirectorListReferenceAddress(redirectorAddress);
@@ -2286,49 +2906,57 @@ public class ParagonLiteHandler {
             // Set reference from list to redirector
             globalAddressMap.addReference(battleOvl, redirectorAddress, battleOvl, sourceAddress);
         }
+        Utils.printProgressFinished(startTime, listCount);
+        System.out.println();
     }
 
     private void relocateAbilityListRamAddress(int additionalCount) {
         int oldAddress = getAbilityListAddress();
 
-        int cmpInstructionAddress = globalAddressMap.getAddress(battleOvl, "Inst_AbilityEffectListCountCmp");
+        int cmpInstructionAddress = globalAddressMap.getRamAddress(battleOvl, "Inst_AbilityEffectListCountCmp");
         int oldCount = battleOvl.readUnsignedByte(cmpInstructionAddress);
         int newCount = oldCount + additionalCount;
         battleOvl.writeByte(cmpInstructionAddress, newCount);
 
-        int effectListAddressDataAddress = globalAddressMap.getAddress(battleOvl, "Data_AbilityEffectListAddress");
-        int effectListAddress4DataAddress = globalAddressMap.getAddress(battleOvl, "Data_AbilityEffectListAddress4");
+        int effectListAddressDataAddress = globalAddressMap.getRamAddress(battleOvl, "Data_AbilityEffectListAddress");
+        int effectListAddress4DataAddress = globalAddressMap.getRamAddress(battleOvl, "Data_AbilityEffectListAddress4");
+
+        System.out.println("relocating abilities...");
         relocateObjectList("Data_AbilityEffectList", oldAddress, oldCount, newCount, effectListAddressDataAddress, effectListAddress4DataAddress);
     }
 
     private void relocateMoveListRamAddress(int additionalCount) {
         int oldAddress = getMoveListAddress();
 
-        int countAddress = globalAddressMap.getAddress(battleOvl, "Data_MoveEffectListCount");
+        int countAddress = globalAddressMap.getRamAddress(battleOvl, "Data_MoveEffectListCount");
         int oldCount = battleOvl.readWord(countAddress);
         int newCount = oldCount + additionalCount;
         battleOvl.writeWord(countAddress, newCount, false);
 
-        int effectListAddressDataAddress = globalAddressMap.getAddress(battleOvl, "Data_MoveEffectListAddress");
-        int effectListAddress4DataAddress = globalAddressMap.getAddress(battleOvl, "Data_MoveEffectListAddress4");
+        int effectListAddressDataAddress = globalAddressMap.getRamAddress(battleOvl, "Data_MoveEffectListAddress");
+        int effectListAddress4DataAddress = globalAddressMap.getRamAddress(battleOvl, "Data_MoveEffectListAddress4");
+
+        System.out.println("relocating moves...");
         relocateObjectList("Data_MoveEffectList", oldAddress, oldCount, newCount, effectListAddressDataAddress, effectListAddress4DataAddress);
     }
 
     private void relocateItemListRamAddress(int additionalCount) {
         int oldAddress = getItemListAddress();
 
-        int cmpInstructionAddress = globalAddressMap.getAddress(battleOvl, "Inst_ItemEffectListCountCmp");
+        int cmpInstructionAddress = globalAddressMap.getRamAddress(battleOvl, "Inst_ItemEffectListCountCmp");
         int oldCount = battleOvl.readUnsignedByte(cmpInstructionAddress);
         int newCount = oldCount + additionalCount;
         battleOvl.writeByte(cmpInstructionAddress, newCount);
 
-        int effectListAddressDataAddress = globalAddressMap.getAddress(battleOvl, "Data_ItemEffectListAddress");
-        int effectListAddress4DataAddress = globalAddressMap.getAddress(battleOvl, "Data_ItemEffectListAddress4");
+        int effectListAddressDataAddress = globalAddressMap.getRamAddress(battleOvl, "Data_ItemEffectListAddress");
+        int effectListAddress4DataAddress = globalAddressMap.getRamAddress(battleOvl, "Data_ItemEffectListAddress4");
+
+        System.out.println("relocating items...");
         relocateObjectList("Data_ItemEffectList", oldAddress, oldCount, newCount, effectListAddressDataAddress, effectListAddress4DataAddress);
     }
 
-    private int relocateObjectList(String label, int oldAddress, int oldCount, int newCount, int effectListAddressDataAddress,
-                                   int effectListAddress4DataAddress) {
+    private void relocateObjectList(String label, int oldAddress, int oldCount, int newCount, int effectListAddressDataAddress,
+                                    int effectListAddress4DataAddress) {
         int newSize = newCount * 8;
         byte[] data = new byte[newSize];
 
@@ -2337,6 +2965,7 @@ public class ParagonLiteHandler {
         while (readIndex < oldCount) {
             int number = battleOvl.readWord(oldAddress + readIndex * 8);
             int redirectorAddress = battleOvl.readWord(oldAddress + readIndex * 8 + 4);
+
             if (number == 0) {
                 if (redirectorAddress != 0)
                     throw new RuntimeException("If the number was 0, we should expect the redirector address to also be 0");
@@ -2358,27 +2987,27 @@ public class ParagonLiteHandler {
         }
 
         int newAddress = battleOvl.newData(data, label, "4*");
+        battleOvl.writeWord(effectListAddressDataAddress, newAddress, false);
         battleOvl.writeWord(effectListAddress4DataAddress, newAddress + 4, false);
 
-        return newAddress;
     }
 
     private int getAbilityListAddress() {
-        return globalAddressMap.getAddress(battleOvl, "Data_AbilityEffectList");
+        return globalAddressMap.getRamAddress(battleOvl, "Data_AbilityEffectList");
     }
 
     private int getMoveListAddress() {
-        return globalAddressMap.getAddress(battleOvl, "Data_MoveEffectList");
+        return globalAddressMap.getRamAddress(battleOvl, "Data_MoveEffectList");
     }
 
     private int getItemListAddress() {
-        return globalAddressMap.getAddress(battleOvl, "Data_ItemEffectList");
+        return globalAddressMap.getRamAddress(battleOvl, "Data_ItemEffectList");
     }
 
     private int getRedirectorCountSetAddress(int funcAddress) {
         int returnValue = -1;
 
-        int funcSize = battleOvl.getFuncSize(funcAddress);
+        int funcSize = battleOvl.getFuncSizeRom(funcAddress);
         for (int i = 0; i < funcSize; i += 2) {
             int instruction = battleOvl.readUnsignedHalfword(funcAddress + i);
 
@@ -2403,7 +3032,7 @@ public class ParagonLiteHandler {
     private int getRedirectorListReferenceAddress(int funcAddress) {
         int returnValue = -1;
 
-        int funcSize = battleOvl.getFuncSize(funcAddress);
+        int funcSize = battleOvl.getFuncSizeRom(funcAddress);
         for (int i = 0; i < funcSize; i += 2) {
             int instruction = battleOvl.readUnsignedHalfword(funcAddress + i);
 
@@ -2478,23 +3107,6 @@ public class ParagonLiteHandler {
         throw new RuntimeException(String.format("Could not find event handler on object %d for event type 0x%02X", objectNumber, eventType));
     }
 
-    private int getEventHandlerFuncAddress(int objectNumber, int objectListAddress, int objectListCount, int eventType) {
-        int referenceAddress = getEventHandlerFuncReferenceAddress(objectNumber, objectListAddress, objectListCount, eventType);
-        return battleOvl.readWord(referenceAddress) - 1;
-    }
-
-    private int getMoveEventHandlerFuncAddress(int moveNumber, int eventType) {
-        int listAddress = getMoveListAddress();
-        int listCount = getMoveListCount();
-        return getEventHandlerFuncAddress(moveNumber, listAddress, listCount, eventType);
-    }
-
-    private int getAbilityEventHandlerFuncAddress(int abilityNumber, int eventType) {
-        int listAddress = getAbilityListAddress();
-        int listCount = getAbilityListCount();
-        return getEventHandlerFuncAddress(abilityNumber, listAddress, listCount, eventType);
-    }
-
     private abstract class BattleEventHandler {
         int type;
         int address = -1;
@@ -2513,14 +3125,10 @@ public class ParagonLiteHandler {
                 battleOvl.writeCode(lines, fullFuncName);
             }
 
-            address = globalAddressMap.getAddress(battleOvl, fullFuncName);
+            address = globalAddressMap.getRamAddress(battleOvl, fullFuncName);
         }
 
         protected abstract String getFuncDirectory();
-
-        protected abstract int getObjectListAddress();
-
-        protected abstract int getObjectListCount();
     }
 
     private class AbilityEventHandler extends BattleEventHandler {
@@ -2536,16 +3144,6 @@ public class ParagonLiteHandler {
         protected String getFuncDirectory() {
             return "ability";
         }
-
-        @Override
-        protected int getObjectListAddress() {
-            return getAbilityListAddress();
-        }
-
-        @Override
-        protected int getObjectListCount() {
-            return getAbilityListCount();
-        }
     }
 
     private class MoveEventHandler extends BattleEventHandler {
@@ -2557,51 +3155,27 @@ public class ParagonLiteHandler {
             setFromFuncName(type, funcName);
         }
 
-        MoveEventHandler(int type, int existingMove) {
+        @Override
+        protected String getFuncDirectory() {
+            return "move";
+        }
+    }
+
+    private class ItemEventHandler extends BattleEventHandler {
+        ItemEventHandler(int type, String funcName) {
+            setFromFuncName(type, funcName);
+        }
+
+        ItemEventHandler(int type, int existingItem) {
             this.type = type;
 
-            int referenceAddress = getEventHandlerFuncReferenceAddress(existingMove, getMoveListAddress(), getMoveListCount(), type);
+            int referenceAddress = getEventHandlerFuncReferenceAddress(existingItem, getItemListAddress(), getItemListCount(), type);
             this.address = battleOvl.readWord(referenceAddress) - 1;
         }
 
         @Override
         protected String getFuncDirectory() {
-            return "move";
-        }
-
-        @Override
-        protected int getObjectListAddress() {
-            return getMoveListAddress();
-        }
-
-        @Override
-        protected int getObjectListCount() {
-            return getMoveListCount();
-        }
-    }
-
-    private class ItemEventHandler extends BattleEventHandler {
-        ItemEventHandler(int type) {
-            this.type = type;
-        }
-
-        ItemEventHandler(int type, String funcName) {
-            setFromFuncName(type, funcName);
-        }
-
-        @Override
-        protected String getFuncDirectory() {
             return "item";
-        }
-
-        @Override
-        protected int getObjectListAddress() {
-            return getItemListAddress();
-        }
-
-        @Override
-        protected int getObjectListCount() {
-            return getItemListCount();
         }
     }
 
@@ -2665,6 +3239,14 @@ public class ParagonLiteHandler {
         setBattleObject(moveNumber, index, moveListAddress, events);
     }
 
+    private void cloneMoveEventHandlers(int moveNumber, int otherMoveNumber) {
+        int moveListAddress = getMoveListAddress();
+        int listIndex = getBattleObjectIndex(moveListAddress, getMoveListCount(), moveNumber);
+        int moveRedirectorAddress = getMoveRedirectorAddress(otherMoveNumber);
+        battleOvl.writeWord(moveListAddress + listIndex * 8, moveNumber, false);
+        battleOvl.writeWord(moveListAddress + listIndex * 8 + 4, moveRedirectorAddress + 1, true);
+    }
+
     private void setItemEventHandlers(int itemNumber, ItemEventHandler... events) {
         int itemListAddress = getItemListAddress();
         int itemListCount = getItemListCount();
@@ -2672,9 +3254,12 @@ public class ParagonLiteHandler {
         setBattleObject(itemNumber, index, itemListAddress, events);
     }
 
-    private void setItemEventHandlers(int itemNumber, String sprite, ItemEventHandler... events) {
-        setItemEventHandlers(itemNumber, events);
-        setItemSprite(itemNumber, sprite);
+    private void cloneItemEventHandlersFromAbility(int itemNumber, int abilityNumber) {
+        int itemListAddress = getItemListAddress();
+        int listIndex = getBattleObjectIndex(itemListAddress, getItemListCount(), itemNumber);
+        int abilityRedirectorAddress = getAbilityRedirectorAddress(abilityNumber);
+        battleOvl.writeWord(itemListAddress + listIndex * 8, itemNumber, false);
+        battleOvl.writeWord(itemListAddress + listIndex * 8 + 4, abilityRedirectorAddress + 1, true);
     }
 
     private void clearMoveEventHandlers(int moveNumber) {
@@ -2687,17 +3272,17 @@ public class ParagonLiteHandler {
     }
 
     private int getAbilityListCount() {
-        int cmpInstructionAddress = globalAddressMap.getAddress(battleOvl, "Inst_AbilityEffectListCountCmp");
+        int cmpInstructionAddress = globalAddressMap.getRamAddress(battleOvl, "Inst_AbilityEffectListCountCmp");
         return battleOvl.readUnsignedByte(cmpInstructionAddress);
     }
 
     private int getMoveListCount() {
-        int dataAddress = globalAddressMap.getAddress(battleOvl, "Data_MoveEffectListCount");
+        int dataAddress = globalAddressMap.getRamAddress(battleOvl, "Data_MoveEffectListCount");
         return battleOvl.readWord(dataAddress);
     }
 
     private int getItemListCount() {
-        int cmpInstructionAddress = globalAddressMap.getAddress(battleOvl, "Inst_ItemEffectListCountCmp");
+        int cmpInstructionAddress = globalAddressMap.getRamAddress(battleOvl, "Inst_ItemEffectListCountCmp");
         return battleOvl.readUnsignedByte(cmpInstructionAddress);
     }
 
@@ -2728,66 +3313,143 @@ public class ParagonLiteHandler {
             throw new RuntimeException(String.format("Could not find function \"%s\".", fullFuncName));
 
         String[] strs = fullFuncName.split("::", 2);
-        return globalAddressMap.getAddress(strs[0], strs[1]);
+        return globalAddressMap.getRamAddress(strs[0], strs[1]);
     }
 
-    public void logUpdates(PrintStream log) {
+    public void logUpdates(String directory) {
         // Abilities
+        ParagonLiteDocWriter docWriter = new ParagonLiteDocWriter();
+        docWriter.h1("Ability Changes");
+
+        ParagonLiteDocWriter.Table abilityNameChangesTable = new ParagonLiteDocWriter.Table("Notes");
         for (int i = 0; i <= Abilities.teravolt; ++i) {
             String name = abilityNames.get(i);
             String oldName = oldAbilityNames.get(i);
             boolean updatedName = false;
             if (!Objects.equals(name, oldName)) {
-                log.printf("#%3d %s >> %s%n", i, oldName, name);
+                name = String.format("#%03d %s >> %s%n", i, oldName, name);
                 updatedName = true;
             }
 
-            if (abilityUpdates.containsKey(i)) {
-                if (!updatedName)
-                    log.printf("#%3d %s%n", i, name);
-
-                String abilityUpdate = abilityUpdates.get(i);
-                log.println("- " + abilityUpdate);
+            boolean hasUpdateNote = abilityUpdates.containsKey(i);
+            if (updatedName || hasUpdateNote) {
+                String note = hasUpdateNote ? abilityUpdates.get(i) : "";
+                abilityNameChangesTable.addRow(name, note);
             }
-
-            log.println();
         }
+        docWriter.write(directory + File.separator + "AbilityChanges");
 
         // Pokemon
-        for (int i = 0; i <= pokes.length; ++i) {
-            PokeUpdate pokeUpdate = pokeUpdates[i];
-            if (!pokeUpdate.hasAnyUpdate())
+        Map<Pokemon, List<Pokemon>> formes = new HashMap<>();
+        for (Pokemon poke : pokes) {
+            if (poke == null)
                 continue;
 
-            Pokemon poke = pokes[i];
-            log.println("====================");
-            log.printf("#%3d %s%n", poke.number, poke.fullName());
-            log.println("====================");
+            if (poke.baseForme == null || poke.baseForme == poke)
+                continue;
 
-            if (pokeUpdate.hasTypeUpdate()) {
-                log.println("Type:");
-                Type oldType1 = Type.values()[poke.primaryType.ordinal() - pokeUpdate.type1];
-
-                int oldType2Ordinal = (poke.secondaryType == null ? -1 : poke.secondaryType.ordinal()) - pokeUpdate.type2;
-                Type oldType2 = oldType2Ordinal < 0 ? null : Type.values()[oldType2Ordinal];
-
-                String oldTypeStr = oldType2 == null ? oldType1.camelCase() : (oldType1.camelCase() + " / " + oldType2.camelCase());
-                log.printf("Old    %s%n", oldTypeStr);
-                log.printf("New    %s%n", poke.getTypeString(true));
-                log.println();
+            if (!formes.containsKey(poke.baseForme)) {
+                List<Pokemon> formeList = new ArrayList<>();
+                formeList.add(poke.baseForme);
+                formes.put(poke.baseForme, formeList);
             }
+            formes.get(poke.baseForme).add(poke);
+        }
 
-            if (pokeUpdate.hasAbilityUpdate()) {
-                log.println("Abilities:");
+        docWriter = new ParagonLiteDocWriter();
+        docWriter.h1("Pokémon Changes");
+        for (int i = 1; i < pokes.length; ++i) {
+            List<Pokemon> pokeFormes = formes.getOrDefault(pokes[i], Collections.singletonList(pokes[i]));
+            for (Pokemon poke : pokeFormes) {
+                PokeUpdate pokeUpdate = pokeUpdates[poke.number];
+                if (!pokeUpdate.hasAnyUpdate(oldAbilityNames, abilityNames))
+                    continue;
 
-                String oldAbility1 = oldAbilityNames.get(poke.ability1 - pokeUpdate.ability1);
-                String oldAbility2 = oldAbilityNames.get(poke.ability2 - pokeUpdate.ability2);
-                String oldAbility3 = oldAbilityNames.get(poke.ability3 - pokeUpdate.ability3);
+                docWriter.horizontalRule();
+                docWriter.h2(String.format("#%03d %s", pokes[i].number, poke.fullName()));
 
-                log.printf("Old    1: %s / 2: %s / HA: %s%n", oldAbility1, oldAbility2, oldAbility3);
-                log.printf("New    1: %s / 2: %s / HA: %s%n", abilityNames.get(poke.ability1), abilityNames.get(poke.ability2), abilityNames.get(poke.ability3));
+                // Type
+                if (pokeUpdate.hasTypeUpdate()) {
+                    Type oldType1 = Type.values()[poke.primaryType.ordinal() - pokeUpdate.type1];
+
+                    int oldType2Ordinal = (poke.secondaryType == null ? -1 : poke.secondaryType.ordinal()) - pokeUpdate.type2;
+                    Type oldType2 = oldType2Ordinal < 0 ? null : Type.values()[oldType2Ordinal];
+                    String oldTypeStr = oldType2 == null ? oldType1.camelCase() : String.format("%s/%s", oldType1.camelCase(), oldType2.camelCase());
+
+                    docWriter.paragraph("Old Type: " + oldTypeStr, "New Type: " + poke.getTypeString(true));
+                } else {
+                    docWriter.paragraph("Type: " + poke.getTypeString(false));
+                }
+
+                // Ability
+                ParagonLiteDocWriter.Table abilityTable;
+                if (pokeUpdate.hasAbilityUpdate(oldAbilityNames, abilityNames)) {
+                    abilityTable = new ParagonLiteDocWriter.Table("Old Ability", "New Ability");
+                    String oldAbility1 = oldAbilityNames.get(poke.ability1 - pokeUpdate.ability1);
+                    String oldAbility2 = oldAbilityNames.get(poke.ability2 - pokeUpdate.ability2);
+                    String oldAbility3 = oldAbilityNames.get(poke.ability3 - pokeUpdate.ability3);
+
+                    abilityTable.addRow("1", oldAbility1, abilityNames.get(poke.ability1));
+                    abilityTable.addRow("2", oldAbility2, abilityNames.get(poke.ability2));
+                    abilityTable.addRow("Hidden", oldAbility3, abilityNames.get(poke.ability3));
+                } else {
+                    abilityTable = new ParagonLiteDocWriter.Table("Ability");
+                    abilityTable.addRow("1", abilityNames.get(poke.ability1));
+                    abilityTable.addRow("2", abilityNames.get(poke.ability2));
+                    abilityTable.addRow("Hidden", abilityNames.get(poke.ability3));
+                }
+                docWriter.table(abilityTable);
+
+                // Exp. Yield
+                if (pokeUpdate.hasExpYieldUpdate()) {
+                    docWriter.paragraph("Old Exp. Yield: " + (poke.expYield - pokeUpdate.expYield), String.format("New Exp. Yield: %s (%+d)", poke.expYield, pokeUpdate.expYield));
+                } else {
+                    docWriter.paragraph("Exp. Yield: " + poke.expYield);
+                }
+
+                // Stats
+                if (pokeUpdate.hasStatsUpdate()) {
+                    docWriter.h3("Old Stats");
+                    ParagonLiteDocWriter.Table oldStatsTable = new ParagonLiteDocWriter.Table("Value", "");
+                    oldStatsTable.addRow("HP", String.valueOf(poke.hp - pokeUpdate.hp), getStatBar(poke.hp - pokeUpdate.hp));
+                    oldStatsTable.addRow("Attack", String.valueOf(poke.attack - pokeUpdate.attack), getStatBar(poke.attack - pokeUpdate.attack));
+                    oldStatsTable.addRow("Defense", String.valueOf(poke.defense - pokeUpdate.defense), getStatBar(poke.defense - pokeUpdate.defense));
+                    oldStatsTable.addRow("Sp. Atk", String.valueOf(poke.spatk - pokeUpdate.spatk), getStatBar(poke.spatk - pokeUpdate.spatk));
+                    oldStatsTable.addRow("Sp. Def", String.valueOf(poke.spdef - pokeUpdate.spdef), getStatBar(poke.spdef - pokeUpdate.spdef));
+                    oldStatsTable.addRow("Speed", String.valueOf(poke.speed - pokeUpdate.speed), getStatBar(poke.speed - pokeUpdate.speed));
+                    oldStatsTable.addRow("BST", String.valueOf(poke.bst() - pokeUpdate.bst()), "");
+                    docWriter.table(oldStatsTable);
+
+                    docWriter.h3("New Stats");
+                    ParagonLiteDocWriter.Table newStatsTable = new ParagonLiteDocWriter.Table("Value", "", "Change");
+                    newStatsTable.addRow("HP", String.valueOf(poke.hp), getStatBar(poke.hp), String.format("%+d", pokeUpdate.hp));
+                    newStatsTable.addRow("Attack", String.valueOf(poke.attack), getStatBar(poke.attack), String.format("%+d", pokeUpdate.attack));
+                    newStatsTable.addRow("Defense", String.valueOf(poke.defense), getStatBar(poke.defense), String.format("%+d", pokeUpdate.defense));
+                    newStatsTable.addRow("Sp. Atk", String.valueOf(poke.spatk), getStatBar(poke.spatk), String.format("%+d", pokeUpdate.spatk));
+                    newStatsTable.addRow("Sp. Def", String.valueOf(poke.spdef), getStatBar(poke.spdef), String.format("%+d", pokeUpdate.spdef));
+                    newStatsTable.addRow("Speed", String.valueOf(poke.speed), getStatBar(poke.speed), String.format("%+d", pokeUpdate.speed));
+                    newStatsTable.addRow("BST", String.valueOf(poke.bst()), "", String.format("%+d", pokeUpdate.bst()));
+                    docWriter.table(newStatsTable);
+                } else {
+                    docWriter.h3("Stats");
+                    ParagonLiteDocWriter.Table statsTable = new ParagonLiteDocWriter.Table("Value", "");
+                    statsTable.addRow("HP", String.valueOf(poke.hp), getStatBar(poke.hp));
+                    statsTable.addRow("Attack", String.valueOf(poke.attack), getStatBar(poke.attack));
+                    statsTable.addRow("Defense", String.valueOf(poke.defense), getStatBar(poke.defense));
+                    statsTable.addRow("Sp. Atk", String.valueOf(poke.spatk), getStatBar(poke.spatk));
+                    statsTable.addRow("Sp. Def", String.valueOf(poke.spdef), getStatBar(poke.spdef));
+                    statsTable.addRow("Speed", String.valueOf(poke.speed), getStatBar(poke.speed));
+                    statsTable.addRow("BST", String.valueOf(poke.bst()), "");
+                    docWriter.table(statsTable);
+                }
             }
         }
+        docWriter.write(directory + File.separator + "PokémonChanges");
+    }
+
+    private static String getStatBar(int value) {
+        String bar = "█".repeat(value / 10) + (value % 10 >= 5 ? "▌" : "");
+        return String.format("`%s%s`", bar, ".".repeat(26 - bar.length()));
     }
 
     private static int alignWord(int address) {
@@ -2795,14 +3457,10 @@ public class ParagonLiteHandler {
     }
 
     private static List<String> readLines(String filename) {
-        String extension = ".s";
-        if (!filename.endsWith(extension))
-            filename += extension;
-
         Scanner sc;
         try {
             InputStream stream = FileFunctions.openConfig("paragonlite/" + filename);
-            sc = new Scanner(stream, "UTF-8");
+            sc = new Scanner(stream, StandardCharsets.UTF_8);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -2816,6 +3474,14 @@ public class ParagonLiteHandler {
     }
 
     private void setItemSprite(int number, String sprite) {
+        setItemSpriteInternal(number, -1, sprite);
+    }
+
+    private void setItemSprite(int number, int baseItem, String paletteSprite) {
+        setItemSpriteInternal(number, baseItem, paletteSprite);
+    }
+
+    private void setItemSpriteInternal(int number, int baseItemNumber, String sprite) {
         String extension = ".bmp";
         if (!sprite.endsWith(extension))
             sprite += extension;
@@ -2837,26 +3503,23 @@ public class ParagonLiteHandler {
             throw new RuntimeException(e);
         }
 
-        byte[] graphicFile = bitmapFile.writeGraphicFile32x32();
-        byte[] paletteFile = bitmapFile.writePaletteFile();
+        int itemSpriteMapAddress = globalAddressMap.getRamAddress(arm9, "Data_ItemSpriteMap");
 
-        int itemSpriteMapAddress = globalAddressMap.getAddress(arm9, "Data_ItemSpriteMap");
         int itemGraphicAddress = itemSpriteMapAddress + number * 4;
-        int itemPaletteAddress = itemSpriteMapAddress + number * 4 + 2;
-
-        int itemGraphicId = arm9.readUnsignedHalfword(itemGraphicAddress);
-        int itemPaletteId = arm9.readUnsignedHalfword(itemPaletteAddress);
-
-        if ((itemGraphicId == 0x03FD) != (itemPaletteId == 0x03FE))
-            throw new RuntimeException("Expected both to be valid or both to be invalid");
-
-        itemGraphicId = itemGraphicsNarc.files.size();
-        itemPaletteId = itemGraphicId + 1;
-
-        itemGraphicsNarc.files.add(graphicFile);
-        itemGraphicsNarc.files.add(paletteFile);
-
+        int itemGraphicId;
+        if (baseItemNumber < 0) {
+            itemGraphicId = itemGraphicsNarc.files.size();
+            byte[] graphicFile = bitmapFile.writeGraphicFile32x32();
+            itemGraphicsNarc.files.add(graphicFile);
+        } else {
+            itemGraphicId = arm9.readUnsignedHalfword(itemSpriteMapAddress + baseItemNumber * 4);
+        }
         arm9.writeHalfword(itemGraphicAddress, itemGraphicId);
+
+        int itemPaletteAddress = itemSpriteMapAddress + number * 4 + 2;
+        int itemPaletteId = itemGraphicsNarc.files.size();
+        byte[] paletteFile = bitmapFile.writePaletteFile();
+        itemGraphicsNarc.files.add(paletteFile);
         arm9.writeHalfword(itemPaletteAddress, itemPaletteId);
     }
 

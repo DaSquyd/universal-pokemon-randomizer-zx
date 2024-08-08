@@ -15,7 +15,7 @@
     cmp     r0, #0
     beq     End
     
-    ldr     r1, =5325 ; 1.3x
+    ldr     r1, =4915 ; 1.2x
     mov     r0, #49 ; move power
     bl      Battle::EventVar_MulValue
     

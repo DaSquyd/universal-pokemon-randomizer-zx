@@ -1,5 +1,6 @@
 package com.dabomstew.pkrandom;
 
+import java.util.Arrays;
 import java.util.zip.DataFormatException;
 
 public class BitmapFile {
@@ -75,10 +76,6 @@ public class BitmapFile {
         return height;
     }
 
-    public int getColor(int index) {
-        return colorTable[index];
-    }
-
     public int getPixelColorIndex(int pixelIndex) {
         int row = pixelIndex / width;
         int col = pixelIndex % width;
@@ -89,17 +86,12 @@ public class BitmapFile {
         return pixels[row][col];
     }
 
-    public int getPixelColor(int pixelIndex) {
-        int colorIndex = getPixelColorIndex(pixelIndex);
-        return colorTable[colorIndex];
-    }
-
-    public int getPixelColor(int row, int col) {
-        int colorIndex = getPixelColorIndex(row, col);
-        return colorTable[colorIndex];
-    }
-
     public byte[] writePaletteFile() {
+        return writePaletteFileFromColors(colorTable);
+    }
+    
+    public static byte[] writePaletteFileFromColors(int[] colors) {
+
         byte[] bytes = new byte[552];
 
         // NCLR Header
@@ -115,12 +107,12 @@ public class BitmapFile {
         writeLong(bytes, 0x18, 3);
         writeLong(bytes, 0x20, 0x200);
         writeLong(bytes, 0x24, 16);
-
+        
         // PLTT Color Array
         int colorArrayOffset = 0x28;
         writeWord(bytes, colorArrayOffset, 0x5AD6); // index 0 is always ignored as it is intended to be transparency
-        for (int i = 1; i < colorTable.length; ++i) {
-            int color = colorTable[i];
+        for (int i = 0; i < colors.length; ++i) {
+            int color = colors[i];
             int c = GFXFunctions.convARGBTo16BitColor(color);
             writeWord(bytes, colorArrayOffset + i * 2, c);
         }
@@ -174,31 +166,31 @@ public class BitmapFile {
         return bytes;
     }
 
-    private int readUnsignedWord(byte[] data, int offset) {
+    private static int readUnsignedWord(byte[] data, int offset) {
         return ((data[offset] & 0xFF)
                 | ((data[offset + 1] & 0xFF) << 8));
     }
 
-    private void writeWord(byte[] data, int offset, int value) {
+    private static void writeWord(byte[] data, int offset, int value) {
         data[offset] = (byte) (value & 0xFF);
         data[offset + 1] = (byte) ((value >> 8) & 0xFF);
     }
 
-    private int readLong(byte[] data, int offset) {
+    private static int readLong(byte[] data, int offset) {
         return (data[offset] & 0xFF)
                 | ((data[offset + 1] & 0xFF) << 8)
                 | ((data[offset + 2] & 0xFF) << 16)
                 | ((data[offset + 3] & 0xFF) << 24);
     }
 
-    private void writeLong(byte[] data, int offset, int value) {
+    private static void writeLong(byte[] data, int offset, int value) {
         data[offset] = (byte) (value & 0xFF);
         data[offset + 1] = (byte) ((value >> 8) & 0xFF);
         data[offset + 2] = (byte) ((value >> 16) & 0xFF);
         data[offset + 3] = (byte) ((value >> 24) & 0xFF);
     }
 
-    private String readString(byte[] data, int offset, int length) {
+    private static String readString(byte[] data, int offset, int length) {
         StringBuilder sb = new StringBuilder(length);
 
         for (int i = 0; i < length; ++i) {
@@ -208,7 +200,7 @@ public class BitmapFile {
         return sb.toString();
     }
 
-    private void writeString(byte[] data, int offset, String str) {
+    private static void writeString(byte[] data, int offset, String str) {
         char[] charArray = str.toCharArray();
         for (int i = 0; i < charArray.length; ++i) {
             char c = charArray[i];

@@ -321,6 +321,7 @@ public class NewRandomizerGUI {
     private JCheckBox modernizeGemsCheckBox;
     private JCheckBox NPCSmartAICheckBox;
     private JCheckBox paragonLiteCheckBox;
+    private JCheckBox debugModeCheckBox;
 
     private static JFrame frame;
 
@@ -367,7 +368,7 @@ public class NewRandomizerGUI {
 
     private BatchRandomizationSettings batchRandomizationSettings;
 
-    public NewRandomizerGUI() {
+    public NewRandomizerGUI() {        
         ToolTipManager.sharedInstance().setInitialDelay(400);
         ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
         bundle = ResourceBundle.getBundle("com/dabomstew/pkrandom/newgui/Bundle");

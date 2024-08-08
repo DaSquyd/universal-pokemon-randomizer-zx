@@ -32,7 +32,7 @@ AssaultVestCheck:
     
     mov     r0, r6
     bl      Battle::GetPokeHeldItem
-    ldr     r1, =537 ; Prism Scale (TEMP)
+    ldr     r1, =114 ; Assault Vest
     cmp     r0, r1
     bne     CheckChoiceItem
     

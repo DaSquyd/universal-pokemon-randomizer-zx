@@ -423,7 +423,7 @@ public class Settings {
                 trainersMod == TrainersMod.MAINPLAYTHROUGH,
                 trainersMod == TrainersMod.TYPE_THEMED,
                 trainersMod == TrainersMod.TYPE_THEMED_ELITE4_GYMS));
-        
+
         // 14 trainer pokemon force evolutions
         out.write((trainersForceFullyEvolved ? 0x80 : 0) | trainersForceFullyEvolvedLevel);
 
@@ -490,9 +490,9 @@ public class Settings {
         out.write(makeByteSelected(evolutionsMod == EvolutionsMod.UNCHANGED, evolutionsMod == EvolutionsMod.RANDOM,
                 evosSimilarStrength, evosSameTyping, evosMaxThreeStages, evosForceChange, evosAllowAltFormes,
                 evolutionsMod == EvolutionsMod.RANDOM_EVERY_LEVEL));
-        
+
         // 27 pokemon trainer misc
-        out.write(makeByteSelected(trainersUsePokemonOfSimilarStrength, 
+        out.write(makeByteSelected(trainersUsePokemonOfSimilarStrength,
                 rivalCarriesStarterThroughout,
                 trainersMatchTypingDistribution,
                 trainersBlockLegendaries,
@@ -514,14 +514,14 @@ public class Settings {
 
         // 32 - 35: misc tweaks part 1
         try {
-            int miscTweaksLow = (int)(currentMiscTweaks & 0xFFFFFFFFL);
+            int miscTweaksLow = (int) (currentMiscTweaks & 0xFFFFFFFFL);
             writeFullInt(out, miscTweaksLow);
         } catch (IOException e) {
             e.printStackTrace(); // better than nothing
         }
 
         // 36 trainer pokemon level modifier
-        out.write((trainersLevelModified ? 0x80 : 0) | (trainersLevelModifier+50));
+        out.write((trainersLevelModified ? 0x80 : 0) | (trainersLevelModifier + 50));
 
         // 37 shop items
         out.write(makeByteSelected(shopItemsMod == ShopItemsMod.RANDOM, shopItemsMod == ShopItemsMod.SHUFFLE,
@@ -529,7 +529,7 @@ public class Settings {
                 balanceShopPrices, guaranteeEvolutionItems));
 
         // 38 wild level modifier
-        out.write((wildLevelsModified ? 0x80 : 0) | (wildLevelModifier+50));
+        out.write((wildLevelsModified ? 0x80 : 0) | (wildLevelModifier + 50));
 
         // 39 EXP curve mod, block broken moves, alt forme stuff
         out.write(makeByteSelected(
@@ -568,7 +568,7 @@ public class Settings {
                 allowTotemAltFormes));
 
         // 43 Totem level modifier
-        out.write((totemLevelsModified ? 0x80 : 0) | (totemLevelModifier+50));
+        out.write((totemLevelsModified ? 0x80 : 0) | (totemLevelModifier + 50));
 
         // 44 - 45: These two get a byte each for future proofing
         out.write(updateBaseStatsToGeneration);
@@ -578,7 +578,7 @@ public class Settings {
         out.write(selectedEXPCurve.toByte());
 
         // 47 Static level modifier
-        out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier+50));
+        out.write((staticLevelModified ? 0x80 : 0) | (staticLevelModifier + 50));
 
         // 48 trainer pokemon held items / pokemon ensure two abilities
         out.write(makeByteSelected(randomizeHeldItemsForBossTrainerPokemon,
@@ -603,7 +603,7 @@ public class Settings {
 
         // 52 - 55: misc tweaks part 2
         try {
-            int miscTweaksHigh = (int)(currentMiscTweaks >> 32);
+            int miscTweaksHigh = (int) (currentMiscTweaks >> 32);
             writeFullInt(out, miscTweaksHigh);
         } catch (IOException e) {
             e.printStackTrace(); // better than nothing
@@ -653,8 +653,8 @@ public class Settings {
         settings.setStandardizeEXPCurves(restoreState(data[1], 4));
         settings.setBaseStatsFollowEvolutions(restoreState(data[1], 0));
         settings.setUpdateBaseStats(restoreState(data[1], 5));
-        settings.setBaseStatsFollowMegaEvolutions(restoreState(data[1],6));
-        settings.setAssignEvoStatsRandomly(restoreState(data[1],7));
+        settings.setBaseStatsFollowMegaEvolutions(restoreState(data[1], 6));
+        settings.setAssignEvoStatsRandomly(restoreState(data[1], 7));
 
         settings.setTypesMod(restoreEnum(TypesMod.class, data[2], 2, // UNCHANGED
                 0, // RANDOM_FOLLOW_EVOLUTIONS
@@ -663,7 +663,7 @@ public class Settings {
         settings.setRaceMode(restoreState(data[2], 3));
         settings.setBlockBrokenMoves(restoreState(data[2], 4));
         settings.setLimitPokemon(restoreState(data[2], 5));
-        settings.setTypesFollowMegaEvolutions(restoreState(data[2],6));
+        settings.setTypesFollowMegaEvolutions(restoreState(data[2], 6));
         settings.setDualTypeOnly(restoreState(data[2], 7));
         settings.setAbilitiesMod(restoreEnum(AbilitiesMod.class, data[3], 0, // UNCHANGED
                 1 // RANDOMIZE
@@ -673,15 +673,15 @@ public class Settings {
         settings.setBanTrappingAbilities(restoreState(data[3], 4));
         settings.setBanNegativeAbilities(restoreState(data[3], 5));
         settings.setBanBadAbilities(restoreState(data[3], 6));
-        settings.setAbilitiesFollowMegaEvolutions(restoreState(data[3],7));
+        settings.setAbilitiesFollowMegaEvolutions(restoreState(data[3], 7));
 
         settings.setStartersMod(StartersMod.values()[data[4] & 0x7]);
         settings.setRandomizeStartersHeldItems(restoreState(data[4], 3));
         settings.setBanBadRandomStarterHeldItems(restoreState(data[4], 4));
-        settings.setAllowStarterAltFormes(restoreState(data[4],5));
+        settings.setAllowStarterAltFormes(restoreState(data[4], 5));
 
-        settings.setCustomStarters(new int[] { FileFunctions.read2ByteInt(data, 5) + 1,
-                FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1 });
+        settings.setCustomStarters(new int[]{FileFunctions.read2ByteInt(data, 5) + 1,
+                FileFunctions.read2ByteInt(data, 7) + 1, FileFunctions.read2ByteInt(data, 9) + 1});
 
         settings.setMovesetsMod(restoreEnum(MovesetsMod.class, data[11], 2, // UNCHANGED
                 1, // RANDOM_PREFER_SAME_TYPE
@@ -730,12 +730,12 @@ public class Settings {
                 2, // COMPLETELY_RANDOM
                 3  // SIMILAR_STRENGTH 
         ));
-        
+
         settings.setLimitMainGameLegendaries(restoreState(data[17], 4));
         settings.setLimit600(restoreState(data[17], 5));
         settings.setAllowStaticAltFormes(restoreState(data[17], 6));
         settings.setSwapStaticMegaEvos(restoreState(data[17], 7));
-        
+
         settings.setTmsMod(restoreEnum(TMsMod.class, data[18], 4, // UNCHANGED
                 3 // RANDOM
         ));
@@ -743,7 +743,7 @@ public class Settings {
                 1, // RANDOM_PREFER_TYPE
                 0, // COMPLETELY_RANDOM
                 7 // FULL
-        )); 
+        ));
         settings.setTmLevelUpMoveSanity(restoreState(data[18], 5));
         settings.setKeepFieldMoveTMs(restoreState(data[18], 6));
 
@@ -778,7 +778,7 @@ public class Settings {
         settings.setRandomizeInGameTradesNicknames(restoreState(data[23], 4));
         settings.setRandomizeInGameTradesOTs(restoreState(data[23], 5));
 
-        settings.setFieldItemsMod(restoreEnum(FieldItemsMod.class, data[24],  
+        settings.setFieldItemsMod(restoreEnum(FieldItemsMod.class, data[24],
                 2,  // UNCHANGED
                 1,  // SHUFFLE
                 0,  // RANDOM
@@ -802,7 +802,7 @@ public class Settings {
         settings.setEvosSameTyping(restoreState(data[26], 3));
         settings.setEvosMaxThreeStages(restoreState(data[26], 4));
         settings.setEvosForceChange(restoreState(data[26], 5));
-        settings.setEvosAllowAltFormes(restoreState(data[26],6));
+        settings.setEvosAllowAltFormes(restoreState(data[26], 6));
 
         // new pokemon trainer misc
         settings.setTrainersUsePokemonOfSimilarStrength(restoreState(data[27], 0));
@@ -822,35 +822,35 @@ public class Settings {
         }
         settings.setCurrentRestrictions(restrictions);
 
-        long codeTweaksLow = FileFunctions.readFullIntBigEndian(data, 32);
-        long codeTweaksHigh = (FileFunctions.readFullIntBigEndian(data, 52));
+        long codeTweaksLow = ((long) FileFunctions.readFullIntBigEndian(data, 32)) & 0xFFFFFFFFL;
+        long codeTweaksHigh = ((long)FileFunctions.readFullIntBigEndian(data, 52)) & 0xFFFFFFFFL;
         long codeTweaks = codeTweaksLow | (codeTweaksHigh << 32);
         settings.setCurrentMiscTweaks(codeTweaks);
 
         settings.setTrainersLevelModified(restoreState(data[36], 7));
         settings.setTrainersLevelModifier((data[36] & 0x7F) - 50);
         //settings.setTrainersLevelModifier((data[36] & 0x7F));
-        settings.setShopItemsMod(restoreEnum(ShopItemsMod.class,data[37],
+        settings.setShopItemsMod(restoreEnum(ShopItemsMod.class, data[37],
                 2,
                 1,
                 0));
-        settings.setBanBadRandomShopItems(restoreState(data[37],3));
-        settings.setBanRegularShopItems(restoreState(data[37],4));
-        settings.setBanOPShopItems(restoreState(data[37],5));
-        settings.setBalanceShopPrices(restoreState(data[37],6));
-        settings.setGuaranteeEvolutionItems(restoreState(data[37],7));
+        settings.setBanBadRandomShopItems(restoreState(data[37], 3));
+        settings.setBanRegularShopItems(restoreState(data[37], 4));
+        settings.setBanOPShopItems(restoreState(data[37], 5));
+        settings.setBalanceShopPrices(restoreState(data[37], 6));
+        settings.setGuaranteeEvolutionItems(restoreState(data[37], 7));
 
-        settings.setWildLevelsModified(restoreState(data[38],7));
+        settings.setWildLevelsModified(restoreState(data[38], 7));
         settings.setWildLevelModifier((data[38] & 0x7F) - 50);
 
-        settings.setExpCurveMod(restoreEnum(ExpCurveMod.class,data[39],0,1,2));
+        settings.setExpCurveMod(restoreEnum(ExpCurveMod.class, data[39], 0, 1, 2));
 
-        settings.setBlockBrokenMovesetMoves(restoreState(data[39],3));
-        settings.setBlockBrokenTMMoves(restoreState(data[39],4));
-        settings.setBlockBrokenTutorMoves(restoreState(data[39],5));
+        settings.setBlockBrokenMovesetMoves(restoreState(data[39], 3));
+        settings.setBlockBrokenTMMoves(restoreState(data[39], 4));
+        settings.setBlockBrokenTutorMoves(restoreState(data[39], 5));
 
-        settings.setAllowTrainerAlternateFormes(restoreState(data[39],6));
-        settings.setAllowWildAltFormes(restoreState(data[39],7));
+        settings.setAllowTrainerAlternateFormes(restoreState(data[39], 6));
+        settings.setAllowWildAltFormes(restoreState(data[39], 7));
 
         settings.setDoubleBattleMode(restoreState(data[40], 0));
         settings.setAdditionalBossTrainerPokemon((data[40] & 0xE) >> 1);
@@ -858,15 +858,15 @@ public class Settings {
         settings.setWeighDuplicateAbilitiesTogether(restoreState(data[40], 7));
 
         settings.setAdditionalRegularTrainerPokemon((data[41] & 0x7));
-        settings.setAuraMod(restoreEnum(AuraMod.class,data[41],3,4,5));
-        settings.setEvolutionMovesForAll(restoreState(data[41],6));
-        settings.setGuaranteeXItems(restoreState(data[41],7));
+        settings.setAuraMod(restoreEnum(AuraMod.class, data[41], 3, 4, 5));
+        settings.setEvolutionMovesForAll(restoreState(data[41], 6));
+        settings.setGuaranteeXItems(restoreState(data[41], 7));
 
-        settings.setTotemPokemonMod(restoreEnum(TotemPokemonMod.class,data[42],0,1,2));
-        settings.setAllyPokemonMod(restoreEnum(AllyPokemonMod.class,data[42],3,4,5));
-        settings.setRandomizeTotemHeldItems(restoreState(data[42],6));
-        settings.setAllowTotemAltFormes(restoreState(data[42],7));
-        settings.setTotemLevelsModified(restoreState(data[43],7));
+        settings.setTotemPokemonMod(restoreEnum(TotemPokemonMod.class, data[42], 0, 1, 2));
+        settings.setAllyPokemonMod(restoreEnum(AllyPokemonMod.class, data[42], 3, 4, 5));
+        settings.setRandomizeTotemHeldItems(restoreState(data[42], 6));
+        settings.setAllowTotemAltFormes(restoreState(data[42], 7));
+        settings.setTotemLevelsModified(restoreState(data[43], 7));
         settings.setTotemLevelModifier((data[43] & 0x7F) - 50);
 
         settings.setUpdateBaseStatsToGeneration(data[44]);
@@ -875,7 +875,7 @@ public class Settings {
 
         settings.setSelectedEXPCurve(ExpCurve.fromByte(data[46]));
 
-        settings.setStaticLevelModified(restoreState(data[47],7));
+        settings.setStaticLevelModified(restoreState(data[47], 7));
         settings.setStaticLevelModifier((data[47] & 0x7F) - 50);
 
         settings.setRandomizeHeldItemsForBossTrainerPokemon(restoreState(data[48], 0));
@@ -1117,11 +1117,11 @@ public class Settings {
         return changeImpossibleEvolutions;
     }
 
-    public boolean isDualTypeOnly(){
+    public boolean isDualTypeOnly() {
         return dualTypeOnly;
     }
 
-    public void setDualTypeOnly(boolean dualTypeOnly){
+    public void setDualTypeOnly(boolean dualTypeOnly) {
         this.dualTypeOnly = dualTypeOnly;
     }
 
@@ -1336,13 +1336,18 @@ public class Settings {
         this.weighDuplicateAbilitiesTogether = weighDuplicateAbilitiesTogether;
     }
 
-    public boolean isEnsureTwoAbilities() { return ensureTwoAbilities; }
+    public boolean isEnsureTwoAbilities() {
+        return ensureTwoAbilities;
+    }
 
     public void setEnsureTwoAbilities(boolean ensureTwoAbilities) {
         this.ensureTwoAbilities = ensureTwoAbilities;
     }
 
-    public boolean isEnsureRelevantAbilities() { return ensureRelevantAbilities; }
+    public boolean isEnsureRelevantAbilities() {
+        return ensureRelevantAbilities;
+    }
+
     public void setEnsureRelevantAbilities(boolean ensureRelevantAbilities) {
         this.ensureRelevantAbilities = ensureRelevantAbilities;
     }
@@ -1391,7 +1396,7 @@ public class Settings {
         this.allowStarterAltFormes = allowStarterAltFormes;
     }
 
-    
+
     public TypesMod getTypesMod() {
         return typesMod;
     }
@@ -1672,7 +1677,7 @@ public class Settings {
         this.trainersEnforceDistribution = trainersEnforceDistribution;
         return this;
     }
-    
+
     public boolean isTrainersEnforceMainPlaythrough() {
         return trainersEnforceMainPlaythrough;
     }
@@ -1682,7 +1687,7 @@ public class Settings {
         return this;
     }
 
-    
+
     public boolean isTrainersBlockEarlyWonderGuard() {
         return trainersBlockEarlyWonderGuard;
     }
@@ -2361,7 +2366,7 @@ public class Settings {
     public void setBalanceShopPrices(boolean balanceShopPrices) {
         this.balanceShopPrices = balanceShopPrices;
     }
-   
+
     public boolean isGuaranteeEvolutionItems() {
         return guaranteeEvolutionItems;
     }

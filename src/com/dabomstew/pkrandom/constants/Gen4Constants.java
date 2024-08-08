@@ -24,13 +24,12 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.pokemon.*;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import com.dabomstew.pkrandom.pokemon.*;
-import com.sun.xml.internal.ws.client.sei.ValueSetter;
 
 public class Gen4Constants {
 

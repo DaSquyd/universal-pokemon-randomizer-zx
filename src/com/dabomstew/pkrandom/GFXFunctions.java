@@ -79,7 +79,7 @@ public class GFXFunctions {
     }
 
     private static BufferedImage drawTiledZOrderImage(byte[] data, int[] palette, int offset, int width, int height,
-                                                int tileWidth, int tileHeight, int bpp) {
+                                                      int tileWidth, int tileHeight, int bpp) {
         if (bpp != 1 && bpp != 2 && bpp != 4 && bpp != 8) {
             throw new IllegalArgumentException("Bits per pixel must be a multiple of 2.");
         }
@@ -101,7 +101,7 @@ public class GFXFunctions {
                 for (int xT = 0; xT < tileWidth; xT++) {
                     int value = data[tile * bytesPerTile + yT * tileWidth / pixelsPerByte + xT / pixelsPerByte + offset] & 0xFF;
                     if (pixelsPerByte != 1) {
-                        value = (value >>> ((xT+1) % pixelsPerByte) * bpp) & ((1 << bpp) - 1);
+                        value = (value >>> ((xT + 1) % pixelsPerByte) * bpp) & ((1 << bpp) - 1);
                     }
 
                     int withinTile = yT * tileWidth + xT;
@@ -119,13 +119,21 @@ public class GFXFunctions {
         return bim;
     }
 
+    public static int makeARGBColor(int red, int green, int blue) {
+        return makeARGBColor(red, green, blue, 255);
+    }
+
+    public static int makeARGBColor(int red, int green, int blue, int alpha) {
+        return ((alpha & 0xFF) << 24) | ((red & 0xFF) << 16) | ((green & 0xFF) << 8) | (blue & 0xFF);
+    }
+
     public static int conv16BitColorToARGB(int palValue) {
-        int red = (int) ((palValue & 0x1F) * 8.25);
-        int green = (int) (((palValue & 0x3E0) >> 5) * 8.25);
-        int blue = (int) (((palValue & 0x7C00) >> 10) * 8.25);
+        int red = ((palValue & 0x1F) * 510 + 31) / 62;
+        int green = (((palValue >> 5) & 0x1F) * 510 + 31) / 62;
+        int blue = (((palValue >> 10) & 0x1F) * 510 + 31) / 62;
         return 0xFF000000 | (red << 16) | (green << 8) | blue;
     }
-    
+
     public static int convARGBTo16BitColor(int argb) {
         int red = Math.min(((argb >> 16) & 0xFF) / 8, 31);
         int green = Math.min(((argb >> 8) & 0xFF) / 8, 31);
@@ -134,10 +142,10 @@ public class GFXFunctions {
     }
 
     public static int conv3DS16BitColorToARGB(int palValue) {
-        int alpha = (int) ((palValue & 0x1) * 0xFF);
-        int blue = (int) (((palValue & 0x3E) >> 1) * 8.25);
-        int green = (int) (((palValue & 0x7C0) >> 6) * 8.25);
-        int red = (int) (((palValue & 0xF800) >> 11) * 8.25);
+        int alpha = (palValue & 0x1) * 0xFF;
+        int blue = (((palValue >> 1) & 0x1F) * 510 + 31) / 62;
+        int green = (((palValue >> 6) & 0x1F) * 510 + 31) / 62;
+        int red = (((palValue >> 11) & 0x1F) * 510 + 31) / 62;
         return (alpha << 24) | (red << 16) | (green << 8) | blue;
     }
 

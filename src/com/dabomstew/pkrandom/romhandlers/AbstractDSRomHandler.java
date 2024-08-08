@@ -368,7 +368,7 @@ public abstract class AbstractDSRomHandler extends AbstractRomHandler {
         for enlarging the "copy to ITCM" area) and #2 (since the ARM9 will be made larger). We also want to change the
         specified size for the ITCM area since we're enlarging it.
          */
-
+        
         if (arm9Extended) return arm9;  // Don't try to extend the ARM9 more than once
 
         int tcmCopyingPointersOffset = find(arm9, prefix);

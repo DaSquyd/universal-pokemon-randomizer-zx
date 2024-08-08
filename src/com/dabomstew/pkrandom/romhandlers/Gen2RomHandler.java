@@ -1167,7 +1167,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 tr.fullDisplayName = tcnames.get(i) + " " + name;
                 offs += lengthOfStringAt(offs, false) + 1;
                 int dataType = rom[offs] & 0xFF;
-                tr.poketype = dataType;
+                tr.partyFlags = dataType;
                 offs++;
                 while ((rom[offs] & 0xFF) != 0xFF) {
                     TrainerPokemon tp = new TrainerPokemon();
@@ -1241,7 +1241,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 writeFixedLengthString(tr.name, offs, trnamelen + 1);
                 offs += trnamelen + 1;
                 // Write out new trainer data
-                rom[offs++] = (byte) tr.poketype;
+                rom[offs++] = (byte) tr.partyFlags;
                 Iterator<TrainerPokemon> tPokes = tr.pokemon.iterator();
                 for (int tpnum = 0; tpnum < tr.pokemon.size(); tpnum++) {
                     TrainerPokemon tp = tPokes.next();

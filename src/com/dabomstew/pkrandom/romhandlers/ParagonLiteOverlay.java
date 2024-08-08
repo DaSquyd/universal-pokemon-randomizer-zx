@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class ParagonLiteOverlay {
+    protected Gen5RomHandler romHandler;
     protected final int number;
     protected final String name;
     protected byte[] data;
@@ -27,8 +28,8 @@ public class ParagonLiteOverlay {
         int end;
 
         FreeSpace(int start, int end) {
-            this.start = alignWord(start);
-            this.end = alignNextWord(end);
+            this.start = align(start, 4);
+            this.end = alignNext(end, 4);
         }
 
         int size() {
@@ -41,7 +42,8 @@ public class ParagonLiteOverlay {
         }
     }
 
-    public ParagonLiteOverlay(int number, String name, byte[] data, int address, Insertion insertion, ParagonLiteAddressMap globalAddressMap) {
+    public ParagonLiteOverlay(Gen5RomHandler romHandler, int number, String name, byte[] data, int address, Insertion insertion, ParagonLiteAddressMap globalAddressMap) {
+        this.romHandler = romHandler;
         this.number = number;
         this.name = name;
         this.data = data;
@@ -53,8 +55,42 @@ public class ParagonLiteOverlay {
         globalAddressMap.registerOverlay(this);
     }
 
-    private int allocate(int size) {
-        size = alignNextWord(size);
+    public int romToRamAddress(int romAddress) {
+        return romAddress;
+    }
+
+    public int ramToRomAddress(int romAddress) {
+        return romAddress;
+    }
+
+    public int allocateRom(int size) {
+        return allocateRomRange(size, -1, -1);
+    }
+
+    public int allocateRomNear(int size, int referenceAddress, int referenceSize) {
+        return allocateRomRange(size, referenceAddress, referenceAddress + referenceSize);
+    }
+    
+    private boolean rangeIsNear(int startA, int endA, int startB, int endB) {
+        if (startA < 0 || endA < 0 || startB < 0 || endB < 0)
+            return true;
+        
+        int min = 0xFFC00000; // -4194304
+        int max = 0x003FFFFF; // +4194303
+
+        int startToStart = startA - startB;
+        int startToEnd = startA - endB;
+        int endToStart = endA - startB;
+        int endToEnd = endA - endB;
+
+        return startToStart >= min && startToStart <= max
+                && startToEnd >= min && startToEnd <= max
+                && endToStart >= min && endToStart <= max
+                && endToEnd >= min && endToEnd <= max;
+    }
+
+    private int allocateRomRange(int size, int rangeStart, int rangeEnd) {
+        size = alignNext(size, 4);
 
         Iterator<FreeSpace> iterator = freeSpaces.iterator();
 
@@ -64,6 +100,9 @@ public class ParagonLiteOverlay {
         // Try for perfect match
         while (iterator.hasNext()) {
             FreeSpace freeSpace = iterator.next();
+            if (!rangeIsNear(romToRamAddress(freeSpace.start), romToRamAddress(freeSpace.end), rangeStart, rangeEnd))
+                continue;
+            
             if (freeSpace.size() == size) {
                 int start = freeSpace.start;
                 iterator.remove();
@@ -79,28 +118,29 @@ public class ParagonLiteOverlay {
         if (largestFreeSpace != null) {
             largestFreeSpace.end -= size;
 
-            if (alignWord(largestFreeSpace.end) != largestFreeSpace.end)
+            if (align(largestFreeSpace.end, 4) != largestFreeSpace.end)
                 throw new RuntimeException();
 
             return largestFreeSpace.end;
         }
 
-        return allocateExtend(size);
+        int allocationRomAddress = allocateExtend(size);
+        int allocationRamAddress = romToRamAddress(allocationRomAddress);
+        if (!rangeIsNear(allocationRamAddress, allocationRamAddress + size, rangeStart, rangeEnd))
+            throw new RuntimeException();
+        
+        return allocationRomAddress;
     }
 
-    protected int allocateExtend(int size) {
-        switch (insertion) {
-            case Front:
-                return allocateExtendFront(size);
-            case Back:
-                return allocateExtendBack(size);
-            default:
-                throw new RuntimeException();
-        }
+    public int allocateExtend(int size) {
+        return switch (insertion) {
+            case Front -> allocateExtendFront(size);
+            case Back -> allocateExtendBack(size);
+        };
     }
 
     private int allocateExtendFront(int size) {
-        size = alignNextWord(size);
+        size = alignNext(size, 4);
 
         int allocAddress = address - size;
 
@@ -125,7 +165,7 @@ public class ParagonLiteOverlay {
     }
 
     private int allocateExtendBack(int size) {
-        size = alignNextWord(size);
+        size = alignNext(size, 4);
 
         int allocAddress = address + data.length;
 
@@ -151,22 +191,22 @@ public class ParagonLiteOverlay {
         return allocAddress;
     }
 
-    private void free(int address, int size) {
+    private void free(int romAddress, int size) {
         if (size < 0)
             throw new RuntimeException();
 
         if (size == 0)
             return;
 
-        address = alignWord(address);
-        size = alignNextWord(size);
+        romAddress = align(romAddress, 4);
+        size = alignNext(size, 4);
 
-        fill(address, size, (byte) 0x00);
+        clear(romAddress, size);
 
-        int funcEnd = address + size;
+        int funcEnd = romAddress + size;
 
         if (freeSpaces.isEmpty()) {
-            freeSpaces.add(new FreeSpace(address, funcEnd));
+            freeSpaces.add(new FreeSpace(romAddress, funcEnd));
             return;
         }
 
@@ -175,7 +215,7 @@ public class ParagonLiteOverlay {
             FreeSpace freeSpace = iterator.next();
 
             // Case: Deallocate at end of known free space
-            if (address == freeSpace.end) {
+            if (romAddress == freeSpace.end) {
                 freeSpace.end += size;
 
                 if (!iterator.hasNext())
@@ -190,24 +230,24 @@ public class ParagonLiteOverlay {
             }
 
             // Case: Func is after this free space
-            if (address > freeSpace.end) {
+            if (romAddress > freeSpace.end) {
                 if (iterator.hasNext())
                     continue;
 
                 // Case: There is no next free space
-                iterator.add(new FreeSpace(address, funcEnd));
+                iterator.add(new FreeSpace(romAddress, funcEnd));
                 return;
             }
 
             // Case: Func ends at start of next free space
             if (funcEnd == freeSpace.start) {
-                freeSpace.start = address;
+                freeSpace.start = romAddress;
                 return;
             }
 
             // Case: Func starts and ends before this free space
             iterator.previous();
-            iterator.add(new FreeSpace(address, funcEnd));
+            iterator.add(new FreeSpace(romAddress, funcEnd));
             return;
         }
     }
@@ -221,7 +261,7 @@ public class ParagonLiteOverlay {
     }
 
     public void setAddress(int newAddress) {
-        if (!isWordAligned(newAddress))
+        if (!isAligned(newAddress, 4))
             throw new RuntimeException(String.format("Address 0x%08X was not word-aligned", newAddress));
 
         int diff = address - newAddress;
@@ -236,7 +276,7 @@ public class ParagonLiteOverlay {
 
     public void save(Gen5RomHandler romHandler) {
         // Align 32
-        setAddress(address & 0xFFFFFFE0);
+        setAddress(align(address, 32));
 
         romHandler.setOverlayAddress(number, address);
 
@@ -251,8 +291,13 @@ public class ParagonLiteOverlay {
         return data.length;
     }
 
-    public int getFuncSize(int ramAddress) {
-        return armParser.getFuncSize(data, ramAddress - address);
+    public int getFuncSizeRam(int ramAddress) {
+        int romAddress = ramToRomAddress(ramAddress);
+        return getFuncSizeRom(romAddress);
+    }
+
+    public int getFuncSizeRom(int romAddress) {
+        return armParser.getFuncSize(data, romAddress - address);
     }
 
     // Obtains the RAM address of the found string of bytes
@@ -276,80 +321,70 @@ public class ParagonLiteOverlay {
         return found.get(0) + address;
     }
 
-    private void fill(int ramAddress, int length, byte value) {
-        int offset = ramAddress - address;
+    private void clear(int romAddress, int length) {
+        int offset = romAddress - address;
         for (int i = 0; i < length; ++i)
-            data[offset + i] = value;
+            data[offset + i] = (byte) 0x00;
     }
 
-    public void writeByte(int ramAddress, byte byteValue) {
-        int offset = ramAddress - address;
+    public void writeByte(int romAddress, byte byteValue) {
+        int offset = romAddress - address;
         data[offset] = (byte) (byteValue & 0xFF);
     }
 
-    public void writeByte(int ramAddress, int byteValue) {
-        int offset = ramAddress - address;
+    public void writeByte(int romAddress, int byteValue) {
+        int offset = romAddress - address;
         data[offset] = (byte) (byteValue & 0xFF);
     }
 
-    public void writeHalfword(int ramAddress, int halfword) {
-        int offset = ramAddress - address;
+    public void writeHalfword(int romAddress, int halfword) {
+        int offset = romAddress - address;
         data[offset] = (byte) (halfword & 0xFF);
         data[offset + 1] = (byte) ((halfword >> 8) & 0xFF);
     }
 
-    public void writeWord(int address, int word, boolean isReference) {
+    public void writeWord(int romAddress, int word, boolean isReference) {
         if (isReference) {
-            int oldWord = readWord(address);
+            int ramAddress = romToRamAddress(romAddress);
+            int oldWord = readWord(romAddress);
 
-            int oldDestination = alignWord(oldWord);
+            int oldDestination = align(oldWord, 4);
 
             if (word > 0) {
-                int newDestination = alignWord(word);
-                globalAddressMap.addReference(newDestination, this, address);
+                int newDestination = align(word, 4);
+                globalAddressMap.addReference(newDestination, this, ramAddress);
             }
 
-            ParagonLiteAddressMap.RemovalData removalData = globalAddressMap.removeReference(oldDestination, this, address);
+            ParagonLiteAddressMap.RemovalData removalData = globalAddressMap.removeReference(oldDestination, this, ramAddress);
             if (removalData != null && removalData.referenceCount == 0) {
                 free(removalData.address, removalData.size);
             }
         }
 
-        int offset = address - this.address;
+        int offset = romAddress - this.address;
         data[offset] = (byte) (word & 0xFF);
         data[offset + 1] = (byte) ((word >> 8) & 0xFF);
         data[offset + 2] = (byte) ((word >> 16) & 0xFF);
         data[offset + 3] = (byte) ((word >> 24) & 0xFF);
     }
 
-    public void writeBytes(int ramAddress, byte[] bytes) {
-        System.arraycopy(bytes, 0, data, ramAddress - address, bytes.length);
+    public void writeBytes(int romAddress, byte[] bytes) {
+        System.arraycopy(bytes, 0, data, romAddress - address, bytes.length);
     }
 
-    public byte readByte(int ramAddress) {
-        int offset = ramAddress - address;
-        return data[offset];
-    }
-
-    public int readUnsignedByte(int ramAddress) {
-        int offset = ramAddress - address;
+    public int readUnsignedByte(int romAddress) {
+        int offset = romAddress - address;
         return ((int) data[offset]) & 0xFF;
     }
 
-    public short readSignedHalfword(int ramAddress) {
-        int offset = ramAddress - address;
-        return (short) (((data[offset] & 0xFF)
-                | ((data[offset + 1] & 0xFF) << 8)));
-    }
-
-    public int readUnsignedHalfword(int ramAddress) {
-        int offset = ramAddress - address;
+    public int readUnsignedHalfword(int romAddress) {
+        int offset = romAddress - address;
         return ((data[offset] & 0xFF)
                 | ((data[offset + 1] & 0xFF) << 8));
     }
 
-    public int readWord(int ramAddress) {
-        int offset = ramAddress - address;
+    public int readWord(int romAddress) {
+        int offset = romAddress - address;
         return (data[offset] & 0xFF)
                 | ((data[offset + 1] & 0xFF) << 8)
                 | ((data[offset + 2] & 0xFF) << 16)
@@ -358,37 +393,61 @@ public class ParagonLiteOverlay {
 
     public int writeCode(List<String> lines, String label) {
         int size = armParser.getByteLength(lines);
-        int address = allocate(size);
+        int romAddress = allocateRom(size);
 
-        return writeCodeInternal(lines, address, label);
+        writeCodeInternal(lines, romAddress, label);
+        return romAddress;
     }
 
     public int writeCodeUnnamed(List<String> lines) {
         int size = armParser.getByteLength(lines);
-        int address = allocate(size);
+        int romAddress = allocateRom(size);
 
-        String label = String.format("Code_0x%08X", address);
-        return writeCodeInternal(lines, address, label);
+        String label = String.format("Code_0x%08X", romAddress);
+        writeCodeInternal(lines, romAddress, label);
+        return romAddress;
     }
 
-    private int writeCodeInternal(List<String> lines, int address, String label) {
-        byte[] bytes = armParser.parse(lines, this, address);
-        System.arraycopy(bytes, 0, data, address - this.address, bytes.length);
+    private void writeCodeInternal(List<String> lines, int romAddress, String label) {
+        int ramAddress = romToRamAddress(romAddress);
+        byte[] bytes = armParser.parse(lines, this, ramAddress);
+        writeBytes(romAddress, bytes);
 
-        globalAddressMap.registerCodeAddress(this, label, address, 2);
-        return address;
+        globalAddressMap.registerCodeAddress(this, label, ramAddress, 2);
     }
 
     public void writeCodeForceInline(List<String> lines, String label) {
-        int address = globalAddressMap.getAddress(this, label);
-        int oldSize = getFuncSize(address);
+        int ramAddress = globalAddressMap.getRamAddress(this, label);
+        int romAddress = ramToRomAddress(ramAddress);
+        int oldSize = getFuncSizeRam(ramAddress);
 
-        byte[] bytes = armParser.parse(lines, this, address);
-        if (bytes.length > oldSize)
-            throw new RuntimeException("Too large!");
+        byte[] bytes = armParser.parse(lines, this, ramAddress);
+        if (bytes.length > oldSize || label.equals("GetTrainerData")) {
+            if (bytes.length <= 16)
+                throw new RuntimeException();
 
-        Map<Integer, Set<Integer>> oldOutgoingReferencesMap = armParser.getOutgoingCodeReferences(data, address - this.address, this.address);
-        Map<Integer, Set<Integer>> newOutgoingReferencesMap = armParser.getOutgoingCodeReferences(bytes, 0, this.address);
+            int newRomAddress = allocateRom(bytes.length);
+            int newRamAddress = romToRamAddress(newRomAddress);
+            bytes = armParser.parse(lines, this, newRamAddress);
+            globalAddressMap.relocateCodeAddress(this, label, newRamAddress);
+            writeBytes(newRomAddress, bytes);
+
+            List<String> redirectorLines = Arrays.asList(
+                    "bx pc",
+                    "dcw 0x46C0", // nop
+                    "dcd 0xE59FC000", // ldr r12, =(newRomAddress+1)
+                    "dcd 0xE12FFF1C", // bx r12
+                    "dcd " + (newRamAddress + 1)
+            );
+            bytes = armParser.parse(redirectorLines, this, ramAddress);
+            writeBytes(romAddress, bytes);
+            free(romAddress + bytes.length, oldSize - bytes.length);
+            return;
+        }
+
+        Map<Integer, Set<Integer>> oldOutgoingReferencesMap = armParser.getOutgoingCodeReferences(data, ramAddress - this.address, this.address);
+        writeBytes(romAddress, bytes);
+        Map<Integer, Set<Integer>> newOutgoingReferencesMap = armParser.getOutgoingCodeReferences(data, ramAddress - this.address, this.address);
 
         // Add new references
         for (Map.Entry<Integer, Set<Integer>> entry : newOutgoingReferencesMap.entrySet()) {
@@ -403,7 +462,8 @@ public class ParagonLiteOverlay {
 
             // Remove all if destination is not found in new references
             if (!newOutgoingReferencesMap.containsKey(destinationAddress)) {
-                for (int sourceAddress : entry.getValue()) {
+                List<Integer> sourceAddresses = entry.getValue().stream().toList();
+                for (int sourceAddress : sourceAddresses) {
                     oldOutgoingReferencesMap.get(destinationAddress).remove(sourceAddress);
                     globalAddressMap.removeReference(destinationAddress, this, sourceAddress);
                 }
@@ -419,67 +479,62 @@ public class ParagonLiteOverlay {
             }
         }
 
-        writeBytes(address, bytes);
-
         int diff = oldSize - bytes.length;
-        free(address + bytes.length, diff);
+        free(romAddress + bytes.length, diff);
     }
 
-    public int replaceCode(List<String> lines, String label) {
+    public void replaceCode(List<String> lines, String label) {
         int size = armParser.getByteLength(lines);
-        int address = allocate(size);
-        
-        byte[] bytes = armParser.parse(lines, this, address);
-        System.arraycopy(bytes, 0, data, address - this.address, bytes.length);
+        int romAddress = allocateRom(size);
 
-        globalAddressMap.relocateCodeAddress(this, label, address);
-        return address;
+        int ramAddress = romToRamAddress(romAddress);
+        byte[] bytes = armParser.parse(lines, this, ramAddress);
+        writeBytes(romAddress, bytes);
+
+        globalAddressMap.relocateCodeAddress(this, label, ramAddress);
     }
 
-    public int writeData(byte[] bytes, String label) {
-        return writeData(bytes, label, null);
+    public void writeData(byte[] bytes, String label) {
+        writeData(bytes, label, null);
     }
 
-    public int writeData(byte[] bytes, String label, String refPattern) {
-        int address = allocate(bytes.length);
-        return writeDataInternal(bytes, label, address, refPattern);
-    }
-
-    public int writeDataUnnamed(byte[] bytes) {
-        return writeDataUnnamed(bytes, null);
+    public void writeData(byte[] bytes, String label, String refPattern) {
+        int romAddress = allocateRom(bytes.length);
+        writeDataInternal(bytes, label, romAddress, refPattern);
     }
 
     public int writeDataUnnamed(byte[] bytes, String refPattern) {
-        int address = allocate(bytes.length);
-        String label = String.format("Data_0x%08X", address);
+        int romAddress = allocateRom(bytes.length);
+        String label = String.format("Data_0x%08X", romAddress);
 
-        return writeDataInternal(bytes, label, address, refPattern);
+        writeDataInternal(bytes, label, romAddress, refPattern);
+        return romAddress;
     }
 
-    private int writeDataInternal(byte[] bytes, String label, int address, String refPattern) {
-        System.arraycopy(bytes, 0, data, address - this.address, bytes.length);
-
-        globalAddressMap.registerDataAddress(this, label, address, bytes.length, refPattern);
-        return address;
+    private void writeDataInternal(byte[] bytes, String label, int romAddress, String refPattern) {
+        writeBytes(romAddress, bytes);
+        int ramAddress = romToRamAddress(romAddress);
+        globalAddressMap.registerDataAddress(this, label, ramAddress, bytes.length, refPattern);
     }
 
     public int newData(byte[] bytes, String label, String refPattern) {
-        int address = allocate(bytes.length);
-        System.arraycopy(bytes, 0, data, address - this.address, bytes.length);
+        int romAddress = allocateRom(bytes.length);
+        writeBytes(romAddress, bytes);
 
-        globalAddressMap.relocateDataAddress(this, label, address, bytes.length, refPattern);
-        return address;
+        int ramAddress = romToRamAddress(romAddress);
+        globalAddressMap.relocateDataAddress(this, label, ramAddress, bytes.length, refPattern);
+        return romAddress;
     }
 
-    public static boolean isWordAligned(int address) {
-        return alignWord(address) == address;
+    public static boolean isAligned(int address, int bytes) {
+        return align(address, bytes) == address;
     }
 
-    public static int alignWord(int address) {
-        return address & 0xFFFFFFFC;
+    public static int align(int address, int bytes) {
+        return address & -bytes;
     }
 
-    public static int alignNextWord(int address) {
-        return alignWord(address + 3);
+    public static int alignNext(int address, int bytes) {
+        return align(address + bytes - 1, bytes);
     }
 }

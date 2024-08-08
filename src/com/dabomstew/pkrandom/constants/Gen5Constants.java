@@ -365,7 +365,8 @@ public class Gen5Constants {
         list.addAll(Arrays.asList(Items.airBalloon, Items.redCard, Items.absorbBulb, Items.cellBattery,
                 Items.ejectButton, Items.fireGem, Items.waterGem, Items.electricGem, Items.grassGem, Items.iceGem,
                 Items.fightingGem, Items.poisonGem, Items.groundGem, Items.flyingGem, Items.psychicGem, Items.bugGem,
-                Items.rockGem, Items.ghostGem, Items.dragonGem, Items.darkGem, Items.steelGem, Items.normalGem));
+                Items.rockGem, Items.ghostGem, Items.dragonGem, Items.darkGem, Items.steelGem, Items.normalGem,
+                ParagonLiteItems.fairyGem));
         return Collections.unmodifiableList(list);
     }
 
@@ -376,7 +377,8 @@ public class Gen5Constants {
         list.addAll(Arrays.asList(Items.airBalloon, Items.redCard, Items.absorbBulb, Items.cellBattery,
                 Items.ejectButton, Items.fireGem, Items.waterGem, Items.electricGem, Items.grassGem, Items.iceGem,
                 Items.fightingGem, Items.poisonGem, Items.groundGem, Items.flyingGem, Items.psychicGem, Items.bugGem,
-                Items.rockGem, Items.ghostGem, Items.dragonGem, Items.darkGem, Items.steelGem, Items.normalGem));
+                Items.rockGem, Items.ghostGem, Items.dragonGem, Items.darkGem, Items.steelGem, Items.normalGem,
+                ParagonLiteItems.fairyGem));
         list.addAll(Arrays.asList(Items.eviolite, Items.floatStone, Items.rockyHelmet, Items.ringTarget, Items.bindingBand));
         return Collections.unmodifiableList(list);
     }
@@ -385,11 +387,18 @@ public class Gen5Constants {
 
     private static List<Integer> initializeGeneralPurposeConsumableItems() {
         List<Integer> list = new ArrayList<>(Gen4Constants.generalPurposeConsumableItems);
-        list.addAll(Arrays.asList(Items.redCard, Items.absorbBulb, Items.cellBattery, Items.ejectButton));
+        list.addAll(Arrays.asList(Items.redCard, Items.absorbBulb, Items.cellBattery, Items.ejectButton
+                
+                /* ParagonLiteItems.snowball, ParagonLiteItems. */));
         return Collections.unmodifiableList(list);
     }
 
-    public static final List<Integer> generalPurposeItems = initializeGeneralPurposeItems();
+    public static final List<Integer> generalPurposeItems = Collections.unmodifiableList(Arrays.asList(
+            Items.brightPowder, Items.quickClaw, Items.kingsRock, Items.focusBand, Items.scopeLens, Items.leftovers,
+            Items.shellBell, Items.laxIncense, Items.wideLens, Items.expertBelt, Items.lifeOrb, Items.zoomLens,
+            Items.destinyKnot, Items.shedShell, Items.razorClaw, Items.razorFang, Items.floatStone, Items.rockyHelmet,
+            
+            ParagonLiteItems.assaultVest, ParagonLiteItems.clearAmulet, ParagonLiteItems.covertCloak));
 
     private static List<Integer> initializeGeneralPurposeItems() {
         List<Integer> list = new ArrayList<>(Gen4Constants.generalPurposeItems);
@@ -418,6 +427,7 @@ public class Gen5Constants {
         map.put(Type.DARK, Items.darkGem);
         map.put(Type.STEEL, Items.steelGem);
         map.put(Type.NORMAL, Items.normalGem);
+        map.put(Type.FAIRY, ParagonLiteItems.fairyGem);
         return Collections.unmodifiableMap(map);
     }
 
@@ -443,8 +453,55 @@ public class Gen5Constants {
     // None of these have new entries in Gen V.
     public static final Map<Integer, List<Integer>> abilityBoostingItems = Gen4Constants.abilityBoostingItems;
     public static final Map<Integer, List<Integer>> speciesBoostingItems = Gen4Constants.speciesBoostingItems;
-    public static final Map<Type, List<Integer>> typeBoostingItems = Gen4Constants.typeBoostingItems;
-    public static final Map<Type, Integer> weaknessReducingBerries = Gen4Constants.weaknessReducingBerries;
+    public static final Map<Type, List<Integer>> typeBoostingItems = initializeTypeBoostingItems();
+
+    private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
+        Map<Type, List<Integer>> map = new HashMap<>();
+        map.put(Type.BUG, Arrays.asList(Items.silverPowder, Items.insectPlate));
+        map.put(Type.DARK, Arrays.asList(Items.blackGlasses, Items.dreadPlate));
+        map.put(Type.DRAGON, Arrays.asList(Items.dragonFang, Items.dracoPlate));
+        map.put(Type.ELECTRIC, Arrays.asList(Items.magnet, Items.zapPlate));
+        map.put(Type.FAIRY, Arrays.asList(ParagonLiteItems.pixiePlate)); // TODO
+        map.put(Type.FIGHTING, Arrays.asList(Items.blackBelt, Items.fistPlate));
+        map.put(Type.FIRE, Arrays.asList(Items.charcoal, Items.flamePlate));
+        map.put(Type.FLYING, Arrays.asList(Items.sharpBeak, Items.skyPlate));
+        map.put(Type.GHOST, Arrays.asList(Items.spellTag, Items.spookyPlate));
+        map.put(Type.GRASS, Arrays.asList(Items.miracleSeed, Items.meadowPlate, Items.roseIncense));
+        map.put(Type.GROUND, Arrays.asList(Items.softSand, Items.earthPlate));
+        map.put(Type.ICE, Arrays.asList(Items.neverMeltIce, Items.iciclePlate));
+        map.put(Type.NORMAL, Arrays.asList(Items.silkScarf, ParagonLiteItems.blankPlate));
+        map.put(Type.POISON, Arrays.asList(Items.poisonBarb, Items.toxicPlate));
+        map.put(Type.PSYCHIC, Arrays.asList(Items.twistedSpoon, Items.mindPlate, Items.oddIncense));
+        map.put(Type.ROCK, Arrays.asList(Items.hardStone, Items.stonePlate, Items.rockIncense));
+        map.put(Type.STEEL, Arrays.asList(Items.metalCoat, Items.ironPlate));
+        map.put(Type.WATER, Arrays.asList(Items.mysticWater, Items.seaIncense, Items.splashPlate, Items.waveIncense));
+        map.put(null, Collections.emptyList()); // ??? type
+        return Collections.unmodifiableMap(map);
+    }
+    
+    public static final Map<Type, Integer> weaknessReducingBerries = initializeWeaknessReducingBerries();
+
+    private static Map<Type, Integer> initializeWeaknessReducingBerries() {
+        Map<Type, Integer> map = new HashMap<>();
+        map.put(Type.FIRE, Items.occaBerry);
+        map.put(Type.WATER, Items.passhoBerry);
+        map.put(Type.ELECTRIC, Items.wacanBerry);
+        map.put(Type.GRASS, Items.rindoBerry);
+        map.put(Type.ICE, Items.yacheBerry);
+        map.put(Type.FIGHTING, Items.chopleBerry);
+        map.put(Type.POISON, Items.kebiaBerry);
+        map.put(Type.GROUND, Items.shucaBerry);
+        map.put(Type.FLYING, Items.cobaBerry);
+        map.put(Type.PSYCHIC, Items.payapaBerry);
+        map.put(Type.BUG, Items.tangaBerry);
+        map.put(Type.ROCK, Items.chartiBerry);
+        map.put(Type.GHOST, Items.kasibBerry);
+        map.put(Type.DRAGON, Items.habanBerry);
+        map.put(Type.DARK, Items.colburBerry);
+        map.put(Type.STEEL, Items.babiriBerry);
+        map.put(Type.FAIRY, ParagonLiteItems.roseliBerry);
+        return Collections.unmodifiableMap(map);
+    }
 
     private static Type[] constructTypeTable() {
         Type[] table = new Type[256];
@@ -846,12 +903,16 @@ public class Gen5Constants {
         allowedItems = new ItemList(Items.revealGlass);
         // Key items + version exclusives
         allowedItems.banRange(Items.explorerKit, 76);
-        allowedItems.banRange(Items.dataCard01, 32);
+        allowedItems.banRange(Items.dataCard01, 13);
+        allowedItems.banRange(Items.dataCard15, 2);
+        allowedItems.banRange(Items.dataCard18, 2);
+        allowedItems.banRange(Items.dataCard22, 11);
         allowedItems.banRange(Items.xtransceiverMale, 18);
         allowedItems.banSingles(Items.libertyPass, Items.propCase, Items.dragonSkull, Items.lightStone, Items.darkStone);
         // Unknown blank items or version exclusives
-        allowedItems.banRange(Items.tea, 3);
-        allowedItems.banRange(Items.unused120, 14);
+        allowedItems.banRange(Items.unused120, 2);
+        allowedItems.banRange(Items.tmCase, 2);
+        allowedItems.banRange(Items.clothingTrunk, 8);
         // TMs & HMs - tms cant be held in gen5
         allowedItems.tmRange(Items.tm01, 92);
         allowedItems.tmRange(Items.tm93, 3);

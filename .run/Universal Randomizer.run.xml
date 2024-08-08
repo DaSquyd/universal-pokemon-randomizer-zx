@@ -1,7 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Universal Randomizer" type="Application" factoryName="Application">
-    <option name="ALTERNATIVE_JRE_PATH" value="corretto-1.8" />
+    <option name="ALTERNATIVE_JRE_PATH" value="19" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
     <option name="MAIN_CLASS_NAME" value="com.dabomstew.pkrandom.newgui.NewRandomizerGUI" />
     <module name="universal-pokemon-randomizer-zx" />
     <option name="PROGRAM_PARAMETERS" value="please-use-the-launcher" />

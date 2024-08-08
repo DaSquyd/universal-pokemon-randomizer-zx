@@ -1566,7 +1566,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 byte[] trainer = trainers.files.get(i).get(0);
                 byte[] trpoke = trpokes.files.get(i).get(0);
                 Trainer tr = new Trainer();
-                tr.poketype = trainer[13] & 0xFF;
+                tr.partyFlags = trainer[13] & 0xFF;
                 tr.index = i;
                 tr.trainerclass = trainer[0] & 0xFF;
                 int battleType = trainer[2] & 0xFF;
@@ -1668,7 +1668,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 byte[] trainer = trainers.files.get(i).get(0);
                 Trainer tr = allTrainers.next();
                 int offset = 0;
-                trainer[13] = (byte) tr.poketype;
+                trainer[13] = (byte) tr.partyFlags;
                 int numPokes = tr.pokemon.size();
                 trainer[offset+3] = (byte) numPokes;
 

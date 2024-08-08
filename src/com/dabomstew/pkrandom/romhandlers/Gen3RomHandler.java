@@ -1818,7 +1818,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             boolean doubleBattle = rom[trOffset + (entryLen - 16)] == 0x01;
             int numPokes = rom[trOffset + (entryLen - 8)] & 0xFF;
             int pointerToPokes = readPointer(trOffset + (entryLen - 4));
-            tr.poketype = pokeDataType;
+            tr.partyFlags = pokeDataType;
             tr.name = this.readVariableLengthString(trOffset + 4);
             tr.fullDisplayName = tcnames.get(trainerclass) + " " + tr.name;
             // Pokemon structure data is like
@@ -1882,7 +1882,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             Trainer mossdeepSteven = new Trainer();
             mossdeepSteven.offset = mossdeepStevenOffset;
             mossdeepSteven.index = amount;
-            mossdeepSteven.poketype = 1; // Custom moves, but no held items
+            mossdeepSteven.partyFlags = 1; // Custom moves, but no held items
 
             // This is literally how the game does it too, lol. Have to subtract one because the
             // trainers internally are one-indexed, but then theTrainers is zero-indexed.
@@ -1957,11 +1957,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             int oldPokeType = rom[trOffset] & 0xFF;
             int oldPokeCount = rom[trOffset + (entryLen - 8)] & 0xFF;
             int newPokeCount = tr.pokemon.size();
-            int newDataSize = newPokeCount * ((tr.poketype & 1) == 1 ? 16 : 8);
+            int newDataSize = newPokeCount * ((tr.partyFlags & 1) == 1 ? 16 : 8);
             int oldDataSize = oldPokeCount * ((oldPokeType & 1) == 1 ? 16 : 8);
 
             // write out new data first...
-            rom[trOffset] = (byte) tr.poketype;
+            rom[trOffset] = (byte) tr.partyFlags;
             rom[trOffset + (entryLen - 8)] = (byte) newPokeCount;
             if (doubleBattleMode) {
                 if (!tr.skipImportant()) {
