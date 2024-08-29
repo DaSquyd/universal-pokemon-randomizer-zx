@@ -24,7 +24,7 @@
     beq     End
     
     mov     r0, r7
-    bl      Battle::IsFainted
+    bl      Battle::IsPokeFainted
     cmp     r0, #0
     bne     End
     

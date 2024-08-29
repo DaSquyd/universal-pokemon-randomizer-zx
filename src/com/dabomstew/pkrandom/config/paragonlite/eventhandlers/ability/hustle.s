@@ -4,7 +4,7 @@
     mov     r4, r2
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
-    bne     End
+    bne     Return
     
     mov     r0, #18 ; move id
     bl      Battle::EventVar_GetValue
@@ -14,20 +14,20 @@
     
     bl      ARM9::IsMoveDamaging
     cmp     r0, #1
-    bne     End
+    bne     Return
     
     mov     r0, r5
     bl      ARM9::GetMoveBasePower
-    cmp     r0, #60 ; max move power for effect
-    bhi     End
+    cmp     r0, #60
+    bcs     Return ; >= 60
     cmp     r0, #1 ; variable power moves don't get priority
-    beq     End
+    beq     Return
     
     ; ignore guaranteed crit moves
     mov     r0, r5
     bl      ARM9::IsMoveAlwaysCrit
     cmp     r0, #0 ; not crit
-    bne     End
+    bne     Return
     
     mov     r0, #24
     bl      Battle::EventVar_GetValue
@@ -37,5 +37,5 @@
     add     r1, r1, #1
     bl      Battle::EventVar_RewriteValue
     
-End:
+Return:
     pop     {r4, r5, pc}

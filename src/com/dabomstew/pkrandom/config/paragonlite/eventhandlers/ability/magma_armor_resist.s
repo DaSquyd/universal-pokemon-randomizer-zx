@@ -6,7 +6,7 @@
     cmp     r4, r0
     bne     End
     
-    mov     r0, #0x16
+    mov     r0, #0x16 ; move type
     bl      Battle::EventVar_GetValue
     lsl     r0, #24
     lsr     r0, #24
@@ -16,7 +16,7 @@
     bne     End
     
 ApplyMod:
-    mov     r0, #53 ; offensive stat
+    mov     r0, #0x35 ; offensive stat
     ldr     r1, =2048 ; 0.5x
     bl      Battle::EventVar_MulValue
 

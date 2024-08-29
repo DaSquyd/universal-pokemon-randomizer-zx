@@ -1,9 +1,11 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 import com.dabomstew.pkrandom.RomFunctions;
+import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.arm.ArmParser;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class ParagonLiteOverlay {
@@ -55,6 +57,10 @@ public class ParagonLiteOverlay {
         globalAddressMap.registerOverlay(this);
     }
 
+    public int getEarliestRamAddress() {
+        return address;
+    }
+
     public int romToRamAddress(int romAddress) {
         return romAddress;
     }
@@ -70,11 +76,11 @@ public class ParagonLiteOverlay {
     public int allocateRomNear(int size, int referenceAddress, int referenceSize) {
         return allocateRomRange(size, referenceAddress, referenceAddress + referenceSize);
     }
-    
+
     private boolean rangeIsNear(int startA, int endA, int startB, int endB) {
         if (startA < 0 || endA < 0 || startB < 0 || endB < 0)
             return true;
-        
+
         int min = 0xFFC00000; // -4194304
         int max = 0x003FFFFF; // +4194303
 
@@ -102,7 +108,7 @@ public class ParagonLiteOverlay {
             FreeSpace freeSpace = iterator.next();
             if (!rangeIsNear(romToRamAddress(freeSpace.start), romToRamAddress(freeSpace.end), rangeStart, rangeEnd))
                 continue;
-            
+
             if (freeSpace.size() == size) {
                 int start = freeSpace.start;
                 iterator.remove();
@@ -128,7 +134,7 @@ public class ParagonLiteOverlay {
         int allocationRamAddress = romToRamAddress(allocationRomAddress);
         if (!rangeIsNear(allocationRamAddress, allocationRamAddress + size, rangeStart, rangeEnd))
             throw new RuntimeException();
-        
+
         return allocationRomAddress;
     }
 
@@ -297,7 +303,7 @@ public class ParagonLiteOverlay {
     }
 
     public int getFuncSizeRom(int romAddress) {
-        return armParser.getFuncSize(data, romAddress - address);
+        return armParser.getFuncSize(this, romAddress);
     }
 
     // Obtains the RAM address of the found string of bytes
@@ -343,7 +349,7 @@ public class ParagonLiteOverlay {
         data[offset + 1] = (byte) ((halfword >> 8) & 0xFF);
     }
 
-    public void writeWord(int romAddress, int word, boolean isReference) {
+    public void writeWord(int romAddress, int word, boolean isReference) {        
         if (isReference) {
             int ramAddress = romToRamAddress(romAddress);
             int oldWord = readWord(romAddress);
@@ -356,12 +362,13 @@ public class ParagonLiteOverlay {
             }
 
             ParagonLiteAddressMap.RemovalData removalData = globalAddressMap.removeReference(oldDestination, this, ramAddress);
-            if (removalData != null && removalData.referenceCount == 0) {
-                free(removalData.address, removalData.size);
-            }
         }
 
         int offset = romAddress - this.address;
+        
+        if (offset < 0 || offset + 3 > data.length)
+            throw new RuntimeException();
+        
         data[offset] = (byte) (word & 0xFF);
         data[offset + 1] = (byte) ((word >> 8) & 0xFF);
         data[offset + 2] = (byte) ((word >> 16) & 0xFF);
@@ -379,6 +386,9 @@ public class ParagonLiteOverlay {
 
     public int readUnsignedHalfword(int romAddress) {
         int offset = romAddress - address;
+        if (offset < 0 || offset + 1 > data.length)
+            throw new RuntimeException();
+        
         return ((data[offset] & 0xFF)
                 | ((data[offset + 1] & 0xFF) << 8));
     }
@@ -422,6 +432,17 @@ public class ParagonLiteOverlay {
         int oldSize = getFuncSizeRam(ramAddress);
 
         byte[] bytes = armParser.parse(lines, this, ramAddress);
+        if ((bytes.length == oldSize && Utils.debugMode)) {
+            for (int i = 0; i < bytes.length; i += 2) {
+                int address = romAddress + i;
+                int oldValue = readUnsignedHalfword(address);
+                int newValue = (bytes[i] & 0xFF) | ((bytes[i + 1] & 0xFF) << 8);
+                if (oldValue != newValue) {
+                    continue;
+                }
+            }
+        }
+
         if (bytes.length > oldSize || label.equals("GetTrainerData")) {
             if (bytes.length <= 16)
                 throw new RuntimeException();
@@ -429,8 +450,8 @@ public class ParagonLiteOverlay {
             int newRomAddress = allocateRom(bytes.length);
             int newRamAddress = romToRamAddress(newRomAddress);
             bytes = armParser.parse(lines, this, newRamAddress);
-            globalAddressMap.relocateCodeAddress(this, label, newRamAddress);
             writeBytes(newRomAddress, bytes);
+            globalAddressMap.relocateCodeAddress(this, label, newRamAddress);
 
             List<String> redirectorLines = Arrays.asList(
                     "bx pc",
@@ -445,9 +466,9 @@ public class ParagonLiteOverlay {
             return;
         }
 
-        Map<Integer, Set<Integer>> oldOutgoingReferencesMap = armParser.getOutgoingCodeReferences(data, ramAddress - this.address, this.address);
+        Map<Integer, Set<Integer>> oldOutgoingReferencesMap = armParser.getOutgoingCodeReferences(this, ramAddress);
         writeBytes(romAddress, bytes);
-        Map<Integer, Set<Integer>> newOutgoingReferencesMap = armParser.getOutgoingCodeReferences(data, ramAddress - this.address, this.address);
+        Map<Integer, Set<Integer>> newOutgoingReferencesMap = armParser.getOutgoingCodeReferences(this, ramAddress);
 
         // Add new references
         for (Map.Entry<Integer, Set<Integer>> entry : newOutgoingReferencesMap.entrySet()) {

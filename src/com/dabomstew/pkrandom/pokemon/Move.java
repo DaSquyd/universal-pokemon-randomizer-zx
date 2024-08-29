@@ -126,13 +126,15 @@ public class Move {
     public int priority; // 06
     public int minHits; // 07
     public int maxHits; // 07
-    public MoveStatusType statusType = MoveStatusType.NONE; // 08-09, 11-13
+    public MoveStatusType statusType = MoveStatusType.NONE; // 08-09, 11
     public double statusPercentChance; // 10
+    public int statusMinTurns = -1; // 12
+    public int statusMaxTurns = -1; // 13
     public CriticalChance criticalChance = CriticalChance.NORMAL; // 14
     public double flinchPercentChance; // 15
     public MoveEffect effect; // 16
     public int recoil; // 18, can be regained health too
-    public int heal;
+    public int heal; // 19
     public MoveTarget target; // 20
     public StatChange[] statChanges = new StatChange[3]; // 21-29
     public boolean makesContact; // 30 (0x0001)
@@ -148,7 +150,7 @@ public class Move {
     public boolean isThawingMove; // 30 (0x0400)
     public boolean hitsNonAdjacentTargets; // 30 (0x0800)
     public boolean isHealMove; // 30 (0x1000)
-    public boolean hitsThroughSubstitute; // 30 (0x2000)
+    public boolean bypassesSubstitute; // 30 (0x2000)
     public boolean unknownFlag1; // 30 (0x4000)
     public boolean unknownFlag2; // 30 (0x8000)
 
@@ -159,6 +161,8 @@ public class Move {
     public boolean isCustomTriageMove; // 30 (0x20000)
     public boolean isCustomPowderMove; // 30 (0x40000)
     public boolean isCustomWindMove; // 30 (0x80000)
+    public boolean isCustomBallBombMove; // 30 (0x100000)
+    public boolean isCustomPulseMove; // 30 (0x200000)
 
     public Move() {
         // Initialize all statStageChanges to something sensible so that we don't need to have

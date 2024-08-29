@@ -8,12 +8,12 @@
     bl      Battle::EventVar_GetValue
     lsl     r0, r0, #16
     lsr     r0, r0, #16
-    mov     r1, #16 ; slice
+    mov     r1, #16 ; slice flag
     bl      ARM9::MoveHasFlag
     cmp     r0, #0
     beq     End
-    ldr     r1, =6144 ; 1.5x
-    mov     r0, #49 ; move power
+    ldr     r1, =5325 ; 1.3x
+    mov     r0, #0x31 ; move power
     bl      Battle::EventVar_MulValue
     
 End:

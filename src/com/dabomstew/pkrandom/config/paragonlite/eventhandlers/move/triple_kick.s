@@ -2,7 +2,7 @@
     mov     r5, r2
     mov     r4, r3
     
-    mov     r0, #3
+    mov     r0, #0x03
     bl      Battle::EventVar_GetValue
     cmp     r5, r0
     bne     End
@@ -14,6 +14,7 @@
 ; 1st hit = 20
 ; 2nd hit = 30
 ; 3rd hit = 40
+; total   = 90
     mov     r1, #10
     mul     r1, r2
     add     r1, #20

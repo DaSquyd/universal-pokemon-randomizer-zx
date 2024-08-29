@@ -610,6 +610,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (generationOfPokemon() <= 4)
             return;
 
+        pokes.get(Species.snivy).secondaryType = Type.ELECTRIC;
+        pokes.get(Species.servine).secondaryType = Type.ELECTRIC;
+        pokes.get(Species.serperior).secondaryType = Type.ELECTRIC;
         pokes.get(Species.pignite).secondaryType = Type.DARK;
         pokes.get(Species.emboar).secondaryType = Type.DARK;
         pokes.get(Species.dewott).secondaryType = Type.FIGHTING;
@@ -840,6 +843,17 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
+    public Set<Integer> getAvailableAbilities(Settings settings) {
+        int maxAbility = highestAbilityIndex(settings);
+        Set<Integer> availableAbilities = new HashSet<>(maxAbility);
+        for (int i = 1; i <= maxAbility; ++i) {
+            availableAbilities.add(i);
+        }
+        
+        return availableAbilities;
+    }
+
+    @Override
     public void randomizeAbilities(Settings settings) {
         boolean evolutionSanity = settings.isAbilitiesFollowEvolutions();
         boolean allowWonderGuard = settings.isAllowWonderGuard();
@@ -886,7 +900,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        final int maxAbility = this.highestAbilityIndex(settings);
+        final Set<Integer> availableAbilities = this.getAvailableAbilities(settings);
 
         if (evolutionSanity) {
             // copy abilities straight up evolution lines
@@ -898,12 +912,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                         && pk.ability2 != Abilities.wonderGuard
                         && pk.ability3 != Abilities.wonderGuard)) {
                     // Pick first ability
-                    pk.ability1 = pickRandomAbility(pk, settings, maxAbility, bannedAbilities, weighDuplicatesTogether);
+                    pk.ability1 = pickRandomAbility(pk, settings, availableAbilities, bannedAbilities, weighDuplicatesTogether);
 
                     // Second ability?
                     if (ensureTwoAbilities || AbstractRomHandler.this.random.nextDouble() < 0.5) {
                         // Yes, second ability
-                        pk.ability2 = pickRandomAbility(pk, settings, maxAbility, bannedAbilities, weighDuplicatesTogether,
+                        pk.ability2 = pickRandomAbility(pk, settings, availableAbilities, bannedAbilities, weighDuplicatesTogether,
                                 pk.ability1);
                     } else {
                         // Nope
@@ -912,7 +926,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                     // Third ability?
                     if (hasDWAbilities) {
-                        pk.ability3 = pickRandomAbility(pk, settings, maxAbility, bannedAbilities, weighDuplicatesTogether,
+                        pk.ability3 = pickRandomAbility(pk, settings, availableAbilities, bannedAbilities, weighDuplicatesTogether,
                                 pk.ability1, pk.ability2);
                     }
                 }
@@ -939,12 +953,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 //                    continue;
 
                 // Pick first ability
-                pk.ability1 = this.pickRandomAbility(pk, settings, maxAbility, bannedAbilities, weighDuplicatesTogether);
+                pk.ability1 = this.pickRandomAbility(pk, settings, availableAbilities, bannedAbilities, weighDuplicatesTogether);
 
                 // Second ability?
                 if (ensureTwoAbilities || this.random.nextDouble() < 0.5) {
                     // Yes, second ability
-                    pk.ability2 = this.pickRandomAbility(pk, settings, maxAbility, bannedAbilities,
+                    pk.ability2 = this.pickRandomAbility(pk, settings, availableAbilities, bannedAbilities,
                             weighDuplicatesTogether, pk.ability1);
                 } else {
                     // Nope
@@ -953,7 +967,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 // Third ability?
                 if (hasDWAbilities) {
-                    pk.ability3 = pickRandomAbility(pk, settings, maxAbility, bannedAbilities,
+                    pk.ability3 = pickRandomAbility(pk, settings, availableAbilities, bannedAbilities,
                             weighDuplicatesTogether, pk.ability1, pk.ability2);
                 }
             }
@@ -1008,9 +1022,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         return newAbility;
     }
 
-    private int pickRandomAbility(Pokemon pk, Settings settings, int maxAbility, List<Integer> bannedAbilities, boolean useVariations,
+    private int pickRandomAbility(Pokemon pk, Settings settings, Set<Integer> availableAbilities, List<Integer> bannedAbilities, boolean useVariations,
                                   int... alreadySetAbilities) {
-        int newAbility;
+        int newAbility = -1;
 
         boolean isParagonLite = (settings.getCurrentMiscTweaks() & MiscTweak.PARAGON_LITE.getValue()) != 0L;
 
@@ -1210,6 +1224,31 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.harvest); // 139
                 irrelevantAbilities.add(Abilities.regenerator); // 144
                 irrelevantAbilities.add(Abilities.rattled); // 155
+                irrelevantAbilities.add(Abilities.furCoat); // 169
+                irrelevantAbilities.add(Abilities.gooey); // 183
+                irrelevantAbilities.add(Abilities.stamina); // 192
+                irrelevantAbilities.add(Abilities.wimpOut); // 193
+                irrelevantAbilities.add(Abilities.emergencyExit); // 194
+                irrelevantAbilities.add(Abilities.waterCompaction); // 195
+                irrelevantAbilities.add(Abilities.innardsOut); // 215
+                irrelevantAbilities.add(Abilities.fluffy); // 218
+                irrelevantAbilities.add(Abilities.shadowShield); // 231
+                irrelevantAbilities.add(Abilities.prismArmor); // 232
+                irrelevantAbilities.add(Abilities.cottonDown); // 238
+                irrelevantAbilities.add(Abilities.mirrorArmor); // 240
+                irrelevantAbilities.add(Abilities.steamEngine); // 243
+                irrelevantAbilities.add(Abilities.sandSpit); // 245
+                irrelevantAbilities.add(Abilities.iceScales); // 246
+                irrelevantAbilities.add(Abilities.perishBody); // 253
+                irrelevantAbilities.add(Abilities.seedSower); // 269
+                irrelevantAbilities.add(Abilities.thermalExchange); // 270
+                irrelevantAbilities.add(Abilities.angerShell); // 271
+                irrelevantAbilities.add(Abilities.electromorphosis); // 280
+                irrelevantAbilities.add(Abilities.toxicDebris); // 295
+                
+                if (isParagonLite) {
+                    irrelevantAbilities.add(Abilities.innerFocus);
+                }
             }
 
             if (pk.bst() > 550)
@@ -1223,8 +1262,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (isElectric || isGround)
                 irrelevantAbilities.add(Abilities.limber);
 
-            // Avoid Flying-type STAB Gale Wings in Gen VI (other types are more reasonable)
-            if (isFlying && generationOfPokemon() == 6)
+            // Avoid Flying-type STAB Gale Wings in Gen VI
+            // Otherwise, avoid giving it to non-Flying-types 
+            if ((generationOfPokemon() == 6) == isFlying)
                 irrelevantAbilities.add(Abilities.galeWings);
 
             // Protean and Libero are OP until Gen IX nerf
@@ -1314,22 +1354,15 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.defiant);
                 irrelevantAbilities.add(Abilities.poisonTouch);
                 irrelevantAbilities.add(Abilities.moxie);
-
-                if (isParagonLite) {
-                    irrelevantAbilities.add(Abilities.strongJaw);
-                } else {
-                    irrelevantAbilities.add(ParagonLiteAbilities.strongJaw);
-                }
+                irrelevantAbilities.add(Abilities.strongJaw);
+                irrelevantAbilities.add(Abilities.toughClaws);
+                irrelevantAbilities.add(Abilities.sharpness);
             }
 
             // only benefits special attackers
             if (!higherOrEqualSpAtk) {
-                if (isParagonLite) {
-                    irrelevantAbilities.add(ParagonLiteAbilities.competitive);
-                } else {
-                    irrelevantAbilities.add(Abilities.competitive);
-                    irrelevantAbilities.add(Abilities.megaLauncher);
-                }
+                irrelevantAbilities.add(Abilities.competitive);
+                irrelevantAbilities.add(Abilities.megaLauncher);
             }
 
             if (lowBulk)
@@ -1423,6 +1456,19 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (highPhysBulk)
                 irrelevantAbilities.add(Abilities.marvelScale);
+            
+            if (!higherOrEqualAttack || pk.primaryType == Type.NORMAL || pk.secondaryType == Type.NORMAL) {
+                irrelevantAbilities.add(Abilities.refrigerate);
+                irrelevantAbilities.add(Abilities.pixilate);
+                irrelevantAbilities.add(Abilities.aerilate);
+                irrelevantAbilities.add(Abilities.galvanize);
+            }
+
+            if (lowSpeed || highSpeed)
+                irrelevantAbilities.add(Abilities.slushRush);
+
+            if (highSpeed)
+                irrelevantAbilities.add(Abilities.triage);
 
             if (isParagonLite) {
                 if (!higherOrEqualAttack && resistsDark)
@@ -1437,51 +1483,27 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (resistsBug)
                     irrelevantAbilities.add(ParagonLiteAbilities.insectivore);
 
-                if (lowSpeed || highSpeed)
-                    irrelevantAbilities.add(ParagonLiteAbilities.slushRush);
-
                 if (!higherOrEqualSpAtk)
                     irrelevantAbilities.add(ParagonLiteAbilities.prestige);
 
                 if (!higherOrEqualAttack)
                     irrelevantAbilities.add(ParagonLiteAbilities.luckyFoot);
 
-                if (highSpeed)
-                    irrelevantAbilities.add(ParagonLiteAbilities.triage);
-
-                if (!higherOrEqualSpAtk)
-                    irrelevantAbilities.add(ParagonLiteAbilities.competitive);
-
-                if (!higherOrEqualAttack)
-                    irrelevantAbilities.add(ParagonLiteAbilities.strongJaw);
-
                 if (resistsPsychic)
                     irrelevantAbilities.add(ParagonLiteAbilities.assimilate);
-
-                if (!higherOrEqualAttack)
-                    irrelevantAbilities.add(ParagonLiteAbilities.sharpness);
-
-                if (!higherOrEqualAttack || pk.primaryType == Type.NORMAL || pk.secondaryType == Type.NORMAL) {
-                    irrelevantAbilities.add(ParagonLiteAbilities.refrigerate);
-                    irrelevantAbilities.add(ParagonLiteAbilities.pixilate);
-                    irrelevantAbilities.add(ParagonLiteAbilities.aerilate);
-                    irrelevantAbilities.add(ParagonLiteAbilities.galvanize);
-                }
-
-                if (highSpeed || isFlying)
-                    irrelevantAbilities.add(ParagonLiteAbilities.galeWings);
-
-                if (!higherOrEqualAttack)
-                    irrelevantAbilities.add(ParagonLiteAbilities.toughClaws);
             }
         }
 
-        // TODO: Gen VI :)
-
-        while (true) {
-            newAbility = this.random.nextInt(maxAbility) + 1;
+        List<Integer> availableAbilitiesList = new ArrayList<>(availableAbilities);
+        while (!availableAbilitiesList.isEmpty()) {
+            int randomIndex = this.random.nextInt(availableAbilitiesList.size());
+            newAbility = availableAbilitiesList.get(randomIndex);
 
             if (bannedAbilities.contains(newAbility) || irrelevantAbilities.contains(newAbility)) {
+                // swap and remove
+                int lastIndex = availableAbilitiesList.size() - 1;
+                availableAbilitiesList.set(randomIndex, availableAbilitiesList.get(lastIndex));
+                availableAbilitiesList.remove(lastIndex);
                 continue;
             }
 
@@ -1500,6 +1522,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 break;
             }
         }
+        
+        if (newAbility == -1)
+            throw new RandomizationException("Failed to get ability");
 
         return newAbility;
     }
@@ -4619,7 +4644,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.destinyBond).statChanges[1] = new Move.StatChange(StatChangeType.DEFENSE, 1, 0.0);
         moves.get(Moves.destinyBond).statChanges[2] = new Move.StatChange(StatChangeType.ACCURACY, 1, 0.0);
         moves.get(Moves.destinyBond).isStolenBySnatch = true;
-        moves.get(Moves.destinyBond).hitsThroughSubstitute = false;
+        moves.get(Moves.destinyBond).bypassesSubstitute = false;
         moves.get(Moves.destinyBond).name = "Manifest";
         moves.get(Moves.destinyBond).description = "The user manifests itself in a more physical form. This raises its Attack and Defense stats as well as its accuracy.";
 
@@ -5391,23 +5416,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public int getTextCharPixels(char character) {
-        switch (character) {
-            case 'i':
-                return 3;
-            case ' ':
-            case 'l':
-                return 4;
-            case 'f':
-            case ',':
-            case '.':
-            case '\'':
-            case '\"':
-            case ':':
-            case ';':
-                return 5;
-            default:
-                return 6; // All other characters are 6 pixels
-        }
+        return switch (character) {
+            case 'i' -> 3;
+            case ' ', 'l' -> 4;
+            case 'f', ',', '.', '\'', '\"', ':', ';' -> 5;
+            default -> 6; // All other characters are 6 pixels
+        };
     }
 
     @Override
@@ -8165,10 +8179,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 int j = 0;
                 do {
                     newItem = possibleItems.randomNonTM(this.random);
-                    
+
                     if (j > 100)
                         break;
-                    
+
                     ++j;
                 }
                 while (newItems.contains(newItem));

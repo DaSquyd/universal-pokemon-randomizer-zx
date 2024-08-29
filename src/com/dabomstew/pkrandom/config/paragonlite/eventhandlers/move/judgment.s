@@ -16,8 +16,6 @@
     mov     r1, r5
     bl      Battle::GetPoke
     bl      Battle::GetPokeHeldItem
-    lsl     r0, #16
-    lsr     r0, #16
     bl      ARM9::GetTypeForPlate
     mov     r1, r0
     mov     r0, #0x16

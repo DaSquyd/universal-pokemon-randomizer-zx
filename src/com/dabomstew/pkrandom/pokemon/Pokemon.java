@@ -57,7 +57,7 @@ public class Pokemon implements Comparable<Pokemon> {
     
     public boolean noFall;
 
-    public int catchRate, baseHappiness, expYield, stage;
+    public int catchRate, baseFriendship, expYield, stage;
 
     public int guaranteedHeldItem, commonHeldItem, rareHeldItem, darkGrassHeldItem;
 

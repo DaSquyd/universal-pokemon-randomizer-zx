@@ -38,6 +38,7 @@ public class ParagonLiteAddressMap {
             return incomingReferences.size();
         }
 
+        abstract boolean hasSize();
         abstract int getSize();
 
         @Override
@@ -84,11 +85,16 @@ public class ParagonLiteAddressMap {
         public String getLabel() {
             return label;
         }
+        
+        @Override
+        public boolean hasSize() {
+            return encoding == 2;
+        }
 
         @Override
         public int getSize() {
             if (encoding != 2)
-                throw new RuntimeException("We can only get size of ARM Thumb code");
+                throw new RuntimeException(); // For now, we shouldn't be getting size of ARM functions
 
             return size;
         }
@@ -116,6 +122,11 @@ public class ParagonLiteAddressMap {
         }
 
         @Override
+        boolean hasSize() {
+            return size > 0;
+        }
+
+        @Override
         public int getSize() {
             return size;
         }
@@ -124,6 +135,11 @@ public class ParagonLiteAddressMap {
     public static class ReferenceAddress extends AddressBase implements ReferenceAddressInterface {
         ReferenceAddress(ParagonLiteOverlay overlay, int address) {
             super(overlay, address);
+        }
+
+        @Override
+        boolean hasSize() {
+            return true;
         }
 
         @Override
@@ -214,21 +230,19 @@ public class ParagonLiteAddressMap {
     public void relocateCodeAddress(ParagonLiteOverlay overlay, int oldAddress, int newAddress) {
         if (oldAddress == newAddress)
             throw new RuntimeException();
-        
+
         LabeledAddressInterface labeledAddress = addressMap.get(overlay).get(oldAddress);
         if (!(labeledAddress instanceof CodeAddress codeAddress))
             throw new RuntimeException();
 
         if (!codeAddress.incomingReferences.isEmpty()) {
             ArmParser armParser = new ArmParser(this);
-            int oldStartingOffset = oldAddress - overlay.address;
-            Map<Integer, Set<Integer>> oldOutgoingReferences = armParser.getOutgoingCodeReferences(overlay.data, oldStartingOffset, overlay.address);
-            int newStartingOffset = newAddress - overlay.address;
-            Map<Integer, Set<Integer>> newOutgoingReferences = armParser.getOutgoingCodeReferences(overlay.data, newStartingOffset, overlay.address);
+            Map<Integer, Set<Integer>> oldOutgoingReferences = armParser.getOutgoingCodeReferences(overlay, oldAddress);
+            Map<Integer, Set<Integer>> newOutgoingReferences = armParser.getOutgoingCodeReferences(overlay, newAddress);
 
             relocateAddressInternal(codeAddress, newAddress, oldOutgoingReferences, newOutgoingReferences);
         }
-        
+
         addressMap.get(overlay).put(newAddress, codeAddress);
         addressMap.get(overlay).remove(codeAddress.address);
         codeAddress.address = newAddress;
@@ -287,12 +301,13 @@ public class ParagonLiteAddressMap {
             }
 
             LabeledAddressInterface destinationLabeledAddress = addressMap.get(destinationOverlay).get(destinationAddress);
-            if (destinationLabeledAddress == null)
-                throw new RuntimeException();
+            if (destinationLabeledAddress == null) {
+                Utils.printProgress(total, current++, String.format("old outgoing: %s::Unk_%X", destinationOverlay.name, destinationAddress));
+                continue;
+            }
 
             AddressBase destinationAddressBase = (AddressBase) destinationLabeledAddress;
-            Utils.printProgress(total, current++, String.format("old outgoing: %s::%s (0x%08X)",
-                    destinationAddressBase.overlay.name, destinationLabeledAddress.getLabel(), destinationAddress));
+            Utils.printProgress(total, current++, String.format("old outgoing: %s::%s (0x%08X)", destinationOverlay.name, destinationLabeledAddress.getLabel(), destinationAddress));
 
             for (int sourceAddress : entry.getValue()) {
                 ReferenceAddress referenceAddress = new ReferenceAddress(addressBase.overlay, sourceAddress);
@@ -319,7 +334,7 @@ public class ParagonLiteAddressMap {
             AddressBase destinationAddressBase = getAddressData(destinationOverlay, destinationAddress);
             if (destinationAddressBase == null)
                 continue;
-            
+
             if (destinationAddressBase instanceof LabeledAddressInterface labeledAddress)
                 Utils.printProgress(total, current++, String.format("new outgoing: %s::%s (0x%08X)",
                         destinationAddressBase.overlay.name, labeledAddress.getLabel(), destinationAddress));
@@ -421,7 +436,7 @@ public class ParagonLiteAddressMap {
 
         LabeledAddressInterface labeledAddress = labelMap.get(overlay).get(label);
         if (!(labeledAddress instanceof AddressBase))
-            throw new RuntimeException();
+            throw new RuntimeException(String.format("Unknown function \"%s::%s\"", overlay.name, label));
 
         return (AddressBase) labeledAddress;
     }
@@ -454,7 +469,7 @@ public class ParagonLiteAddressMap {
         ParagonLiteOverlay destinationOverlay = namespaceToOverlay.get(destinationNamespace);
         LabeledAddressInterface labeledAddress = labelMap.get(destinationOverlay).get(destinationLabel);
         if (!(labeledAddress instanceof AddressBase destinationAddressBase))
-            throw new RuntimeException();
+            throw new RuntimeException(String.format("Could not find function %s in file %s", destinationLabel, destinationOverlay.name));
 
         addReference(destinationOverlay, destinationAddressBase.address, sourceOverlay, sourceAddress);
     }
@@ -511,8 +526,7 @@ public class ParagonLiteAddressMap {
             throw new RuntimeException();
 
         ArmParser armParser = new ArmParser(this);
-        int startingOffset = address - overlay.address;
-        Map<Integer, Set<Integer>> references = armParser.getOutgoingCodeReferences(overlay.data, startingOffset, overlay.address);
+        Map<Integer, Set<Integer>> references = armParser.getOutgoingCodeReferences(overlay, address);
 
         addReferencesInternal(overlay, references);
     }
@@ -572,6 +586,9 @@ public class ParagonLiteAddressMap {
             removeAddressData(destinationOverlay, destinationAddress);
         }
 
+        if (!destinationAddressBase.hasSize())
+            return null;
+        
         return new RemovalData(destinationAddress, count, destinationAddressBase.getSize());
     }
 
@@ -587,9 +604,10 @@ public class ParagonLiteAddressMap {
         ParagonLiteOverlay overlay = null;
         for (Map.Entry<ParagonLiteOverlay, Map<String, LabeledAddressInterface>> entry : labelMap.entrySet()) {
             ParagonLiteOverlay ovl = entry.getKey();
+            int ovlEarliestRamAddress = ovl.getEarliestRamAddress();
             int ovlSize = ovl.size();
-            int ovlEnd = ovl.address + ovlSize;
-            if (address < ovl.address || address >= ovlEnd)
+            int ovlEnd = ovlEarliestRamAddress + ovlSize;
+            if (address < ovlEarliestRamAddress || address >= ovlEnd)
                 continue;
 
             if (overlay != null)

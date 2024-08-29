@@ -21,7 +21,7 @@ LoopStart:
     mov     r0, r5
     lsr     r1, #24
     bl      Battle::GetPoke
-    bl      Battle::IsFainted
+    bl      Battle::IsPokeFainted
     cmp     r0, #0
     beq     EndLoop
     

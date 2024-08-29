@@ -23,33 +23,58 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.util.Set;
+
 public class ParagonLiteAbilities {
-    public static final int heavyWing = 165;
-    public static final int adaptability = 166;
-    public static final int insectivore = 167;
-    public static final int slushRush = 168;
-    public static final int prestige = 169;
-    public static final int luckyFoot = 170;
-    public static final int triage = 171;
-    public static final int competitive = 172;
-    public static final int strongJaw = 173;
-    public static final int stamina = 174;
-    public static final int assimilate = 175;
-    public static final int sharpness = 176;
-    public static final int windRider = 177;
-    public static final int refrigerate = 178;
-    public static final int pixilate = 179;
-    public static final int aerilate = 180;
-    public static final int galvanize = 181;
-    public static final int galeWings = 182;
-    public static final int toughClaws = 183;
-    public static final int stoneHome = 184;
-    
-    public static final int ripTide = 185;
-    
-    public static final int specialized = Abilities.adaptability;
+
     public static final int xrayVision = Abilities.frisk;
     public static final int herbivore = Abilities.sapSipper;
+
+    public static final int heavyWing = 500;
+    public static final int specialized = 501;
+    public static final int insectivore = 502;
+    public static final int prestige = 503;
+    public static final int luckyFoot = 504;
+    public static final int assimilate = 505;
+    public static final int stoneHome = 506;
+    public static final int cacophony = 507;
+    public static final int ripTide = 508;
+
+    public static final int MAX = ripTide;
     
-    public static final int MAX = stoneHome;
+    public static Set<Integer> allowedAbilities = Set.of(
+            Abilities.protean, // 168
+            Abilities.furCoat, // 169
+            Abilities.bulletproof, // 171
+            Abilities.competitive, // 172
+            Abilities.strongJaw, // 173
+            Abilities.refrigerate, // 174
+            Abilities.galeWings, // 175 
+            Abilities.megaLauncher, // 178
+            Abilities.toughClaws, // 181
+            Abilities.pixilate, // 182
+            Abilities.gooey, // 183
+            Abilities.aerilate, // 184
+            Abilities.stamina, // 192
+            Abilities.steelworker, // 200
+            Abilities.slushRush, // 202
+            Abilities.triage, // 205
+            Abilities.galvanize, // 206
+            Abilities.fluffy, // 218
+            Abilities.cottonDown, // 238
+            Abilities.windRider, // 274
+            Abilities.windPower, // 277
+            Abilities.sharpness, // 292
+            Abilities.supremeOverlord, // 293
+            
+            heavyWing, // 500
+            specialized, // 501
+            insectivore, // 502
+            prestige, // 503
+            luckyFoot, // 504
+            assimilate, // 505
+            stoneHome, // 506
+            cacophony, // 507
+            ripTide // 508
+    );
 }

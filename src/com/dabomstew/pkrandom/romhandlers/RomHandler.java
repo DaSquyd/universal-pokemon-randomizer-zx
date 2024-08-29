@@ -27,13 +27,11 @@ package com.dabomstew.pkrandom.romhandlers;
 
 import java.awt.image.BufferedImage;
 import java.io.PrintStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.Settings;
+import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.pokemon.*;
 
 public interface RomHandler {
@@ -202,6 +200,8 @@ public interface RomHandler {
 
     int abilitiesPerPokemon();
 
+    Set<Integer> getAvailableAbilities(Settings settings);
+    
     int highestAbilityIndex(Settings settings);
 
     String abilityName(int number);

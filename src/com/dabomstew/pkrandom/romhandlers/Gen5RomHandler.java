@@ -541,10 +541,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private void loadMoves() {
         try {
             moveNarc = this.readNARC(romEntry.getFile("MoveData"));
-            moves = new Move[Gen5Constants.moveCount + 1];
+            moves = new Move[moveNarc.files.size()];
             List<String> moveNames = getStrings(false, romEntry.getInt("MoveNamesTextOffset"));
             List<String> moveDescriptions = getStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"));
-            for (int i = 1; i <= Gen5Constants.moveCount; i++) {
+            for (int i = 1; i < moveNarc.files.size(); i++) {
                 byte[] moveData = moveNarc.files.get(i);
                 moves[i] = new Move();
                 moves[i].name = moveNames.get(i);
@@ -606,7 +606,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 moves[i].isThawingMove = (flags & 0x400) != 0;
                 moves[i].hitsNonAdjacentTargets = (flags & 0x800) != 0;
                 moves[i].isHealMove = (flags & 0x1000) != 0;
-                moves[i].hitsThroughSubstitute = (flags & 0x2000) != 0;
+                moves[i].bypassesSubstitute = (flags & 0x2000) != 0;
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -629,13 +629,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             pkmn.secondaryType = null;
         }
         pkmn.catchRate = stats[Gen5Constants.bsCatchRateOffset] & 0xFF;
-        pkmn.baseHappiness = stats[Gen5Constants.bsBaseHappinessOffset] & 0xFF;
-        pkmn.growthCurve = ExpCurve.fromByte(stats[Gen5Constants.bsGrowthCurveOffset]);
-
-        pkmn.ability1 = stats[Gen5Constants.bsAbility1Offset] & 0xFF;
-        pkmn.ability2 = stats[Gen5Constants.bsAbility2Offset] & 0xFF;
-        pkmn.ability3 = stats[Gen5Constants.bsAbility3Offset] & 0xFF;
-
         pkmn.stage = stats[Gen5Constants.bsStageOffset] & 0xFF;
 
         int evYield = readUnsignedWord(stats, Gen5Constants.bsEVYieldOffset);
@@ -663,9 +656,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             pkmn.rareHeldItem = item2;
             pkmn.darkGrassHeldItem = readUnsignedWord(stats, Gen5Constants.bsDarkGrassHeldItemOffset);
         }
-
+        
         pkmn.genderRatio = stats[Gen5Constants.bsGenderRatioOffset] & 0xFF;
+        pkmn.baseFriendship = stats[Gen5Constants.bsBaseFriendshipOffset] & 0xFF;
+        pkmn.growthCurve = ExpCurve.fromByte(stats[Gen5Constants.bsGrowthCurveOffset]);
 
+        pkmn.ability1 = stats[Gen5Constants.bsAbility1Offset] & 0xFF;
+        pkmn.ability2 = stats[Gen5Constants.bsAbility2Offset] & 0xFF;
+        pkmn.ability3 = stats[Gen5Constants.bsAbility3Offset] & 0xFF;
+        
         pkmn.expYield = readUnsignedWord(stats, Gen5Constants.bsExpYieldOffset);
 
         int formeCount = stats[Gen5Constants.bsFormeCountOffset] & 0xFF;
@@ -756,8 +755,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             writeWord(data, 8, moves[i].statusType.index);
             data[10] = (byte) moves[i].statusPercentChance;
             data[11] = (byte) moves[i].statusType.mode.ordinal();
-            data[12] = (byte) moves[i].statusType.minTurns;
-            data[13] = (byte) moves[i].statusType.maxTurns;
+            data[12] = (byte) (moves[i].statusMinTurns < 0 ? moves[i].statusType.minTurns : moves[i].statusMinTurns);
+            data[13] = (byte) (moves[i].statusMaxTurns < 0 ? moves[i].statusType.maxTurns : moves[i].statusMaxTurns);
             if (moves[i].criticalChance == CriticalChance.GUARANTEED) {
                 data[14] = (byte) 6;
             } else if (moves[i].criticalChance == CriticalChance.INCREASED) {
@@ -807,7 +806,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         flags |= moves[moveIndex].isThawingMove ? 0x1 << 10 : 0;
         flags |= moves[moveIndex].hitsNonAdjacentTargets ? 0x1 << 11 : 0;
         flags |= moves[moveIndex].isHealMove ? 0x1 << 12 : 0;
-        flags |= moves[moveIndex].hitsThroughSubstitute ? 0x1 << 13 : 0;
+        flags |= moves[moveIndex].bypassesSubstitute ? 0x1 << 13 : 0;
 
         // custom
         flags |= moves[moveIndex].isCustomKickMove ? 0x1 << 14 : 0;
@@ -816,6 +815,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         flags |= moves[moveIndex].isCustomTriageMove ? 0x1 << 17 : 0;
         flags |= moves[moveIndex].isCustomPowderMove ? 0x1 << 18 : 0;
         flags |= moves[moveIndex].isCustomWindMove ? 0x1 << 19 : 0;
+        flags |= moves[moveIndex].isCustomBallBombMove ? 0x1 << 20 : 0;
 
         return flags;
     }
@@ -859,7 +859,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             stats[Gen5Constants.bsSecondaryTypeOffset] = Gen5Constants.typeToByte(pkmn.secondaryType);
         }
         stats[Gen5Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
-        stats[Gen5Constants.bsBaseHappinessOffset] = (byte) pkmn.baseHappiness;
+        stats[Gen5Constants.bsBaseFriendshipOffset] = (byte) pkmn.baseFriendship;
         stats[Gen5Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
 
         stats[Gen5Constants.bsAbility1Offset] = (byte) pkmn.ability1;
@@ -1519,6 +1519,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 if (trainer[2] == 1 && setOriginalDoubleTrainers) {
                     originalDoubleTrainers.add(i);
                 }
+                tr.battleType = Trainer.BattleType.values()[trainer[2]];
 
                 int pokeOffs = 0;
                 for (int poke = 0; poke < pokeCount; poke++) {
@@ -1692,10 +1693,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 trainer[0x00] = (byte) tr.partyFlags;
                 trainer[0x01] = (byte) tr.trainerclass;
 
+                if (setToDoubleBattle)
+                    tr.battleType = Trainer.BattleType.DoubleBattle;
                 trainer[0x02] = (byte) tr.battleType.ordinal();
-                if (setToDoubleBattle) {
-                    trainer[0x02] = (byte) Trainer.BattleType.DoubleBattle.ordinal();
-                }
 
                 int numPokes = tr.pokemon.size();
                 trainer[0x03] = (byte) numPokes;
@@ -1709,6 +1709,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 if (setToDoubleBattle)
                     trainer[0x0C] |= (byte) 0x80; // Flag that needs to be set for trainers not to attack their own pokes
 
+                trainer[0x0C] = (byte) (0x01); // TODO: Remove
+                
                 trainer[0x10] = (byte) (tr.isHealer ? 1 : 0);
                 trainer[0x11] = tr.rewardMoneyScale;
                 writeWord(trainer, 0x12, tr.rewardItem);
@@ -2798,7 +2800,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             for (Pokemon pk : pokes) {
                 if (pk != null)
-                    pk.baseHappiness = 255;
+                    pk.baseFriendship = 255;
             }
         } else if (tweak == MiscTweak.CUSTOM_NO_EVS) {
             List<Pokemon> pokes = getPokemonInclFormes();
@@ -4167,6 +4169,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public Set<Integer> getAvailableAbilities(Settings settings) {
+        Set<Integer> availableAbilities = super.getAvailableAbilities(settings);
+        
+        if ((settings.getCurrentMiscTweaks() & MiscTweak.PARAGON_LITE.getValue()) != 0)
+            availableAbilities.addAll(ParagonLiteAbilities.allowedAbilities);
+        
+        return availableAbilities;
+    }
+
+    @Override
     public int highestAbilityIndex(Settings settings) {
         if ((settings.getCurrentMiscTweaks() & MiscTweak.PARAGON_LITE.getValue()) != 0)
             return ParagonLiteAbilities.MAX;
@@ -5184,7 +5196,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         boolean debugMode = (settings.getCurrentMiscTweaks() & MiscTweak.DEBUG_MODE.getValue()) != 0;
         Utils.debugMode = debugMode;
 
-        if (/*!debugMode &&*/ (isWhite2() || isBlack2()))
+        if ((isWhite2() || isBlack2()))
             customAddFairy();
 
         int battleOvlNumber = romEntry.getInt("BattleOvlNumber");
@@ -5209,7 +5221,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int battleEventTextOffset1 = romEntry.getInt("BattleEventText1Offset");
         int battleEventTextOffset2 = romEntry.getInt("BattleEventText2Offset");
         int abilityNamesTextOffset = romEntry.getInt("AbilityNamesTextOffset");
-        int abilityDescriptionsTextOffset = romEntry.getInt("AbilityDescriptionsTextOffset");
+        int abilityDescriptionsTextOffset = romEntry.getInt("AbilityDescriptionsTextOffset");        
         int abilityExplanationsTextOffset = romEntry.getInt("AbilityExplanationsTextOffset");
         int moveNamesTextOffset = romEntry.getInt("MoveNamesTextOffset");
         int moveDescriptionsTextOffset = romEntry.getInt("MoveDescriptionsTextOffset");
@@ -5221,7 +5233,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         List<String> battleEventStrings1 = getStrings(false, battleEventTextOffset1);
         List<String> battleEventStrings2 = getStrings(false, battleEventTextOffset2);
 
-        List<String> abilityDescriptions = getStrings(false, abilityDescriptionsTextOffset);
+        List<String> abilityDescriptions = getStrings(false, abilityDescriptionsTextOffset);        
         List<String> abilityExplanations = (isWhite() || isBlack()) ? null : getStrings(false, abilityExplanationsTextOffset);
 
         List<String> moveNames = getStrings(false, moveNamesTextOffset);
@@ -5239,6 +5251,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setBattleEventStrings();
 
         // Code updates
+        paragonLite.setReadPokePersonalData();
+        paragonLite.setReadPokeBoxData();
+        paragonLite.fixChallengeModeLevelBug();
+        paragonLite.setDamageCalcOffensiveStat();
         paragonLite.setDamageCalcDefensiveStat();
         paragonLite.setCritRatio();
         paragonLite.setCritDamage();
@@ -5247,9 +5263,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setTypeForPlate();
         paragonLite.setGemDamageBoost();
         paragonLite.setMultiStrikeLoadedDice();
-        paragonLite.setMoveRestrictions();
+        paragonLite.setIsSelectedMoveValid();
         paragonLite.setWeatherDamage();
         paragonLite.setShinyRate();
+        paragonLite.setGhostEscape();
+        paragonLite.setCallModifyEffectivenessHandler();
 
         paragonLite.setMoves();
         paragonLite.setItems();

@@ -12,90 +12,29 @@ Main:
     lsl     r1, #1 ; 298
     sub     r0, r1
     cmp     r0, #15
-    bhi     Normal
+    bhi     Other
     
-    #SWITCH r0
-    #CASE Fire
-    #CASE Water
-    #CASE Electric
-    #CASE Grass
-    #CASE Ice
-    #CASE Fighting
-    #CASE Poison
-    #CASE Ground
-    #CASE Flying
-    #CASE Psychic
-    #CASE Bug
-    #CASE Rock
-    #CASE Ghost
-    #CASE Dragon
-    #CASE Dark
-    #CASE Steel
-    
-Fire:
-    mov     r0, #9
+    add     r0, pc
+    ldrb    r0, [r0, #2]
     bx      lr
     
-Water:
-    mov     r0, #10
-    bx      lr
+    dcb     9  ; Flame Plate
+    dcb     10 ; Splash Plate
+    dcb     12 ; Zap Plate
+    dcb     11 ; Meadow Plate
+    dcb     14 ; Icicle Plate
+    dcb     1  ; Fist Plate
+    dcb     3  ; Toxic Plate
+    dcb     4  ; Earth Plate
+    dcb     2  ; Sky Plate
+    dcb     13 ; Mind Plate
+    dcb     6  ; Insect Plate
+    dcb     5  ; Stone Plate
+    dcb     7  ; Spooky Plate
+    dcb     15 ; Draco Plate
+    dcb     16 ; Dread Plate
+    dcb     8  ; Iron Plate
     
-Electric:
-    mov     r0, #12
-    bx      lr
-    
-Grass:
-    mov     r0, #11
-    bx      lr
-    
-Ice:
-    mov     r0, #14
-    bx      lr
-    
-Fighting:
-    mov     r0, #1
-    bx      lr
-    
-Poison:
-    mov     r0, #3
-    bx      lr
-    
-Ground:
-    mov     r0, #4
-    bx      lr
-    
-Flying:
-    mov     r0, #2
-    bx      lr
-    
-Psychic:
-    mov     r0, #13
-    bx      lr
-    
-Bug:
-    mov     r0, #6
-    bx      lr
-    
-Rock:
-    mov     r0, #5
-    bx      lr
-    
-Ghost:
-    mov     r0, #7
-    bx      lr
-    
-Dragon:
-    mov     r0, #15
-    bx      lr
-    
-Dark:
-    mov     r0, #16
-    bx      lr
-    
-Steel:
-    mov     r0, #8
-    bx      lr
-    
-Normal:
+Other:
     mov     r0, #0
     bx      lr

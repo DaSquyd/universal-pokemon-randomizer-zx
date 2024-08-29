@@ -59,7 +59,7 @@ public class ArmParser {
         labelAddressMap.clear();
         dataRamAddressMap.clear();
         redirectorAddressMap.clear();
-        
+
         this.overlay = overlay;
         this.initialRamAddress = initialRamAddress;
         this.currentRamAddress = initialRamAddress;
@@ -80,18 +80,20 @@ public class ArmParser {
                 varDefinesStringBuilder.append(varValue);
                 varDefinesStringBuilder.append(';');
             } else if (str.toUpperCase().startsWith("#SWITCH ")) {
-                String switchRegister = str.split(" ", 2)[1];
+                String[] switchSplit = str.split(" ", 3);
+                String switchRegister1 = switchSplit[1];
+                String switchRegister2 = switchSplit.length == 3 ? switchSplit[2] : switchRegister1;
                 List<String> oldLines = lines;
                 lines = new ArrayList<>(lines.size() + 5);
                 for (int j = 0; j < i; ++j) {
                     lines.add(oldLines.get(j));
                 }
-                lines.add(String.format("add r0, %s, %s", switchRegister, switchRegister));
-                lines.add("add r0, pc");
-                lines.add("ldrh r0, [r0, #6]");
-                lines.add("lsl r0, #16");
-                lines.add("asr r0, #16");
-                lines.add("add pc, r0");
+                lines.add(String.format("add %s, %s, %s", switchRegister1, switchRegister2, switchRegister2));
+                lines.add(String.format("add %s, pc", switchRegister1));
+                lines.add(String.format("ldrh %s, [%s, #6]", switchRegister1, switchRegister1));
+                lines.add(String.format("lsl %s, #16", switchRegister1));
+                lines.add(String.format("asr %s, #16", switchRegister1));
+                lines.add(String.format("add pc, %s", switchRegister1));
                 for (int j = i + 1; j < oldLines.size(); ++j) {
                     lines.add(oldLines.get(j));
                 }
@@ -132,8 +134,8 @@ public class ArmParser {
 
             int firstSpaceIndex = str.indexOf(' ');
             if (firstSpaceIndex <= 0)
-                throw new RuntimeException();
-            
+                throw new RuntimeException("Could not parse " + str);
+
             String op = str.substring(0, firstSpaceIndex).toLowerCase();
             String args = str.substring(firstSpaceIndex + 1).replace(" ", "");
 
@@ -186,52 +188,55 @@ public class ArmParser {
         return bytes.length;
     }
 
-    public int getFuncSize(byte[] bytes, int startingOffset) {
-        if (readWord(bytes, startingOffset) == 0)
+    public int getFuncSize(ParagonLiteOverlay overlay, int initialRamAddress) {
+        if (overlay.readWord(initialRamAddress) == 0)
             throw new RuntimeException("Empty function");
+        
+        final AtomicReference<Integer> maxOffset = new AtomicReference<>(initialRamAddress);
 
-        final AtomicReference<Integer> maxOffset = new AtomicReference<>(startingOffset);
-
-        traverseData(bytes, startingOffset, (context) -> {
-            maxOffset.set(Math.max(maxOffset.get(), context.offset + 2));
+        traverseData(overlay, initialRamAddress, (context) -> {
+            maxOffset.set(Math.max(maxOffset.get(), context.ramAddress + 2));
 
             // PC-relative load
             if ((context.instruction & 0xF800) == 0x4800) {
                 int imm = context.instruction & 0x00FF;
-                int dataOffset = alignWord(context.offset + ((imm << 2) + 4));
+                int dataOffset = alignWord(context.ramAddress + ((imm << 2) + 4));
                 maxOffset.set(Math.max(maxOffset.get(), dataOffset + 4));
             }
         });
-
-        return alignNextWord(maxOffset.get()) - startingOffset;
+        
+        return alignNextWord(maxOffset.get()) - initialRamAddress;
     }
 
-    public Map<Integer, Set<Integer>> getOutgoingCodeReferences(final byte[] data, int startingOffset, final int overlayAddress) {
+    public Map<Integer, Set<Integer>> getOutgoingCodeReferences(ParagonLiteOverlay overlay, int initialRamAddress) {
         AtomicReference<Map<Integer, Set<Integer>>> mapRef = new AtomicReference<>(new HashMap<>());
 
-        traverseData(data, startingOffset, (context) -> {
+        traverseData(overlay, initialRamAddress, (context) -> {
             Map<Integer, Set<Integer>> map = mapRef.get();
 
             // PC-relative load
             if ((context.instruction & 0xF800) == 0x4800) {
                 int imm = context.instruction & 0x00FF;
-                int dataOffset = alignWord(context.offset + ((imm << 2) + 4));
-
-                int value = readWord(data, dataOffset);
+                int ramAddress = alignWord(context.ramAddress + ((imm << 2) + 4));
+                int romAddress = overlay.ramToRomAddress(ramAddress);
+                
+                int value = overlay.readWord(romAddress);
                 if (!ParagonLiteAddressMap.isValidAddress(value, true))
                     return;
 
                 int address = alignWord(value);
                 if (!map.containsKey(address))
                     map.put(address, new HashSet<>());
-                map.get(address).add(overlayAddress + context.offset);
+                map.get(address).add(context.ramAddress);
                 return;
             }
 
             // long branch with link (high)
             if ((context.instruction & 0xF800) == 0xF000) {
-                int nextInstruction = readUnsignedHalfword(data, context.offset + 2);
-
+                int ramAddress = context.ramAddress + 2;
+                int romAddress = overlay.ramToRomAddress(ramAddress);
+                
+                int nextInstruction = overlay.readUnsignedHalfword(romAddress);
                 if ((nextInstruction & 0xE800) != 0xE800) // can be blx
                     return;
 
@@ -239,14 +244,14 @@ public class ArmParser {
                 int low = (nextInstruction & 0x07FF) << 1;
                 int offset = (high | low);
 
-                int value = overlayAddress + context.offset + offset + 4;
+                int value = context.ramAddress + offset + 4;
                 if (!ParagonLiteAddressMap.isValidAddress(value, false))
                     return;
 
                 int address = alignWord(value);
                 if (!map.containsKey(address))
                     map.put(address, new HashSet<>());
-                map.get(address).add(overlayAddress + context.offset);
+                map.get(address).add(context.ramAddress);
             }
         });
 
@@ -294,30 +299,31 @@ public class ArmParser {
     }
 
     private static class TraversalContext {
-        int offset;
+        int ramAddress;
         int instruction = -1;
 
-        private TraversalContext(int offset) {
-            this.offset = offset;
+        private TraversalContext(int ramAddress) {
+            this.ramAddress = ramAddress;
         }
     }
 
-    private void traverseData(byte[] bytes, int startingOffset, Consumer<TraversalContext> action) {
-        if (!isWordAligned(startingOffset))
+    private void traverseData(ParagonLiteOverlay overlay, int initialRamAddress, Consumer<TraversalContext> action) {
+        if (!isWordAligned(initialRamAddress))
             throw new RuntimeException("StartingOffset must be word-aligned.");
 
         Queue<TraversalContext> queue = new LinkedList<>();
-        queue.add(new TraversalContext(startingOffset));
+        queue.add(new TraversalContext(initialRamAddress));
 
         Set<Integer> seen = new HashSet<>();
 
         while (!queue.isEmpty()) {
             TraversalContext context = queue.poll();
-            if (!seen.add(context.offset))
+            if (!seen.add(context.ramAddress))
                 continue;
 
             // read instruction
-            context.instruction = readUnsignedHalfword(bytes, context.offset);
+            int romAddress = overlay.ramToRomAddress(context.ramAddress);
+            context.instruction = overlay.readUnsignedHalfword(romAddress);
             action.accept(context); // process lambda
 
             // conditional branch
@@ -330,7 +336,7 @@ public class ArmParser {
                 int branchOffset = (byte) (context.instruction & 0x00FF);
                 branchOffset = (branchOffset << 1) + 4;
 
-                TraversalContext newContext = new TraversalContext(context.offset + branchOffset);
+                TraversalContext newContext = new TraversalContext(context.ramAddress + branchOffset);
 
                 queue.add(newContext); // jump
             }
@@ -338,7 +344,7 @@ public class ArmParser {
             // unconditional branch
             if ((context.instruction & 0xF800) == 0xE000) {
                 // two's compliment 12-bit
-                context.offset += (((context.instruction & 0x07FF) << 21) >> 20) + 4;
+                context.ramAddress += (((context.instruction & 0x07FF) << 21) >> 20) + 4;
                 queue.add(context);
                 continue;
             }
@@ -348,23 +354,24 @@ public class ArmParser {
                 Set<Integer> destinations = new HashSet<>();
 
                 for (int i = 0; ; ++i) {
-                    int switchOffset = context.offset + 2 + i * 2;
-                    if (destinations.contains(switchOffset) || seen.contains(switchOffset))
+                    int switchJumpRamAddress = context.ramAddress + 2 + i * 2;
+                    int switchJumpRomAddress = overlay.ramToRomAddress(switchJumpRamAddress);
+                    if (destinations.contains(switchJumpRamAddress) || seen.contains(switchJumpRamAddress))
                         break;
 
                     // Check to see if we have a queued
                     boolean foundMatchingDestination = false;
                     for (TraversalContext queuedContext : queue) {
-                        if (queuedContext.offset == switchOffset) {
+                        if (queuedContext.ramAddress == switchJumpRamAddress) {
                             foundMatchingDestination = true;
                             break;
                         }
                     }
                     if (foundMatchingDestination)
                         break;
-
-                    int switchJump = readUnsignedHalfword(bytes, switchOffset);
-                    int destination = context.offset + switchJump + 4;
+                    
+                    int switchJump = overlay.readUnsignedHalfword(switchJumpRomAddress);
+                    int destination = context.ramAddress + switchJump + 4;
                     destinations.add(destination);
                 }
 
@@ -384,7 +391,7 @@ public class ArmParser {
                 continue;
             }
 
-            context.offset += 2;
+            context.ramAddress += 2;
             queue.add(context);
         }
     }
@@ -502,15 +509,18 @@ public class ArmParser {
             if (args[0].equalsIgnoreCase("sp"))
                 return format13(args);
 
-            if (args[1].startsWith("#"))
+            if (args[1].startsWith("#")) {
+                if (parseValue(args[1]) <= 7)
+                    return format2(new String[]{args[0], args[0], args[1]}, 0);
                 return format3(args, 2);
+            }
 
             int rd = parseRegister(args[0]);
             int rs = parseRegister(args[1]);
 
             // Prefer format2
             if (rd < 8 && rs < 8)
-                return format2(new String[]{args[0], args[1], args[0]}, 0);
+                return format2(new String[]{args[0], args[0], args[1]}, 0);
 
             return format5(args, 0);
         }
@@ -835,8 +845,8 @@ public class ArmParser {
 
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("sp"))
-                return format13(new String[] {args[0], "#-(" + args[1].substring(1) + ")"}); // flip
-            
+                return format13(new String[]{args[0], "#-(" + args[1].substring(1) + ")"}); // flip
+
             if (args[1].startsWith("#"))
                 return format3(args, 3);
 
@@ -847,6 +857,20 @@ public class ArmParser {
             return format2(args, 1);
 
         throw new DataFormatException();
+    }
+
+    private void throwParseError(int formatNumber, String op, String[] args, String message) {
+        throw new IllegalArgumentException(String.format("Parse Error - Format %d: %s %s; %s", formatNumber, op, String.join(" ", args), message));
+    }
+
+    private void assertRegisterRange(int formatNumber, String op, String[] args, String register, String registerName, int registerValue, int registerValueMin, int registerValueMax) {
+        if (registerValue < registerValueMin || registerValue > registerValueMax)
+            throwParseError(formatNumber, op, args, String.format("%s (%s) must be in range of r%d-r%d", register, registerName, registerValueMin, registerValueMax));
+    }
+
+    private void assertImmediateRange(int formatNumber, String op, String[] args, int immediateValue, int immediateValueMin, int immediateValueMax) {
+        if (immediateValue < immediateValueMin || immediateValue > immediateValueMax)
+            throwParseError(formatNumber, op, args, String.format("imm (%d) must be in range of %d-%d", immediateValue, immediateValueMin, immediateValueMax));
     }
 
     // Format 1: move shifted register
@@ -872,8 +896,13 @@ public class ArmParser {
         boolean isImmediate = args[2].startsWith("#");
         int rnOrImm = isImmediate ? parseValue(args[2]) : parseRegister(args[2]);
 
-        if (rd < 0 || rd > 7 || rs < 0 || rs > 7 || rnOrImm < 0 || rnOrImm > 7)
-            throw new DataFormatException();
+        String opName = op == 0 ? "add" : "sub";
+        assertRegisterRange(2, opName, args, "rd", args[0], rd, 0, 7);
+        assertRegisterRange(2, opName, args, "rs", args[1], rs, 0, 7);
+        if (isImmediate)
+            assertImmediateRange(2, opName, args, rnOrImm, 0, 7);
+        else
+            assertRegisterRange(2, opName, args, "rn", args[2], rnOrImm, 0, 7);
 
         return halfwordToBytes(rd | (rs << 3) | (rnOrImm << 6) | (op << 9) | ((isImmediate ? 1 : 0) << 10) | 0x1800);
     }
@@ -1196,7 +1225,7 @@ public class ArmParser {
 
         int jumpAddress = labelAddressMap.get(args[0]);
         int offset = jumpAddress - currentRamAddress - 4;
-        if (offset < -128 || offset > 127)
+        if (offset < -256 || offset > 255)
             throw new DataFormatException("Offset is too large");
 
         offset = (offset >> 1) & 0xFF;
@@ -1240,7 +1269,7 @@ public class ArmParser {
         }
 
         int funcRamAddress;
-        int encoding;
+        int targetFunctionEncoding;
 
         if (args[0].contains("::")) {
             String[] funcStrs = args[0].split("::");
@@ -1256,20 +1285,23 @@ public class ArmParser {
                 throw new DataFormatException();
 
             funcRamAddress = codeAddress.getRamAddress();
-            encoding = codeAddress.getEncoding();
-            if (encoding == 2 && exchangeInstructionSet)
-                throw new DataFormatException("BLX was used on a Thumb function");
-            if (encoding == 4 && !exchangeInstructionSet)
-                throw new DataFormatException("BL was used on an ARM function");
+            targetFunctionEncoding = codeAddress.getEncoding();
+//            if (targetFunctionEncoding == 2 && exchangeInstructionSet)
+//                throw new DataFormatException("BLX was used on a Thumb function");
+//            if (targetFunctionEncoding == 4 && !exchangeInstructionSet)
+//                throw new DataFormatException("BL was used on an ARM function");
 
+            // TODO: Give proper warning when this was changed
+            exchangeInstructionSet = targetFunctionEncoding == 4;
+            
             if (!isWordAligned(funcRamAddress))
                 throw new DataFormatException(String.format("Function address of %s (0x%08X) is not word-aligned", args[0], funcRamAddress));
         } else {
             funcRamAddress = parseValue(args[0]);
-            encoding = 2; // TODO: Assume Thumb for now
+            targetFunctionEncoding = 2; // TODO: Assume Thumb for now
         }
 
-        int funcOffset = funcRamAddress - (currentRamAddress + 4);
+        int funcOffset = funcRamAddress - ((exchangeInstructionSet ? alignWord(currentRamAddress) : currentRamAddress) + 4);
 
         int min = 0xFFC00000; // -4194304
         int max = 0x003FFFFF; // +4194303
@@ -1281,12 +1313,12 @@ public class ArmParser {
                 overlay.writeHalfword(redirectorRomAddress + 0x02, 0x46C0); // nop
                 overlay.writeWord(redirectorRomAddress + 0x04, 0xE59FC000, false); // ldr r12, =(address+1 or address+0)
                 overlay.writeWord(redirectorRomAddress + 0x08, 0xE12FFF1C, false); // bx r12
-                overlay.writeWord(redirectorRomAddress + 0x0C, funcRamAddress + (encoding == 4 ? 0 : 1), true);
+                overlay.writeWord(redirectorRomAddress + 0x0C, funcRamAddress + (targetFunctionEncoding == 4 ? 0 : 1), true);
 
                 int redirectorRamAddress = overlay.romToRamAddress(redirectorRomAddress);
                 redirectorAddressMap.put(funcRamAddress, redirectorRamAddress);
             }
-            
+
             funcRamAddress = redirectorAddressMap.get(funcRamAddress);
             exchangeInstructionSet = false;
             funcOffset = funcRamAddress - (currentRamAddress + 4);
@@ -1370,7 +1402,7 @@ public class ArmParser {
                 return (int) Math.round((double) evalObj);
             return (int) evalObj;
         } catch (ScriptException e) {
-            throw new DataFormatException(String.format("Could not parse %s", valueStr));
+            throw new DataFormatException(String.format("Could not parse %s: %s", valueStr, e));
         }
     }
 
@@ -1382,7 +1414,7 @@ public class ArmParser {
     }
 
     private static int readUnsignedHalfword(byte[] data, int offset) {
-        if (offset + 1 >= data.length)
+        if (offset < 0 || offset + 1 >= data.length)
             throw new RuntimeException();
 
         return ((data[offset] & 0xFF) | ((data[offset + 1] & 0xFF) << 8));

@@ -1,17 +1,22 @@
-    PUSH {R4-R5, LR}
-    MOV  R0, #2
-    MOV  R5, R1
-    MOV  R4, R2
-    BL   Battle::EventVar_GetValue
-    CMP  R4, R0
-    BNE  End
-    MOV  R0, R5
-    BL   Battle::GetWeather
-    CMP  R0, #3
-    BNE  End
-    MOV  R0, #53 ; stat
-    ldr  R1, =8192 ; 2x
-    BL   Battle::EventVar_MulValue
+    push    {r4-r5, lr}
+    mov     r0, #2
+    mov     r5, r1
+    mov     r4, r2
+    bl      Battle::EventVar_GetValue
+    cmp     r4, r0
+    bne     Return
+    mov     r0, r5
+    bl      Battle::GetWeather
+    cmp     r0, #3 ; Hail
+    bne     Return
+    mov     r0, #0x35
+    mov     r1, #4
+    lsl     r1, #11 ; 8192 (2x)
+    bl      Battle::EventVar_MulValue
     
-End:
-    POP  {R4-R5, PC}
+Return:
+    pop     {r4-r5, pc}
+    
+    
+    
+    

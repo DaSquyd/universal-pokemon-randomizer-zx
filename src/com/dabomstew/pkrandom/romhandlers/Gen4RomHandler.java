@@ -1078,7 +1078,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         pkmn.spatkEVs = (evYield >> 8) & 0xFF;
         pkmn.spdefEVs = (evYield >> 10) & 0xFF;
         
-        pkmn.baseHappiness = stats[Gen4Constants.bsBaseHappinessOffset];
+        pkmn.baseFriendship = stats[Gen4Constants.bsBaseHappinessOffset];
 
         int cosmeticForms = Gen4Constants.cosmeticForms.getOrDefault(pkmn.number,0);
         if (cosmeticForms > 0 && romEntry.romType != Gen4Constants.Type_DP) {
@@ -1208,7 +1208,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         stats[Gen4Constants.bsAbility2Offset] = (byte) pkmn.ability2;
         
         stats[Gen4Constants.bsExpYieldOffset] = (byte) pkmn.expYield;
-        stats[Gen4Constants.bsBaseHappinessOffset] = (byte) pkmn.baseHappiness;
+        stats[Gen4Constants.bsBaseHappinessOffset] = (byte) pkmn.baseFriendship;
 
         int evYield = 0;
         evYield |= pkmn.hpEVs;
@@ -5371,7 +5371,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     
             for (Pokemon pk : pokes) {
                 if (pk != null)
-                    pk.baseHappiness = 255;
+                    pk.baseFriendship = 255;
             }
         } else if (tweak == MiscTweak.CUSTOM_NO_EVS) {
             List<Pokemon> pokes = getPokemonInclFormes();

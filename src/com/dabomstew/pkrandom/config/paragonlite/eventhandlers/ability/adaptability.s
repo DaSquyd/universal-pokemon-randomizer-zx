@@ -1,5 +1,5 @@
 ; The original Adaptability is now called "Specialized".
-; This is the new version where all moves get STAB, albeit reduced
+; This is the new version where non-STAB moves get a boost of 1.3x
 
     push    {r3-r6, lr}
     mov     r0, #3
@@ -10,7 +10,9 @@
     cmp     r5, r0
     bne     End
     
-    mov     r0, #22 ; move type
+    mov     r0, #0x12 
+    
+    mov     r0, #0x16 ; move type
     bl      Battle::EventVar_GetValue
     mov     r4, r0
 

@@ -21,7 +21,12 @@ public class ParagonLiteArm9 extends ParagonLiteOverlay {
     private int getItcmDestStart() {
         return 0x01FF8000;
     }
-    
+
+    @Override
+    public int getEarliestRamAddress() {
+        return getItcmDestStart();
+    }
+
     @Override
     public int romToRamAddress(int romAddress) {
         int itcmSrcAddress = getItcmSrcAddress();

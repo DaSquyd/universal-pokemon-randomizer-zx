@@ -1,4 +1,4 @@
-; THIS IS THE REPLACEMENT FUNCTION that handles move restriction checks. See move_restriction_ref.s!
+; THIS IS THE ORIGINAL FUNCTION that handles move restriction checks.
 ; It's located in Overlay 167 at 0x021B47F8 for W2 and 0x021B47B8 for B2.
 ; References:
 ; W2            B2
@@ -17,55 +17,13 @@
     mov     r4, r3
     
     cmp     r5, #165 ; Struggle
-    bne     AssaultVestCheck
+    bne     CheckChoiceItem
     
     add     sp, #20
     mov     r0, #0 ; false
     pop     {r4-r7, pc}
     
-
-; NEW SECTION:
-AssaultVestCheck:
-    bl      Battle::CanPokeUseHeldItem
-    cmp     r0, #0
-    beq     CheckChoiceItem
     
-    mov     r0, r6
-    bl      Battle::GetPokeHeldItem
-    ldr     r1, =114 ; Assault Vest
-    cmp     r0, r1
-    bne     CheckChoiceItem
-    
-    mov     r0, r5
-    bl      ARM9::IsMoveDamaging
-    cmp     r0, #0
-    bne     CheckChoiceItem
-    
-    cmp     r4, #0
-    beq     AssaultVestReturnTrue
-    
-    mov     r0, r4
-    ldr     r2, =1189 ; "The effects of the Assault Vest prevent status moves from being used!"
-    mov     r1, #2 ; File 0x11
-    bl      Battle::DisplayMessage
-    
-    mov     r0, r6
-    bl      Battle::GetPokeId
-    mov     r1, r0
-    mov     r0, r4
-    bl      Battle::Unk_21D0B64
-    
-    mov     r0, r4
-    mov     r1, r5
-    bl      Battle::Unk_21D0B64
-    
-AssaultVestReturnTrue:
-    add     sp, #20
-    mov     r0, #1
-    pop     {r4-r7, pc}
-    
-
-
 
 ; Is the user holding Choice Band/Specs/Scarf and is already locked into a move?
 CheckChoiceItem:
@@ -82,7 +40,7 @@ CheckChoiceItem:
     mov     r0, r6
     mov     r1, #27 ; Choice Item Check
     bl      Battle::GetConditionData
-    bl      Battle::GetMoveFromConditionData
+    bl      Battle::ConditionPtr_GetMove
     str     r0, [sp, #0]
     
     ldr     r1, [sp, #0]
@@ -108,11 +66,11 @@ CheckChoiceItem:
     
     mov     r1, r0
     mov     r0, r4
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
     ldr     r1, [sp, #0]
     mov     r0, r4
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
 ChoiceItemReturnTrue:
     add     sp, #20
@@ -132,7 +90,7 @@ CheckEncore:
     mov     r0, r6
     mov     r1, #23 ; Encore
     bl      Battle::GetConditionData
-    bl      Battle::GetMoveFromConditionData
+    bl      Battle::ConditionPtr_GetMove
     str     r0, [sp, #4]
     cmp     r5, r0
     beq     CheckTaunt
@@ -149,11 +107,11 @@ CheckEncore:
     bl      Battle::GetPokeId
     mov     r1, r0
     mov     r0, r4
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
     ldr     r1, [sp, #4]
     mov     r0, r4
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
 EncoreReturnTrue:
     add     sp, #20
@@ -187,11 +145,11 @@ CheckTaunt:
     bl      Battle::GetPokeId
     mov     r1, r0
     mov     r0, r4
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
     mov     r0, r4
     mov     r1, r5
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
 TauntReturnTrue:
     add     sp, #20
@@ -226,10 +184,10 @@ CheckTorment:
     bl      Battle::GetPokeId
     mov     r1, r0
     mov     r0, r4
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     mov     r0, r4
     mov     r1, r5
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
 TormentReturnTrue:
     add     sp, #20
@@ -267,11 +225,11 @@ CheckDisable:
     bl      Battle::GetPokeId
     mov     r1, r0
     mov     r0, r4
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
     mov     r0, r4
     mov     r1, r5
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
 DisableReturnTrue:
     add     sp, #20
@@ -306,11 +264,11 @@ CheckHealBlock:
     bl      Battle::GetPokeId
     mov     r1, r0
     mov     r0, r4
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
     mov     r0, r4
     mov     r1, r5
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
 HealBlockReturnTrue:
     add     sp, #20
@@ -347,11 +305,11 @@ CheckImprison:
     bl      Battle::GetPokeId
     mov     r1, r0
     mov     r0, r4
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
     mov     r0, r4
     mov     r1, r5
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
 ImprisonReturnTrue:
     add     sp, #20
@@ -387,11 +345,11 @@ CheckGravity:
     bl      Battle::GetPokeId
     mov     r1, r0
     mov     r0, r4
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
     mov     r0, r4
     mov     r1, r5
-    bl      Battle::Unk_21D0B64
+    bl      Battle::StringParam_AddArg
     
 GravityReturnTrue:
     add     sp, #20

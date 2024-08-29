@@ -15,7 +15,7 @@
     mov     r1, r4
     bl      Battle::GetPoke
     
-    mov     r1, #2
+    mov     r1, #4 ; Sp. Def
     mov     r2, #1
     mov     r7, r0
     mov     r6, #0
@@ -24,7 +24,7 @@
     beq     End
     
     mov     r0, r7
-    bl      Battle::IsFainted
+    bl      Battle::IsPokeFainted
     cmp     r0, #0
     bne     End
     

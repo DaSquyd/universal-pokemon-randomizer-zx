@@ -65,9 +65,9 @@ ModifyStatEvent:
      beq    CheckRawStat
      
 ; Should flip stats...
-     cmp    r4, #9 ; Defense stat
+     cmp    r4, #0x09 ; Defense stat
      bne    SetStatToDefense
-     mov    r4, #11 ; Set stat to Sp. Def stat
+     mov    r4, #0x0B ; Set stat to Sp. Def stat
      b      UpdateCategory
      
 SetStatToDefense:
@@ -89,7 +89,7 @@ CheckRawStat:
     mov     r0, #0x51
     bl      Battle::EventVar_GetValue
     lsl     r0, #24
-    lsr     r7, r0, #24 ; Mask: 00000000_00000000_00000000_11111111
+    lsr     r7, r0, #24
     
     ldr     r0, =0x3163
     bl      Battle::EventVar_Pop

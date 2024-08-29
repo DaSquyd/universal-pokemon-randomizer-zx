@@ -1,28 +1,28 @@
     push    {r4-r6, lr}
-    mov     r0, #4
     mov     r5, r1
     mov     r4, r2
+    
+    mov     r0, #4
     mov     r6, #4
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
-    bne     End
+    bne     Return
     
-    ; Get Move ID
-    mov     r0, #18 ; move id
+    mov     r0, #0x12 ; move id
     bl      Battle::EventVar_GetValue
-    lsl     r0, r0, #16
-    lsr     r0, r0, #16
+    lsl     r0, #16
+    lsr     r0, #16
     
-    mov     r1, #19 ; wind move flag
+    mov     r1, #20 ; ball/bomb flag
     bl      ARM9::MoveHasFlag
     cmp     r0, #0
-    beq     End
+    beq     Return
     
-    mov     r0, #64
+    mov     r0, #0x40
     mov     r1, #1
     bl      Battle::EventVar_RewriteValue
     cmp     r0, #0
-    beq     End
+    beq     Return
     
     mov     r0, r5
     mov     r1, #2
@@ -33,11 +33,11 @@
     mov     r1, r6
     mov     r2, r4
     bl      Battle::Handler_PushWork
-    
     mov     r6, r0
+    
     add     r0, r6, #4
     mov     r1, #2
-    mov     r2, #210
+    mov     r2, #210 ; "It doesn't affect [poke]..."
     bl      Battle::Handler_StrSetup
     
     add     r0, r6, #4
@@ -49,16 +49,9 @@
     bl      Battle::Handler_PopWork
     
     mov     r0, r5
-    mov     r1, #3
+    mov     r1, #0x03
     mov     r2, r4
     bl      Battle::Handler_PushRun
     
-; apply boost
-    mov     r0, r5
-    mov     r1, r4
-    mov     r2, #1 ; attack
-    mov     r3, #1 ; boost amount
-    bl      Battle::CommonTypeNoEffectBoost
-    
-End:
+Return:
     pop     {r4-r6, pc}

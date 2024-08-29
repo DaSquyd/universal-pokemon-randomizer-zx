@@ -401,7 +401,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             pkmn.secondaryType = null;
         }
         pkmn.catchRate = stats[Gen6Constants.bsCatchRateOffset] & 0xFF;
-        pkmn.baseHappiness = stats[Gen6Constants.bsBaseHappinessOffset] & 0xFF;
+        pkmn.baseFriendship = stats[Gen6Constants.bsBaseHappinessOffset] & 0xFF;
         pkmn.growthCurve = ExpCurve.fromByte(stats[Gen6Constants.bsGrowthCurveOffset]);
 
         pkmn.ability1 = stats[Gen6Constants.bsAbility1Offset] & 0xFF;
@@ -669,7 +669,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 moves[i].isThawingMove = (flags & 0x400) != 0;
                 moves[i].hitsNonAdjacentTargets = (flags & 0x800) != 0;
                 moves[i].isHealMove = (flags & 0x1000) != 0;
-                moves[i].hitsThroughSubstitute = (flags & 0x2000) != 0;
+                moves[i].bypassesSubstitute = (flags & 0x2000) != 0;
                 moves[i].unknownFlag1 = (flags & 0x4000) != 0;
                 moves[i].unknownFlag2 = (flags & 0x8000) != 0;
             }
@@ -746,7 +746,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             stats[Gen6Constants.bsSecondaryTypeOffset] = Gen6Constants.typeToByte(pkmn.secondaryType);
         }
         stats[Gen6Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
-        stats[Gen6Constants.bsBaseHappinessOffset] = (byte) pkmn.baseHappiness;
+        stats[Gen6Constants.bsBaseHappinessOffset] = (byte) pkmn.baseFriendship;
         stats[Gen6Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
 
         stats[Gen6Constants.bsAbility1Offset] = (byte) pkmn.ability1;
@@ -953,8 +953,8 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
             writeWord(data, 8, moves[i].statusType.index);
             data[10] = (byte) moves[i].statusPercentChance;
             data[11] = (byte) moves[i].statusType.mode.ordinal();
-            data[12] = (byte) moves[i].statusType.minTurns;
-            data[13] = (byte) moves[i].statusType.maxTurns;
+            data[12] = (byte) (moves[i].statusMinTurns < 0 ? moves[i].statusType.minTurns : moves[i].statusMinTurns);
+            data[13] = (byte) (moves[i].statusMaxTurns < 0 ? moves[i].statusType.maxTurns : moves[i].statusMaxTurns);
             if (moves[i].criticalChance == CriticalChance.GUARANTEED) {
                 data[14] = (byte) 6;
             } else if (moves[i].criticalChance == CriticalChance.INCREASED) {
@@ -1003,7 +1003,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         flags |= moves[moveIndex].isThawingMove ? 0x400 : 0;
         flags |= moves[moveIndex].hitsNonAdjacentTargets ? 0x800 : 0;
         flags |= moves[moveIndex].isHealMove ? 0x1000 : 0;
-        flags |= moves[moveIndex].hitsThroughSubstitute ? 0x2000 : 0;
+        flags |= moves[moveIndex].bypassesSubstitute ? 0x2000 : 0;
         flags |= moves[moveIndex].unknownFlag1 ? 0x4000 : 0;
         flags |= moves[moveIndex].unknownFlag2 ? 0x8000 : 0;
         return flags;
@@ -2717,7 +2717,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
             for (Pokemon pk : pokes) {
                 if (pk != null)
-                    pk.baseHappiness = 255;
+                    pk.baseFriendship = 255;
             }
         }
         else if (tweak == MiscTweak.CUSTOM_NO_EVS) {

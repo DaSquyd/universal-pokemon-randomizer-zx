@@ -11,25 +11,25 @@
     #CASE   ReturnZero
     #CASE   ReturnZero
     #CASE   ReturnZero
-    #CASE   ReturnZero      ; Freeze
-    #CASE   Burn            ; Burn
-    #CASE   PoisonAndToxic  ; Poison/Toxic
+    #CASE   ReturnZero         ; Freeze
+    #CASE   Burn               ; Burn
+    #CASE   PoisonAndBadPoison ; Poison/BadPoison
     #CASE   ReturnZero      
     #CASE   ReturnZero
     #CASE   ReturnZero
-    #CASE   Nightmare       ; Nightmare
-    #CASE   Curse           ; Curse
+    #CASE   Nightmare          ; Nightmare
+    #CASE   Curse              ; Curse
     
-PoisonAndToxic:
+PoisonAndBadPoison:
     lsl     r0, r5, #2
     add     r0, r4
     add     r0, #28
     ldr     r0, [r0]
-    bl      Battle::GetTurnsFromConditionData
+    bl      Battle::ConditionPtr_GetIsBadPoison
     cmp     r0, #0
     beq     Poison
     
-Toxic:
+BadPoison:
     mov     r0, r4
     mov     r1, #16 ; 1/16
     bl      Battle::DivideMaxHPZeroCheck
