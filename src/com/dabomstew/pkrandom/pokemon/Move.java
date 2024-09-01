@@ -115,54 +115,54 @@ public class Move {
 
     public String name;
     public String description;
-    public int number;
-    public int internalId;
-    public Type type; // 00
+    public int number = 0;
+    public int internalId = 0;
+    public Type type = Type.NORMAL; // 00
     public MoveQualities qualities; // 01
-    public MoveCategory category; // 02
-    public int power; // 03
-    public double accuracy; // 04
-    public int pp; // 05
-    public int priority; // 06
-    public int minHits; // 07
-    public int maxHits; // 07
+    public MoveCategory category = MoveCategory.STATUS; // 02
+    public int power = 0; // 03
+    public double accuracy = 0; // 04
+    public int pp = 0; // 05
+    public int priority = 0; // 06
+    public int minHits = 0; // 07
+    public int maxHits = 0; // 07
     public MoveStatusType statusType = MoveStatusType.NONE; // 08-09, 11
-    public double statusPercentChance; // 10
+    public double statusPercentChance = 0; // 10
     public int statusMinTurns = -1; // 12
     public int statusMaxTurns = -1; // 13
     public CriticalChance criticalChance = CriticalChance.NORMAL; // 14
-    public double flinchPercentChance; // 15
-    public MoveEffect effect; // 16
-    public int recoil; // 18, can be regained health too
-    public int heal; // 19
-    public MoveTarget target; // 20
+    public double flinchPercentChance = 0; // 15
+    public MoveEffect effect = MoveEffect.DMG; // 16
+    public int recoil = 0; // 18, can be regained health too
+    public int heal = 0; // 19
+    public MoveTarget target = MoveTarget.ANY_ADJACENT; // 20
     public StatChange[] statChanges = new StatChange[3]; // 21-29
-    public boolean makesContact; // 30 (0x0001)
-    public boolean isChargeMove; // 30 (0x0002)
-    public boolean isRechargeMove; // 30 (0x0004)
-    public boolean isBlockedByProtect; // 30 (0x0008)
-    public boolean isReflectedByMagicCoat; // 30 (0x0010)
-    public boolean isStolenBySnatch; // 30 (0x0020)
-    public boolean isCopiedByMirrorMove; // 30 (0x0040)
-    public boolean isPunchMove; // 30 (0x080)
-    public boolean isSoundMove; // 30 (0x0100)
-    public boolean isAffectedByGravity; // 30 (0x0200)
-    public boolean isThawingMove; // 30 (0x0400)
-    public boolean hitsNonAdjacentTargets; // 30 (0x0800)
-    public boolean isHealMove; // 30 (0x1000)
-    public boolean bypassesSubstitute; // 30 (0x2000)
-    public boolean unknownFlag1; // 30 (0x4000)
-    public boolean unknownFlag2; // 30 (0x8000)
+    public boolean makesContact = false; // 30 (0x0001)
+    public boolean isChargeMove = false; // 30 (0x0002)
+    public boolean isRechargeMove = false; // 30 (0x0004)
+    public boolean isBlockedByProtect = false; // 30 (0x0008)
+    public boolean isReflectedByMagicCoat = false; // 30 (0x0010)
+    public boolean isStolenBySnatch = false; // 30 (0x0020)
+    public boolean isCopiedByMirrorMove = false; // 30 (0x0040)
+    public boolean isPunchMove = false; // 30 (0x080)
+    public boolean isSoundMove = false; // 30 (0x0100)
+    public boolean isAffectedByGravity = false; // 30 (0x0200)
+    public boolean isThawingMove = false; // 30 (0x0400)
+    public boolean hitsNonAdjacentTargets = false; // 30 (0x0800)
+    public boolean isHealMove = false; // 30 (0x1000)
+    public boolean bypassesSubstitute = false; // 30 (0x2000)
+    public boolean unknownFlag1 = false; // 30 (0x4000)
+    public boolean unknownFlag2 = false; // 30 (0x8000)
 
     // Custom
-    public boolean isCustomKickMove; // 30 (0x4000)
-    public boolean isCustomBiteMove; // 30 (0x8000)
-    public boolean isCustomSliceMove; // 30 (0x10000)
-    public boolean isCustomTriageMove; // 30 (0x20000)
-    public boolean isCustomPowderMove; // 30 (0x40000)
-    public boolean isCustomWindMove; // 30 (0x80000)
-    public boolean isCustomBallBombMove; // 30 (0x100000)
-    public boolean isCustomPulseMove; // 30 (0x200000)
+    public boolean isCustomKickMove = false; // 30 (0x4000)
+    public boolean isCustomBiteMove = false; // 30 (0x8000)
+    public boolean isCustomSliceMove = false; // 30 (0x10000)
+    public boolean isCustomTriageMove = false; // 30 (0x20000)
+    public boolean isCustomPowderMove = false; // 30 (0x40000)
+    public boolean isCustomWindMove = false; // 30 (0x80000)
+    public boolean isCustomBallBombMove = false; // 30 (0x100000)
+    public boolean isCustomPulseMove = false; // 30 (0x200000)
 
     public Move() {
         // Initialize all statStageChanges to something sensible so that we don't need to have
@@ -344,7 +344,6 @@ public class Move {
     }
 
     public String toString() {
-        return "#" + number + " " + name + " - Power: " + power + ", Base PP: " + pp + ", Type: " + type + ", Hit%: "
-                + (accuracy) + ", Effect: " + effect.toString() + ", Priority: " + priority;
+        return String.format("#%d %s - Type: %s, Power: %d, Acc: %d%%, PP: %d, Priority: %+d, Effect: %s", number, name, type, power, Math.round(accuracy), pp, priority, effect);
     }
 }

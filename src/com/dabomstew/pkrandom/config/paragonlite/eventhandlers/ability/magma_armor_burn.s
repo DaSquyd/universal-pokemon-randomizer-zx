@@ -4,7 +4,7 @@
     mov     r0, #4 ; burn
     mov     r5, r1
     mov     r4, r2
-    bl      Battle::Unk_21BD56C ; Something to do with non-volatiles...
+    bl      Battle::MakeNonVolatileStatus
     mov     r3, r0
     mov     r0, #10 ; 10%
     str     r0, [sp]

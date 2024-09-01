@@ -63,14 +63,13 @@ public enum MoveStatusType {
     }
 
     public static MoveStatusType fromValues(int index, MoveStatusMode mode, int minTurns, int maxTurns) {
-        for (MoveStatusType moveStatusType: values()) {
-            if (moveStatusType.index == index
-                    && moveStatusType.mode == mode
-                    && moveStatusType.minTurns == minTurns
-                    && moveStatusType.maxTurns == maxTurns)
-                return moveStatusType;
+        MoveStatusType match = null;
+
+        for (MoveStatusType moveStatusType : values()) {
+            if (moveStatusType.index == index && moveStatusType.mode == mode && (match == null || (moveStatusType.minTurns == minTurns && moveStatusType.maxTurns == maxTurns)))
+                match = moveStatusType;
         }
 
-        return null;
+        return match;
     }
 }

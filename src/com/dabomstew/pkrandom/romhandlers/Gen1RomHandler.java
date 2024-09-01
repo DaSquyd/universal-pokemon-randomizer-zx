@@ -1698,7 +1698,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     public void setTMHMPalettes() { }
 
     @Override
-    public void setTMMoves(List<Integer> moveIndexes) {
+    public void setTMMoves(Settings settings, List<Integer> moveIndexes) {
         int offset = romEntry.getValue("TMMovesOffset");
         for (int i = 1; i <= Gen1Constants.tmCount; i++) {
             rom[offset + (i - 1)] = (byte) moveNumToRomTable[moveIndexes.get(i - 1)];

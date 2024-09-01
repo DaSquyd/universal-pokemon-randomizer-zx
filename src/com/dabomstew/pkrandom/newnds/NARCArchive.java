@@ -61,26 +61,26 @@ public class NARCArchive {
         }
 
         // Filenames?
-        byte[] fntbframe = frames.get("FNTB");
-        int unk1 = readLong(fntbframe, 0);
-        if (unk1 == 8) {
-            // Filenames exist
-            hasFilenames = true;
-            int offset = 8;
-            for (int i = 0; i < fileCount; i++) {
-                int fnLength = (fntbframe[offset] & 0xFF);
-                offset++;
-                byte[] filenameBA = new byte[fnLength];
-                System.arraycopy(fntbframe, offset, filenameBA, 0, fnLength);
-                String filename = new String(filenameBA, "US-ASCII");
-                filenames.add(filename);
-            }
-        } else {
-            hasFilenames = false;
-            for (int i = 0; i < fileCount; i++) {
-                filenames.add(null);
-            }
+//        byte[] fntbframe = frames.get("FNTB");
+//        int unk1 = readLong(fntbframe, 0);
+//        if (unk1 == 8 && false) {
+//            // Filenames exist
+//            hasFilenames = true;
+//            int offset = 8;
+//            for (int i = 0; i < fileCount; i++) {
+//                int fnLength = (fntbframe[offset] & 0xFF);
+//                offset++;
+//                byte[] filenameBA = new byte[fnLength];
+//                System.arraycopy(fntbframe, offset, filenameBA, 0, fnLength);
+//                String filename = new String(filenameBA, "US-ASCII");
+//                filenames.add(filename);
+//            }
+//        } else {
+        hasFilenames = false;
+        for (int i = 0; i < fileCount; i++) {
+            filenames.add(null);
         }
+//        }
     }
 
     public byte[] getBytes() throws IOException {
@@ -181,7 +181,7 @@ public class NARCArchive {
         int offset = 0x10;
         Map<String, byte[]> frames = new TreeMap<>();
         for (int i = 0; i < frameCount; i++) {
-            byte[] magic = new byte[] { data[offset + 3], data[offset + 2], data[offset + 1], data[offset] };
+            byte[] magic = new byte[]{data[offset + 3], data[offset + 2], data[offset + 1], data[offset]};
             String magicS = new String(magic, "US-ASCII");
 
             int frame_size = readLong(data, offset + 4);

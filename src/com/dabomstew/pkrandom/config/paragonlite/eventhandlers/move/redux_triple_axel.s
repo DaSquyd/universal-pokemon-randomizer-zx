@@ -8,20 +8,18 @@
     bne     End
     
 ; get iteration count
-    ldr     r2, [r4]
+    ldr     r0, [r4]
     
-; power   = i * 20 + 20
+; power   = (i+1) * 20
 ; 1st hit = 20
 ; 2nd hit = 40
 ; 3rd hit = 60
 ; total   = 120
+    add     r2, r0, #1 ; increment
+    str     r2, [r4]
+    
     mov     r1, #20
     mul     r1, r2
-    add     r1, #20
-    
-; increment iteration count
-    add     r2, #1
-    str     r2, [r4]
     
     mov     r0, #0x30 ; move base power
     bl      Battle::EventVar_RewriteValue

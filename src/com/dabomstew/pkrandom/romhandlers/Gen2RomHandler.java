@@ -1626,7 +1626,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void setTMMoves(List<Integer> moveIndexes) {
+    public void setTMMoves(Settings settings, List<Integer> moveIndexes) {
         int offset = romEntry.getValue("TMMovesOffset");
         for (int i = 1; i <= Gen2Constants.tmCount; i++) {
             rom[offset + (i - 1)] = moveIndexes.get(i - 1).byteValue();

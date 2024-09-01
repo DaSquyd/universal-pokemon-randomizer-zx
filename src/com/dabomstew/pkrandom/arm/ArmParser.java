@@ -105,6 +105,15 @@ public class ArmParser {
         }
         this.varDefines = varDefinesStringBuilder.toString();
 
+
+        try {
+            Object evalObj = engine.eval(varDefines + "0");
+            if (!(evalObj instanceof Integer intValue) || intValue != 0)
+                throw new RuntimeException("Error while parsing defines: " + varDefines);
+        } catch (ScriptException e) {
+            throw new RuntimeException("Error while parsing defines: " + e);
+        }
+
         int lastNonSwitchAddress = initialRamAddress;
         currentRamAddress = initialRamAddress;
         for (int i = 0; i < lines.size(); ++i) {
@@ -227,7 +236,7 @@ public class ArmParser {
                 int address = alignWord(value);
                 if (!map.containsKey(address))
                     map.put(address, new HashSet<>());
-                map.get(address).add(context.ramAddress);
+                map.get(address).add(ramAddress);
                 return;
             }
 

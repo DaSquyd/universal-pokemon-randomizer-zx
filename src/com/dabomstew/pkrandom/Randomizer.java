@@ -521,7 +521,7 @@ public class Randomizer {
 
         // Apply metronome only mode now that trainers have been dealt with
         if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
-            romHandler.metronomeOnlyMode();
+            romHandler.metronomeOnlyMode(settings);
         }
 
         List<Trainer> trainers = romHandler.getTrainers();
@@ -673,7 +673,8 @@ public class Randomizer {
         // romHandler.renderPlacementHistory();
 
         // Intro Pokemon...
-        romHandler.randomizeIntroPokemon();
+        if ((settings.getCurrentMiscTweaks() & MiscTweak.PARAGON_LITE.getValue()) == 0)
+            romHandler.randomizeIntroPokemon();
 
         // Record check value?
         romHandler.writeCheckValueToROM(checkValue);

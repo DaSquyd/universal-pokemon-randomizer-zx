@@ -2475,7 +2475,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTMMoves(List<Integer> moveIndexes) {
+    public void setTMMoves(Settings settings, List<Integer> moveIndexes) {
         String tmDataPrefix = Gen7Constants.getTmDataPrefix(romEntry.romType);
         int offset = find(code, tmDataPrefix);
         if (offset > 0) {

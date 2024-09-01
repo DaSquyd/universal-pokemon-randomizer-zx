@@ -14,11 +14,11 @@
     cmp     r0, #WATER_TYPE
     bne     Return
     
-    mov     r0, #0x4C
+    mov     r0, #0x4C ; VAR_SET_TYPE_EFFECTIVENESS
     mov     r1, #1
     bl      Battle::EventVar_RewriteValue
     
-    mov     r0, #0x4B
+    mov     r0, #0x4B ; VAR_NO_TYPE_EFFECTIVENESS
     mov     r1, #EFFECTIVENESS_DOUBLE
     bl      Battle::EventVar_RewriteValue
     

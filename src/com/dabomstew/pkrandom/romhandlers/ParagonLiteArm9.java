@@ -23,8 +23,13 @@ public class ParagonLiteArm9 extends ParagonLiteOverlay {
     }
 
     @Override
-    public int getEarliestRamAddress() {
+    public int getLowerBoundRamAddress() {
         return getItcmDestStart();
+    }
+
+    @Override
+    public int getUpperBoundRamAddress() {
+        return 0x0214F53C;
     }
 
     @Override

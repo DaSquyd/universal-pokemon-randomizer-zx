@@ -384,7 +384,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private Map<Integer, FormeInfo> formeMappings = new TreeMap<>();
     private List<Pokemon> pokemonList;
     private List<Pokemon> pokemonListInclFormes;
-    private Move[] moves;
+    private List<Move> moves = new ArrayList<>();
     private RomEntry romEntry;
     private byte[] arm9;
     private List<String> abilityNames;
@@ -404,7 +404,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private Map<Integer, Long> actualOverlayCRC32s;
     private Map<String, Long> actualFileCRC32s;
 
-    private NARCArchive pokeNarc, moveNarc, stringsNarc, storyTextNarc, scriptNarc, shopNarc;
+    private NARCArchive pokeNarc, movesNarc, stringsNarc, storyTextNarc, scriptNarc, shopNarc;
 
     @Override
     protected boolean detectNDSRom(String ndsCode, byte version) {
@@ -468,7 +468,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         loadPokemonStats();
         pokemonListInclFormes = Arrays.asList(pokes);
         pokemonList = Arrays.asList(Arrays.copyOfRange(pokes, 0, Gen5Constants.pokemonCount + 1));
-        loadMoves();
+        try {
+            movesNarc = this.readNARC(romEntry.getFile("MoveData"));
+            loadMoves(movesNarc);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         abilityNames = getStrings(false, romEntry.getInt("AbilityNamesTextOffset"));
         itemNames = getStrings(false, romEntry.getInt("ItemNamesTextOffset"));
@@ -538,80 +543,93 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     }
 
-    private void loadMoves() {
-        try {
-            moveNarc = this.readNARC(romEntry.getFile("MoveData"));
-            moves = new Move[moveNarc.files.size()];
-            List<String> moveNames = getStrings(false, romEntry.getInt("MoveNamesTextOffset"));
-            List<String> moveDescriptions = getStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"));
-            for (int i = 1; i < moveNarc.files.size(); i++) {
-                byte[] moveData = moveNarc.files.get(i);
-                moves[i] = new Move();
-                moves[i].name = moveNames.get(i);
-                moves[i].description = moveDescriptions.get(i);
-                moves[i].number = i;
-                moves[i].internalId = i;
+    public void loadMoves(NARCArchive narc) {
+        moves.clear();
 
-                moves[i].type = Gen5Constants.typeTable[moveData[0] & 0xFF];
-                moves[i].qualities = MoveQualities.values()[moveData[1]];
-                moves[i].category = Gen5Constants.moveCategoryIndices[moveData[2] & 0xFF];
-                moves[i].power = moveData[3] & 0xFF;
-                moves[i].accuracy = (moveData[4] & 0xFF);
-                moves[i].pp = moveData[5] & 0xFF;
-                moves[i].priority = moveData[6];
-                moves[i].minHits = moveData[7] % 16;
-                moves[i].maxHits = moveData[7] / 16;
+        List<String> moveNames = getStrings(false, romEntry.getInt("MoveNamesTextOffset"));
+        List<String> moveDescriptions = getStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"));
 
-                int statusTypeIndex = readSignedWord(moveData, 8);
-                MoveStatusMode statusMode = MoveStatusMode.values()[moveData[11] & 0xFF];
-                int minStatusTurns = moveData[12] & 0xFF;
-                int maxStatusTurns = moveData[13] & 0xFF;
-                moves[i].statusType = MoveStatusType.fromValues(statusTypeIndex, statusMode, minStatusTurns, maxStatusTurns);
-                moves[i].statusPercentChance = moveData[10] & 0xFF;
-
-                int critStages = moveData[14] & 0xFF;
-                if (critStages == 6) {
-                    moves[i].criticalChance = CriticalChance.GUARANTEED;
-                } else if (critStages > 0) {
-                    moves[i].criticalChance = CriticalChance.INCREASED;
-                }
-
-                moves[i].flinchPercentChance = moveData[15] & 0xFF;
-
-                moves[i].effect = MoveEffect.fromIndex(generationOfPokemon(), readUnsignedWord(moveData, 16));
-
-                moves[i].recoil = moveData[18];
-                moves[i].heal = moveData[19];
-
-                moves[i].target = MoveTarget.values()[moveData[20] & 0xFF];
-
-                for (int statChange = 0; statChange < 3; statChange++) {
-                    moves[i].statChanges[statChange].type = StatChangeType.values()[moveData[21 + statChange]];
-                    moves[i].statChanges[statChange].stages = moveData[24 + statChange];
-                    moves[i].statChanges[statChange].percentChance = moveData[27 + statChange];
-                }
-
-                // Flags
-                int flags = FileFunctions.readFullInt(moveData, 32);
-                moves[i].makesContact = (flags & 0x001) != 0;
-                moves[i].isChargeMove = (flags & 0x002) != 0;
-                moves[i].isRechargeMove = (flags & 0x004) != 0;
-                moves[i].isBlockedByProtect = (flags & 0x008) != 0;
-                moves[i].isReflectedByMagicCoat = (flags & 0x010) != 0;
-                moves[i].isStolenBySnatch = (flags & 0x020) != 0;
-                moves[i].isCopiedByMirrorMove = (flags & 0x040) != 0;
-                moves[i].isPunchMove = (flags & 0x080) != 0;
-                moves[i].isSoundMove = (flags & 0x100) != 0;
-                moves[i].isAffectedByGravity = (flags & 0x200) != 0;
-                moves[i].isThawingMove = (flags & 0x400) != 0;
-                moves[i].hitsNonAdjacentTargets = (flags & 0x800) != 0;
-                moves[i].isHealMove = (flags & 0x1000) != 0;
-                moves[i].bypassesSubstitute = (flags & 0x2000) != 0;
+        int moveIndex = 0;
+        int longestMove = 0;
+        int longest = 0;
+        for (String moveDescription : moveDescriptions) {
+            int descriptionLongest = getLongestLinePixels(moveDescription);
+            if (descriptionLongest > longest) {
+                longestMove = moveIndex;
+                longest = descriptionLongest;
             }
-        } catch (IOException e) {
-            throw new RandomizerIOException(e);
+            moveIndex++;
         }
+        
+        for (int i = 0; i < narc.files.size(); i++) {
+            Move move = new Move();
+            moves.add(move);
 
+            byte[] moveData = narc.files.get(i);
+            if (moveData == null)
+                continue;
+
+            move.name = moveNames.get(moveNames.size() > i ? i : 0);
+            move.description = moveDescriptions.get(moveDescriptions.size() > i ? i : 0);
+            move.number = i;
+            move.internalId = i;
+
+            move.type = Gen5Constants.typeTable[moveData[0] & 0xFF];
+            move.qualities = MoveQualities.values()[moveData[1]];
+            move.category = Gen5Constants.moveCategoryIndices[moveData[2] & 0xFF];
+            move.power = moveData[3] & 0xFF;
+            move.accuracy = (moveData[4] & 0xFF);
+            move.pp = moveData[5] & 0xFF;
+            move.priority = moveData[6];
+            move.minHits = moveData[7] % 16;
+            move.maxHits = moveData[7] / 16;
+
+            int statusTypeIndex = readSignedWord(moveData, 8);
+            MoveStatusMode statusMode = MoveStatusMode.values()[moveData[11] & 0xFF];
+            int minStatusTurns = moveData[12] & 0xFF;
+            int maxStatusTurns = moveData[13] & 0xFF;
+            move.statusType = MoveStatusType.fromValues(statusTypeIndex, statusMode, minStatusTurns, maxStatusTurns);
+            move.statusPercentChance = moveData[10] & 0xFF;
+
+            int critStages = moveData[14] & 0xFF;
+            if (critStages == 6) {
+                move.criticalChance = CriticalChance.GUARANTEED;
+            } else if (critStages > 0) {
+                move.criticalChance = CriticalChance.INCREASED;
+            }
+
+            move.flinchPercentChance = moveData[15] & 0xFF;
+
+            move.effect = MoveEffect.fromIndex(generationOfPokemon(), readUnsignedWord(moveData, 16));
+
+            move.recoil = moveData[18];
+            move.heal = moveData[19];
+
+            move.target = MoveTarget.values()[moveData[20] & 0xFF];
+
+            for (int statChange = 0; statChange < 3; statChange++) {
+                move.statChanges[statChange].type = StatChangeType.values()[moveData[21 + statChange]];
+                move.statChanges[statChange].stages = moveData[24 + statChange];
+                move.statChanges[statChange].percentChance = moveData[27 + statChange];
+            }
+
+            // Flags
+            int flags = FileFunctions.readFullInt(moveData, 32);
+            move.makesContact = (flags & 0x001) != 0;
+            move.isChargeMove = (flags & 0x002) != 0;
+            move.isRechargeMove = (flags & 0x004) != 0;
+            move.isBlockedByProtect = (flags & 0x008) != 0;
+            move.isReflectedByMagicCoat = (flags & 0x010) != 0;
+            move.isStolenBySnatch = (flags & 0x020) != 0;
+            move.isCopiedByMirrorMove = (flags & 0x040) != 0;
+            move.isPunchMove = (flags & 0x080) != 0;
+            move.isSoundMove = (flags & 0x100) != 0;
+            move.isAffectedByGravity = (flags & 0x200) != 0;
+            move.isThawingMove = (flags & 0x400) != 0;
+            move.hitsNonAdjacentTargets = (flags & 0x800) != 0;
+            move.isHealMove = (flags & 0x1000) != 0;
+            move.bypassesSubstitute = (flags & 0x2000) != 0;
+        }
     }
 
     private void loadBasicPokeStats(Pokemon pkmn, byte[] stats, Map<Integer, FormeInfo> altFormes) {
@@ -656,7 +674,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             pkmn.rareHeldItem = item2;
             pkmn.darkGrassHeldItem = readUnsignedWord(stats, Gen5Constants.bsDarkGrassHeldItemOffset);
         }
-        
+
         pkmn.genderRatio = stats[Gen5Constants.bsGenderRatioOffset] & 0xFF;
         pkmn.baseFriendship = stats[Gen5Constants.bsBaseFriendshipOffset] & 0xFF;
         pkmn.growthCurve = ExpCurve.fromByte(stats[Gen5Constants.bsGrowthCurveOffset]);
@@ -664,7 +682,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         pkmn.ability1 = stats[Gen5Constants.bsAbility1Offset] & 0xFF;
         pkmn.ability2 = stats[Gen5Constants.bsAbility2Offset] & 0xFF;
         pkmn.ability3 = stats[Gen5Constants.bsAbility3Offset] & 0xFF;
-        
+
         pkmn.expYield = readUnsignedWord(stats, Gen5Constants.bsExpYieldOffset);
 
         int formeCount = stats[Gen5Constants.bsFormeCountOffset] & 0xFF;
@@ -680,8 +698,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             } else {
                 if (pkmn.number == Species.arceus) {
                     pkmn.specialForms = formeCount;
-                }
-                else if (pkmn.number != Species.cherrim && pkmn.number != Species.deerling && pkmn.number != Species.sawsbuck && pkmn.number < Species.genesect) {
+                } else if (pkmn.number != Species.cherrim && pkmn.number != Species.deerling && pkmn.number != Species.sawsbuck && pkmn.number < Species.genesect) {
                     // Reason for exclusions:
                     // Cherrim/Arceus/Genesect: to avoid confusion
                     // Deerling/Sawsbuck: handled automatically in gen 5
@@ -731,53 +748,62 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         List<String> moveDescriptions = getStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"));
         List<String> moveUsages = getStrings(false, romEntry.getInt("MoveUsagesTextOffset"));
 
-        for (int i = 1; i <= Gen5Constants.moveCount; i++) {
-            moveNames.set(i, moves[i].name);
-            moveDescriptions.set(i, sortText(moves[i].description, 3, 233));
-            for (int j = 0; j < 3; j++) {
-                int index = i * 3 + j;
-                String usage = moveUsages.get(index);
-                int lastSegment = usage.lastIndexOf(getLineBreakString()) + 6;
-                moveUsages.set(index, usage.substring(0, lastSegment) + moves[i].name + "!");
+        moveNames.addAll(Collections.nCopies(moves.size() - moveNames.size(), moveNames.get(0)));
+        moveDescriptions.addAll(Collections.nCopies(moves.size() - moveDescriptions.size(), moveDescriptions.get(0)));
+        while (moveUsages.size() < moves.size() * 3) {
+            for (int i = 0; i < 3; i++)
+                moveUsages.add(moveUsages.get(i));
+        }
+
+        movesNarc.files.clear();
+        for (int i = 0; i < moves.size(); i++) {
+            Move move = moves.get(i);
+
+            if (!move.name.equals(moveNames.get(0))) {
+                moveNames.set(i, move.name);
+                moveDescriptions.set(i, sortText(move.description, 3, 233, false));
+
+                moveUsages.set(i * 3, String.format("\uF000Ă\\x0001\\x0000 used\\xFFFE%s!", move.name));
+                moveUsages.set(i * 3 + 1, String.format("The wild \uF000Ă\\x0001\\x0000 used\\xFFFE%s!", move.name));
+                moveUsages.set(i * 3 + 2, String.format("The foe's \uF000Ă\\x0001\\x0000 used\\xFFFE%s!", move.name));
             }
 
-            byte[] data = moveNarc.files.get(i);
+            byte[] data = new byte[36];
+            movesNarc.files.add(data);
 
             // FINISH
-            data[0] = Gen5Constants.typeToByte(moves[i].type);
-            data[1] = (byte) moves[i].qualities.ordinal();
-            data[2] = Gen5Constants.moveCategoryToByte(moves[i].category);
-            data[3] = (byte) moves[i].power;
-            data[4] = (byte) moves[i].accuracy;
-            data[5] = (byte) moves[i].pp;
-            data[6] = (byte) moves[i].priority;
-            data[7] = (byte) (moves[i].minHits | (moves[i].maxHits << 4));
-            writeWord(data, 8, moves[i].statusType.index);
-            data[10] = (byte) moves[i].statusPercentChance;
-            data[11] = (byte) moves[i].statusType.mode.ordinal();
-            data[12] = (byte) (moves[i].statusMinTurns < 0 ? moves[i].statusType.minTurns : moves[i].statusMinTurns);
-            data[13] = (byte) (moves[i].statusMaxTurns < 0 ? moves[i].statusType.maxTurns : moves[i].statusMaxTurns);
-            if (moves[i].criticalChance == CriticalChance.GUARANTEED) {
+            data[0] = Gen5Constants.typeToByte(move.type);
+            data[1] = (byte) move.qualities.ordinal();
+            data[2] = Gen5Constants.moveCategoryToByte(move.category);
+            data[3] = (byte) move.power;
+            data[4] = (byte) move.accuracy;
+            data[5] = (byte) move.pp;
+            data[6] = (byte) move.priority;
+            data[7] = (byte) (move.minHits | (move.maxHits << 4));
+            writeWord(data, 8, move.statusType.index);
+            data[10] = (byte) move.statusPercentChance;
+            data[11] = (byte) move.statusType.mode.ordinal();
+            data[12] = (byte) (move.statusMinTurns < 0 ? move.statusType.minTurns : move.statusMinTurns);
+            data[13] = (byte) (move.statusMaxTurns < 0 ? move.statusType.maxTurns : move.statusMaxTurns);
+            if (move.criticalChance == CriticalChance.GUARANTEED) {
                 data[14] = (byte) 6;
-            } else if (moves[i].criticalChance == CriticalChance.INCREASED) {
+            } else if (move.criticalChance == CriticalChance.INCREASED) {
                 data[14] = 1;
             }
-            data[15] = (byte) moves[i].flinchPercentChance;
-            writeWord(data, 16, moves[i].effect.getIndex(generationOfPokemon()));
-            data[18] = (byte) moves[i].recoil;
-            data[19] = (byte) moves[i].heal;
-            data[20] = (byte) moves[i].target.ordinal();
+            data[15] = (byte) move.flinchPercentChance;
+            writeWord(data, 16, move.effect.getIndex(generationOfPokemon()));
+            data[18] = (byte) move.recoil;
+            data[19] = (byte) move.heal;
+            data[20] = (byte) move.target.ordinal();
             for (int statChange = 0; statChange < 3; statChange++) {
-                data[21 + statChange] = (byte) moves[i].statChanges[statChange].type.ordinal();
-                data[24 + statChange] = (byte) moves[i].statChanges[statChange].stages;
-                data[27 + statChange] = (byte) (moves[i].statChanges[statChange].percentChance);
+                data[21 + statChange] = (byte) move.statChanges[statChange].type.ordinal();
+                data[24 + statChange] = (byte) move.statChanges[statChange].stages;
+                data[27 + statChange] = (byte) (move.statChanges[statChange].percentChance);
             }
+            data[30] = 0x53;
+            data[31] = 0x53;
             int flags = getMoveFlags(i);
             FileFunctions.writeFullInt(data, 32, flags);
-
-            // Explicitly set struggle to type 18
-            if (i == Moves.struggle && wasFairyAdded)
-                data[0] = 18;
         }
 
         setStrings(false, romEntry.getInt("MoveNamesTextOffset"), moveNames);
@@ -785,37 +811,38 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         setStrings(false, romEntry.getInt("MoveUsagesTextOffset"), moveUsages);
 
         try {
-            this.writeNARC(romEntry.getFile("MoveData"), moveNarc);
+            this.writeNARC(romEntry.getFile("MoveData"), movesNarc);
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
     }
 
     private int getMoveFlags(int moveIndex) {
+        Move move = moves.get(moveIndex);
         int flags = 0;
-        flags |= moves[moveIndex].makesContact ? 0x1 : 0;
-        flags |= moves[moveIndex].isChargeMove ? 0x1 << 1 : 0;
-        flags |= moves[moveIndex].isRechargeMove ? 0x1 << 2 : 0;
-        flags |= moves[moveIndex].isBlockedByProtect ? 0x1 << 3 : 0;
-        flags |= moves[moveIndex].isReflectedByMagicCoat ? 0x1 << 4 : 0;
-        flags |= moves[moveIndex].isStolenBySnatch ? 0x1 << 5 : 0;
-        flags |= moves[moveIndex].isCopiedByMirrorMove ? 0x1 << 6 : 0;
-        flags |= moves[moveIndex].isPunchMove ? 0x1 << 7 : 0;
-        flags |= moves[moveIndex].isSoundMove ? 0x1 << 8 : 0;
-        flags |= moves[moveIndex].isAffectedByGravity ? 0x1 << 9 : 0;
-        flags |= moves[moveIndex].isThawingMove ? 0x1 << 10 : 0;
-        flags |= moves[moveIndex].hitsNonAdjacentTargets ? 0x1 << 11 : 0;
-        flags |= moves[moveIndex].isHealMove ? 0x1 << 12 : 0;
-        flags |= moves[moveIndex].bypassesSubstitute ? 0x1 << 13 : 0;
+        flags |= move.makesContact ? 0x1 : 0;
+        flags |= move.isChargeMove ? 0x1 << 1 : 0;
+        flags |= move.isRechargeMove ? 0x1 << 2 : 0;
+        flags |= move.isBlockedByProtect ? 0x1 << 3 : 0;
+        flags |= move.isReflectedByMagicCoat ? 0x1 << 4 : 0;
+        flags |= move.isStolenBySnatch ? 0x1 << 5 : 0;
+        flags |= move.isCopiedByMirrorMove ? 0x1 << 6 : 0;
+        flags |= move.isPunchMove ? 0x1 << 7 : 0;
+        flags |= move.isSoundMove ? 0x1 << 8 : 0;
+        flags |= move.isAffectedByGravity ? 0x1 << 9 : 0;
+        flags |= move.isThawingMove ? 0x1 << 10 : 0;
+        flags |= move.hitsNonAdjacentTargets ? 0x1 << 11 : 0;
+        flags |= move.isHealMove ? 0x1 << 12 : 0;
+        flags |= move.bypassesSubstitute ? 0x1 << 13 : 0;
 
         // custom
-        flags |= moves[moveIndex].isCustomKickMove ? 0x1 << 14 : 0;
-        flags |= moves[moveIndex].isCustomBiteMove ? 0x1 << 15 : 0;
-        flags |= moves[moveIndex].isCustomSliceMove ? 0x1 << 16 : 0;
-        flags |= moves[moveIndex].isCustomTriageMove ? 0x1 << 17 : 0;
-        flags |= moves[moveIndex].isCustomPowderMove ? 0x1 << 18 : 0;
-        flags |= moves[moveIndex].isCustomWindMove ? 0x1 << 19 : 0;
-        flags |= moves[moveIndex].isCustomBallBombMove ? 0x1 << 20 : 0;
+        flags |= move.isCustomKickMove ? 0x1 << 14 : 0;
+        flags |= move.isCustomBiteMove ? 0x1 << 15 : 0;
+        flags |= move.isCustomSliceMove ? 0x1 << 16 : 0;
+        flags |= move.isCustomTriageMove ? 0x1 << 17 : 0;
+        flags |= move.isCustomPowderMove ? 0x1 << 18 : 0;
+        flags |= move.isCustomWindMove ? 0x1 << 19 : 0;
+        flags |= move.isCustomBallBombMove ? 0x1 << 20 : 0;
 
         return flags;
     }
@@ -893,7 +920,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         stats[Gen5Constants.bsGenderRatioOffset] = (byte) pkmn.genderRatio;
 
         writeWord(stats, Gen5Constants.bsExpYieldOffset, pkmn.expYield);
-        
+
         if (pkmn.specialForms > 0)
             stats[Gen5Constants.bsFormeCountOffset] = (byte) pkmn.specialForms;
     }
@@ -921,6 +948,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public Pokemon getAltFormeOfPokemon(Pokemon pk, int forme) {
+        if (pk == null)
+            return null;
+
         int pokeNum = Gen5Constants.getAbsolutePokeNumByBaseForme(pk.number, forme);
         return pokeNum != 0 ? pokes[pokeNum] : pk;
     }
@@ -1105,7 +1135,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public List<Move> getMoves() {
-        return Arrays.asList(moves);
+        return List.copyOf(moves);
     }
 
     @Override
@@ -1480,7 +1510,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 // Victory Item; 2 bytes; The item given out after defeat (e.g. berries)
                 byte[] trainer = trainers.files.get(i);
 
-                boolean plMode = trainer.length != 0x14;
+                boolean plMode = trainer.length == 0x16;
 
                 byte[] trpoke = trpokes.files.get(i);
                 Trainer tr = new Trainer();
@@ -1513,7 +1543,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 tr.isHealer = trainer[0x10] != 0;
 
                 tr.rewardMoneyScale = trainer[0x11];
-                tr.rewardItem = readUnsignedWord(trainer, 0x12);
+                tr.rewardItem = trainer.length >= 20 ? readUnsignedWord(trainer, 0x12) : 0;
 
                 tr.fullDisplayName = tclasses.get(tr.trainerclass) + " " + tnames.get(i - 1);
                 if (trainer[2] == 1 && setOriginalDoubleTrainers) {
@@ -1710,7 +1740,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     trainer[0x0C] |= (byte) 0x80; // Flag that needs to be set for trainers not to attack their own pokes
 
                 trainer[0x0C] = (byte) (0x01); // TODO: Remove
-                
+
                 trainer[0x10] = (byte) (tr.isHealer ? 1 : 0);
                 trainer[0x11] = tr.rewardMoneyScale;
                 writeWord(trainer, 0x12, tr.rewardItem);
@@ -2160,7 +2190,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
 
         public Pokemon getPokemon(Gen5RomHandler parent, NARCArchive scriptNARC) {
-            return parent.pokes[parent.readUnsignedWord(scriptNARC.files.get(speciesEntries[0].file), speciesEntries[0].offset)];
+            byte[] file = scriptNARC.files.get(speciesEntries[0].file);
+            int offset = speciesEntries[0].offset;
+            int index = parent.readUnsignedWord(file, offset);
+
+            if (index < 0 || index >= parent.pokes.length)
+                return null;
+
+            return parent.pokes[index];
         }
 
         public void setPokemon(Gen5RomHandler parent, NARCArchive scriptNARC, Pokemon pkmn) {
@@ -2400,6 +2437,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             StaticPokemon statP = romEntry.staticPokemon.get(i);
             StaticEncounter se = new StaticEncounter();
             Pokemon newPK = statP.getPokemon(this, scriptNARC);
+            if (newPK == null)
+                continue;
+
             newPK = getAltFormeOfPokemon(newPK, statP.getForme(scriptNARC));
             se.pkmn = newPK;
             se.level = statP.getLevel(scriptNARC, 0);
@@ -3215,39 +3255,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             pokes[Species.cottonee].secondaryType = Type.FAIRY;
             pokes[Species.whimsicott].secondaryType = Type.FAIRY;
 
-            moves[Moves.charm].type = Type.FAIRY;
-            moves[Moves.moonlight].type = Type.FAIRY;
-            moves[Moves.sweetKiss].type = Type.FAIRY;
-
-            // Submission -> Play Rough
-            moves[Moves.submission].name = "Play Rough";
-            moves[Moves.submission].type = Type.FAIRY;
-            moves[Moves.submission].power = 90;
-            moves[Moves.submission].accuracy = 90;
-            moves[Moves.submission].qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
-            moves[Moves.submission].effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
-            moves[Moves.submission].recoil = 0;
-            moves[Moves.submission].statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 10);
-            moves[Moves.submission].description = "The user plays rough with the target and attacks it. It may also lower the target's Attack stat.";
-
-            // Luster Purge -> Dazzling Gleam
-            moves[Moves.lusterPurge].name = "DazzlingGleam";
-            moves[Moves.lusterPurge].type = Type.FAIRY;
-            moves[Moves.lusterPurge].power = 80;
-            moves[Moves.lusterPurge].pp = 10;
-            moves[Moves.lusterPurge].qualities = MoveQualities.DAMAGE;
-            moves[Moves.lusterPurge].effect = MoveEffect.DMG;
-            moves[Moves.lusterPurge].target = MoveTarget.ALL_ADJACENT_FOES;
-            moves[Moves.lusterPurge].statChanges[0] = new Move.StatChange(StatChangeType.NONE, 0, 0);
-            moves[Moves.lusterPurge].description = "The user damages opposing Pokémon by emitting a powerful flash.";
-
-            // Mist Ball -> Moonblast
-            moves[Moves.mistBall].name = "Moonblast";
-            moves[Moves.mistBall].type = Type.FAIRY;
-            moves[Moves.mistBall].power = 95;
-            moves[Moves.mistBall].pp = 15;
-            moves[Moves.mistBall].statChanges[0].percentChance = 30;
-            moves[Moves.mistBall].description = "Borrowing the power of the moon, the user attacks the target. It may also lower the target's Sp. Atk stat.";
+            moves.get(Moves.charm).type = Type.FAIRY;
+            moves.get(Moves.moonlight).type = Type.FAIRY;
+            moves.get(Moves.sweetKiss).type = Type.FAIRY;
 
             wasFairyAdded = true;
         } catch (IOException e) {
@@ -3275,7 +3285,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     private void disableLowHpMusic() {
         try {
-            byte[] lowHealthMusicOverlay = readOverlay(romEntry.getInt("LowHealthMusicOvlNumber"));
+            byte[] lowHealthMusicOverlay = readOverlay(romEntry.getInt("BattleFxOvlNumber"));
             int offset = find(lowHealthMusicOverlay, Gen5Constants.lowHealthMusicLocator);
             if (offset > 0) {
                 // The game calls a function that returns 2 if the Pokemon has low HP. The ASM looks like this:
@@ -3286,7 +3296,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 // The offset variable is currently pointing at the bne instruction. If we change that bne to an unconditional
                 // branch, the game will never think the player's Pokemon has low HP (for the purposes of changing the music).
                 lowHealthMusicOverlay[offset + 1] = (byte) 0xE0;
-                writeOverlay(romEntry.getInt("LowHealthMusicOvlNumber"), lowHealthMusicOverlay);
+                writeOverlay(romEntry.getInt("BattleFxOvlNumber"), lowHealthMusicOverlay);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -3388,19 +3398,19 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // Write pals
             for (int i = 0; i < Gen5Constants.tmBlockOneCount; i++) {
                 int itmNum = Gen5Constants.tmBlockOneOffset + i;
-                Move m = this.moves[tmMoves.get(i)];
+                Move m = this.moves.get(tmMoves.get(i));
                 int pal = this.typeTMHMPaletteNumber(m.type);
                 writeWord(arm9, offsPals + itmNum * 4 + 2, pal);
             }
             for (int i = 0; i < (Gen5Constants.tmCount - Gen5Constants.tmBlockOneCount); i++) {
                 int itmNum = Gen5Constants.tmBlockTwoOffset + i;
-                Move m = this.moves[tmMoves.get(i + Gen5Constants.tmBlockOneCount)];
+                Move m = this.moves.get(tmMoves.get(i + Gen5Constants.tmBlockOneCount));
                 int pal = this.typeTMHMPaletteNumber(m.type);
                 writeWord(arm9, offsPals + itmNum * 4 + 2, pal);
             }
             for (int i = 0; i < Gen5Constants.hmCount; i++) {
                 int itmNum = Gen5Constants.hmOffset + i;
-                Move m = this.moves[hmMoves.get(i)];
+                Move m = this.moves.get(hmMoves.get(i));
                 int pal = this.typeTMHMPaletteNumber(m.type);
                 writeWord(arm9, offsPals + itmNum * 4 + 2, pal);
             }
@@ -3408,7 +3418,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void setTMMoves(List<Integer> moveIndexes) {
+    public void setTMMoves(Settings settings, List<Integer> moveIndexes) {
+        boolean allowDescriptionError = settings.getTmsMod() == Settings.TMsMod.UNCHANGED;
+
         String tmDataPrefix = Gen5Constants.tmDataPrefix;
         int offset = find(arm9, tmDataPrefix);
         if (offset > 0) {
@@ -3433,17 +3445,17 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             // TM01 is item 328 and so on
             for (int i = 0; i < Gen5Constants.tmBlockOneCount; i++) {
-                String description = sortText(moves[moveIndexes.get(i)].description, maxLines, maxLinePixels);
+                String description = sortText(moves.get(moveIndexes.get(i)).description, maxLines, maxLinePixels, allowDescriptionError);
                 itemDescriptions.set(i + Gen5Constants.tmBlockOneOffset, description);
             }
             // TM93-95 are 618-620
             for (int i = 0; i < (Gen5Constants.tmCount - Gen5Constants.tmBlockOneCount); i++) {
-                String description = sortText(moves[moveIndexes.get(i + Gen5Constants.tmBlockOneCount)].description, maxLines, maxLinePixels);
+                String description = sortText(moves.get(moveIndexes.get(i + Gen5Constants.tmBlockOneCount)).description, maxLines, maxLinePixels, allowDescriptionError);
                 itemDescriptions.set(i + Gen5Constants.tmBlockTwoOffset, description);
             }
             // HMs
             for (int i = 0; i < (Gen5Constants.hmCount); i++) {
-                String description = sortText(moves[hmMoves.get(i)].description, maxLines, maxLinePixels);
+                String description = sortText(moves.get(hmMoves.get(i)).description, maxLines, maxLinePixels, allowDescriptionError);
                 itemDescriptions.set(i + Gen5Constants.hmOffset, description);
             }
             // Save the new item descriptions
@@ -4171,10 +4183,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public Set<Integer> getAvailableAbilities(Settings settings) {
         Set<Integer> availableAbilities = super.getAvailableAbilities(settings);
-        
+
         if ((settings.getCurrentMiscTweaks() & MiscTweak.PARAGON_LITE.getValue()) != 0)
             availableAbilities.addAll(ParagonLiteAbilities.allowedAbilities);
-        
+
         return availableAbilities;
     }
 
@@ -5200,20 +5212,30 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             customAddFairy();
 
         int battleOvlNumber = romEntry.getInt("BattleOvlNumber");
+        int battleFxOvlNumber = romEntry.getInt("BattleFxOvlNumber");
         int battleServerOvlNumber = romEntry.getInt("BattleServerOvlNumber");
         int trainerAIOvlNumber = romEntry.getInt("TrainerAIOvlNumber");
 
         String pokemonGraphicsFilename = romEntry.getFile("PokemonGraphics");
+        String moveAnimationsFilename = romEntry.getFile("MoveAnimations");
         String trainerAIScriptsFilename = romEntry.getFile("TrainerAIScripts");
         String itemDataFilename = romEntry.getFile("ItemData");
         String itemGraphicsFilename = romEntry.getFile("ItemGraphics");
+        String moveAnimationScriptsFilename = romEntry.getFile("MoveAnimationScripts");
+        String battleAnimationScriptsFilename = romEntry.getFile("BattleAnimationScripts");
         NARCArchive pokemonGraphicsNarc;
+        NARCArchive moveAnimationsNarc;
         NARCArchive itemDataNarc;
         NARCArchive itemGraphicsNarc;
+        NARCArchive moveAnimationScriptsNarc;
+        NARCArchive battleAnimationScriptsNarc;
         try {
             pokemonGraphicsNarc = readNARC(pokemonGraphicsFilename);
+            moveAnimationsNarc = readNARC(moveAnimationsFilename);
             itemDataNarc = readNARC(itemDataFilename);
             itemGraphicsNarc = readNARC(itemGraphicsFilename);
+            moveAnimationScriptsNarc = readNARC(moveAnimationScriptsFilename);
+            battleAnimationScriptsNarc = readNARC(battleAnimationScriptsFilename);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -5221,7 +5243,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int battleEventTextOffset1 = romEntry.getInt("BattleEventText1Offset");
         int battleEventTextOffset2 = romEntry.getInt("BattleEventText2Offset");
         int abilityNamesTextOffset = romEntry.getInt("AbilityNamesTextOffset");
-        int abilityDescriptionsTextOffset = romEntry.getInt("AbilityDescriptionsTextOffset");        
+        int abilityDescriptionsTextOffset = romEntry.getInt("AbilityDescriptionsTextOffset");
         int abilityExplanationsTextOffset = romEntry.getInt("AbilityExplanationsTextOffset");
         int moveNamesTextOffset = romEntry.getInt("MoveNamesTextOffset");
         int moveDescriptionsTextOffset = romEntry.getInt("MoveDescriptionsTextOffset");
@@ -5233,7 +5255,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         List<String> battleEventStrings1 = getStrings(false, battleEventTextOffset1);
         List<String> battleEventStrings2 = getStrings(false, battleEventTextOffset2);
 
-        List<String> abilityDescriptions = getStrings(false, abilityDescriptionsTextOffset);        
+        List<String> abilityDescriptions = getStrings(false, abilityDescriptionsTextOffset);
         List<String> abilityExplanations = (isWhite() || isBlack()) ? null : getStrings(false, abilityExplanationsTextOffset);
 
         List<String> moveNames = getStrings(false, moveNamesTextOffset);
@@ -5243,10 +5265,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         List<String> itemPluralNames = getStrings(false, itemPluralNamesTextOffset);
         List<String> itemDescriptions = getStrings(false, itemDescriptionsTextOffset);
 
-        ParagonLiteHandler paragonLite = new ParagonLiteHandler(this, arm9, battleOvlNumber, battleServerOvlNumber,
-                trainerAIOvlNumber, pokes, moves, pokemonGraphicsNarc, itemDataNarc, itemGraphicsNarc, battleEventStrings1,
-                battleEventStrings2, abilityNames, abilityDescriptions, abilityExplanations, moveNames, moveDescriptions, itemNames,
-                itemNameMessages, itemPluralNames, itemDescriptions);
+        ParagonLiteHandler paragonLite = new ParagonLiteHandler(this, arm9, battleOvlNumber, battleFxOvlNumber, battleServerOvlNumber, trainerAIOvlNumber, pokes, moves,
+                pokemonGraphicsNarc, moveAnimationsNarc, itemDataNarc, itemGraphicsNarc, moveAnimationScriptsNarc, battleAnimationScriptsNarc, battleEventStrings1,
+                battleEventStrings2, abilityNames, abilityDescriptions, abilityExplanations, moveNames, moveDescriptions, itemNames, itemNameMessages, itemPluralNames,
+                itemDescriptions);
 
         paragonLite.setBattleEventStrings();
 
@@ -5304,8 +5326,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         try {
             writeNARC(pokemonGraphicsFilename, pokemonGraphicsNarc);
+            writeNARC(moveAnimationsFilename, moveAnimationsNarc);
             writeNARC(itemDataFilename, itemDataNarc);
             writeNARC(itemGraphicsFilename, itemGraphicsNarc);
+            writeNARC(moveAnimationScriptsFilename, moveAnimationScriptsNarc);
+            writeNARC(battleAnimationScriptsFilename, battleAnimationScriptsNarc);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

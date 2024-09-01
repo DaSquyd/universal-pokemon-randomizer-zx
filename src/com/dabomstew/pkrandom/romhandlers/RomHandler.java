@@ -330,7 +330,7 @@ public interface RomHandler {
 
     void orderDamagingMovesByDamage();
 
-    void metronomeOnlyMode();
+    void metronomeOnlyMode(Settings settings);
 
     boolean supportsFourStartingMoves();
 
@@ -384,7 +384,7 @@ public interface RomHandler {
 
     void setTMHMPalettes();
 
-    void setTMMoves(List<Integer> moveIndexes);
+    void setTMMoves(Settings settings, List<Integer> moveIndexes);
 
     void randomizeTMMoves(Settings settings);
 

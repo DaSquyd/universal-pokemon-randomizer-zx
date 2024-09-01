@@ -112,7 +112,7 @@ public class ParagonLiteAddressMap {
             this.size = size;
             this.refPattern = refPattern;
 
-            if (size <= 0)
+            if (size < 0)
                 throw new RuntimeException();
         }
 
@@ -184,9 +184,8 @@ public class ParagonLiteAddressMap {
 
     public void registerCodeAddress(ParagonLiteOverlay overlay, String label, int address, int encoding, boolean addReferences) {
         // Already exists
-        if (labelMap.get(overlay).containsKey(label)) {
-            throw new RuntimeException();
-        }
+        if (labelMap.get(overlay).containsKey(label))
+            throw new RuntimeException(String.format("An entry for %s already exists in %s", label, overlay));
 
         CodeAddress codeAddress = new CodeAddress(overlay, label, address, encoding);
 
@@ -211,7 +210,7 @@ public class ParagonLiteAddressMap {
 
         // Already exists        
         if (labelMap.get(overlay).containsKey(label))
-            throw new RuntimeException();
+            throw new RuntimeException(String.format("An entry for %s already exists in %s", label, overlay));
 
         DataAddress dataAddress = new DataAddress(overlay, label, address, size, refPattern);
 
@@ -362,7 +361,9 @@ public class ParagonLiteAddressMap {
         }
 
         // Update incoming references
-        for (ReferenceAddressInterface source : addressBase.incomingReferences) {
+        // We convert to a list first because the original will have entries removed as this iterates
+        List<ReferenceAddressInterface> incomingReferences = addressBase.incomingReferences.stream().toList();
+        for (ReferenceAddressInterface source : incomingReferences) {
             if (!(source instanceof ReferenceAddress referenceAddress))
                 throw new RuntimeException();
 
@@ -604,9 +605,8 @@ public class ParagonLiteAddressMap {
         ParagonLiteOverlay overlay = null;
         for (Map.Entry<ParagonLiteOverlay, Map<String, LabeledAddressInterface>> entry : labelMap.entrySet()) {
             ParagonLiteOverlay ovl = entry.getKey();
-            int ovlEarliestRamAddress = ovl.getEarliestRamAddress();
-            int ovlSize = ovl.size();
-            int ovlEnd = ovlEarliestRamAddress + ovlSize;
+            int ovlEarliestRamAddress = ovl.getLowerBoundRamAddress();
+            int ovlEnd = ovl.getUpperBoundRamAddress();
             if (address < ovlEarliestRamAddress || address >= ovlEnd)
                 continue;
 

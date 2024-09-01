@@ -20,7 +20,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.ParagonLite;
+    public static Mode mode = Mode.Redux;
 
     Gen5RomHandler romHandler;
 
@@ -28,15 +28,19 @@ public class ParagonLiteHandler {
 
     ParagonLiteOverlay arm9;
     ParagonLiteOverlay battleOvl;
+    ParagonLiteOverlay battleFxOvl;
     ParagonLiteOverlay battleServerOvl;
     ParagonLiteOverlay trainerAIOvl;
 
     Pokemon[] pokes;
-    Move[] moves;
+    List<Move> moves;
 
     NARCArchive pokemonGraphicsNarc;
+    NARCArchive moveAnimationsNarc;
     NARCArchive itemDataNarc;
     NARCArchive itemGraphicsNarc;
+    NARCArchive moveAnimationScriptsNarc;
+    NARCArchive battleAnimationScriptsNarc;
 
     List<String> battleEventStrings1;
     List<String> battleEventStrings2;
@@ -116,7 +120,11 @@ public class ParagonLiteHandler {
         }
     }
 
-    ParagonLiteHandler(Gen5RomHandler romHandler, byte[] arm9Data, int battleOvlNumber, int battleServerOvlNumber, int trainerAIOvlNumber, Pokemon[] pokes, Move[] moves, NARCArchive pokemonGraphicsNarc, NARCArchive itemDataNarc, NARCArchive itemGraphicsNarc, List<String> battleEventStrings1, List<String> battleEventStrings2, List<String> abilityNames, List<String> abilityDescriptions, List<String> abilityExplanations, List<String> moveNames, List<String> moveDescriptions, List<String> itemNames, List<String> itemNameMessages, List<String> itemPluralNames, List<String> itemDescriptions) {
+    ParagonLiteHandler(Gen5RomHandler romHandler, byte[] arm9Data, int battleOvlNumber, int battleFxOvlNumber, int battleServerOvlNumber, int trainerAIOvlNumber, Pokemon[] pokes,
+                       List<Move> moves, NARCArchive pokemonGraphicsNarc, NARCArchive moveAnimationsNarc, NARCArchive itemDataNarc, NARCArchive itemGraphicsNarc,
+                       NARCArchive moveAnimationScriptsNarc, NARCArchive battleAnimationScriptsNarc, List<String> battleEventStrings1, List<String> battleEventStrings2,
+                       List<String> abilityNames, List<String> abilityDescriptions, List<String> abilityExplanations, List<String> moveNames, List<String> moveDescriptions,
+                       List<String> itemNames, List<String> itemNameMessages, List<String> itemPluralNames, List<String> itemDescriptions) {
         this.romHandler = romHandler;
 
         globalAddressMap = new ParagonLiteAddressMap();
@@ -127,9 +135,13 @@ public class ParagonLiteHandler {
             int battleOvlAddress = romHandler.getOverlayAddress(battleOvlNumber);
             battleOvl = new ParagonLiteOverlay(romHandler, battleOvlNumber, "Battle", battleOvlData, battleOvlAddress, ParagonLiteOverlay.Insertion.Front, globalAddressMap);
 
+            byte[] battleFxOvlData = romHandler.readOverlay(battleFxOvlNumber);
+            int battleFxOvlAddress = romHandler.getOverlayAddress(battleFxOvlNumber);
+            battleFxOvl = new ParagonLiteOverlay(romHandler, battleFxOvlNumber, "BattleFx", battleFxOvlData, battleFxOvlAddress, ParagonLiteOverlay.Insertion.Front, globalAddressMap);
+
             byte[] battleServerOvlData = romHandler.readOverlay(battleServerOvlNumber);
             int battleServerOvlAddress = romHandler.getOverlayAddress(battleServerOvlNumber);
-            battleServerOvl = new ParagonLiteOverlay(romHandler, battleServerOvlNumber, "BattleServer", battleServerOvlData, battleServerOvlAddress, ParagonLiteOverlay.Insertion.Front, globalAddressMap);
+            battleServerOvl = new ParagonLiteOverlay(romHandler, battleServerOvlNumber, "BattleServer", battleServerOvlData, battleServerOvlAddress, ParagonLiteOverlay.Insertion.Back, globalAddressMap);
 
             byte[] trainerAIOvlData = romHandler.readOverlay(trainerAIOvlNumber);
             int trainerAIOvlAddress = romHandler.getOverlayAddress(trainerAIOvlNumber);
@@ -205,8 +217,11 @@ public class ParagonLiteHandler {
         this.moves = moves;
 
         this.pokemonGraphicsNarc = pokemonGraphicsNarc;
+        this.moveAnimationsNarc = moveAnimationsNarc;
         this.itemDataNarc = itemDataNarc;
         this.itemGraphicsNarc = itemGraphicsNarc;
+        this.moveAnimationScriptsNarc = moveAnimationScriptsNarc;
+        this.battleAnimationScriptsNarc = battleAnimationScriptsNarc;
 
         this.battleEventStrings1 = battleEventStrings1;
         this.battleEventStrings2 = battleEventStrings2;
@@ -242,6 +257,7 @@ public class ParagonLiteHandler {
         long startTime = System.currentTimeMillis();
         arm9.save(romHandler);
         battleOvl.save(romHandler);
+        battleFxOvl.save(romHandler);
         battleServerOvl.save(romHandler);
         trainerAIOvl.save(romHandler);
         System.out.printf(" - done, time=%dms\n", System.currentTimeMillis() - startTime);
@@ -370,6 +386,16 @@ public class ParagonLiteHandler {
         battleEventStrings2.add/* 1203*/("\uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
         battleEventStrings2.add/* 1204*/("The wild \uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
         battleEventStrings2.add/* 1205*/("The foe's \uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
+    
+        // Electro Shot
+        battleEventStrings2.add/* 1206*/("\uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
+        battleEventStrings2.add/* 1207*/("The wild \uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
+        battleEventStrings2.add/* 1208*/("The foe's \uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
+        
+        // Meteor Beam
+        battleEventStrings2.add/* 1209*/("\uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
+        battleEventStrings2.add/* 1210*/("The wild \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
+        battleEventStrings2.add/* 1211*/("The foe's \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
     }
 
     public void setReadPokePersonalData() {
@@ -1232,7 +1258,7 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, "Changes the Pokémon's\\xFFFEtype to match its move.");
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.unknown29, "protean.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onDecideTarget, "protean.s"));
     }
 
     private void addFurCoat() {
@@ -1270,7 +1296,7 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, "Protects the Pokémon from\\xFFFEsome ball and bomb moves.");
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onPreMoveImmuneCheck, "bulletproof.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "bulletproof.s"));
     }
 
     private void addCompetitive() {
@@ -1292,7 +1318,7 @@ public class ParagonLiteHandler {
         }
 
         // Data
-        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onPostStatChange, "competitive"));
+        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeSuccess, "competitive"));
     }
 
     private void addStrongJaw() {
@@ -1335,7 +1361,7 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(index,
-                new AbilityEventHandler(Gen5BattleEventType.onGetMoveType, "refrigerate_type"),
+                new AbilityEventHandler(Gen5BattleEventType.onGetMoveParam, "refrigerate_type"),
                 new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "common_move_type_change_power"));
     }
 
@@ -1356,7 +1382,7 @@ public class ParagonLiteHandler {
         }
 
         // Data
-        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onGetPriority, "gale_wings"));
+        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onGetMovePriority, "gale_wings"));
     }
 
     private void addMegaLauncher() {
@@ -1412,7 +1438,7 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(index,
-                new AbilityEventHandler(Gen5BattleEventType.onGetMoveType, "pixilate_type"),
+                new AbilityEventHandler(Gen5BattleEventType.onGetMoveParam, "pixilate_type"),
                 new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "common_move_type_change_power"));
     }
 
@@ -1426,7 +1452,7 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, "Contact moves lower the\\xFFFEattacker's Speed stat.");
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onHit2, "gooey.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "gooey.s"));
     }
 
     private void addAerilate() {
@@ -1447,7 +1473,7 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(index,
-                new AbilityEventHandler(Gen5BattleEventType.onGetMoveType, "aerilate_type"),
+                new AbilityEventHandler(Gen5BattleEventType.onGetMoveParam, "aerilate_type"),
                 new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "common_move_type_change_power"));
     }
 
@@ -1466,7 +1492,7 @@ public class ParagonLiteHandler {
         }
 
         // Data
-        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onHit2, "stamina"));
+        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "stamina"));
     }
 
     private void addSteelworker() {
@@ -1511,8 +1537,8 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onGetSpeedStat, "slush_rush_speed.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onWeather, "slush_rush_weather_immune.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onCalcSpeed, "slush_rush_speed.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction, "slush_rush_weather_immune.s"));
     }
 
     private void addTriage() {
@@ -1534,7 +1560,7 @@ public class ParagonLiteHandler {
         }
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetPriority, "triage"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePriority, "triage"));
     }
 
     private void addGalvanize() {
@@ -1555,7 +1581,7 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onGetMoveType, "galvanize_type.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onGetMoveParam, "galvanize_type.s"),
                 new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "common_move_type_change_power.s"));
     }
 
@@ -1572,7 +1598,7 @@ public class ParagonLiteHandler {
             case Redux -> filename = "redux_fluffy.s";
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetDamage, filename));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, filename));
     }
 
     private void addCottonDown() {
@@ -1596,10 +1622,10 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(index,
-                new AbilityEventHandler(Gen5BattleEventType.onPreMoveImmuneCheck, "wind_rider_immunity.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "wind_rider_on_enter.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "wind_rider_on_enter.s"),
-                new AbilityEventHandler(Gen5BattleEventType.OnMoveSuccess, "wind_rider_after_tailwind.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "wind_rider_immunity.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "wind_rider_on_enter.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "wind_rider_on_enter.s"),
+                new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteEffective, "wind_rider_after_tailwind.s"));
     }
 
     private void addWindPower() {
@@ -1644,9 +1670,9 @@ public class ParagonLiteHandler {
 
         setAbilityEventHandlers(number,
                 new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "supreme_overlord_power.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "supreme_overlord_on_enter.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "supreme_overlord_on_enter.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeExit, "supreme_overlord_on_exit.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "supreme_overlord_on_enter.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "supreme_overlord_on_enter.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchOut, "supreme_overlord_on_exit.s"));
     }
 
     private void addHeavyWing() {
@@ -1686,7 +1712,7 @@ public class ParagonLiteHandler {
         }
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetStab, Abilities.adaptability));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onApplyStab, Abilities.adaptability));
     }
 
     private void addInsectivore() {
@@ -1708,7 +1734,7 @@ public class ParagonLiteHandler {
         }
 
         // Data
-        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onPreMoveImmuneCheck, "insectivore.s"));
+        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "insectivore.s"));
     }
 
     private void addPrestige() {
@@ -1730,7 +1756,7 @@ public class ParagonLiteHandler {
         }
 
         // Data
-        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onPostHit2, "prestige"));
+        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "prestige"));
     }
 
     private void addLuckyFoot() {
@@ -1775,7 +1801,7 @@ public class ParagonLiteHandler {
         }
 
         // Data
-        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onPreMoveImmuneCheck, "assimilate"));
+        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "assimilate"));
     }
 
     private void addStoneHome() {
@@ -1790,8 +1816,8 @@ public class ParagonLiteHandler {
         // Data
         setAbilityEventHandlers(number,
                 new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStatValue, "stone_home_defense"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "stone_home_message"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "stone_home_message"));
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "stone_home_message"),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "stone_home_message"));
     }
 
     private void addCacophony() {
@@ -1819,7 +1845,7 @@ public class ParagonLiteHandler {
     private void setStench() {
         if (mode == Mode.Redux) {
             int number = Abilities.stench;
-            setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetFlinch, "redux_stench.s"));
+            setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMoveFlinchChance, "redux_stench.s"));
         }
     }
 
@@ -1828,28 +1854,28 @@ public class ParagonLiteHandler {
 
         setAbilityEventHandlers(number,
                 // Old Damp
-                new AbilityEventHandler(Gen5BattleEventType.unknown1F),
-                new AbilityEventHandler(Gen5BattleEventType.onFlinch),
-                new AbilityEventHandler(Gen5BattleEventType.unknown03),
-                new AbilityEventHandler(Gen5BattleEventType.unknown04),
-                new AbilityEventHandler(Gen5BattleEventType.unknown6A),
+                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteCheck2),
+                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail),
+                new AbilityEventHandler(Gen5BattleEventType.onMoveSequenceStart),
+                new AbilityEventHandler(Gen5BattleEventType.onMoveSequenceEnd),
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityNullified),
 
                 // Old Heatproof
                 new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, Abilities.heatproof),
-                new AbilityEventHandler(Gen5BattleEventType.unknown6B, Abilities.heatproof));
+                new AbilityEventHandler(Gen5BattleEventType.onConditionDamage, Abilities.heatproof));
     }
 
     private void setLimber() {
         int number = Abilities.limber;
 
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainStatus),
-                new AbilityEventHandler(Gen5BattleEventType.unknown67),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter),
-                new AbilityEventHandler(Gen5BattleEventType.unknown02),
-                new AbilityEventHandler(Gen5BattleEventType.unknown5B, "limber_speed.s"),
-                new AbilityEventHandler(Gen5BattleEventType.unknown5C, "limber_speed_message.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onAddConditionCheckFail),
+                new AbilityEventHandler(Gen5BattleEventType.onAddConditionFail),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
+                new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd),
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck, "limber_speed.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail, "limber_speed_message.s"));
     }
 
     private void setOblivious() {
@@ -1865,11 +1891,11 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainStatus),
-                new AbilityEventHandler(Gen5BattleEventType.unknown67),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility),
-                new AbilityEventHandler(Gen5BattleEventType.onPreMoveImmuneCheck, "oblivious_taunt.s"),
-                new AbilityEventHandler(Gen5BattleEventType.unknown02));
+                new AbilityEventHandler(Gen5BattleEventType.onAddConditionCheckFail),
+                new AbilityEventHandler(Gen5BattleEventType.onAddConditionFail),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "oblivious_taunt.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd));
     }
 
     private void setCloudNine() {
@@ -1899,7 +1925,7 @@ public class ParagonLiteHandler {
         // TODO: Add bespoke Protean
 
         int number = Abilities.colorChange;
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.unknown29, "protean.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onDecideTarget, "protean.s"));
     }
 
     private void setImmunity() {
@@ -1908,12 +1934,12 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainStatus),
-                new AbilityEventHandler(Gen5BattleEventType.unknown67),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter),
-                new AbilityEventHandler(Gen5BattleEventType.onPreMoveImmuneCheck, "immunity.s"),
-                new AbilityEventHandler(Gen5BattleEventType.unknown02));
+                new AbilityEventHandler(Gen5BattleEventType.onAddConditionCheckFail),
+                new AbilityEventHandler(Gen5BattleEventType.onAddConditionFail),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "immunity.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd));
     }
 
     private void setShadowTag() {
@@ -1921,9 +1947,9 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPreSwitch),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "shadow_tag_message"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "shadow_tag_message"));
+                new AbilityEventHandler(Gen5BattleEventType.onPreventRun),
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "shadow_tag_message"),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "shadow_tag_message"));
     }
 
     private void setWonderGuard() {
@@ -1931,9 +1957,9 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPreMoveImmuneCheck),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "wonder_guard_message.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "wonder_guard_message.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect),
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "wonder_guard_message.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "wonder_guard_message.s"));
     }
 
     private void setLightningRod() {
@@ -1973,8 +1999,8 @@ public class ParagonLiteHandler {
         // Data
         setAbilityEventHandlers(number,
                 new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "huge_power.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "huge_power_message.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "huge_power_message.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "huge_power_message.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "huge_power_message.s"));
     }
 
     private void setMagmaArmor() {
@@ -1999,16 +2025,16 @@ public class ParagonLiteHandler {
 
                 // Data
                 setAbilityEventHandlers(number,
-                        new AbilityEventHandler(Gen5BattleEventType.onHit2, "magma_armor_burn.s"),
+                        new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "magma_armor_burn.s"),
                         new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "magma_armor_resist.s"));
             }
             case Redux -> setAbilityEventHandlers(number,
-                    new AbilityEventHandler(Gen5BattleEventType.onPokeGainStatus),
-                    new AbilityEventHandler(Gen5BattleEventType.unknown67),
-                    new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility),
-                    new AbilityEventHandler(Gen5BattleEventType.onPokeEnter),
-                    new AbilityEventHandler(Gen5BattleEventType.unknown02),
-                    new AbilityEventHandler(Gen5BattleEventType.onGetCrit, Abilities.battleArmor));
+                    new AbilityEventHandler(Gen5BattleEventType.onAddConditionCheckFail),
+                    new AbilityEventHandler(Gen5BattleEventType.onAddConditionFail),
+                    new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                    new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
+                    new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd),
+                    new AbilityEventHandler(Gen5BattleEventType.onGetIsCriticalHit, Abilities.battleArmor));
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
     }
@@ -2018,12 +2044,12 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainStatus),
-                new AbilityEventHandler(Gen5BattleEventType.unknown67),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility), // TODO Add message
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter), // TODO Add message
-                new AbilityEventHandler(Gen5BattleEventType.unknown02),
-                new AbilityEventHandler(Gen5BattleEventType.onWeather, Abilities.overcoat));
+                new AbilityEventHandler(Gen5BattleEventType.onAddConditionCheckFail),
+                new AbilityEventHandler(Gen5BattleEventType.onAddConditionFail),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange), // TODO Add message
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn), // TODO Add message
+                new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd),
+                new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction, Abilities.overcoat));
     }
 
     private void setMagnetPull() {
@@ -2031,26 +2057,26 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPreSwitch),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "magnet_pull_message"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "magnet_pull_message"));
+                new AbilityEventHandler(Gen5BattleEventType.onPreventRun),
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "magnet_pull_message"),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "magnet_pull_message"));
     }
 
     private void setSandStream() {
         int number = Abilities.sandStream;
 
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility),
-                new AbilityEventHandler(Gen5BattleEventType.onWeather, "sand_stream_no_damage"));
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction, "sand_stream_no_damage"));
     }
 
     private void setHyperCutter() {
         int number = Abilities.hyperCutter;
 
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.unknown5B, "hyper_cutter.s"),
-                new AbilityEventHandler(Gen5BattleEventType.unknown5C));
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck, "hyper_cutter.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail));
     }
 
     private void setHustle() {
@@ -2076,11 +2102,11 @@ public class ParagonLiteHandler {
                 }
 
                 // Data
-                setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetPriority, "hustle.s"));
+                setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePriority, "hustle.s"));
                 break;
             }
             case Redux: {
-                setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetPriority, "redux_hustle.s"));
+                setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePriority, "redux_hustle.s"));
                 break;
             }
             default:
@@ -2100,15 +2126,15 @@ public class ParagonLiteHandler {
                 // Data
                 setAbilityEventHandlers(number,
                         new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "plus_spatk.s"),
-                        new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "plus_message.s"),
-                        new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "plus_message.s"));
+                        new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "plus_message.s"),
+                        new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "plus_message.s"));
             }
             case Redux -> {
                 // Data
                 setAbilityEventHandlers(number,
                         new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "redux_plus_spatk.s"),
-                        new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "plus_message.s"),
-                        new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "plus_message.s"));
+                        new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "plus_message.s"),
+                        new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "plus_message.s"));
             }
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
@@ -2126,8 +2152,8 @@ public class ParagonLiteHandler {
                 // Data
                 setAbilityEventHandlers(number,
                         new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStatValue, "minus_spdef.s"),
-                        new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "minus_message.s"),
-                        new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "minus_message.s"));
+                        new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "minus_message.s"),
+                        new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "minus_message.s"));
             }
             case Redux -> {
                 // Description
@@ -2136,8 +2162,8 @@ public class ParagonLiteHandler {
                 // Data
                 setAbilityEventHandlers(number,
                         new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "redux_minus_attack.s"),
-                        new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "minus_message.s"),
-                        new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "minus_message.s"));
+                        new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "minus_message.s"),
+                        new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "minus_message.s"));
             }
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
@@ -2150,7 +2176,7 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, "The Pokémon heals its\\xFFFEown status problems.");
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onPreTurn, "shed_skin.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onCheckSpecialPriority, "shed_skin.s"));
     }
 
     private void setArenaTrap() {
@@ -2158,9 +2184,9 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPreSwitch),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "arena_trap_message"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "arena_trap_message"));
+                new AbilityEventHandler(Gen5BattleEventType.onPreventRun),
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "arena_trap_message"),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "arena_trap_message"));
     }
 
     private void setVitalSpirit() {
@@ -2172,7 +2198,7 @@ public class ParagonLiteHandler {
         // TODO: Explanation
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onHit2, "vital_spirit.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "vital_spirit.s"));
     }
 
     private void setWhiteSmoke() {
@@ -2183,8 +2209,8 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.unknown5B, "white_smoke.s"),
-                new AbilityEventHandler(Gen5BattleEventType.unknown5C));
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck, "white_smoke.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail));
     }
 
     private void setPurePower() {
@@ -2206,8 +2232,8 @@ public class ParagonLiteHandler {
                 // Data
                 setAbilityEventHandlers(number,
                         new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "pure_power.s"),
-                        new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "pure_power_message.s"),
-                        new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "pure_power_message.s"));
+                        new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "pure_power_message.s"),
+                        new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "pure_power_message.s"));
             }
             case Redux -> {
                 // Explanation
@@ -2246,9 +2272,9 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onHit2, "anger_point_crit"),
-                new AbilityEventHandler(Gen5BattleEventType.onFlinch, "anger_point_flinch"),
-                new AbilityEventHandler(Gen5BattleEventType.OnMoveFail, "anger_point_miss"));
+                new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "anger_point_crit"),
+                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "anger_point_flinch"),
+                new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteNoEffect, "anger_point_miss"));
     }
 
     private void setIronFist() {
@@ -2272,14 +2298,14 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onGetDamage, "adaptability.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, "adaptability.s"));
     }
 
     private void setSolarPower() {
         int number = Abilities.solarPower;
 
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onWeather, "solar_power_weather.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction, "solar_power_weather.s"),
                 new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "solar_power_spatk_boost.s"));
     }
 
@@ -2301,14 +2327,14 @@ public class ParagonLiteHandler {
                 abilityDescriptions.set(number, description);
 
                 // Data
-                setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetDamage, "leaf_guard.s"));
+                setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, "leaf_guard.s"));
             }
             case Redux -> {
                 setAbilityEventHandlers(number,
-                        new AbilityEventHandler(Gen5BattleEventType.onPokeGainStatus),
-                        new AbilityEventHandler(Gen5BattleEventType.unknown67),
-                        new AbilityEventHandler(Gen5BattleEventType.unknown0E),
-                        new AbilityEventHandler(Gen5BattleEventType.onGetCrit, Abilities.battleArmor));
+                        new AbilityEventHandler(Gen5BattleEventType.onAddConditionCheckFail),
+                        new AbilityEventHandler(Gen5BattleEventType.onAddConditionFail),
+                        new AbilityEventHandler(Gen5BattleEventType.onCheckSleep),
+                        new AbilityEventHandler(Gen5BattleEventType.onGetIsCriticalHit, Abilities.battleArmor));
             }
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
@@ -2319,21 +2345,21 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onGetCrit),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter, "super_luck_message.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility, "super_luck_message.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onGetIsCriticalHit),
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "super_luck_message.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "super_luck_message.s"));
     }
 
     private void setSlowStart() {
         int number = Abilities.slowStart;
 
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter),
-                new AbilityEventHandler(Gen5BattleEventType.unknown58),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility),
-                new AbilityEventHandler(Gen5BattleEventType.onGetSpeedStat),
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
+                new AbilityEventHandler(Gen5BattleEventType.onCheckActivation),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onCalcSpeed),
                 new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue),
-                new AbilityEventHandler(Gen5BattleEventType.onEndOfTurn2, "slow_start_end_of_turn.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onTurnCheckEnd, "slow_start_end_of_turn.s"));
     }
 
     private void setIceBody() {
@@ -2351,17 +2377,17 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onWeather),
-                new AbilityEventHandler(Gen5BattleEventType.onPreMoveImmuneCheck, "ice_body_immunity.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction),
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "ice_body_immunity.s"));
     }
 
     private void setSnowWarning() {
         int number = Abilities.snowWarning;
 
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility),
-                new AbilityEventHandler(Gen5BattleEventType.onWeather, "snow_warning_no_damage.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction, "snow_warning_no_damage.s"));
     }
 
     private void setXrayVision() {
@@ -2389,19 +2415,19 @@ public class ParagonLiteHandler {
 
         abilityDescriptions.set(number, "Heals ally HP and\\xFFFEsometimes status condition.");
 
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onEndOfTurn1, "healer_recover_hp.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onTurnCheckBegin, "healer_recover_hp.s"));
     }
 
     private void setFriendGuard() {
         int number = Abilities.friendGuard;
 
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetDamage, "friend_guard"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, "friend_guard"));
     }
 
     private void setWeakArmor() {
         int number = Abilities.weakArmor;
 
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onHit2, "weak_armor.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "weak_armor.s"));
     }
 
     private void setHeavyMetal() {
@@ -2416,14 +2442,14 @@ public class ParagonLiteHandler {
                 // Data
                 setAbilityEventHandlers(number,
                         new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStatValue, "heavy_metal_defense"),
-                        new AbilityEventHandler(Gen5BattleEventType.onGetSpeedStat, "heavy_metal_speed"));
+                        new AbilityEventHandler(Gen5BattleEventType.onCalcSpeed, "heavy_metal_speed"));
             }
             case Redux -> {
                 abilityDescriptions.set(number, abilityDescriptions.get(Abilities.filter));
 
                 setAbilityEventHandlers(number,
                         new AbilityEventHandler(Gen5BattleEventType.onGetPokeWeight),
-                        new AbilityEventHandler(Gen5BattleEventType.onGetDamage, Abilities.filter));
+                        new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, Abilities.filter));
             }
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
@@ -2439,7 +2465,7 @@ public class ParagonLiteHandler {
         // Data
         setAbilityEventHandlers(number,
                 new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStatValue, "light_metal_defense"),
-                new AbilityEventHandler(Gen5BattleEventType.onGetSpeedStat, "light_metal_speed"));
+                new AbilityEventHandler(Gen5BattleEventType.onCalcSpeed, "light_metal_speed"));
     }
 
     private void setOvercoat() {
@@ -2451,8 +2477,8 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onWeather),
-                new AbilityEventHandler(Gen5BattleEventType.onPreMoveImmuneCheck, "overcoat_powder_immunity"));
+                new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction),
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "overcoat_powder_immunity"));
     }
 
     private void setRegenerator() {
@@ -2460,7 +2486,7 @@ public class ParagonLiteHandler {
 
         if (mode == Mode.Redux) {
             // Data
-            setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onSwitchOut, "redux_regenerator.s"));
+            setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onSwitchOutEnd, "redux_regenerator.s"));
         }
     }
 
@@ -2481,7 +2507,7 @@ public class ParagonLiteHandler {
         }
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onPreMoveImmuneCheck, "justified"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "justified"));
     }
 
     private void setHerbivore() {
@@ -2505,11 +2531,11 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPokeEnter),
-                new AbilityEventHandler(Gen5BattleEventType.onPokeGainAbility),
-                new AbilityEventHandler(Gen5BattleEventType.unknown03, "turboblaze"),
-                new AbilityEventHandler(Gen5BattleEventType.unknown04),
-                new AbilityEventHandler(Gen5BattleEventType.unknown6A));
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onMoveSequenceStart, "turboblaze"),
+                new AbilityEventHandler(Gen5BattleEventType.onMoveSequenceEnd),
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityNullified));
     }
 
     private void setLowHpTypeBoostAbility() {
@@ -2527,15 +2553,44 @@ public class ParagonLiteHandler {
     public void setMoves() {
         registerMoveEffects();
 
-        // Name Updates
-        moves[Moves.viseGrip].name = "Vise Grip"; // 011
-        moves[Moves.feintAttack].name = "Feint Attack"; // 185
-        moves[Moves.smellingSalts].name = "Smelling Salts"; // 265
+        // HACK: We have to allocate to Battle overlay and jump to that because we can't allocate new space in BattleFx 
+        List<String> playMoveAnimationLines = readLines("play_move_animation.s");
+        battleOvl.writeCode(playMoveAnimationLines, "PlayMoveAnimation");
+        
+        List<String> playMoveAnimationJumpLines = readLines("play_move_animation_jump.s");
+        battleFxOvl.writeCodeForceInline(playMoveAnimationJumpLines, "PlayMoveAnimation");
+        
+        int maxMoveIndex = Moves.malignantChain;
+        int highMoveOffset = 116;
+        int battleAnimationScriptsOffset = 561;
+        
+        int maxMoveScriptIndex = maxMoveIndex + highMoveOffset - battleAnimationScriptsOffset;
+        while (battleAnimationScriptsNarc.files.size() < maxMoveScriptIndex) {
+            byte[] animationScriptFile = new byte[0x60];
+            writeWord(animationScriptFile, 0x00, 0x01);
+            for (int i = 0; i < 14; ++i)
+                writeWord(animationScriptFile, 0x04 + i * 4, 0x3C);
+            writeWord(animationScriptFile, 0x3C, 0x3A);
+            writeWord(animationScriptFile, 0x44, 0x01);
+            writeWord(animationScriptFile, 0x48, 0x11);
+            writeWord(animationScriptFile, 0x4C, 0x18);
+            writeHalf(animationScriptFile, 0x5E, 0x4D);
+            battleAnimationScriptsNarc.files.add(animationScriptFile);
+        }
 
-        // TODO: These won't matter after Fairy is properly implemented
-        moves[Moves.submission].name = "Play Rough"; // 066
-        moves[Moves.lusterPurge].name = "Dazzling Gleam"; // 295
-        moves[Moves.mistBall].name = "Moonblast"; // 296
+        // 12
+//        arm9.writeByte(0x0215339C, 0x24);
+
+        // 36
+//        arm9.writeByte(0x021AC538, 0x24);
+//        arm9.writeByte(0x021ADB32, 0x24);
+//        arm9.writeByte(0x021ADB56, 0x24);
+//        arm9.writeByte(0x021ADB7A, 0x24);
+
+        // Name Updates
+        moves.get(Moves.viseGrip).name = "Vise Grip"; // 011
+        moves.get(Moves.feintAttack).name = "Feint Attack"; // 185
+        moves.get(Moves.smellingSalts).name = "Smelling Salts"; // 265
 
         // All sound moves hit through substitute
         for (Move m : moves) {
@@ -2543,103 +2598,528 @@ public class ParagonLiteHandler {
         }
 
         // Kick Moves
-        moves[Moves.stomp].isCustomKickMove = true; // 023
-        moves[Moves.doubleKick].isCustomKickMove = true; // 024
-        moves[Moves.jumpKick].isCustomKickMove = true; // 026
-        moves[Moves.rollingKick].isCustomKickMove = true; // 27
-        moves[Moves.lowKick].isCustomKickMove = true; // 67
-        moves[Moves.highJumpKick].isCustomKickMove = true; // 136
-        moves[Moves.tripleKick].isCustomKickMove = true; // 167
-        moves[Moves.blazeKick].isCustomKickMove = true; // 299
-        moves[Moves.lowSweep].isCustomKickMove = true; // 490
+        for (int moveIndex : new int[]{
+                Moves.stomp, // 023
+                Moves.doubleKick, // 024
+                Moves.jumpKick, // 026
+                Moves.rollingKick, // 027
+                Moves.lowKick, // 067
+                Moves.highJumpKick, // 136
+                Moves.tripleKick, // 167
+                Moves.blazeKick, // 299
+                Moves.lowSweep, // 490
+        }) {
+            moves.get(moveIndex).isCustomKickMove = true;
+        }
 
         // Bite Moves
-        moves[Moves.bite].isCustomBiteMove = true; // 044
-        moves[Moves.hyperFang].isCustomBiteMove = true; // 158
-        moves[Moves.crunch].isCustomBiteMove = true; // 242
-        moves[Moves.poisonFang].isCustomBiteMove = true; // 305
-        moves[Moves.thunderFang].isCustomBiteMove = true; // 422
-        moves[Moves.iceFang].isCustomBiteMove = true; // 423
-        moves[Moves.fireFang].isCustomBiteMove = true; // 424
+        for (int moveIndex : new int[]{
+                Moves.bite, // 044
+                Moves.hyperFang, // 158
+                Moves.crunch, // 242
+                Moves.poisonFang, // 305
+                Moves.thunderFang, // 422
+                Moves.iceFang, // 423
+                Moves.fireFang, // 424
+        }) {
+            moves.get(moveIndex).isCustomBiteMove = true;
+        }
 
         // Slice Moves
-        moves[Moves.cut].isCustomSliceMove = true; // 015
-        moves[Moves.razorLeaf].isCustomSliceMove = true; // 075
-        moves[Moves.slash].isCustomSliceMove = true; // 163
-        moves[Moves.furyCutter].isCustomSliceMove = true; // 210
-        moves[Moves.airCutter].isCustomSliceMove = true; // 314
-        moves[Moves.aerialAce].isCustomSliceMove = true; // 332
-        moves[Moves.leafBlade].isCustomSliceMove = true; // 348
-        moves[Moves.nightSlash].isCustomSliceMove = true; // 400
-        moves[Moves.airSlash].isCustomSliceMove = true; // 403
-        moves[Moves.xScissor].isCustomSliceMove = true; // 404
-        moves[Moves.psychoCut].isCustomSliceMove = true; // 427
-        moves[Moves.crossPoison].isCustomSliceMove = true; // 440
-        moves[Moves.sacredSword].isCustomSliceMove = true; // 533
-        moves[Moves.razorShell].isCustomSliceMove = true; // 534
-        moves[Moves.secretSword].isCustomSliceMove = true; // 548
+        for (int moveIndex : new int[]{
+                Moves.cut, // 015
+                Moves.razorLeaf, // 075
+                Moves.slash, // 163
+                Moves.furyCutter, // 210
+                Moves.airCutter, // 314
+                Moves.aerialAce, // 332
+                Moves.leafBlade, // 348
+                Moves.nightSlash, // 400
+                Moves.airSlash, // 403
+                Moves.xScissor, // 404
+                Moves.psychoCut, // 427
+                Moves.crossPoison, // 440
+                Moves.sacredSword, // 533
+                Moves.razorShell, // 534
+                Moves.secretSword, // 548
+        }) {
+            moves.get(moveIndex).isCustomSliceMove = true;
+        }
 
         // Triage
         for (int i = 0; i <= Gen5Constants.moveCount; ++i) {
-            if (moves[i] == null) continue;
+            Move move = moves.get(i);
+            if (move == null) continue;
 
-            if (moves[i].isHealMove || moves[i].recoil > 0) moves[i].isCustomTriageMove = true;
+            if (move.isHealMove || move.recoil > 0)
+                move.isCustomTriageMove = true;
         }
 
         // Powder moves
-        moves[Moves.poisonPowder].isCustomPowderMove = true; // 077
-        moves[Moves.stunSpore].isCustomPowderMove = true; // 078
-        moves[Moves.sleepPowder].isCustomPowderMove = true; // 079
-        moves[Moves.spore].isCustomPowderMove = true; // 147
-        moves[Moves.cottonSpore].isCustomPowderMove = true; // 178
-        moves[Moves.ragePowder].isCustomPowderMove = true; // 476
+        for (int moveIndex : new int[]{
+                Moves.poisonPowder, // 077
+                Moves.stunSpore, // 078
+                Moves.sleepPowder, // 079
+                Moves.spore, // 147
+                Moves.cottonSpore, // 178
+                Moves.ragePowder, // 476
+        }) {
+            moves.get(moveIndex).isCustomPowderMove = true;
+        }
 
         // Wind moves
-        moves[Moves.razorWind].isCustomWindMove = true; // 013
-        moves[Moves.gust].isCustomWindMove = true; // 016
-        moves[Moves.whirlwind].isCustomWindMove = true; // 018
-        moves[Moves.blizzard].isCustomWindMove = true; // 059
-        moves[Moves.aeroblast].isCustomWindMove = true; // 177
-        moves[Moves.icyWind].isCustomWindMove = true; // 196
-        moves[Moves.twister].isCustomWindMove = true; // 239
-        moves[Moves.heatWave].isCustomWindMove = true; // 257
-        moves[Moves.airCutter].isCustomWindMove = true; // 314
-        moves[Moves.silverWind].isCustomWindMove = true; // 318
-        moves[Moves.tailwind].isCustomWindMove = true; // 366
-        moves[Moves.ominousWind].isCustomWindMove = true; // 466
-        moves[Moves.hurricane].isCustomWindMove = true; // 542
+        for (int moveIndex : new int[]{
+                Moves.razorWind, // 013
+                Moves.gust, // 016
+                Moves.whirlwind, // 018
+                Moves.blizzard, // 059
+                Moves.aeroblast, // 177
+                Moves.icyWind, // 196
+                Moves.twister, // 239
+                Moves.heatWave, // 257
+                Moves.airCutter, // 314
+                Moves.silverWind, // 318
+                Moves.tailwind, // 366
+                Moves.ominousWind, // 466
+                Moves.hurricane, // 542
+        }) {
+            moves.get(moveIndex).isCustomWindMove = true;
+        }
 
         // Ball/Bomb moves
-        moves[Moves.eggBomb].isCustomBallBombMove = true; // 121
-        moves[Moves.barrage].isCustomBallBombMove = true; // 140
-        moves[Moves.sludgeBomb].isCustomBallBombMove = true; // 188
-        moves[Moves.octazooka].isCustomBallBombMove = true; // 190
-        moves[Moves.zapCannon].isCustomBallBombMove = true; // 192
-        moves[Moves.shadowBall].isCustomBallBombMove = true; // 247
-        moves[Moves.mistBall].isCustomBallBombMove = true; // 296
-        moves[Moves.iceBall].isCustomBallBombMove = true; // 301
-        moves[Moves.weatherBall].isCustomBallBombMove = true; // 311
-        moves[Moves.bulletSeed].isCustomBallBombMove = true; // 331
-        moves[Moves.rockBlast].isCustomBallBombMove = true; // 350
-        moves[Moves.gyroBall].isCustomBallBombMove = true; // 360
-        moves[Moves.auraSphere].isCustomBallBombMove = true; // 396
-        moves[Moves.seedBomb].isCustomBallBombMove = true; // 402
-        moves[Moves.focusBlast].isCustomBallBombMove = true; // 411
-        moves[Moves.energyBall].isCustomBallBombMove = true; // 412
-        moves[Moves.mudBomb].isCustomBallBombMove = true; // 426
-        moves[Moves.rockWrecker].isCustomBallBombMove = true; // 439
-        moves[Moves.magnetBomb].isCustomBallBombMove = true; // 443
-        moves[Moves.electroBall].isCustomBallBombMove = true; // 486
-        moves[Moves.acidSpray].isCustomBallBombMove = true; // 491
-        moves[Moves.searingShot].isCustomBallBombMove = true; // 545
+        for (int moveIndex : new int[]{
+                Moves.eggBomb, // 121
+                Moves.barrage, // 140
+                Moves.sludgeBomb, // 188
+                Moves.octazooka, // 190
+                Moves.zapCannon, // 192
+                Moves.shadowBall, // 247
+                Moves.mistBall, // 296
+                Moves.iceBall, // 301
+                Moves.weatherBall, // 311
+                Moves.bulletSeed, // 331
+                Moves.rockBlast, // 350
+                Moves.gyroBall, // 360
+                Moves.auraSphere, // 396
+                Moves.seedBomb, // 402
+                Moves.focusBlast, // 411
+                Moves.energyBall, // 412
+                Moves.mudBomb, // 426
+                Moves.rockWrecker, // 439
+                Moves.magnetBomb, // 443
+                Moves.electroBall, // 486
+                Moves.acidSpray, // 491
+                Moves.searingShot, // 545
+        }) {
+            moves.get(moveIndex).isCustomBallBombMove = true;
+        }
 
         // Pulse Moves
-        moves[Moves.waterPulse].isCustomPulseMove = true; // 352
-        moves[Moves.auraSphere].isCustomPulseMove = true; // 396
-        moves[Moves.darkPulse].isCustomPulseMove = true; // 399
-        moves[Moves.dragonPulse].isCustomPulseMove = true; // 406
-        moves[Moves.healPulse].isCustomPulseMove = true; // 505
+        for (int moveIndex : new int[]{
+                Moves.waterPulse, // 352
+                Moves.auraSphere, // 396
+                Moves.darkPulse, // 399
+                Moves.dragonPulse, // 406
+                Moves.healPulse, // 505
+        }) {
+            moves.get(moveIndex).isCustomPulseMove = true;
+        }
 
+        switch (mode) {
+            case ParagonLite -> loadMovesFromFile();
+            case Redux -> loadReduxMoves();
+            default -> throw new IllegalStateException("Unexpected value: " + mode);
+        }
+
+        int[] newMoves;
+        int[] movesToClear;
+        switch (mode) {
+            case ParagonLite -> {
+                newMoves = new int[]{
+                        Moves.doubleKick, // #024
+                        Moves.twineedle, // #041
+                        Moves.eggBomb, // #121
+                        Moves.bonemerang, // #155
+                        Moves.astonish, // #310
+                        Moves.magnetBomb, // 443
+                        Moves.doubleHit, // #458
+                        Moves.dualChop, // #530
+                        Moves.gearGrind, // #544
+                        Moves.fellStinger, // #565
+                        Moves.freezeDry, // #573
+                        Moves.darkestLariat, // #663
+                        Moves.pollenPuff, // #676
+                        Moves.psychicFangs, // #706
+                        Moves.meteorBeam, // #800
+                        Moves.tripleAxel, // #813
+                        Moves.dualWingbeat, // #814
+                        Moves.direClaw, // #827
+                        Moves.ragingFury, // #833
+                        Moves.barbBarrage, // #839
+                        Moves.infernalParade, // #844
+                        Moves.makeItRain, // #874
+                        Moves.electroShot, // #905
+                        Moves.hardPress, // #912
+                        Moves.electroShot, // #905
+                };
+
+                movesToClear = new int[]{
+                        Moves.dragonRage, // #082
+                        Moves.nightShade, // #101
+                        Moves.psywave, // #149
+                        Moves.rollout, // #205
+                        Moves.memento, // #262
+                        Moves.iceBall, // #301
+                        Moves.chatter, // #448
+                };
+            }
+            case Redux -> {
+                newMoves = new int[]{
+                        Moves.doubleKick, // #024
+                        Moves.twineedle, // #041
+                        Moves.eggBomb, // #121
+                        Moves.bonemerang, // #155
+                        Moves.magnetBomb, // 443
+                        Moves.doubleHit, // #458
+                        Moves.dualChop, // #530
+                        Moves.gearGrind, // #544
+                        Moves.fellStinger, // #565
+                        Moves.freezeDry, // #573
+                        Moves.darkestLariat, // #663
+                        Moves.pollenPuff, // #676
+                        Moves.psychicFangs, // #706
+                        Moves.meteorBeam, // #800
+                        Moves.tripleAxel, // #813
+                        Moves.dualWingbeat, // #814
+                        Moves.direClaw, // #827
+                        Moves.ragingFury, // #833
+                        Moves.barbBarrage, // #839
+                        Moves.infernalParade, // #844
+                        Moves.makeItRain, // #874
+                        Moves.electroShot, // #905
+                        Moves.hardPress, // #912
+                        Moves.electroShot, // #905
+                };
+
+                movesToClear = new int[]{
+                        Moves.chatter, // #448
+                };
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + mode);
+        }
+
+        int totalMoves = 918;
+        int moveDataSize = 36;
+        arm9.replaceData(new byte[moveDataSize * totalMoves], "Data_MoveCache");
+
+//        arm9.writeHalfword(0x0204A8DA, 0xE005);
+
+//        arm9.writeByte(0x020143C2, 0x24);
+//        arm9.writeByte(0x020155C0, 0x24);
+//        arm9.writeHalfword(0x020919D4, 0x0240);
+
+        for (int moveToClear : movesToClear) {
+            clearMoveEventHandlers(moveToClear);
+        }
+
+        // TODO: For some reason the relocator addresses values are wrong
+        relocateMoveListRamAddress(newMoves.length - movesToClear.length);
+
+        // + #121 Egg Bomb
+        cloneMoveEventHandlers(Moves.eggBomb, Moves.psystrike);
+
+        // + #310 Astonish
+        if (mode == Mode.ParagonLite)
+            cloneMoveEventHandlers(Moves.astonish, Moves.fakeOut);
+        
+
+        // TODO #564 Sticky Web
+        
+        // + #565 Fell Stinger
+        moves.get(Moves.fellStinger).name = "Fell Stinger";
+        setMoveEventHandlers(Moves.fellStinger, new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "fell_stinger.s"));
+        setMoveAnimations(Moves.fellStinger);
+        
+        // #570 Parabolic Charge
+        moves.get(Moves.parabolicCharge).name = "Parabolic Charge";
+
+        // + #573 Freeze-Dry
+        moves.get(Moves.freezeDry).name = "Freeze-Dry";
+        setMoveEventHandlers(Moves.freezeDry, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness1, "freeze-dry.s"));
+
+        // #574 Disarming Voice
+        moves.get(Moves.disarmingVoice).name = "Disarming Voice";
+        setMoveAnimations(Moves.disarmingVoice, 743);
+        
+        // #583 Play Rough
+        moves.get(Moves.playRough).name = "Play Rough";
+        setMoveAnimations(Moves.playRough, 740);
+
+        // #585 Moonblast
+        moves.get(Moves.moonblast).name = "Moonblast";
+        setMoveAnimations(Moves.moonblast, 741, 742);
+
+        // #586 Boomburst
+        moves.get(Moves.boomburst).name = "Boomburst";
+        setMoveAnimations(Moves.boomburst, 752);
+
+        // #595 Mystical Fire
+        moves.get(Moves.mysticalFire).name = "Mystical Fire";
+        setMoveAnimations(Moves.mysticalFire);
+
+        // #605 Dazzling Gleam
+        moves.get(Moves.dazzlingGleam).name = "Dazzling Gleam";
+        setMoveAnimations(Moves.dazzlingGleam, 745);
+
+        // #609 Nuzzle
+        moves.get(Moves.nuzzle).name = "Nuzzle";
+        setMoveAnimations(Moves.nuzzle);
+
+//        // TODO: #611 Infestation
+//        moves.get(Moves.infestation).name = "Infestation";
+//        setMoveAnimations(Moves.infestation, 747);
+        
+        // #612 Power-Up Punch
+        moves.get(Moves.powerUpPunch).name = "Power-Up Punch";
+        setMoveAnimations(Moves.powerUpPunch);
+
+        // #660 First Impression
+        moves.get(Moves.firstImpression).name = "First Impression";
+        setMoveAnimations(Moves.firstImpression, 760);
+
+        // + #663 Darkest Lariat
+        moves.get(Moves.darkestLariat).name = "DarkestLariat";
+        cloneMoveEventHandlers(Moves.darkestLariat, Moves.chipAway);
+        
+        // #665 Ice Hammer
+        moves.get(Moves.iceHammer).name = "Ice Hammer";
+        
+        // #667 High Horsepower
+        moves.get(Moves.highHorsepower).name = "High Horsepower";
+        setMoveAnimations(Moves.highHorsepower, 739);
+        
+        // TODO #668 Strength Sap
+
+        // + #676 Pollen Puff
+        setMoveEventHandlers(Moves.pollenPuff,
+                new MoveEventHandler(Gen5BattleEventType.onCheckDamageToRecover, "pollen_puff_set_mode.s"),
+                new MoveEventHandler(Gen5BattleEventType.onApplyDamageToRecover, "pollen_puff_heal.s"));
+        
+        // #679 Lunge
+        moves.get(Moves.lunge).name = "Lunge";
+        setMoveAnimations(Moves.lunge, 753);
+
+        // #680 Fire Lash
+        moves.get(Moves.fireLash).name = "Fire Lash";
+        setMoveAnimations(Moves.fireLash, 750);
+
+        // #684 Smart Strike
+        moves.get(Moves.smartStrike).name = "Smart Strike";
+        setMoveAnimations(Moves.smartStrike, 751);
+
+        // #693 Brutal Swing
+        moves.get(Moves.brutalSwing).name = "Brutal Swing";
+        setMoveAnimations(Moves.brutalSwing);
+
+        // #706 Psychic Fangs
+        moves.get(Moves.psychicFangs).name = "Psychic Fangs";
+        cloneMoveEventHandlers(Moves.psychicFangs, Moves.brickBreak);
+        setMoveAnimations(Moves.psychicFangs, 748);
+
+        // #709 Accelerock
+        moves.get(Moves.accelerock).name = "Accelerock";
+        setMoveAnimations(Moves.accelerock);
+
+        // #710 Liquidation
+        moves.get(Moves.liquidation).name = "Liquidation";
+        setMoveAnimations(Moves.liquidation);
+        
+        // + #776 Body Press
+//        setMoveEventHandlers(Moves.bodyPress, new MoveEventHandler(Gen5BattleEventType.onGetAttackingStat, "body_press.s"));
+
+        // #799 Scale Shot
+        moves.get(Moves.scaleShot).name = "Scale Shot";
+        setMoveAnimations(Moves.scaleShot, 758);
+        
+        // #800 Meteor Beam
+        moves.get(Moves.meteorBeam).name = "Meteor Beam";
+        if (mode != Mode.Redux)
+            setMoveEventHandlers(Moves.meteorBeam, new MoveEventHandler(Gen5BattleEventType.onChargeUpStartDone, "meteor_beam.s"));
+        
+        // #812 Flip Turn
+        moves.get(Moves.flipTurn).name = "Flip Turn";
+        setMoveAnimations(Moves.flipTurn, 759);
+
+        // + #813 Triple Axel
+        moves.get(Moves.tripleAxel).name = "Triple Axel";
+        switch (mode) {
+            case ParagonLite -> setMoveEventHandlers(Moves.tripleAxel,
+                    new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "triple_kick.s"),
+                    new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
+            case Redux -> setMoveEventHandlers(Moves.tripleAxel,
+                    new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "redux_triple_axel.s"),
+                    new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
+            default -> throw new IllegalStateException("Unexpected value: " + mode);
+        }
+        setMoveAnimations(Moves.tripleAxel, 754);
+        
+        // + #814 Dual Wingbeat
+        moves.get(Moves.dualWingbeat).name = "Dual Wingbeat";
+        setMoveEventHandlers(Moves.dualWingbeat, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+        setMoveAnimations(Moves.dualWingbeat, 746);
+
+        // #815 Scorching Sands
+        moves.get(Moves.scorchingSands).name = "Scorching Sands";
+        setMoveAnimations(Moves.scorchingSands);
+        
+        // #827 Dire Claw
+        moves.get(Moves.direClaw).name = "Dire Claw";
+        setMoveEventHandlers(Moves.direClaw, new MoveEventHandler(Gen5BattleEventType.onAddCondition, "dire_claw.s"));
+
+        // #833 Raging Fury
+        moves.get(Moves.ragingFury).name = "Raging Fury";
+        cloneMoveEventHandlers(Moves.ragingFury, Moves.thrash);
+        
+        // #828 Psyshield Bash
+        moves.get(Moves.psyshieldBash).name = "Psyshield Bash";
+        setMoveAnimations(Moves.psyshieldBash);
+
+        // #833 Raging Fury
+        moves.get(Moves.ragingFury).name = "Raging Fury";
+        setMoveAnimations(Moves.ragingFury);
+
+        // #834 Wave Crash
+        moves.get(Moves.waveCrash).name = "Wave Crash";
+        setMoveAnimations(Moves.waveCrash);
+
+        // #838 Headlong Rush
+        moves.get(Moves.headlongRush).name = "Headlong Rush";
+        setMoveAnimations(Moves.headlongRush);
+        
+        // #839 Barb Barrage
+        moves.get(Moves.barbBarrage).name = "Barb Barrage";
+        setMoveEventHandlers(Moves.barbBarrage, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "barb_barrage.s"));
+        setMoveAnimations(Moves.barbBarrage, 757);
+        
+        // #840 Esper Wing
+        moves.get(Moves.esperWing).name = "Esper Wing";
+        setMoveAnimations(Moves.esperWing, 749);
+
+        // + #844 Infernal Parade
+        moves.get(Moves.infernalParade).name = "Infernal Parade";
+        cloneMoveEventHandlers(Moves.infernalParade, Moves.hex);
+        
+        // + #874 Make It Rain
+        moves.get(Moves.makeItRain).name = "Make It Rain";
+        cloneMoveEventHandlers(Moves.makeItRain, Moves.payDay);
+        
+        // #895 Aqua Cutter
+        moves.get(Moves.aquaCutter).name = "Aqua Cutter";
+        setMoveAnimations(Moves.aquaCutter, 756);
+        
+        // + #905 Electro Shot
+        moves.get(Moves.electroShot).name = "Electro Shot";
+        setMoveEventHandlers(Moves.electroShot,
+                new MoveEventHandler(Gen5BattleEventType.onCheckChargeUpSkip, "electro_shot_charge_up_skip.s"),
+                new MoveEventHandler(Gen5BattleEventType.onChargeUpStart, "electro_shot_charge_up_start.s"));
+        
+        // + #912 Hard Press
+        moves.get(Moves.hardPress).name = "Hard Press";
+        cloneMoveEventHandlers(Moves.hardPress, Moves.wringOut);
+        
+        // #916 Supercell Slam
+        moves.get(Moves.supercellSlam).name = "Supercell Slam";
+        cloneMoveEventHandlers(Moves.supercellSlam, Moves.jumpKick);
+
+        // #917 Psychic Noise
+        moves.get(Moves.psychicNoise).name = "Psychic Noise";
+        setMoveAnimations(Moves.psychicNoise);
+        
+        
+        ///////////////
+        // OLD MOVES //
+        ///////////////
+
+        // + #024 Double Kick
+        setMoveEventHandlers(Moves.doubleKick, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+
+        // + #041 Twineedle
+        setMoveEventHandlers(Moves.twineedle, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+
+        // + #155 Bonemerang
+        setMoveEventHandlers(Moves.bonemerang, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+        
+        // #167 Triple Kick
+        if (mode == Mode.ParagonLite)
+            setMoveEventHandlers(Moves.tripleKick, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "triple_kick.s"));
+
+        // #200 Outrage
+        if (mode == Mode.ParagonLite)
+            cloneMoveEventHandlers(Moves.outrage, Moves.revenge);
+
+        // #237 Hidden Power
+        setMoveEventHandlers(Moves.hiddenPower, new MoveEventHandler(Gen5BattleEventType.onGetMoveParam));
+
+        // #243 Mirror Coat
+        if (mode == Mode.ParagonLite)
+            cloneMoveEventHandlers(Moves.mirrorCoat, Moves.eruption);
+
+        // #360 Gyro Ball
+        if (mode == Mode.ParagonLite)
+            setMoveEventHandlers(Moves.gyroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "gyro_ball.s"));
+
+        // #362 Brine
+        if (mode == Mode.ParagonLite)
+            setMoveEventHandlers(Moves.brine, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness1, "brine.s"));
+
+        // #368 Metal Burst
+        if (mode == Mode.ParagonLite)
+            cloneMoveEventHandlers(Moves.metalBurst, Moves.eruption);
+
+        // #381 Lucky Chant
+        if (mode == Mode.ParagonLite)
+            cloneMoveEventHandlers(Moves.luckyChant, Moves.focusEnergy);
+
+        // + #443 Magnet Bomb
+        cloneMoveEventHandlers(Moves.magnetBomb, Moves.psystrike);
+        
+        // #449 Judgment (needs update for Pixie plate)
+        setMoveEventHandlers(Moves.judgment, new MoveEventHandler(Gen5BattleEventType.onGetMoveParam, "judgment.s"));
+
+        // + #458 Double Hit
+        setMoveEventHandlers(Moves.doubleHit, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+
+        // #486 Electro Ball
+        if (mode == Mode.ParagonLite)
+            setMoveEventHandlers(Moves.electroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "electro_ball.s"));
+
+        // + #530 Dual Chop
+        setMoveEventHandlers(Moves.dualChop, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+
+        // + #544 Gear Grind
+        setMoveEventHandlers(Moves.gearGrind, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+
+        System.out.println("Set moves");
+    }
+    
+    private void setMoveAnimations(int moveNumber, int... SpaFiles) {
+        // TODO: Make this a global param somewhere
+        int highMoveOffset = 116;
+        int battleAnimationScriptsOffset = 561;
+        
+        String formattedMoveName = moves.get(moveNumber).name.toLowerCase().replace(' ', '_');
+        for (int spaFileNumber : SpaFiles) {
+            byte[] spaFileData = readBytes(String.format("moveanims/spa/%03d_%s_%03d.spa", moveNumber, formattedMoveName, spaFileNumber));
+            while (moveAnimationsNarc.files.size() <= spaFileNumber) {
+                moveAnimationsNarc.files.add(new byte[16]);
+            }
+            moveAnimationsNarc.files.set(spaFileNumber, spaFileData);
+        }
+        byte[] script = readBytes(String.format("moveanims/scripts/%03d_%s.bin", moveNumber, formattedMoveName));
+        battleAnimationScriptsNarc.files.set(moveNumber + highMoveOffset - battleAnimationScriptsOffset, script);
+    }
+
+    private void loadMovesFromFile() {
         Scanner sc;
         try {
             sc = new Scanner(FileFunctions.openConfig("paragonlite/moves.ini"), StandardCharsets.UTF_8);
@@ -2660,7 +3140,7 @@ public class ParagonLiteHandler {
                 // New move
                 String numStr = q.substring(1, 4);
                 int num = Integer.parseInt(numStr);
-                move = moves[num];
+                move = moves.get(num);
 
                 String nameStr = q.substring(5, q.length() - 1).trim();
 
@@ -2695,12 +3175,14 @@ public class ParagonLiteHandler {
 
             switch (key) {
                 case "Name": {
-                    if (!value.startsWith("\"") || !value.endsWith("\"")) throw new RuntimeException(String.format("Value must be in quotations for %s: \"%s\"", key, value));
+                    if (!value.startsWith("\"") || !value.endsWith("\""))
+                        throw new RuntimeException(String.format("Value must be in quotations for %s: \"%s\"", key, value));
                     move.name = value.substring(1, value.length() - 1);
                     break;
                 }
                 case "Description": {
-                    if (!value.startsWith("\"") || !value.endsWith("\"")) throw new RuntimeException(String.format("Value must be in quotations for %s: \"%s\"", key, value));
+                    if (!value.startsWith("\"") || !value.endsWith("\""))
+                        throw new RuntimeException(String.format("Value must be in quotations for %s: \"%s\"", key, value));
                     move.description = value.substring(1, value.length() - 1);
                     break;
                 }
@@ -2883,126 +3365,16 @@ public class ParagonLiteHandler {
                     throw new RuntimeException(String.format("Unknown parameter \"%s\"", key));
             }
         }
+    }
 
-        int[] newMoves;
-        int[] movesToClear;
-        switch (mode) {
-            case ParagonLite -> {
-                newMoves = new int[]{
-                        Moves.eggBomb, // #121
-                        Moves.astonish, // #310
-                };
-
-                movesToClear = new int[]{
-                        Moves.dragonRage, // #082
-                        Moves.nightShade, // #101
-                        Moves.psywave, // #149
-                        Moves.rollout, // #205
-                        Moves.memento, // #262
-                        Moves.iceBall, // #301
-                        Moves.chatter, // #448
-                };
-            }
-            case Redux -> {
-                newMoves = new int[]{
-                        Moves.eggBomb, // #121
-                };
-
-                movesToClear = new int[]{
-                        Moves.chatter, // #448
-                };
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + mode);
+    private void loadReduxMoves() {
+        try {
+            byte[] bytes = readBytes("redux_moves.narc");
+            NARCArchive reduxMovesNarc = new NARCArchive(bytes);
+            romHandler.loadMoves(reduxMovesNarc);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-
-        for (int moveToClear : movesToClear) {
-            clearMoveEventHandlers(moveToClear);
-        }
-
-        // TODO: For some reason the relocator addresses values are wrong
-        relocateMoveListRamAddress(newMoves.length - movesToClear.length);
-
-        // + #121 Egg Bomb
-        cloneMoveEventHandlers(Moves.eggBomb, Moves.psystrike);
-
-        // + #310 Astonish
-        if (mode == Mode.ParagonLite)
-            cloneMoveEventHandlers(Moves.astonish, Moves.fakeOut);
-
-
-        // TODO #564 Sticky Web
-        // TODO #565 Fell Stinger
-
-        // TODO: Make this work for AI
-        // + #573 Freeze-Dry
-//        setMoveEventHandlers(Moves.freezeDry, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "freeze-dry.s"));
-
-        // TODO #668 Strength Sap
-
-        // + #676 Pollen Puff
-//        setMoveEventHandlers(Moves.pollenPuff,
-//                new MoveEventHandler(Gen5BattleEventType.onMoveDetermineMode, "pollen_puff_set_mode.s"),
-//                new MoveEventHandler(Gen5BattleEventType.unknown31, "pollen_puff_heal.s"));
-
-        // TODO #694 Aurora Veil
-
-        // + #776 Body Press
-//        setMoveEventHandlers(Moves.bodyPress, new MoveEventHandler(Gen5BattleEventType.onGetAttackingStat, "body_press.s"));
-
-        // + #813 Triple Axel
-//        switch (mode) {
-//            case ParagonLite -> setMoveEventHandlers(Moves.tripleAxel,
-//                    new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "triple_kick.s"),
-//                    new MoveEventHandler(Gen5BattleEventType.onGetMultiStrike, Moves.tripleKick));
-//            case Redux -> setMoveEventHandlers(Moves.tripleAxel,
-//                    new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "redux_triple_axel.s"),
-//                    new MoveEventHandler(Gen5BattleEventType.onGetMultiStrike, Moves.tripleKick));
-//            default -> throw new IllegalStateException("Unexpected value: " + mode);
-//        }
-
-        // TODO #861 Ice Spinner
-
-
-        // #167 Triple Kick
-        if (mode == Mode.ParagonLite)
-            setMoveEventHandlers(Moves.tripleKick, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "triple_kick.s"));
-
-        // #200 Outrage
-        if (mode == Mode.ParagonLite)
-            cloneMoveEventHandlers(Moves.outrage, Moves.revenge);
-
-        // #237 Hidden Power
-        setMoveEventHandlers(Moves.hiddenPower, new MoveEventHandler(Gen5BattleEventType.onGetMoveType));
-
-        // #243 Mirror Coat
-        if (mode == Mode.ParagonLite)
-            cloneMoveEventHandlers(Moves.mirrorCoat, Moves.eruption);
-
-        // #360 Gyro Ball
-        if (mode == Mode.ParagonLite)
-            setMoveEventHandlers(Moves.gyroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "gyro_ball.s"));
-
-        // #362 Brine
-        if (mode == Mode.ParagonLite)
-            setMoveEventHandlers(Moves.brine, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "brine.s"));
-
-        // #368 Metal Burst
-        if (mode == Mode.ParagonLite)
-            cloneMoveEventHandlers(Moves.metalBurst, Moves.eruption);
-
-        // #381 Lucky Chant
-        if (mode == Mode.ParagonLite)
-            cloneMoveEventHandlers(Moves.luckyChant, Moves.focusEnergy);
-
-        // #449 Judgment (needs update for Pixie plate)
-        setMoveEventHandlers(Moves.judgment, new MoveEventHandler(Gen5BattleEventType.onGetMoveType, "judgment.s"));
-
-        // #486 Electro Ball
-        if (mode == Mode.ParagonLite)
-            setMoveEventHandlers(Moves.electroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "electro_ball.s"));
-
-        System.out.println("Set moves");
     }
 
     public void setItems() {
@@ -3080,7 +3452,7 @@ public class ParagonLiteHandler {
 
         itemDescriptions.set(index, "An item to be held by a Pokémon.\\xFFFEThis rock summons a hailstorm\\xFFFEwhen the holder enters battle.");
 
-        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onPokeEnter, "icy_rock_hail"), new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "icy_rock_hail"), new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "icy_rock_immune"));
+        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "icy_rock_hail"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "icy_rock_hail"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "icy_rock_immune"));
     }
 
     void setSmoothRock() {
@@ -3088,7 +3460,7 @@ public class ParagonLiteHandler {
 
         itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock summons a sandstorm\\xFFFEwhen the holder enters battle.");
 
-        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onPokeEnter, "smooth_rock_sandstorm"), new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "smooth_rock_sandstorm"), new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "smooth_rock_immune"));
+        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "smooth_rock_sandstorm"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "smooth_rock_sandstorm"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "smooth_rock_immune"));
     }
 
     void setHeatRock() {
@@ -3096,7 +3468,7 @@ public class ParagonLiteHandler {
 
         itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock turns the sunlight harsh\\xFFFEwhen the holder enters battle.");
 
-        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onPokeEnter, "heat_rock"), new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "heat_rock"));
+        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "heat_rock"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "heat_rock"));
     }
 
     void setDampRock() {
@@ -3104,7 +3476,7 @@ public class ParagonLiteHandler {
 
         itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock makes it rain\\xFFFEwhen the holder enters battle.");
 
-        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onPokeEnter, "damp_rock"), new ItemEventHandler(Gen5BattleEventType.onPokeGainItem, "damp_rock"));
+        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "damp_rock"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "damp_rock"));
     }
 
     void setBigNugget() {
@@ -3127,7 +3499,7 @@ public class ParagonLiteHandler {
 
         setItemSprite(index, "weakness_policy");
 
-        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onHit2, "weakness_policy_on_hit"), new ItemEventHandler(Gen5BattleEventType.unknown72, "weakness_policy_boost"));
+        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "weakness_policy_on_hit"), new ItemEventHandler(Gen5BattleEventType.onUseItem, "weakness_policy_boost"));
     }
 
     void addAssaultVest() {
@@ -3181,7 +3553,7 @@ public class ParagonLiteHandler {
 
         setItemSprite(index, "roseli_berry");
 
-        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onGetDamage, "roseli_berry_super_effective_check"), new ItemEventHandler(Gen5BattleEventType.unknown44, Items.occaBerry));
+        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, "roseli_berry_super_effective_check"), new ItemEventHandler(Gen5BattleEventType.onPostDamageReaction, Items.occaBerry));
     }
 
     void addFairyGem() {
@@ -3199,7 +3571,7 @@ public class ParagonLiteHandler {
 
         setItemSprite(index, Items.fireGem, "fairy_gem");
 
-        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onPreMove, "fairy_gem_work"), new ItemEventHandler(Gen5BattleEventType.onGetMovePower, "fairy_gem_damage_boost"), new ItemEventHandler(Gen5BattleEventType.unknown88, Items.fireGem));
+        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onDamageProcessingStart, "fairy_gem_work"), new ItemEventHandler(Gen5BattleEventType.onGetMovePower, "fairy_gem_damage_boost"), new ItemEventHandler(Gen5BattleEventType.onDamageProcessingEnd, Items.fireGem));
     }
 
     void addBlankPlate() {
@@ -3272,7 +3644,7 @@ public class ParagonLiteHandler {
 
         setItemSprite(index, "loaded_dice");
 
-        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onGetMultiStrike, "loaded_dice"));
+        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onGetHitCount, "loaded_dice"));
     }
 
     private void setItemName(int itemNumber, String name, String pluralName) {
@@ -3371,6 +3743,9 @@ public class ParagonLiteHandler {
         List<Trainer> trainers = romHandler.getTrainers();
 
         for (Trainer tr : trainers) {
+            if (tr.pokemon.isEmpty())
+                continue;
+
             tr.setPokemonHaveCustomMoves(true);
             tr.setPokemonHaveItems(true);
 
@@ -3874,12 +4249,18 @@ public class ParagonLiteHandler {
         int abilityListRamAddress = getAbilityListAddress();
         int abilityListCount = getAbilityListCount();
         int index = getBattleObjectIndex(abilityListRamAddress, abilityListCount, abilityNumber);
+        if (index < 0)
+            throw new RuntimeException(String.format("Could not find event handlers for %s", abilityNames.get(abilityNumber)));
+        
         setBattleObject(abilityNumber, index, abilityListRamAddress, events);
     }
 
     private void cloneAbilityEventHandlers(int abilityNumber, int otherAbilityNumber) {
         int abilityListAddress = getAbilityListAddress();
         int listIndex = getBattleObjectIndex(abilityListAddress, getAbilityListCount(), abilityNumber);
+        if (listIndex < 0)
+            throw new RuntimeException(String.format("Could not find event handlers for %s", abilityNames.get(abilityNumber)));
+        
         int abilityRedirectorAddress = getAbilityRedirectorAddress(otherAbilityNumber);
         battleOvl.writeWord(abilityListAddress + listIndex * 8, abilityNumber, false);
         battleOvl.writeWord(abilityListAddress + listIndex * 8 + 4, abilityRedirectorAddress + 1, true);
@@ -3889,12 +4270,18 @@ public class ParagonLiteHandler {
         int moveListAddress = getMoveListAddress();
         int moveListCount = getMoveListCount();
         int index = getBattleObjectIndex(moveListAddress, moveListCount, moveNumber);
+        if (index < 0)
+            throw new RuntimeException(String.format("Could not find event handlers for %s", moves.get(moveNumber).name));
+        
         setBattleObject(moveNumber, index, moveListAddress, events);
     }
 
     private void cloneMoveEventHandlers(int moveNumber, int otherMoveNumber) {
         int moveListAddress = getMoveListAddress();
         int listIndex = getBattleObjectIndex(moveListAddress, getMoveListCount(), moveNumber);
+        if (listIndex < 0)
+            throw new RuntimeException(String.format("Could not find event handlers for %s", moves.get(moveNumber).name));
+        
         int moveRedirectorAddress = getMoveRedirectorAddress(otherMoveNumber);
         battleOvl.writeWord(moveListAddress + listIndex * 8, moveNumber, false);
         battleOvl.writeWord(moveListAddress + listIndex * 8 + 4, moveRedirectorAddress + 1, true);
@@ -3904,12 +4291,18 @@ public class ParagonLiteHandler {
         int itemListAddress = getItemListAddress();
         int itemListCount = getItemListCount();
         int index = getBattleObjectIndex(itemListAddress, itemListCount, itemNumber);
+        if (index < 0)
+            throw new RuntimeException(String.format("Could not find event handlers for %s", itemNames.get(itemNumber)));
+        
         setBattleObject(itemNumber, index, itemListAddress, events);
     }
 
     private void cloneItemEventHandlersFromAbility(int itemNumber, int abilityNumber) {
         int itemListAddress = getItemListAddress();
         int listIndex = getBattleObjectIndex(itemListAddress, getItemListCount(), itemNumber);
+        if (listIndex < 0)
+            throw new RuntimeException(String.format("Could not find event handlers for %s", itemNames.get(itemNumber)));
+        
         int abilityRedirectorAddress = getAbilityRedirectorAddress(abilityNumber);
         battleOvl.writeWord(itemListAddress + listIndex * 8, itemNumber, false);
         battleOvl.writeWord(itemListAddress + listIndex * 8 + 4, abilityRedirectorAddress + 1, true);
@@ -3919,6 +4312,8 @@ public class ParagonLiteHandler {
         int moveListAddress = getMoveListAddress();
         int moveListCount = getMoveListCount();
         int index = getBattleObjectIndex(moveListAddress, moveListCount, moveNumber);
+        if (index < 0)
+            throw new RuntimeException(String.format("Could not find event handlers for %s", moves.get(moveNumber).name));
 
         battleOvl.writeWord(moveListAddress + index * 8, 0, false);
         battleOvl.writeWord(moveListAddress + index * 8 + 4, 0, true);
@@ -4123,6 +4518,24 @@ public class ParagonLiteHandler {
         }
 
         return lines;
+    }
+    
+    private static byte[] readBytes(String filename) {
+        byte[] bytes;
+        try {
+            InputStream stream = FileFunctions.openConfig("paragonlite/" + filename);
+
+            if (stream == null)
+                throw new IOException(String.format("Could not find file with name '%s'", filename));
+            
+            bytes = new byte[stream.available()];
+            if (stream.read(bytes) == -1)
+                throw new IOException();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return bytes;
     }
 
     private void setItemSprite(int number, String sprite) {

@@ -76,7 +76,7 @@ IsMultiStrike:
 LoadedDice:
 ; only applies to moves with a max hit count of 5
     mov     r0, #2
-    bl      Battle::Rand ; 50%/50% for 4 vs 5 hits
+    bl      Battle::Random ; 50%/50% for 4 vs 5 hits
     cmp     r0, #0
     beq     SkillLink
     mov     r4, #4

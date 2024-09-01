@@ -2607,7 +2607,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public void setTMMoves(List<Integer> moveIndexes) {
+    public void setTMMoves(Settings settings, List<Integer> moveIndexes) {
         if (!mapLoadingDone) {
             preprocessMaps();
             mapLoadingDone = true;

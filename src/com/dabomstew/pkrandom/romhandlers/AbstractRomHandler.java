@@ -5300,11 +5300,11 @@ public abstract class AbstractRomHandler implements RomHandler {
         logBlankLine();
     }
 
-    public String sortText(String inText, int maxLines, int maxLinePixels) {
-        return sortText(inText, maxLines, maxLinePixels, 7);
+    public String sortText(String inText, int maxLines, int maxLinePixels, boolean throwOnOverflow) {
+        return sortText(inText, maxLines, maxLinePixels, 7, throwOnOverflow);
     }
 
-    public String sortText(String inText, int maxLines, int maxLinePixels, int sentenceLineFlags) {
+    public String sortText(String inText, int maxLines, int maxLinePixels, int sentenceLineFlags, boolean throwOnOverflow) {
         String[] inLines = inText.split(getLineBreakStringRegex());
         if (validateTextLines(inLines, maxLines, maxLinePixels))
             return inText; // Already valid
@@ -5364,10 +5364,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 int mask = (1 << (sentenceIndex - 1)) - 1;
                 sentenceLineFlags = mask & (sentenceLineFlags - 1);
 
-                return sortText(inText, maxLines, maxLinePixels, sentenceLineFlags);
+                return sortText(inText, maxLines, maxLinePixels, sentenceLineFlags, throwOnOverflow);
             }
 
             // TOO LONG! May happen with many TMs
+            if (throwOnOverflow)
+                throw new RuntimeException("Text was too long: " + inText);
+            
             return String.join(getLineBreakString(), lines);
         }
 
@@ -5935,7 +5938,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public void metronomeOnlyMode() {
+    public void metronomeOnlyMode(Settings settings) {
         // movesets
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
 
@@ -5971,7 +5974,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             tmMoves.set(i, Moves.metronome);
         }
 
-        this.setTMMoves(tmMoves);
+        this.setTMMoves(settings, tmMoves);
 
         // movetutors
         if (this.hasMoveTutors()) {
@@ -6640,7 +6643,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        this.setTMMoves(newTMs);
+        this.setTMMoves(settings, newTMs);
     }
 
     @Override

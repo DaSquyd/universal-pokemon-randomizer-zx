@@ -921,7 +921,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
         for (int i = 1; i <= moveCount; i++) {
             moveNames.set(i, moves[i].name);
-            moveDescriptions.set(i, sortText(moves[i].description, 3, 394));
+            moveDescriptions.set(i, sortText(moves[i].description, 3, 394, true));
             for (int j = 0; j < 3; j++) {
                 int index = i*3 + j;
                 String usage = moveUsages.get(index);
@@ -3029,7 +3029,9 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTMMoves(List<Integer> moveIndexes) {
+    public void setTMMoves(Settings settings, List<Integer> moveIndexes) {
+        boolean allowDescriptionError = settings.getTmsMod() == Settings.TMsMod.UNCHANGED;
+        
         String tmDataPrefix = Gen6Constants.tmDataPrefix;
         int offset = find(code, tmDataPrefix);
         if (offset > 0) {
@@ -3052,28 +3054,28 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
 
             // TM01 is item 328 and so on
             for (int i = 0; i < Gen6Constants.tmBlockOneCount; i++) {
-                String description = sortText(moves[moveIndexes.get(i)].description, maxLines, maxLinePixels);
+                String description = sortText(moves[moveIndexes.get(i)].description, maxLines, maxLinePixels, allowDescriptionError);
                 itemDescriptions.set(i + Gen6Constants.tmBlockOneOffset, description);
             }
             // TM93-95 are 618-620
             for (int i = 0; i < Gen6Constants.tmBlockTwoCount; i++) {
-                String description = sortText(moves[moveIndexes.get(i)].description, maxLines, maxLinePixels);
+                String description = sortText(moves[moveIndexes.get(i)].description, maxLines, maxLinePixels, allowDescriptionError);
                 itemDescriptions.set(i + Gen6Constants.tmBlockTwoOffset, description);
             }
             // TM96-100 are 690 and so on
             for (int i = 0; i < Gen6Constants.tmBlockThreeCount; i++) {
-                String description = sortText(moves[moveIndexes.get(i)].description, maxLines, maxLinePixels);
+                String description = sortText(moves[moveIndexes.get(i)].description, maxLines, maxLinePixels, allowDescriptionError);
                 itemDescriptions.set(i + Gen6Constants.tmBlockThreeOffset, description);
             }
             // HM01-05
             for (int i = 0; i < Gen6Constants.hmBlockOneCount; i++) {
-                String description = sortText(moves[hmMoves.get(i)].description, maxLines, maxLinePixels);
+                String description = sortText(moves[hmMoves.get(i)].description, maxLines, maxLinePixels, allowDescriptionError);
                 itemDescriptions.set(i + Gen6Constants.hmBlockOneOffset, description);
             }
             // HM06-07
             if (isORAS) {
-                String rockSmashDescription = sortText(moves[Moves.rockSmash].description, maxLines, maxLinePixels);
-                String diveDescription = sortText(moves[Moves.dive].description, maxLines, maxLinePixels);
+                String rockSmashDescription = sortText(moves[Moves.rockSmash].description, maxLines, maxLinePixels, allowDescriptionError);
+                String diveDescription = sortText(moves[Moves.dive].description, maxLines, maxLinePixels, allowDescriptionError);
 
                 itemDescriptions.set(Items.hm06, rockSmashDescription);
                 itemDescriptions.set(Items.hm07ORAS, diveDescription);
