@@ -141,11 +141,11 @@ public class ParagonLiteHandler {
 
             byte[] battleServerOvlData = romHandler.readOverlay(battleServerOvlNumber);
             int battleServerOvlAddress = romHandler.getOverlayAddress(battleServerOvlNumber);
-            battleServerOvl = new ParagonLiteOverlay(romHandler, battleServerOvlNumber, "BattleServer", battleServerOvlData, battleServerOvlAddress, ParagonLiteOverlay.Insertion.Back, globalAddressMap);
+            battleServerOvl = new ParagonLiteOverlay(romHandler, battleServerOvlNumber, "BattleServer", battleServerOvlData, battleServerOvlAddress, ParagonLiteOverlay.Insertion.Restricted, globalAddressMap);
 
             byte[] trainerAIOvlData = romHandler.readOverlay(trainerAIOvlNumber);
             int trainerAIOvlAddress = romHandler.getOverlayAddress(trainerAIOvlNumber);
-            trainerAIOvl = new ParagonLiteOverlay(romHandler, trainerAIOvlNumber, "TrainerAI", trainerAIOvlData, trainerAIOvlAddress, ParagonLiteOverlay.Insertion.Back, globalAddressMap);
+            trainerAIOvl = new ParagonLiteOverlay(romHandler, trainerAIOvlNumber, "TrainerAI", trainerAIOvlData, trainerAIOvlAddress, ParagonLiteOverlay.Insertion.Front, globalAddressMap);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -277,6 +277,12 @@ public class ParagonLiteHandler {
     }
 
     private void setBattleEventStrings2() {
+        globalAddressMap.addDefinition("BATTLE_TEXT_HURT_BY_POISON", 243);
+        globalAddressMap.addDefinition("BATTLE_TEXT_HURT_BY_BURN", 261);
+        globalAddressMap.addDefinition("BATTLE_TEXT_HURT_BY_FROSTBITE", 291);
+        globalAddressMap.addDefinition("BATTLE_TEXT_HURT_BY_NIGHTMARE", 324);
+        globalAddressMap.addDefinition("BATTLE_TEXT_HURT_BY_CURSE", 1071);
+        
         // Heal Prevention (Heal Block + Psychic Noise
         battleEventStrings2.set(884, "\uF000Ă\\x0001\\x0000's healing prevention\\xFFFEwore off!");
         battleEventStrings2.set(885, "The wild \uF000Ă\\x0001\\x0000's healing prevention\\xFFFEwore off!");
@@ -288,42 +294,64 @@ public class ParagonLiteHandler {
         battleEventStrings2.set(891, "The wild \uF000Ă\\x0001\\x0000 can't use\\xFFFE\uF000ć\\x0001\\x0001 because healing is prevented!");
         battleEventStrings2.set(892, "The foe's \uF000Ă\\x0001\\x0000 can't use\\xFFFE\uF000ć\\x0001\\x0001 because healing is prevented!");
 
+        // Frostbite
+        battleEventStrings2.set(288, "\uF000Ă\\x0001\\x0000 got\\xFFFEfrostbite!");
+        battleEventStrings2.set(289, "The wild \uF000Ă\\x0001\\x0000 got\\xFFFEfrostbite!");
+        battleEventStrings2.set(290, "The foe's \uF000Ă\\x0001\\x0000 got\\xFFFEfrostbite!");
+        battleEventStrings2.set(291, "\uF000Ă\\x0001\\x0000 was hurt\\xFFFEby its frostbite!");
+        battleEventStrings2.set(292, "The wild \uF000Ă\\x0001\\x0000 was hurt\\xFFFEby its frostbite!");
+        battleEventStrings2.set(293, "The foe's \uF000Ă\\x0001\\x0000 was hurt\\xFFFEby its frostbite!");
+        battleEventStrings2.set(294, "\uF000Ă\\x0001\\x0000's frostbite was healed.");
+        battleEventStrings2.set(295, "The wild \uF000Ă\\x0001\\x0000's frostbite was healed.");
+        battleEventStrings2.set(296, "The foe's \uF000Ă\\x0001\\x0000's frostbite was healed.");
+        battleEventStrings2.set(297, "\uF000Ă\\x0001\\x0000 already\\xFFFEhas frostbite!");
+        battleEventStrings2.set(298, "The wild \uF000Ă\\x0001\\x0000 already\\xFFFEhas frostbite!");
+        battleEventStrings2.set(299, "The foe's \uF000Ă\\x0001\\x0000 already\\xFFFEhas frostbite!");
+        
         // Limber
+        globalAddressMap.addDefinition("BATTLE_TEXT_LIMBER", battleEventStrings2.size());
         battleEventStrings2.add /* 1159 */("\uF000Ă\\x0001\\x0000's Speed\\xFFFEwas not lowered!");
         battleEventStrings2.add /* 1160 */("The wild \uF000Ă\\x0001\\x0000's Speed\\xFFFEwas not lowered!");
         battleEventStrings2.add /* 1161 */("The foe's \uF000Ă\\x0001\\x0000's Speed\\xFFFEwas not lowered!");
 
         // Plus
+        globalAddressMap.addDefinition("BATTLE_TEXT_PLUS", battleEventStrings2.size());
         battleEventStrings2.add/* 1162 */("\uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith a positive charge!");
         battleEventStrings2.add/* 1163 */("The wild \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith a positive charge!");
         battleEventStrings2.add/* 1164 */("The foe's \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith a positive charge!");
 
         // Minus
+        globalAddressMap.addDefinition("BATTLE_TEXT_MINUS", battleEventStrings2.size());
         battleEventStrings2.add/* 1165 */("\uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith a negative charge!");
         battleEventStrings2.add/* 1166 */("The wild \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith a negative charge!");
         battleEventStrings2.add/* 1167 */("The foe's \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith a negative charge!");
 
         // Super Luck
+        globalAddressMap.addDefinition("BATTLE_TEXT_SUPER_LUCK", battleEventStrings2.size());
         battleEventStrings2.add/* 1168 */("\uF000Ă\\x0001\\x0000 is feeling lucky!");
         battleEventStrings2.add/* 1169 */("The wild \uF000Ă\\x0001\\x0000 is feeling lucky!");
         battleEventStrings2.add/* 1170 */("The foe's \uF000Ă\\x0001\\x0000 is feeling lucky!");
 
         // Huge Power
+        globalAddressMap.addDefinition("BATTLE_TEXT_HUGE_POWER", battleEventStrings2.size());
         battleEventStrings2.add/* 1171 */("\uF000Ă\\x0001\\x0000 is flexing\\xFFFEits muscles!");
         battleEventStrings2.add/* 1172 */("The wild \uF000Ă\\x0001\\x0000 is flexing\\xFFFEits muscles!");
         battleEventStrings2.add/* 1173 */("The foe's \uF000Ă\\x0001\\x0000 is flexing\\xFFFEits muscles!");
 
         // Pure Power
+        globalAddressMap.addDefinition("BATTLE_TEXT_PURE_POWER", battleEventStrings2.size());
         battleEventStrings2.add/* 1174 */("\uF000Ă\\x0001\\x0000 is focusing\\xFFFEits mind!");
         battleEventStrings2.add/* 1175 */("The wild \uF000Ă\\x0001\\x0000 is focusing\\xFFFEits mind!");
         battleEventStrings2.add/* 1176 */("The foe's \uF000Ă\\x0001\\x0000 is focusing\\xFFFEits mind!");
 
         // Magnet Pull
+        globalAddressMap.addDefinition("BATTLE_TEXT_MAGNET_PULL", battleEventStrings2.size());
         battleEventStrings2.add/* 1177 */("\uF000Ă\\x0001\\x0000 is generating\\xFFFEa magnetic field!");
         battleEventStrings2.add/* 1178 */("The wild \uF000Ă\\x0001\\x0000 is generating\\xFFFEa magnetic field!");
         battleEventStrings2.add/* 1179 */("The foe's \uF000Ă\\x0001\\x0000 is generating\\xFFFEa magnetic field!");
 
         // Shadow Tag
+        globalAddressMap.addDefinition("BATTLE_TEXT_SHADOW_TAG", battleEventStrings2.size());
         switch (mode) {
             case ParagonLite -> {
                 battleEventStrings2.add/* 1180 */("\uF000Ă\\x0001\\x0000 steps\\xFFFEon shadows!");
@@ -339,6 +367,7 @@ public class ParagonLiteHandler {
         }
 
         // Arena Trap
+        globalAddressMap.addDefinition("BATTLE_TEXT_ARENA_TRAP", battleEventStrings2.size());
         switch (mode) {
             case ParagonLite -> {
                 battleEventStrings2.add/* 1183 */("\uF000Ă\\x0001\\x0000 dug\\xFFFEa pit trap!");
@@ -354,45 +383,55 @@ public class ParagonLiteHandler {
         }
 
         // Wonder Guard
+        globalAddressMap.addDefinition("BATTLE_TEXT_WONDER_GUARD", battleEventStrings2.size());
         battleEventStrings2.add/* 1186 */("\uF000Ă\\x0001\\x0000 is cloaked in\\xFFFEa mysterious power!");
         battleEventStrings2.add/* 1187 */("The wild \uF000Ă\\x0001\\x0000 is cloaked in\\xFFFEa mysterious power!");
         battleEventStrings2.add/* 1188 */("The foe's \uF000Ă\\x0001\\x0000 is cloaked in\\xFFFEa mysterious power!");
 
         // Assault Vest
+        globalAddressMap.addDefinition("BATTLE_TEXT_ASSAULT_VEST_FAIL", battleEventStrings2.size());
         battleEventStrings2.add/* 1189 */("The effects of the Assault Vest prevent\\xFFFEstatus moves from being used!");
+        globalAddressMap.addDefinition("BATTLE_TEXT_ASSAULT_VEST_PREVENT", battleEventStrings2.size());
         battleEventStrings2.add/* 1190 */("\uF000Č\\x0001\\x0000 can't use status moves!");
 
         // Weather Rocks
+        globalAddressMap.addDefinition("BATTLE_TEXT_WEATHER_ROCK", battleEventStrings2.size());
         battleEventStrings2.add/* 1191 */("\uF000Ă\\x0001\\x0000's \uF000Ć\\x0001\\x0001\\xFFFEbegan to glow!");
         battleEventStrings2.add/* 1192 */("The wild \uF000Ă\\x0001\\x0000's \uF000Ć\\x0001\\x0001\\xFFFEbegan to glow!");
         battleEventStrings2.add/* 1193 */("The foe's \uF000Ă\\x0001\\x0000's \uF000Ć\\x0001\\x0001\\xFFFEbegan to glow!");
 
         // Stone Home
+        globalAddressMap.addDefinition("BATTLE_TEXT_STONE_HOME", battleEventStrings2.size());
         battleEventStrings2.add/* 1194 */("\uF000Ă\\x0001\\x0000 protects its allies with\\xFFFEits stone shell!");
         battleEventStrings2.add/* 1195 */("The wild \uF000Ă\\x0001\\x0000 protects its allies with\\xFFFEits stone shell!");
         battleEventStrings2.add/* 1196 */("The foe's \uF000Ă\\x0001\\x0000 protects its allies with\\xFFFEits stone shell!");
 
         // Water Veil
+        globalAddressMap.addDefinition("BATTLE_TEXT_WATER_VEIL", battleEventStrings2.size());
         battleEventStrings2.add/* 1197*/("\uF000Ă\\x0001\\x0000 is veiled\\xFFFEin water!");
         battleEventStrings2.add/* 1198*/("The wild \uF000Ă\\x0001\\x0000 is veiled\\xFFFEin water!");
         battleEventStrings2.add/* 1199*/("The foe's \uF000Ă\\x0001\\x0000 is veiled\\xFFFEin water!");
 
         // Wind Power
+        globalAddressMap.addDefinition("BATTLE_TEXT_WIND_POWER", battleEventStrings2.size());
         battleEventStrings2.add/* 1200*/("Being hit by \uF000ć\\x0001\\x0000 charged\\xFFFE\uF000Ă\\x0001\\x0001 with power!");
         battleEventStrings2.add/* 1201*/("Being hit by \uF000ć\\x0001\\x0000 charged\\xFFFEthe wild \uF000Ă\\x0001\\x0001 with power!");
         battleEventStrings2.add/* 1202*/("Being hit by \uF000ć\\x0001\\x0000 charged\\xFFFEthe foe's \uF000Ă\\x0001\\x0001 with power!");
 
         // Supreme Overloard
+        globalAddressMap.addDefinition("BATTLE_TEXT_SUPREME_OVERLORD", battleEventStrings2.size());
         battleEventStrings2.add/* 1203*/("\uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
         battleEventStrings2.add/* 1204*/("The wild \uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
         battleEventStrings2.add/* 1205*/("The foe's \uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
-    
+
         // Electro Shot
+        globalAddressMap.addDefinition("BATTLE_TEXT_ELECTRO_SHOT", battleEventStrings2.size());
         battleEventStrings2.add/* 1206*/("\uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
         battleEventStrings2.add/* 1207*/("The wild \uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
         battleEventStrings2.add/* 1208*/("The foe's \uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
-        
+
         // Meteor Beam
+        globalAddressMap.addDefinition("BATTLE_TEXT_METEOR_BEAM", battleEventStrings2.size());
         battleEventStrings2.add/* 1209*/("\uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
         battleEventStrings2.add/* 1210*/("The wild \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
         battleEventStrings2.add/* 1211*/("The foe's \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
@@ -440,7 +479,10 @@ public class ParagonLiteHandler {
     }
 
     public void setCritRatio() {
-        byte[] critChanceData = new byte[]{24, 8, 2, 1, 1};
+        List<String> lines = readLines("check_critical_hit.s");
+        battleOvl.writeCodeForceInline(lines, "CheckCriticalHit");
+        
+        byte[] critChanceData = new byte[]{24, 8, 2, 1};
         battleOvl.writeData(critChanceData, "Data_CriticalHitChances");
 
         System.out.println("Set critical hit ratios");
@@ -460,13 +502,37 @@ public class ParagonLiteHandler {
         battleOvl.writeBytes(critLogicAddress, critLogicData);
         System.out.println("Set critical hit damage");
     }
-
-    public void setBurnDamage() {
+    
+    public void setGetStatusDamage() {
         // Modernizes Burn damage
         // 1/8 -> 1/16
-        List<String> lines = readLines("get_status_damage.s");
-        battleOvl.writeCodeForceInline(lines, "GetStatusDamage");
-        System.out.println("Set Burn damage");
+        //
+        // Sets Frostbite damage
+        // 1/16
+        
+        List<String> statusDamageLines = readLines("get_status_damage.s");
+        battleOvl.writeCodeForceInline(statusDamageLines, "GetStatusDamage");
+        
+        List<String> statusDamageStringLines = readLines("get_status_damage_string.s");
+        battleServerOvl.writeCodeForceInline(statusDamageStringLines, "Condition_GetDamageText");
+        
+        System.out.println("Set GetStatusDamage");
+    }
+    
+    public void setFrostbite() {
+        // Replaces Freeze with Frostbite
+
+        int moveExeCheck1FreezeInstRamAddress = globalAddressMap.getRamAddress(battleOvl, "Inst_ServerControl_MoveExeCheck1_Freeze");
+        int moveExeCheck1FreezeInstRomAddress = battleOvl.ramToRomAddress(moveExeCheck1FreezeInstRamAddress);
+        battleOvl.writeHalfword(moveExeCheck1FreezeInstRomAddress, 0xD119); // Skips the move fail check for being frozen
+        
+        int checkMoveExeFreezeThawRamAddress = globalAddressMap.getRamAddress(battleOvl, "ServerControl_CheckMoveExeFreezeThaw");
+        int checkMoveExeFreezeThawRomAddress = battleOvl.ramToRomAddress(checkMoveExeFreezeThawRamAddress);
+        battleOvl.writeHalfword(checkMoveExeFreezeThawRomAddress, 0x4770); // Immediately exits the function with "bx lr"
+        
+        int damageFreezeThawRamAddress = globalAddressMap.getRamAddress(battleOvl, "ServerControl_DamageFreezeThaw");
+        int damageFreezeThawRomAddress = battleOvl.ramToRomAddress(damageFreezeThawRamAddress);
+        battleOvl.writeHalfword(damageFreezeThawRomAddress, 0x4770); // Immediately exits the function with "bx lr"
     }
 
     public void setTrapDamage() {
@@ -566,6 +632,9 @@ public class ParagonLiteHandler {
     }
 
     public void setShinyRate() {
+        if (mode != Mode.ParagonLite)
+            return;
+
         // Increases shiny odds
         List<String> lines = readLines("shiny_32.s");
         arm9.writeCodeForceInline(lines, "IsShiny");
@@ -590,6 +659,17 @@ public class ParagonLiteHandler {
         battleOvl.writeCodeForceInline(lines, "CallModifyEffectivenessHandler");
 
         System.out.println("Set Call Modify Effectiveness Handler");
+    }
+    
+    public void setHandlerSimulationDamage() {
+        List<String> multiStrikeMultiplierLines = readLines("handler_get_simulation_multi-strike_multiplier.s");
+        battleOvl.writeCode(multiStrikeMultiplierLines, "Handler_GetSimulationMultiStrikeMultiplier");
+        
+        // Updates simulation damage to include move bindings for variable power, type, effectiveness, etc.
+        List<String> simulationDamageLines = readLines("handler_simulation_damage.s");
+        battleOvl.writeCodeForceInline(simulationDamageLines, "Handler_SimulationDamage");
+
+        System.out.println("Set Handler Simulation Damage");
     }
 
     public void setPokemonData() {
@@ -838,7 +918,7 @@ public class ParagonLiteHandler {
 
     }
 
-    public void setTrainerAIScripts(String trainerAIScriptNarcPath) {
+    public void setTrainerAI(String trainerAIScriptNarcPath) {
 //        // TODO: This is used for the multiplicative version of move selection
 //        trainerAIOvl.writeByte(0x0217F842, 4096);
 
@@ -857,15 +937,85 @@ public class ParagonLiteHandler {
             throw new RuntimeException(e);
         }
 
-//        // New OP: Add Stored to Score (0x2B)
-//        List<String> addStoredToScorelines = readLines("traineraiscripts/add_stored_to_score.s");
-//        int addStoredToScoreAddress = trainerAIOvl.writeArm(addStoredToScorelines, armParser);
-//        trainerAIOvl.writeWord(0x02181DA0, addStoredToScoreAddress + 1);
+        int battleClientLineNumRamAddress = globalAddressMap.getRamAddress(battleOvl, "Data_BattleClient_Init_LineNum");
+        int battleClientLineNumRomAddress = battleOvl.ramToRomAddress(battleClientLineNumRamAddress);
+        int battleClientLineNum = battleOvl.readWord(battleClientLineNumRomAddress);
 
-//        // New OP: Get Damage Prediction (0x2B)
-//        List<String> getDamageLines = readLines("traineraiscripts/get_damage.s");
-//        int getDamageAddress = trainerAIOvl.writeArm(getDamageLines, armParser);
-//        trainerAIOvl.writeWord(0x02181DE4, getDamageAddress + 1);
+        int battleClientAllocModifyRamAddress = globalAddressMap.getRamAddress(battleOvl, "Inst_BattleClient_Init_AllocModify");
+        int battleClientAllocModifyRomAddress = battleOvl.ramToRomAddress(battleClientAllocModifyRamAddress);
+        int oldBattleClientAllocDiff = -battleOvl.readUnsignedByte(battleClientAllocModifyRomAddress);
+
+        int threatVarSize = 2;
+        int numPartiesPerSide = 2;
+        int numPokesPerParty = 6;
+        int knowledgeFlagsSize = 4;
+
+        // 0x02A0
+        int threatArrSize = (threatVarSize * numPokesPerParty);
+        int pokeMemorySize = threatArrSize + knowledgeFlagsSize;
+
+        int oldBattleClientSize = battleClientLineNum + oldBattleClientAllocDiff;
+        int battleClientMemBlockSize = numPartiesPerSide * numPokesPerParty * pokeMemorySize;
+        int newBattleClientSize = oldBattleClientSize + 4;
+
+//        if (Math.abs(newBattleClientSize) > 512)
+//            throw new RuntimeException("Allocation too large");
+
+        // lsl r1, r2, #9 (512)
+//        battleOvl.writeHalfword(battleClientAllocModifyRomAddress, (9 << 6) | 0x0011);
+
+        globalAddressMap.addDefinition("MAIN_MODULE_SERVER", 0x0008);
+        globalAddressMap.addDefinition("MAIN_MODULE_CLIENTS_ARR", 0x0010);
+        globalAddressMap.addDefinition("MAIN_MODULE_TRAINER_PARAM", 0x0020);
+        globalAddressMap.addDefinition("MAIN_MODULE_POKECON_CLIENT", 0x00C8);
+        globalAddressMap.addDefinition("MAIN_MODULE_POKECON_SERVER", 0x01B0);
+
+        globalAddressMap.addDefinition("BTL_CLIENT_WK_MAIN_MODULE", 0x0000);
+        globalAddressMap.addDefinition("BTL_CLIENT_WK_POKECON", 0x0004);
+        globalAddressMap.addDefinition("BTL_CLIENT_WK_ID", 0x01AE);
+
+        globalAddressMap.addDefinition("BTL_CLIENT_WK_AI_MEM", oldBattleClientSize);
+
+
+        globalAddressMap.addDefinition("AI_MEM_THREAT_VALUE_SIZE", oldBattleClientSize);
+        globalAddressMap.addDefinition("AI_MEM_POKE_SIZE", pokeMemorySize);
+        globalAddressMap.addDefinition("AI_MEM_THREAT_ARR", 0x00);
+        globalAddressMap.addDefinition("AI_MEM_POKE_FLAGS", threatArrSize);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_SPECIES", 0x00);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_ABILITY", 0x01);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_ITEM", 0x02);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_HP_TYPE", 0x03);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_MOVE_1", 0x04);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_MOVE_2", 0x05);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_MOVE_3", 0x06);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_MOVE_4", 0x07);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_STAT_HP", 0x08);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_STAT_ATTACK", 0x09);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_STAT_DEFENSE", 0x0A);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_STAT_SP_ATK", 0x0B);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_STAT_SP_DEF", 0x0C);
+        globalAddressMap.addDefinition("AI_MEM_FLAG_STAT_SPEED", 0x0D);
+
+        globalAddressMap.addDefinition("AI_MEM_SIZE", battleClientMemBlockSize);
+        globalAddressMap.addDefinition("BTL_CLIENT_WK_SIZE", newBattleClientSize);
+
+        int scriptCommandTableRamAddress = globalAddressMap.getRamAddress(trainerAIOvl, "Data_AIScriptCommands");
+        int scriptCommandTableRomAddress = trainerAIOvl.ramToRomAddress(scriptCommandTableRamAddress);
+
+        // New OP: Multiply Score (0x2B)
+        List<String> multiplyScoreLines = readLines("trainerai/scripts/multiply_score.s");
+        int multiplyScoreAddress = trainerAIOvl.writeCode(multiplyScoreLines, "MultiplyScore");
+        trainerAIOvl.writeWord(scriptCommandTableRomAddress + (0x2B * 4), multiplyScoreAddress + 1, true);
+
+        // New OP: Multiply Score by Stored (0x3C)
+        List<String> multiplyScoreByStoredLines = readLines("trainerai/scripts/multiply_score_by_stored.s");
+        int multiplyScoreByStoredAddress = trainerAIOvl.writeCode(multiplyScoreByStoredLines, "MultiplyScoreByStored");
+        trainerAIOvl.writeWord(scriptCommandTableRomAddress + (0x3C * 4), multiplyScoreByStoredAddress + 1, true);
+
+        // New OP: Get Simulation Multiplier (0x3E)
+        List<String> getSimulationMultiplierLines = readLines("trainerai/scripts/get_simulation_multiplier.s");
+        int getDamageAddress = trainerAIOvl.writeCode(getSimulationMultiplierLines, "GetSimulationMultiplier");
+        trainerAIOvl.writeWord(scriptCommandTableRomAddress + (0x3E * 4), getDamageAddress + 1, true);
 
         System.out.println("Set trainer AI scripts");
     }
@@ -1839,7 +1989,9 @@ public class ParagonLiteHandler {
         }
 
         // Data
-        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "cacophony.s"));
+        setAbilityEventHandlers(index,
+                new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "cacophony_boost.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "cacophony_immunity.s"));
     }
 
     private void setStench() {
@@ -2556,27 +2708,21 @@ public class ParagonLiteHandler {
         // HACK: We have to allocate to Battle overlay and jump to that because we can't allocate new space in BattleFx 
         List<String> playMoveAnimationLines = readLines("play_move_animation.s");
         battleOvl.writeCode(playMoveAnimationLines, "PlayMoveAnimation");
-        
+
         List<String> playMoveAnimationJumpLines = readLines("play_move_animation_jump.s");
         battleFxOvl.writeCodeForceInline(playMoveAnimationJumpLines, "PlayMoveAnimation");
-        
+
         int maxMoveIndex = Moves.malignantChain;
         int highMoveOffset = 116;
         int battleAnimationScriptsOffset = 561;
-        
+
         int maxMoveScriptIndex = maxMoveIndex + highMoveOffset - battleAnimationScriptsOffset;
-        while (battleAnimationScriptsNarc.files.size() < maxMoveScriptIndex) {
-            byte[] animationScriptFile = new byte[0x60];
-            writeWord(animationScriptFile, 0x00, 0x01);
-            for (int i = 0; i < 14; ++i)
-                writeWord(animationScriptFile, 0x04 + i * 4, 0x3C);
-            writeWord(animationScriptFile, 0x3C, 0x3A);
-            writeWord(animationScriptFile, 0x44, 0x01);
-            writeWord(animationScriptFile, 0x48, 0x11);
-            writeWord(animationScriptFile, 0x4C, 0x18);
-            writeHalf(animationScriptFile, 0x5E, 0x4D);
-            battleAnimationScriptsNarc.files.add(animationScriptFile);
-        }
+
+        Map<String, Integer> auxiliaryAnimationScriptIndices = new HashMap<>();
+        auxiliaryAnimationScriptIndices.put("infestation_trap", maxMoveScriptIndex + 1);
+
+        while (battleAnimationScriptsNarc.files.size() < maxMoveScriptIndex)
+            battleAnimationScriptsNarc.files.add(getDefaultAnimationScript());
 
         // 12
 //        arm9.writeByte(0x0215339C, 0x24);
@@ -2741,7 +2887,8 @@ public class ParagonLiteHandler {
                         Moves.eggBomb, // #121
                         Moves.bonemerang, // #155
                         Moves.astonish, // #310
-                        Moves.magnetBomb, // 443
+                        Moves.howl, // #336
+                        Moves.magnetBomb, // #443
                         Moves.doubleHit, // #458
                         Moves.dualChop, // #530
                         Moves.gearGrind, // #544
@@ -2779,7 +2926,9 @@ public class ParagonLiteHandler {
                         Moves.twineedle, // #041
                         Moves.eggBomb, // #121
                         Moves.bonemerang, // #155
-                        Moves.magnetBomb, // 443
+                        Moves.octazooka, // #190
+                        Moves.howl, // #336
+                        Moves.magnetBomb, // #443
                         Moves.doubleHit, // #458
                         Moves.dualChop, // #530
                         Moves.gearGrind, // #544
@@ -2831,26 +2980,30 @@ public class ParagonLiteHandler {
         // + #310 Astonish
         if (mode == Mode.ParagonLite)
             cloneMoveEventHandlers(Moves.astonish, Moves.fakeOut);
-        
+
 
         // TODO #564 Sticky Web
-        
+
         // + #565 Fell Stinger
         moves.get(Moves.fellStinger).name = "Fell Stinger";
         setMoveEventHandlers(Moves.fellStinger, new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "fell_stinger.s"));
         setMoveAnimations(Moves.fellStinger);
-        
+
         // #570 Parabolic Charge
         moves.get(Moves.parabolicCharge).name = "Parabolic Charge";
 
         // + #573 Freeze-Dry
         moves.get(Moves.freezeDry).name = "Freeze-Dry";
-        setMoveEventHandlers(Moves.freezeDry, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness1, "freeze-dry.s"));
+        setMoveEventHandlers(Moves.freezeDry, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "freeze-dry.s"));
 
         // #574 Disarming Voice
         moves.get(Moves.disarmingVoice).name = "Disarming Voice";
         setMoveAnimations(Moves.disarmingVoice, 743);
-        
+
+        // #577 Draining Kiss
+        moves.get(Moves.drainingKiss).name = "Draining Kiss";
+        setMoveAnimations(Moves.drainingKiss, 744);
+
         // #583 Play Rough
         moves.get(Moves.playRough).name = "Play Rough";
         setMoveAnimations(Moves.playRough, 740);
@@ -2875,36 +3028,37 @@ public class ParagonLiteHandler {
         moves.get(Moves.nuzzle).name = "Nuzzle";
         setMoveAnimations(Moves.nuzzle);
 
-//        // TODO: #611 Infestation
-//        moves.get(Moves.infestation).name = "Infestation";
-//        setMoveAnimations(Moves.infestation, 747);
-        
+        // TODO: #611 Infestation
+        moves.get(Moves.infestation).name = "Infestation";
+        setMoveAnimations(Moves.infestation, 747);
+        setMoveAuxiliaryAnimation(Moves.infestation, "trap", auxiliaryAnimationScriptIndices);
+
         // #612 Power-Up Punch
         moves.get(Moves.powerUpPunch).name = "Power-Up Punch";
         setMoveAnimations(Moves.powerUpPunch);
 
         // #660 First Impression
-        moves.get(Moves.firstImpression).name = "First Impression";
+        moves.get(Moves.firstImpression).name = "FirstImpression";
         setMoveAnimations(Moves.firstImpression, 760);
 
         // + #663 Darkest Lariat
         moves.get(Moves.darkestLariat).name = "DarkestLariat";
         cloneMoveEventHandlers(Moves.darkestLariat, Moves.chipAway);
-        
+
         // #665 Ice Hammer
         moves.get(Moves.iceHammer).name = "Ice Hammer";
-        
+
         // #667 High Horsepower
         moves.get(Moves.highHorsepower).name = "High Horsepower";
         setMoveAnimations(Moves.highHorsepower, 739);
-        
+
         // TODO #668 Strength Sap
 
         // + #676 Pollen Puff
         setMoveEventHandlers(Moves.pollenPuff,
                 new MoveEventHandler(Gen5BattleEventType.onCheckDamageToRecover, "pollen_puff_set_mode.s"),
                 new MoveEventHandler(Gen5BattleEventType.onApplyDamageToRecover, "pollen_puff_heal.s"));
-        
+
         // #679 Lunge
         moves.get(Moves.lunge).name = "Lunge";
         setMoveAnimations(Moves.lunge, 753);
@@ -2933,19 +3087,23 @@ public class ParagonLiteHandler {
         // #710 Liquidation
         moves.get(Moves.liquidation).name = "Liquidation";
         setMoveAnimations(Moves.liquidation);
-        
+
         // + #776 Body Press
 //        setMoveEventHandlers(Moves.bodyPress, new MoveEventHandler(Gen5BattleEventType.onGetAttackingStat, "body_press.s"));
+
+        // #784 Breaking Swipe
+        moves.get(Moves.breakingSwipe).name = "Breaking Swipe";
+        setMoveAnimations(Moves.breakingSwipe, 755);
 
         // #799 Scale Shot
         moves.get(Moves.scaleShot).name = "Scale Shot";
         setMoveAnimations(Moves.scaleShot, 758);
-        
+
         // #800 Meteor Beam
         moves.get(Moves.meteorBeam).name = "Meteor Beam";
         if (mode != Mode.Redux)
             setMoveEventHandlers(Moves.meteorBeam, new MoveEventHandler(Gen5BattleEventType.onChargeUpStartDone, "meteor_beam.s"));
-        
+
         // #812 Flip Turn
         moves.get(Moves.flipTurn).name = "Flip Turn";
         setMoveAnimations(Moves.flipTurn, 759);
@@ -2962,7 +3120,7 @@ public class ParagonLiteHandler {
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
         setMoveAnimations(Moves.tripleAxel, 754);
-        
+
         // + #814 Dual Wingbeat
         moves.get(Moves.dualWingbeat).name = "Dual Wingbeat";
         setMoveEventHandlers(Moves.dualWingbeat, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
@@ -2971,7 +3129,7 @@ public class ParagonLiteHandler {
         // #815 Scorching Sands
         moves.get(Moves.scorchingSands).name = "Scorching Sands";
         setMoveAnimations(Moves.scorchingSands);
-        
+
         // #827 Dire Claw
         moves.get(Moves.direClaw).name = "Dire Claw";
         setMoveEventHandlers(Moves.direClaw, new MoveEventHandler(Gen5BattleEventType.onAddCondition, "dire_claw.s"));
@@ -2979,7 +3137,7 @@ public class ParagonLiteHandler {
         // #833 Raging Fury
         moves.get(Moves.ragingFury).name = "Raging Fury";
         cloneMoveEventHandlers(Moves.ragingFury, Moves.thrash);
-        
+
         // #828 Psyshield Bash
         moves.get(Moves.psyshieldBash).name = "Psyshield Bash";
         setMoveAnimations(Moves.psyshieldBash);
@@ -2995,12 +3153,12 @@ public class ParagonLiteHandler {
         // #838 Headlong Rush
         moves.get(Moves.headlongRush).name = "Headlong Rush";
         setMoveAnimations(Moves.headlongRush);
-        
+
         // #839 Barb Barrage
         moves.get(Moves.barbBarrage).name = "Barb Barrage";
         setMoveEventHandlers(Moves.barbBarrage, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "barb_barrage.s"));
         setMoveAnimations(Moves.barbBarrage, 757);
-        
+
         // #840 Esper Wing
         moves.get(Moves.esperWing).name = "Esper Wing";
         setMoveAnimations(Moves.esperWing, 749);
@@ -3008,25 +3166,25 @@ public class ParagonLiteHandler {
         // + #844 Infernal Parade
         moves.get(Moves.infernalParade).name = "Infernal Parade";
         cloneMoveEventHandlers(Moves.infernalParade, Moves.hex);
-        
+
         // + #874 Make It Rain
         moves.get(Moves.makeItRain).name = "Make It Rain";
         cloneMoveEventHandlers(Moves.makeItRain, Moves.payDay);
-        
+
         // #895 Aqua Cutter
         moves.get(Moves.aquaCutter).name = "Aqua Cutter";
         setMoveAnimations(Moves.aquaCutter, 756);
-        
+
         // + #905 Electro Shot
         moves.get(Moves.electroShot).name = "Electro Shot";
         setMoveEventHandlers(Moves.electroShot,
                 new MoveEventHandler(Gen5BattleEventType.onCheckChargeUpSkip, "electro_shot_charge_up_skip.s"),
                 new MoveEventHandler(Gen5BattleEventType.onChargeUpStart, "electro_shot_charge_up_start.s"));
-        
+
         // + #912 Hard Press
         moves.get(Moves.hardPress).name = "Hard Press";
         cloneMoveEventHandlers(Moves.hardPress, Moves.wringOut);
-        
+
         // #916 Supercell Slam
         moves.get(Moves.supercellSlam).name = "Supercell Slam";
         cloneMoveEventHandlers(Moves.supercellSlam, Moves.jumpKick);
@@ -3034,8 +3192,8 @@ public class ParagonLiteHandler {
         // #917 Psychic Noise
         moves.get(Moves.psychicNoise).name = "Psychic Noise";
         setMoveAnimations(Moves.psychicNoise);
-        
-        
+
+
         ///////////////
         // OLD MOVES //
         ///////////////
@@ -3048,10 +3206,14 @@ public class ParagonLiteHandler {
 
         // + #155 Bonemerang
         setMoveEventHandlers(Moves.bonemerang, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
-        
+
         // #167 Triple Kick
         if (mode == Mode.ParagonLite)
             setMoveEventHandlers(Moves.tripleKick, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "triple_kick.s"));
+
+        // + #190 Octazooka
+        if (mode == Mode.Redux)
+            setMoveEventHandlers(Moves.octazooka, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "super_effective_vs_steel.s"));
 
         // #200 Outrage
         if (mode == Mode.ParagonLite)
@@ -3063,6 +3225,19 @@ public class ParagonLiteHandler {
         // #243 Mirror Coat
         if (mode == Mode.ParagonLite)
             cloneMoveEventHandlers(Moves.mirrorCoat, Moves.eruption);
+        
+        // #282 Knock Off
+//        setMoveEventHandlers(Moves.knockOff,
+//                new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal),
+//                new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "knock_off.s"));
+
+        // #327 Sky Uppercut
+        setMoveEventHandlers(Moves.skyUppercut,
+                new MoveEventHandler(Gen5BattleEventType.onCheckSemiInvulnerable),
+                new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "sky_uppercut.s"));
+
+        // + #336 Howl
+        setMoveEventHandlers(Moves.howl, new MoveEventHandler(Gen5BattleEventType.onUncategorizedMoveNoTarget, "howl.s"));
 
         // #360 Gyro Ball
         if (mode == Mode.ParagonLite)
@@ -3070,7 +3245,7 @@ public class ParagonLiteHandler {
 
         // #362 Brine
         if (mode == Mode.ParagonLite)
-            setMoveEventHandlers(Moves.brine, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness1, "brine.s"));
+            setMoveEventHandlers(Moves.brine, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "super_effective_vs_steel.s"));
 
         // #368 Metal Burst
         if (mode == Mode.ParagonLite)
@@ -3082,7 +3257,7 @@ public class ParagonLiteHandler {
 
         // + #443 Magnet Bomb
         cloneMoveEventHandlers(Moves.magnetBomb, Moves.psystrike);
-        
+
         // #449 Judgment (needs update for Pixie plate)
         setMoveEventHandlers(Moves.judgment, new MoveEventHandler(Gen5BattleEventType.onGetMoveParam, "judgment.s"));
 
@@ -3101,12 +3276,12 @@ public class ParagonLiteHandler {
 
         System.out.println("Set moves");
     }
-    
+
     private void setMoveAnimations(int moveNumber, int... SpaFiles) {
         // TODO: Make this a global param somewhere
         int highMoveOffset = 116;
         int battleAnimationScriptsOffset = 561;
-        
+
         String formattedMoveName = moves.get(moveNumber).name.toLowerCase().replace(' ', '_');
         for (int spaFileNumber : SpaFiles) {
             byte[] spaFileData = readBytes(String.format("moveanims/spa/%03d_%s_%03d.spa", moveNumber, formattedMoveName, spaFileNumber));
@@ -3117,6 +3292,32 @@ public class ParagonLiteHandler {
         }
         byte[] script = readBytes(String.format("moveanims/scripts/%03d_%s.bin", moveNumber, formattedMoveName));
         battleAnimationScriptsNarc.files.set(moveNumber + highMoveOffset - battleAnimationScriptsOffset, script);
+    }
+
+    private void setMoveAuxiliaryAnimation(int moveNumber, String mode, Map<String, Integer> auxiliaryAnimationScriptIndices, int... SpaFiles) {
+        String formattedMoveName = moves.get(moveNumber).name.toLowerCase().replace(' ', '_');
+        for (int spaFileNumber : SpaFiles) {
+            byte[] spaFileData = readBytes(String.format("moveanims/spa/%03d_%s_%s_%03d.spa", moveNumber, formattedMoveName, mode, spaFileNumber));
+            while (moveAnimationsNarc.files.size() <= spaFileNumber) {
+                moveAnimationsNarc.files.add(new byte[16]);
+            }
+            moveAnimationsNarc.files.set(spaFileNumber, spaFileData);
+        }
+        byte[] script = readBytes(String.format("moveanims/scripts/%03d_%s_%s.bin", moveNumber, formattedMoveName, mode));
+
+        String auxiliaryAnimationName = String.format("%s_%s", formattedMoveName, mode);
+        if (!auxiliaryAnimationScriptIndices.containsKey(auxiliaryAnimationName))
+            throw new RuntimeException(String.format("Could not find auxiliary animation with id \"%s\"", auxiliaryAnimationName));
+        int auxiliaryAnimationScriptIndex = auxiliaryAnimationScriptIndices.get(auxiliaryAnimationName);
+
+        while (battleAnimationScriptsNarc.files.size() <= auxiliaryAnimationScriptIndex)
+            battleAnimationScriptsNarc.files.add(getDefaultAnimationScript());
+        battleAnimationScriptsNarc.files.set(auxiliaryAnimationScriptIndex, script);
+    }
+    
+    private byte[] getDefaultAnimationScript() {
+        byte[] defaultScript = moveAnimationScriptsNarc.files.get(0);
+        return Arrays.copyOf(defaultScript, defaultScript.length);
     }
 
     private void loadMovesFromFile() {
@@ -3735,30 +3936,33 @@ public class ParagonLiteHandler {
     public void test() {
         System.out.println("- test");
 
+//        battleOvl.writeHalfword(0x021A9BB4, 0x2801);
+        
+        moves.get(Moves.iceBeam).statusPercentChance = 100;
+        
         disableRandomness();
 
-//        // TODO: Frostbite 1/6 HP
-//        battleOvl.writeByte(0x021BBB88, 64);
-
         List<Trainer> trainers = romHandler.getTrainers();
-
+        
         for (Trainer tr : trainers) {
             if (tr.pokemon.isEmpty())
                 continue;
 
             tr.setPokemonHaveCustomMoves(true);
             tr.setPokemonHaveItems(true);
-
+            
             TrainerPokemon poke1 = tr.pokemon.get(0);
             poke1.pokemon = romHandler.getPokemon().get(Species.jellicent);
-            poke1.level = 100;
+            poke1.level = 15;
             pokes[Species.jellicent].ability1 = Abilities.battleArmor;
             poke1.abilitySlot = 1;
-            poke1.moves = new int[]{Moves.glaciate, 0, 0, 0};
-            poke1.heldItem = Items.wideLens;
+            poke1.moves = new int[]{Moves.iceBeam, 0, 0, 0};
+            poke1.heldItem = Items.sitrusBerry;
             poke1.IVs = 0;
 
             if (tr.pokemon.size() < 2)
+                tr.pokemon.add(tr.pokemon.get(0).copy());
+            if (tr.pokemon.size() < 3)
                 tr.pokemon.add(tr.pokemon.get(0).copy());
 //            TrainerPokemon poke2 = tr.pokemon.get(1);
 //            poke2.pokemon = romHandler.getPokemon().get(Species.carracosta);
@@ -3770,11 +3974,11 @@ public class ParagonLiteHandler {
 //            poke2.heldItem = Items.rindoBerry;
         }
 
-        romHandler.setTrainers(trainers, true, true);
+        romHandler.setTrainers(trainers, false, true);
 
-//        // Set debug AI Flag
+        // Set debug AI Flag
 //        for (Trainer tr : trainers) {
-//            tr.aiFlags = 1 << 14;
+//            tr.aiFlags = (1 << 14);
 //        }
 //        romHandler.setTrainers(trainers, false, false);
     }
@@ -3832,14 +4036,14 @@ public class ParagonLiteHandler {
     }
 
     private void setDebugMode() {
-        int dsAddress = 0x0207AC88;
-        int dsiAddress = 0x0207AC84;
-
-        int ds = arm9.readWord(dsAddress);
-        int dsi = arm9.readWord(dsiAddress);
-
-        arm9.writeWord(dsAddress, ds | 0x02000000, false);
-        arm9.writeWord(dsiAddress, dsi | 0x02000000, false);
+//        int dsAddress = 0x0207AC88;
+//        int dsiAddress = 0x0207AC84;
+//
+//        int ds = arm9.readWord(dsAddress);
+//        int dsi = arm9.readWord(dsiAddress);
+//
+//        arm9.writeWord(dsAddress, ds | 0x02000000, false);
+//        arm9.writeWord(dsiAddress, dsi | 0x02000000, false);
     }
 
     // Disables battle random value (0.9x-1.0x damage value)
@@ -3855,13 +4059,13 @@ public class ParagonLiteHandler {
 
         battleOvl.writeByte(critChanceAddress, 0);
 
-        // Remove bonus/drawback from natures
-        int natureStatAdjustAddress = globalAddressMap.getRamAddress(arm9, "Data_StatNatureAdjust");
-        int natureStatAddress = globalAddressMap.getRamAddress(arm9, "Data_NatureStat");
-        for (int i = 0; i < 5 * 25; ++i) {
-            arm9.writeByte(natureStatAdjustAddress + i, 0);
-            arm9.writeByte(natureStatAddress + i, 0);
-        }
+//        // Remove bonus/drawback from natures
+//        int natureStatAdjustAddress = globalAddressMap.getRamAddress(arm9, "Data_StatNatureAdjust");
+//        int natureStatAddress = globalAddressMap.getRamAddress(arm9, "Data_NatureStat");
+//        for (int i = 0; i < 5 * 25; ++i) {
+//            arm9.writeByte(natureStatAdjustAddress + i, 0);
+//            arm9.writeByte(natureStatAddress + i, 0);
+//        }
 
         System.out.println("disabled randomness");
     }
@@ -4251,7 +4455,7 @@ public class ParagonLiteHandler {
         int index = getBattleObjectIndex(abilityListRamAddress, abilityListCount, abilityNumber);
         if (index < 0)
             throw new RuntimeException(String.format("Could not find event handlers for %s", abilityNames.get(abilityNumber)));
-        
+
         setBattleObject(abilityNumber, index, abilityListRamAddress, events);
     }
 
@@ -4260,7 +4464,7 @@ public class ParagonLiteHandler {
         int listIndex = getBattleObjectIndex(abilityListAddress, getAbilityListCount(), abilityNumber);
         if (listIndex < 0)
             throw new RuntimeException(String.format("Could not find event handlers for %s", abilityNames.get(abilityNumber)));
-        
+
         int abilityRedirectorAddress = getAbilityRedirectorAddress(otherAbilityNumber);
         battleOvl.writeWord(abilityListAddress + listIndex * 8, abilityNumber, false);
         battleOvl.writeWord(abilityListAddress + listIndex * 8 + 4, abilityRedirectorAddress + 1, true);
@@ -4272,7 +4476,7 @@ public class ParagonLiteHandler {
         int index = getBattleObjectIndex(moveListAddress, moveListCount, moveNumber);
         if (index < 0)
             throw new RuntimeException(String.format("Could not find event handlers for %s", moves.get(moveNumber).name));
-        
+
         setBattleObject(moveNumber, index, moveListAddress, events);
     }
 
@@ -4281,7 +4485,7 @@ public class ParagonLiteHandler {
         int listIndex = getBattleObjectIndex(moveListAddress, getMoveListCount(), moveNumber);
         if (listIndex < 0)
             throw new RuntimeException(String.format("Could not find event handlers for %s", moves.get(moveNumber).name));
-        
+
         int moveRedirectorAddress = getMoveRedirectorAddress(otherMoveNumber);
         battleOvl.writeWord(moveListAddress + listIndex * 8, moveNumber, false);
         battleOvl.writeWord(moveListAddress + listIndex * 8 + 4, moveRedirectorAddress + 1, true);
@@ -4293,7 +4497,7 @@ public class ParagonLiteHandler {
         int index = getBattleObjectIndex(itemListAddress, itemListCount, itemNumber);
         if (index < 0)
             throw new RuntimeException(String.format("Could not find event handlers for %s", itemNames.get(itemNumber)));
-        
+
         setBattleObject(itemNumber, index, itemListAddress, events);
     }
 
@@ -4302,7 +4506,7 @@ public class ParagonLiteHandler {
         int listIndex = getBattleObjectIndex(itemListAddress, getItemListCount(), itemNumber);
         if (listIndex < 0)
             throw new RuntimeException(String.format("Could not find event handlers for %s", itemNames.get(itemNumber)));
-        
+
         int abilityRedirectorAddress = getAbilityRedirectorAddress(abilityNumber);
         battleOvl.writeWord(itemListAddress + listIndex * 8, itemNumber, false);
         battleOvl.writeWord(itemListAddress + listIndex * 8 + 4, abilityRedirectorAddress + 1, true);
@@ -4519,7 +4723,7 @@ public class ParagonLiteHandler {
 
         return lines;
     }
-    
+
     private static byte[] readBytes(String filename) {
         byte[] bytes;
         try {
@@ -4527,7 +4731,7 @@ public class ParagonLiteHandler {
 
             if (stream == null)
                 throw new IOException(String.format("Could not find file with name '%s'", filename));
-            
+
             bytes = new byte[stream.available()];
             if (stream.read(bytes) == -1)
                 throw new IOException();
@@ -4589,7 +4793,7 @@ public class ParagonLiteHandler {
     private void writeTrainerAIFile(NARCArchive narc, int number) {
         byte[] bytes;
         try {
-            InputStream stream = FileFunctions.openConfig(String.format("paragonlite/traineraiscripts/%d.bin", number));
+            InputStream stream = FileFunctions.openConfig(String.format("paragonlite/trainerai/scripts/%d.bin", number));
             bytes = new byte[stream.available()];
             if (stream.read(bytes) == -1) throw new IOException();
         } catch (IOException e) {

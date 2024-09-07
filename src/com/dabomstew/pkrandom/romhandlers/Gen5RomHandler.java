@@ -889,10 +889,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         stats[Gen5Constants.bsBaseFriendshipOffset] = (byte) pkmn.baseFriendship;
         stats[Gen5Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
 
-        stats[Gen5Constants.bsAbility1Offset] = (byte) pkmn.ability1;
-        stats[Gen5Constants.bsAbility2Offset] = (byte) pkmn.ability2;
-        stats[Gen5Constants.bsAbility3Offset] = (byte) pkmn.ability3;
-
         stats[Gen5Constants.bsStageOffset] = (byte) pkmn.stage;
 
         int evYield = 0;
@@ -918,6 +914,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
 
         stats[Gen5Constants.bsGenderRatioOffset] = (byte) pkmn.genderRatio;
+
+        stats[Gen5Constants.bsAbility1Offset] = (byte) pkmn.ability1;
+        stats[Gen5Constants.bsAbility2Offset] = (byte) pkmn.ability2;
+        stats[Gen5Constants.bsAbility3Offset] = (byte) pkmn.ability3;
 
         writeWord(stats, Gen5Constants.bsExpYieldOffset, pkmn.expYield);
 
@@ -1735,11 +1735,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
                 writeLong(trainer, 0x0C, tr.aiFlags);
                 if (allSmart)
-                    trainer[0x0C] |= 0x07; // Make all trainers "smart"
+                    trainer[0x0C] |= (byte) 0x07; // Make all trainers "smart"
                 if (setToDoubleBattle)
                     trainer[0x0C] |= (byte) 0x80; // Flag that needs to be set for trainers not to attack their own pokes
-
-                trainer[0x0C] = (byte) (0x01); // TODO: Remove
 
                 trainer[0x10] = (byte) (tr.isHealer ? 1 : 0);
                 trainer[0x11] = tr.rewardMoneyScale;
@@ -2064,7 +2062,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
         Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         try {
-            NARCArchive movesLearnt = this.readNARC(romEntry.getFile("PokemonMovesets"));
+            NARCArchive movesLearnt = this.readNARC(romEntry.getFile("PokemonMovesets"));            
             int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
             int formeOffset = Gen5Constants.getFormeOffset(romEntry.romType);
             for (int i = 1; i <= Gen5Constants.pokemonCount + formeCount; i++) {
@@ -5176,9 +5174,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         arm9 = newArm9;
     }
 
-    private void applyParagonLite(Settings settings) {
-//        // Find String
-//        String searchKey = "A wild \uF000ā\\x0001\\x0000 appeared!";
+    private void applyParagonLite(Settings settings) {        
+        // Find String
+//        String searchKey = "Resolute";
 //        List<String> strs = new ArrayList<>();
 //        List<Integer> counts = new ArrayList<>();
 //        int stringFileCount = stringsNarc.files.size();
@@ -5280,7 +5278,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setDamageCalcDefensiveStat();
         paragonLite.setCritRatio();
         paragonLite.setCritDamage();
-        paragonLite.setBurnDamage();
+        paragonLite.setGetStatusDamage();
+        paragonLite.setFrostbite();
         paragonLite.setTrapDamage();
         paragonLite.setTypeForPlate();
         paragonLite.setGemDamageBoost();
@@ -5290,6 +5289,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setShinyRate();
         paragonLite.setGhostEscape();
         paragonLite.setCallModifyEffectivenessHandler();
+        paragonLite.setHandlerSimulationDamage();
 
         paragonLite.setMoves();
         paragonLite.setItems();
@@ -5300,8 +5300,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (debugMode)
             paragonLite.setPokemonData();
 
-        if (debugMode)
-            paragonLite.setTrainerAIScripts(trainerAIScriptsFilename);
+//        if (debugMode)
+//            paragonLite.setTrainerAI(trainerAIScriptsFilename);
 
         if (debugMode)
             paragonLite.setTrainers();

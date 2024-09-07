@@ -90,9 +90,7 @@ public class ArmParser {
                 }
                 lines.add(String.format("add %s, %s, %s", switchRegister1, switchRegister2, switchRegister2));
                 lines.add(String.format("add %s, pc", switchRegister1));
-                lines.add(String.format("ldrh %s, [%s, #6]", switchRegister1, switchRegister1));
-                lines.add(String.format("lsl %s, #16", switchRegister1));
-                lines.add(String.format("asr %s, #16", switchRegister1));
+                lines.add(String.format("ldrh %s, [%s, #2]", switchRegister1, switchRegister1));
                 lines.add(String.format("add pc, %s", switchRegister1));
                 for (int j = i + 1; j < oldLines.size(); ++j) {
                     lines.add(oldLines.get(j));
@@ -200,7 +198,7 @@ public class ArmParser {
     public int getFuncSize(ParagonLiteOverlay overlay, int initialRamAddress) {
         if (overlay.readWord(initialRamAddress) == 0)
             throw new RuntimeException("Empty function");
-        
+
         final AtomicReference<Integer> maxOffset = new AtomicReference<>(initialRamAddress);
 
         traverseData(overlay, initialRamAddress, (context) -> {
@@ -213,7 +211,7 @@ public class ArmParser {
                 maxOffset.set(Math.max(maxOffset.get(), dataOffset + 4));
             }
         });
-        
+
         return alignNextWord(maxOffset.get()) - initialRamAddress;
     }
 
@@ -228,7 +226,7 @@ public class ArmParser {
                 int imm = context.instruction & 0x00FF;
                 int ramAddress = alignWord(context.ramAddress + ((imm << 2) + 4));
                 int romAddress = overlay.ramToRomAddress(ramAddress);
-                
+
                 int value = overlay.readWord(romAddress);
                 if (!ParagonLiteAddressMap.isValidAddress(value, true))
                     return;
@@ -244,7 +242,7 @@ public class ArmParser {
             if ((context.instruction & 0xF800) == 0xF000) {
                 int ramAddress = context.ramAddress + 2;
                 int romAddress = overlay.ramToRomAddress(ramAddress);
-                
+
                 int nextInstruction = overlay.readUnsignedHalfword(romAddress);
                 if ((nextInstruction & 0xE800) != 0xE800) // can be blx
                     return;
@@ -378,7 +376,7 @@ public class ArmParser {
                     }
                     if (foundMatchingDestination)
                         break;
-                    
+
                     int switchJump = overlay.readUnsignedHalfword(switchJumpRomAddress);
                     int destination = context.ramAddress + switchJump + 4;
                     destinations.add(destination);
@@ -945,7 +943,7 @@ public class ArmParser {
     }
 
     // Format 4: ALU operations
-    private byte[] format4(String[] args, int op) throws DataFormatException {
+    private byte[] format4(String[] args, int op) throws DataFormatException {        
         if (args.length != 2)
             throw new DataFormatException();
 
@@ -1230,7 +1228,7 @@ public class ArmParser {
             throw new DataFormatException();
 
         if (!labelAddressMap.containsKey(args[0]))
-            throw new DataFormatException();
+            throw new DataFormatException(String.format("Could not find label \"%s\"", args[0]));
 
         int jumpAddress = labelAddressMap.get(args[0]);
         int offset = jumpAddress - currentRamAddress - 4;
@@ -1302,7 +1300,7 @@ public class ArmParser {
 
             // TODO: Give proper warning when this was changed
             exchangeInstructionSet = targetFunctionEncoding == 4;
-            
+
             if (!isWordAligned(funcRamAddress))
                 throw new DataFormatException(String.format("Function address of %s (0x%08X) is not word-aligned", args[0], funcRamAddress));
         } else {
@@ -1403,7 +1401,7 @@ public class ArmParser {
             valueStr = valueStr.substring(1).trim(); // remove = or #
         }
 
-        String fullStr = varDefines + globalAddressMap.replaceLabelsInExpression(valueStr);
+        String fullStr = varDefines + globalAddressMap.applyDefinitions(valueStr);
 
         try {
             Object evalObj = engine.eval(fullStr);

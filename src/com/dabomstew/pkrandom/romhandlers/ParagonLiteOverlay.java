@@ -21,7 +21,8 @@ public class ParagonLiteOverlay {
 
     public static enum Insertion {
         Front,
-        Back
+        Back,
+        Restricted
     }
 
     protected static class FreeSpace {
@@ -145,6 +146,7 @@ public class ParagonLiteOverlay {
         return switch (insertion) {
             case Front -> allocateExtendFront(size);
             case Back -> allocateExtendBack(size);
+            case Restricted -> throw new RuntimeException("Cannot allocate on restricted overlay " + name);
         };
     }
 
@@ -435,7 +437,7 @@ public class ParagonLiteOverlay {
         int oldSize = getFuncSizeRam(ramAddress);
 
         byte[] bytes = armParser.parse(lines, this, ramAddress);
-        if ((bytes.length == oldSize)) {
+        if (true || (bytes.length == oldSize)) {
             for (int i = 0; i < bytes.length; i += 2) {
                 int address = romAddress + i;
                 int oldValue = readUnsignedHalfword(address);

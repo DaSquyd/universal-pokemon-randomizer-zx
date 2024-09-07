@@ -81,8 +81,8 @@ public class Gen5BattleEventType {
     public static final int onGetAttackingStatValue = 0x3B;
     public static final int onGetDefendingStatValue = 0x3C;
     public static final int onGetEffectivenessEnable = 0x3D;
-    public static final int onGetEffectiveness1 = 0x3E;
-    public static final int onGetEffectiveness2 = 0x3F;
+    public static final int onGetEffectiveness = 0x3E;
+    public static final int onRewriteEffectiveness = 0x3F;
     public static final int onGetIsStab = 0x40;
     public static final int onApplyStab = 0x41;
     public static final int onGetAttackerType = 0x42;
@@ -172,7 +172,7 @@ public class Gen5BattleEventType {
     public static final int onChargeUpStartDone = 0x96;
     public static final int onChargeUpSkip = 0x97;
     public static final int onChargeUpEnd = 0x98;
-    public static final int onCheckHiding = 0x99;
+    public static final int onCheckSemiInvulnerable = 0x99;
     public static final int onHeldItemCheck = 0x9A;
     public static final int onHeldItemFail = 0x9B;
     public static final int onHeldItemDecide = 0x9C;

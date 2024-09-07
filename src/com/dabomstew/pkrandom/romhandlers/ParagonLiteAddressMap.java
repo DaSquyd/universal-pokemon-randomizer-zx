@@ -148,6 +148,7 @@ public class ParagonLiteAddressMap {
         }
     }
 
+    private final Map<String, String> defines = new HashMap<>();
     private final Map<ParagonLiteOverlay, Map<String, LabeledAddressInterface>> labelMap = new HashMap<>();
     private final Map<ParagonLiteOverlay, TreeMap<Integer, LabeledAddressInterface>> addressMap = new HashMap<>();
     private final Map<String, ParagonLiteOverlay> namespaceToOverlay = new HashMap<>();
@@ -619,8 +620,31 @@ public class ParagonLiteAddressMap {
 
         return overlay;
     }
+    
+    public void addDefinition(String key, String value) {
+        defines.put(key, value);
+    }
+    
+    public void addDefinition(String key, int value) {
+        defines.put(key, String.valueOf(value));
+    }
 
-    public String replaceLabelsInExpression(String expression) {
+    public String applyDefinitions(String expression) {
+        expression = replaceLabelsInExpression(expression);
+        
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Map.Entry<String, String> entry : defines.entrySet()) {
+            stringBuilder.append(entry.getKey());
+            stringBuilder.append('=');
+            stringBuilder.append(entry.getValue());
+            stringBuilder.append(';');
+        }
+        stringBuilder.append(expression);
+            
+        return stringBuilder.toString();
+    }
+    
+    private String replaceLabelsInExpression(String expression) {
         if (!expression.contains("::"))
             return expression;
 

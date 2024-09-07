@@ -19,7 +19,7 @@
     beq     Boost
     
     mov     r0, r6
-    bl      Battle::Unk_21ABA44
+    bl      Battle::Handler_IsSimulationMode
     cmp     r0, #0
     beq     End
     

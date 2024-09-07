@@ -19,7 +19,7 @@
     mov     r0, r6
     mov     r1, r5
     mov     r2, sp
-    bl      Battle::Unk_21ABBCC
+    bl      Battle::Handler_GetThisTurnAction
     cmp     r0, #0
     beq     Return
     

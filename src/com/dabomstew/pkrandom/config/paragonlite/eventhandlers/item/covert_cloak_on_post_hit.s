@@ -1,6 +1,6 @@
     push    {r3, lr}
     mov     r0, r2
-    bl      Battle::Unk_21CDE78
+    bl      Battle::HandlerCommon_CheckTargetMonID
     cmp     r0, #0
     beq     End
     

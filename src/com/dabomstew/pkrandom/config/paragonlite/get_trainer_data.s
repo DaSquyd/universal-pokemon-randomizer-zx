@@ -1,7 +1,7 @@
 #DEFINE FILE_SIZE 0x18 ; 0x16 actual size, but this must be 4-byte-aligned
 
     push    {r3-r6, lr}
-    add     sp, #-FILE_SIZE
+    sub     sp, #FILE_SIZE
     mov     r5, r1
     mov     r1, sp
     mov     r6, sp

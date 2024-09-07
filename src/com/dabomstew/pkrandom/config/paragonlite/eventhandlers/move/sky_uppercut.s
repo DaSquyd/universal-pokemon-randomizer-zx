@@ -1,4 +1,4 @@
-#DEFINE TYPE_WATER 10
+#DEFINE TYPE_FLYING 2
 #DEFINE EFFECTIVENESS_DOUBLE 4
 
 #DEFINE VAR_ATTACKING_MON 0x03
@@ -16,7 +16,7 @@
     
     mov     r0, #VAR_POKE_TYPE
     bl      Battle::EventVar_GetValue
-    cmp     r0, #TYPE_WATER
+    cmp     r0, #TYPE_FLYING
     bne     Return
     
     mov     r0, #VAR_SET_TYPE_EFFECTIVENESS
