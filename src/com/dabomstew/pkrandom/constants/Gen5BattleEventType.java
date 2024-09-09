@@ -91,8 +91,8 @@ public class Gen5BattleEventType {
     public static final int onGetMoveDamage = 0x45;
     public static final int onMoveDamageProcessing1 = 0x46;
     public static final int onMoveDamageProcessing2 = 0x47;
-    public static final int onMoveDamageProcessingEnd1 = 0x48;
-    public static final int onMoveDamageProcessingEnd2 = 0x49;
+    public static final int onMoveDamageProcessingEnd = 0x48;
+    public static final int onMoveDamageProcessingFinal = 0x49;
     public static final int onPreviousMoveReaction = 0x4A;
     public static final int onMoveDamageReaction1 = 0x4B;
     public static final int onMoveDamageReaction2 = 0x4C;

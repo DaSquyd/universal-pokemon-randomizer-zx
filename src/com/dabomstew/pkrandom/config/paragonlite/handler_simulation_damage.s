@@ -131,7 +131,7 @@ CalcDamage:
     ldr     r2, [sp, #DEFENDING_MON_PARAM] ; r2 := *defendingMonParam
     mov     r0, r5 ; r0 := serverFlow
     add     r3, sp, #MOVE_PARAM ; r3 := *moveParam
-    bl      Battle::CalcDamage
+    bl      Battle::ServerEvent_CalcDamage
     ldr     r0, =0x0774
     ldr     r1, [r5, r0] ; r1 := serverFlow->simulationCounter
     sub     r1, #1

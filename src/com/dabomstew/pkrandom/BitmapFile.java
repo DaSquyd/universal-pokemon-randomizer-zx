@@ -1,6 +1,5 @@
 package com.dabomstew.pkrandom;
 
-import java.util.Arrays;
 import java.util.zip.DataFormatException;
 
 public class BitmapFile {
@@ -120,34 +119,68 @@ public class BitmapFile {
         return bytes;
     }
 
-    public byte[] writeGraphicFile32x32() {
-        byte[] bytes = new byte[560];
+    public static class GraphicsFileParams {
+        public int width = 0;
+        public int height = 0;
+        public int subImageCount = 0;
+    }
+
+    public byte[] writeGraphicFile(GraphicsFileParams params) {
+        int tileWidth = 8;
+        int tileSize = tileWidth * tileWidth;
+
+        int width = params.width > 0 ? params.width : this.width;
+        int height = params.height > 0 ? params.height : this.height;
+        int subImageCount = params.subImageCount;
+
+        if (width % tileWidth != 0 || height % tileWidth != 0)
+            throw new RuntimeException();
+        
+        int tileCount = (width * height) / tileSize;
+
+        if (subImageCount > 0)
+            if ((width * height) % (subImageCount * tileSize) != 0)
+                throw new RuntimeException();
+        
+        int headerSize = 16;
+        int charHeaderSize = 32;
+        int charSize = charHeaderSize + (width * height / 2);
+        int cposSize = subImageCount > 0 ? 16 : 0;
+        int fileSize = headerSize + charSize + cposSize;
+        byte[] bytes = new byte[fileSize];
 
         // NCGR Header
         writeString(bytes, 0x00, "RGCN");
-        writeLong(bytes, 0x04, 0x0101FEFF);
-        writeLong(bytes, 0x08, bytes.length);
-        writeWord(bytes, 0x0C, 16);
-        writeWord(bytes, 0x0E, 1);
+        writeWord(bytes, 0x04, 0xFEFF); // BOM
+        writeLong(bytes, 0x06, 0x0101); // const
+        writeLong(bytes, 0x08, fileSize); // file size
+        writeWord(bytes, 0x0C, headerSize); // header size
+        writeWord(bytes, 0x0E, subImageCount > 0 ? 2 : 1); // section count
 
         // CHAR Header
         writeString(bytes, 0x10, "RAHC");
-        writeLong(bytes, 0x14, bytes.length - 0x10);
-        writeLong(bytes, 0x18, 0xFFFFFFFF);
-        writeLong(bytes, 0x1C, 3);
-        writeLong(bytes, 0x20, 16);
-        writeLong(bytes, 0x28, 0x200);
-        writeLong(bytes, 0x2C, 24);
+        writeLong(bytes, 0x14, charSize);
+        if (subImageCount > 0) {
+            writeWord(bytes, 0x18, height / tileWidth);
+            writeWord(bytes, 0x1A, width / tileWidth);
+        } else {
+            writeLong(bytes, 0x18, 0xFFFFFFFF);
+        }
+        writeLong(bytes, 0x1C, 3); // bpp: 3=4bpp; 4=8bpp
+        writeLong(bytes, 0x20, subImageCount > 0 ? 0 : 16); // unknown; not sure if this is even due to subImageChunkCount
+        writeLong(bytes, 0x28, width * height / 2); // tile data size
+        writeLong(bytes, 0x2C, 24); // unknown
 
-        int pixelArrayOffset = 0x30;
+        int tilesPerRow = (width / tileWidth);
+        int pixelArrayOffset = headerSize + charHeaderSize;
         int pixelIndex = 0;
-        for (int tile = 0; tile < 16; ++tile) {
-            int tileStartRow = (tile / 4) * 8;
-            int tileStartCol = (tile % 4) * 8;
+        for (int tile = 0; tile < tileCount; ++tile) {
+            int tileStartRow = (tile / tilesPerRow) * tileWidth;
+            int tileStartCol = (tile % tilesPerRow) * tileWidth;
 
             for (int tilePixel = 0; tilePixel < 64; ++tilePixel) {
-                int row = tileStartRow + tilePixel / 8;
-                int col = tileStartCol + tilePixel % 8;
+                int row = tileStartRow + tilePixel / tileWidth;
+                int col = tileStartCol + tilePixel % tileWidth;
 
                 if (row < pixels.length && col < pixels[0].length) {
                     byte colorIndex = (byte) getPixelColorIndex(row, col);
@@ -163,6 +196,16 @@ public class BitmapFile {
             }
         }
 
+        // CPOS
+        if (subImageCount <= 0)
+            return bytes;
+
+        int cposOffset = headerSize + charSize;
+        writeString(bytes, cposOffset, "SOPC");
+        writeLong(bytes, cposOffset + 0x04, cposSize);
+        writeWord(bytes, cposOffset + 0x0C, tileCount / subImageCount);
+        writeWord(bytes, cposOffset + 0x0E, subImageCount);
+        
         return bytes;
     }
 

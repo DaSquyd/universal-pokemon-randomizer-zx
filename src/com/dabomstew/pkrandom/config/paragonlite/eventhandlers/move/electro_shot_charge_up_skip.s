@@ -13,7 +13,7 @@
     bne     Return
     
     mov     r0, r5
-    bl      Battle::GetWeather
+    bl      Battle::ServerEvent_GetWeather
     cmp     r0, #WEATHER_RAIN
     bne     Return
     

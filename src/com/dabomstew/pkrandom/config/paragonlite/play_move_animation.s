@@ -9,19 +9,19 @@
     sub     sp, #ADD_STACK_SIZE
     mov     r5, r0
     
-    bl      BattleFx::ViewCmd_WaitEffect
+    bl      BattleLevel::ViewCmd_WaitEffect
     cmp     r0, #0
     bne     NoScript
     
     add     r4, sp, #PARAMS
     mov     r0, r4
-    bl      BattleFx::ClearAnimParams
+    bl      BattleLevel::ClearAnimParams
     
     ldr     r1, [r5, #0x10]
     add     r0, sp, #PARAMS
     strb    r1, [r0, #0x00]
     ldrb    r1, [r5, #0x0C]
-    ldr     r6, =BattleFx::Data_Unk21F4280
+    ldr     r6, =BattleLevel::Data_Unk21F4280
     ldrh    r3, [r5, #0x00] ; anim id
     
     ; NEW - shifts the anim id of all moves beyond 559 up to a higher index as the intermediate indices are already in use
@@ -45,7 +45,7 @@ Continue:
     lsl     r4, #2 ; 392
     ldr     r0, [r0, r4] ; script_vm
     ldr     r1, [r5, #0x04] ; a2
-    bl      BattleFx::VM_LoadScript
+    bl      BattleLevel::VM_LoadScript
     
     ldr     r0, [r6, #0x00]
     mov     r1, #1
@@ -58,13 +58,13 @@ Continue:
 NoScript:
     mov     r6, #0xB7
     lsl     r6, #2 ; 0x02DC
-    ldr     r7, =BattleFx::Data_Unk21F4280
+    ldr     r7, =BattleLevel::Data_Unk21F4280
     str     r6, [sp, #LINE_NUM] ; line num
     mov     r0, r6
     ldr     r1, [r7, #0x00]
     sub     r0, #0xE4
     ldrh    r0, [r1, r0] ; heap id
-    ldr     r3, =BattleFx::Btlv_EffectC
+    ldr     r3, =BattleLevel::Btlv_EffectC
     mov     r1, #0x14 ; size
     mov     r2, #1 ; calloc
     bl      ARM9::GFL_HeapAllocate
@@ -75,7 +75,7 @@ NoScript:
     ldr     r0, [r7, #0x00]
     sub     r6, #0xE4
     ldrh    r0, [r0, r6] ; heap id
-    ldr     r3, =BattleFx::Btlv_EffectC
+    ldr     r3, =BattleLevel::Btlv_EffectC
     mov     r1, #0x10 ; size
     mov     r2, #1 ; calloc
     bl      ARM9::GFL_HeapAllocate
@@ -98,12 +98,12 @@ NoScript:
     ldr     r0, [r4, #0x10]
     strb    r1, [r0, #0x02]
     ldr     r0, [r7, #0x00]
-    ldr     r1, =(BattleFx::Unk_21E0A18+1) ; callback func
+    ldr     r1, =(BattleLevel::Unk_21E0A18+1) ; callback func
     ldr     r0, [r0, #0x00] ; mgr
     bl      ARM9::GFL_TCBMgrAddTask
     
-    ldr     r1, =(BattleFx::Unk_21E0A58+1) ; a2
+    ldr     r1, =(BattleLevel::Unk_21E0A58+1) ; a2
     mov     r2, #0 ; a3
-    bl      BattleFx::Unk_21E039C
+    bl      BattleLevel::Unk_21E039C
     add     sp, #ADD_STACK_SIZE
     pop     {r4-r7, pc}

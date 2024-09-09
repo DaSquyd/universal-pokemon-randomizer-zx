@@ -97,6 +97,26 @@ public class ArmParser {
                 }
                 --i;
                 continue;
+            } else if (str.toUpperCase().startsWith("#SWITCH_FULL ")) {
+                String[] switchSplit = str.split(" ", 3);
+                String switchRegister1 = switchSplit[1];
+                String switchRegister2 = switchSplit.length == 3 ? switchSplit[2] : switchRegister1;
+                List<String> oldLines = lines;
+                lines = new ArrayList<>(lines.size() + 5);
+                for (int j = 0; j < i; ++j) {
+                    lines.add(oldLines.get(j));
+                }
+                lines.add(String.format("add %s, %s, %s", switchRegister1, switchRegister2, switchRegister2));
+                lines.add(String.format("add %s, pc", switchRegister1));
+                lines.add(String.format("ldrh %s, [%s, #6]", switchRegister1, switchRegister1));
+                lines.add(String.format("lsl %s, #16", switchRegister1));
+                lines.add(String.format("asr %s, #16", switchRegister1));
+                lines.add(String.format("add pc, %s", switchRegister1));
+                for (int j = i + 1; j < oldLines.size(); ++j) {
+                    lines.add(oldLines.get(j));
+                }
+                --i;
+                continue;
             }
 
             currentRamAddress += getLineByteLength(str);
@@ -527,7 +547,7 @@ public class ArmParser {
 
             // Prefer format2
             if (rd < 8 && rs < 8)
-                return format2(new String[]{args[0], args[0], args[1]}, 0);
+                return format2(new String[]{args[0], args[1], args[0]}, 0);
 
             return format5(args, 0);
         }

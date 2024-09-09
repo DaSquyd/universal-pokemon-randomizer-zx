@@ -122,7 +122,7 @@ CheckWeather:
     lsr     r7, r0, #16
     
     ldr     r0, [sp, #0x00]
-    bl      Battle::GetWeather
+    bl      Battle::ServerEvent_GetWeather
     cmp     r0, #3 ; hail
     beq     CheckHail
     cmp     r0, #4 ; sandstorm

@@ -6,7 +6,7 @@
     cmp     r4, r0
     bne     Return
     mov     r0, r5
-    bl      Battle::GetWeather
+    bl      Battle::ServerEvent_GetWeather
     cmp     r0, #3 ; Hail
     bne     Return
     mov     r0, #0x35

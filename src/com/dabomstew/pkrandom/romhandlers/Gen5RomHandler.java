@@ -77,7 +77,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         public long expectedCRC32;
     }
 
-    private static class RomEntry {
+    protected static class RomEntry {
         private String name;
         private String romCode;
         private byte version;
@@ -98,21 +98,21 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         private List<TradeScript> tradeScripts = new ArrayList<>();
 
 
-        private int getInt(String key) {
+        protected int getInt(String key) {
             if (!numbers.containsKey(key)) {
                 numbers.put(key, 0);
             }
             return numbers.get(key);
         }
 
-        private String getString(String key) {
+        protected String getString(String key) {
             if (!strings.containsKey(key)) {
                 strings.put(key, "");
             }
             return strings.get(key);
         }
 
-        private String getFile(String key) {
+        protected String getFile(String key) {
             if (!files.containsKey(key)) {
                 files.put(key, new RomFileEntry());
             }
@@ -3107,7 +3107,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             writeFairy();
 
             // Sprites
-            String smallShieldSpritesNarcPath = romEntry.getFile("SmallShieldSprites");
+            String smallShieldSpritesNarcPath = romEntry.getFile("BattleUIGraphics");
             NARCArchive smallShieldSpritesNarc = readNARC(smallShieldSpritesNarcPath);
 
             // https://code.google.com/archive/p/tinke/wikis/NCLR.wiki
@@ -3283,7 +3283,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     private void disableLowHpMusic() {
         try {
-            byte[] lowHealthMusicOverlay = readOverlay(romEntry.getInt("BattleFxOvlNumber"));
+            byte[] lowHealthMusicOverlay = readOverlay(romEntry.getInt("BattleLevelOvlNumber"));
             int offset = find(lowHealthMusicOverlay, Gen5Constants.lowHealthMusicLocator);
             if (offset > 0) {
                 // The game calls a function that returns 2 if the Pokemon has low HP. The ASM looks like this:
@@ -3294,7 +3294,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 // The offset variable is currently pointing at the bne instruction. If we change that bne to an unconditional
                 // branch, the game will never think the player's Pokemon has low HP (for the purposes of changing the music).
                 lowHealthMusicOverlay[offset + 1] = (byte) 0xE0;
-                writeOverlay(romEntry.getInt("BattleFxOvlNumber"), lowHealthMusicOverlay);
+                writeOverlay(romEntry.getInt("BattleLevelOvlNumber"), lowHealthMusicOverlay);
             }
         } catch (IOException e) {
             throw new RandomizerIOException(e);
@@ -5209,11 +5209,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if ((isWhite2() || isBlack2()))
             customAddFairy();
 
-        int battleOvlNumber = romEntry.getInt("BattleOvlNumber");
-        int battleFxOvlNumber = romEntry.getInt("BattleFxOvlNumber");
-        int battleServerOvlNumber = romEntry.getInt("BattleServerOvlNumber");
-        int trainerAIOvlNumber = romEntry.getInt("TrainerAIOvlNumber");
-
+        ParagonLiteHandler.Params params = new ParagonLiteHandler.Params();
+        params.romHandler = this;
+        params.romEntry = romEntry;
+        params.arm9Data = arm9;
+        params.pokes = pokes;
+        params.moves = moves;
+        
         String pokemonGraphicsFilename = romEntry.getFile("PokemonGraphics");
         String moveAnimationsFilename = romEntry.getFile("MoveAnimations");
         String trainerAIScriptsFilename = romEntry.getFile("TrainerAIScripts");
@@ -5221,19 +5223,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         String itemGraphicsFilename = romEntry.getFile("ItemGraphics");
         String moveAnimationScriptsFilename = romEntry.getFile("MoveAnimationScripts");
         String battleAnimationScriptsFilename = romEntry.getFile("BattleAnimationScripts");
-        NARCArchive pokemonGraphicsNarc;
-        NARCArchive moveAnimationsNarc;
-        NARCArchive itemDataNarc;
-        NARCArchive itemGraphicsNarc;
-        NARCArchive moveAnimationScriptsNarc;
-        NARCArchive battleAnimationScriptsNarc;
+        String battleUIGraphicsFilename = romEntry.getFile("BattleUIGraphics");
         try {
-            pokemonGraphicsNarc = readNARC(pokemonGraphicsFilename);
-            moveAnimationsNarc = readNARC(moveAnimationsFilename);
-            itemDataNarc = readNARC(itemDataFilename);
-            itemGraphicsNarc = readNARC(itemGraphicsFilename);
-            moveAnimationScriptsNarc = readNARC(moveAnimationScriptsFilename);
-            battleAnimationScriptsNarc = readNARC(battleAnimationScriptsFilename);
+            params.pokemonGraphicsNarc = readNARC(pokemonGraphicsFilename);
+            params.moveAnimationsNarc = readNARC(moveAnimationsFilename);
+            params.itemDataNarc = readNARC(itemDataFilename);
+            params.itemGraphicsNarc = readNARC(itemGraphicsFilename);
+            params.moveAnimationScriptsNarc = readNARC(moveAnimationScriptsFilename);
+            params.battleAnimationScriptsNarc = readNARC(battleAnimationScriptsFilename);
+            params.battleUIGraphicsNarc = readNARC(battleUIGraphicsFilename);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -5250,36 +5248,65 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int itemPluralNamesTextOffset = romEntry.getInt("ItemPluralNamesTextOffset");
         int itemDescriptionsTextOffset = romEntry.getInt("ItemDescriptionsTextOffset");
 
-        List<String> battleEventStrings1 = getStrings(false, battleEventTextOffset1);
-        List<String> battleEventStrings2 = getStrings(false, battleEventTextOffset2);
+        params.battleEventStrings1 = getStrings(false, battleEventTextOffset1);
+        params.battleEventStrings2 = getStrings(false, battleEventTextOffset2);
 
-        List<String> abilityDescriptions = getStrings(false, abilityDescriptionsTextOffset);
-        List<String> abilityExplanations = (isWhite() || isBlack()) ? null : getStrings(false, abilityExplanationsTextOffset);
+        params.abilityNames = abilityNames;
+        params.abilityDescriptions = getStrings(false, abilityDescriptionsTextOffset);
+        params.abilityExplanations = (isWhite() || isBlack()) ? null : getStrings(false, abilityExplanationsTextOffset);
 
-        List<String> moveNames = getStrings(false, moveNamesTextOffset);
-        List<String> moveDescriptions = getStrings(false, moveDescriptionsTextOffset);
+        params.moveNames = getStrings(false, moveNamesTextOffset);
+        params.moveDescriptions = getStrings(false, moveDescriptionsTextOffset);
 
-        List<String> itemNameMessages = getStrings(false, itemNameMessagesTextOffset);
-        List<String> itemPluralNames = getStrings(false, itemPluralNamesTextOffset);
-        List<String> itemDescriptions = getStrings(false, itemDescriptionsTextOffset);
+        params.itemNames = itemNames;
+        params.itemNameMessages = getStrings(false, itemNameMessagesTextOffset);
+        params.itemPluralNames = getStrings(false, itemPluralNamesTextOffset);
+        params.itemDescriptions = getStrings(false, itemDescriptionsTextOffset);
+        
+        ParagonLiteHandler paragonLite = new ParagonLiteHandler(params);
+        processParagonLiteHandler(paragonLite, debugMode);
+        paragonLite.save();
 
-        ParagonLiteHandler paragonLite = new ParagonLiteHandler(this, arm9, battleOvlNumber, battleFxOvlNumber, battleServerOvlNumber, trainerAIOvlNumber, pokes, moves,
-                pokemonGraphicsNarc, moveAnimationsNarc, itemDataNarc, itemGraphicsNarc, moveAnimationScriptsNarc, battleAnimationScriptsNarc, battleEventStrings1,
-                battleEventStrings2, abilityNames, abilityDescriptions, abilityExplanations, moveNames, moveDescriptions, itemNames, itemNameMessages, itemPluralNames,
-                itemDescriptions);
+        setStrings(false, battleEventTextOffset1, params.battleEventStrings1);
+        setStrings(false, battleEventTextOffset2, params.battleEventStrings2);
+        setStrings(false, abilityNamesTextOffset, abilityNames);
+        setStrings(false, abilityDescriptionsTextOffset, params.abilityDescriptions);
+        if (isWhite2() || isBlack2())
+            setStrings(false, abilityExplanationsTextOffset, params.abilityExplanations);
+        setStrings(false, moveNamesTextOffset, params.moveNames);
+        setStrings(false, moveDescriptionsTextOffset, params.moveDescriptions);
+        setStrings(false, itemNamesTextOffset, itemNames);
+        setStrings(false, itemNameMessagesTextOffset, params.itemNameMessages);
+        setStrings(false, itemPluralNamesTextOffset, params.itemPluralNames);
+        setStrings(false, itemDescriptionsTextOffset, params.itemDescriptions);
 
+        try {
+            writeNARC(pokemonGraphicsFilename, params.pokemonGraphicsNarc);
+            writeNARC(moveAnimationsFilename, params.moveAnimationsNarc);
+            writeNARC(itemDataFilename, params.itemDataNarc);
+            writeNARC(itemGraphicsFilename, params.itemGraphicsNarc);
+            writeNARC(moveAnimationScriptsFilename, params.moveAnimationScriptsNarc);
+            writeNARC(battleAnimationScriptsFilename, params.battleAnimationScriptsNarc);
+            writeNARC(battleUIGraphicsFilename, params.battleUIGraphicsNarc);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        paragonLite.logUpdates("E:\\Documents\\universal-pokemon-randomizer-zx\\out\\production");
+    }
+
+    private static void processParagonLiteHandler(ParagonLiteHandler paragonLite, boolean debugMode) {
         paragonLite.setBattleEventStrings();
 
         // Code updates
         paragonLite.setReadPokePersonalData();
         paragonLite.setReadPokeBoxData();
         paragonLite.fixChallengeModeLevelBug();
-        paragonLite.setDamageCalcOffensiveStat();
-        paragonLite.setDamageCalcDefensiveStat();
+        paragonLite.setCalcDamageOffensiveValue();
+        paragonLite.setCalcDamageDefensiveValue();
+        paragonLite.setCalcDamage();
         paragonLite.setCritRatio();
-        paragonLite.setCritDamage();
-        paragonLite.setGetStatusDamage();
-        paragonLite.setFrostbite();
+        paragonLite.setStatus();
         paragonLite.setTrapDamage();
         paragonLite.setTypeForPlate();
         paragonLite.setGemDamageBoost();
@@ -5308,33 +5335,5 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         if (debugMode)
             paragonLite.test();
-
-        paragonLite.writeOverlays();
-
-        setStrings(false, battleEventTextOffset1, battleEventStrings1);
-        setStrings(false, battleEventTextOffset2, battleEventStrings2);
-        setStrings(false, abilityNamesTextOffset, abilityNames);
-        setStrings(false, abilityDescriptionsTextOffset, abilityDescriptions);
-        if (isWhite2() || isBlack2())
-            setStrings(false, abilityExplanationsTextOffset, abilityExplanations);
-        setStrings(false, moveNamesTextOffset, moveNames);
-        setStrings(false, moveDescriptionsTextOffset, moveDescriptions);
-        setStrings(false, itemNamesTextOffset, itemNames);
-        setStrings(false, itemNameMessagesTextOffset, itemNameMessages);
-        setStrings(false, itemPluralNamesTextOffset, itemPluralNames);
-        setStrings(false, itemDescriptionsTextOffset, itemDescriptions);
-
-        try {
-            writeNARC(pokemonGraphicsFilename, pokemonGraphicsNarc);
-            writeNARC(moveAnimationsFilename, moveAnimationsNarc);
-            writeNARC(itemDataFilename, itemDataNarc);
-            writeNARC(itemGraphicsFilename, itemGraphicsNarc);
-            writeNARC(moveAnimationScriptsFilename, moveAnimationScriptsNarc);
-            writeNARC(battleAnimationScriptsFilename, battleAnimationScriptsNarc);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        paragonLite.logUpdates("E:\\Documents\\universal-pokemon-randomizer-zx\\out\\production");
     }
 }

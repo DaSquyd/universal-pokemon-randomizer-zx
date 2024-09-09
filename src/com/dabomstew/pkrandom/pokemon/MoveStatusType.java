@@ -30,6 +30,7 @@ public enum MoveStatusType {
     PARALYZE(1, MoveStatusMode.INDEFINITE, 0, 0),
     SLEEP(2, MoveStatusMode.SET_TURNS, 2, 4),
     FREEZE(3, MoveStatusMode.INDEFINITE, 0, 0),
+    FROSTBITE(3, MoveStatusMode.INDEFINITE, 0, 0),
     BURN(4, MoveStatusMode.INDEFINITE, 0, 0),
     POISON(5, MoveStatusMode.INDEFINITE, 0, 0),
     TOXIC_POISON(5, MoveStatusMode.INDEFINITE, 15, 15),
