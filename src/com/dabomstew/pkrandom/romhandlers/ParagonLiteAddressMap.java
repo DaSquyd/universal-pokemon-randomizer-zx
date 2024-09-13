@@ -39,6 +39,7 @@ public class ParagonLiteAddressMap {
         }
 
         abstract boolean hasSize();
+
         abstract int getSize();
 
         @Override
@@ -85,7 +86,7 @@ public class ParagonLiteAddressMap {
         public String getLabel() {
             return label;
         }
-        
+
         @Override
         public boolean hasSize() {
             return encoding == 2;
@@ -279,9 +280,7 @@ public class ParagonLiteAddressMap {
         dataAddress.size = newSize;
     }
 
-    private void relocateAddressInternal(AddressBase addressBase, int newAddress,
-                                         Map<Integer, Set<Integer>> oldOutgoingReferences,
-                                         Map<Integer, Set<Integer>> newOutgoingReferences) {
+    private void relocateAddressInternal(AddressBase addressBase, int newAddress, Map<Integer, Set<Integer>> oldOutgoingReferences, Map<Integer, Set<Integer>> newOutgoingReferences) {
         long startTime = System.currentTimeMillis();
         System.out.printf("relocating address 0x%08X -> 0x%08X", addressBase.address, newAddress);
 
@@ -294,7 +293,7 @@ public class ParagonLiteAddressMap {
         Map<AddressBase, List<ReferenceAddressInterface>> referencesToRemove = new HashMap<>();
         for (Map.Entry<Integer, Set<Integer>> entry : oldOutgoingReferences.entrySet()) {
             int destinationAddress = entry.getKey();
-            ParagonLiteOverlay destinationOverlay = findOverlay(destinationAddress);
+            ParagonLiteOverlay destinationOverlay = findOverlay(destinationAddress, addressBase.overlay);
             if (destinationOverlay == null) {
                 Utils.printProgress(total, current++, String.format("old outgoing: 0x%08X", destinationAddress));
                 continue;
@@ -325,7 +324,7 @@ public class ParagonLiteAddressMap {
         for (Map.Entry<Integer, Set<Integer>> entry : newOutgoingReferences.entrySet()) {
             int destinationAddress = entry.getKey();
 
-            ParagonLiteOverlay destinationOverlay = findOverlay(destinationAddress);
+            ParagonLiteOverlay destinationOverlay = findOverlay(destinationAddress, addressBase.overlay);
             if (destinationOverlay == null) {
                 Utils.printProgress(total, current++, String.format("new outgoing: 0x%08X", destinationAddress));
                 continue;
@@ -458,12 +457,12 @@ public class ParagonLiteAddressMap {
     }
 
     public void addReference(int destinationAddress, ParagonLiteOverlay sourceOverlay, int sourceAddress) {
-        ParagonLiteOverlay destinationOverlay = findOverlay(destinationAddress);
+        ParagonLiteOverlay destinationOverlay = findOverlay(destinationAddress, sourceOverlay);
         addReference(destinationOverlay, destinationAddress, sourceOverlay, sourceAddress);
     }
 
     public void addReference(ParagonLiteOverlay destinationOverlay, int destinationAddress, int sourceAddress) {
-        ParagonLiteOverlay sourceOverlay = findOverlay(sourceAddress);
+        ParagonLiteOverlay sourceOverlay = findOverlay(sourceAddress, destinationOverlay);
         addReference(destinationOverlay, destinationAddress, sourceOverlay, sourceAddress);
     }
 
@@ -572,7 +571,7 @@ public class ParagonLiteAddressMap {
     }
 
     public RemovalData removeReference(int destinationAddress, ParagonLiteOverlay sourceOverlay, int sourceAddress) {
-        ParagonLiteOverlay destinationOverlay = findOverlay(destinationAddress);
+        ParagonLiteOverlay destinationOverlay = findOverlay(destinationAddress, sourceOverlay);
         if (destinationOverlay == null)
             return null;
 
@@ -590,7 +589,7 @@ public class ParagonLiteAddressMap {
 
         if (!destinationAddressBase.hasSize())
             return null;
-        
+
         return new RemovalData(destinationAddress, count, destinationAddressBase.getSize());
     }
 
@@ -602,36 +601,47 @@ public class ParagonLiteAddressMap {
         return getAddressData(overlay, label).address;
     }
 
-    private ParagonLiteOverlay findOverlay(int address) {
-        ParagonLiteOverlay overlay = null;
+    public ParagonLiteOverlay findOverlay(int address, ParagonLiteOverlay defaultOverlay) {
+        List<ParagonLiteOverlay> overlays = new ArrayList<>();
         for (Map.Entry<ParagonLiteOverlay, Map<String, LabeledAddressInterface>> entry : labelMap.entrySet()) {
             ParagonLiteOverlay ovl = entry.getKey();
             int ovlEarliestRamAddress = ovl.getLowerBoundRamAddress();
             int ovlEnd = ovl.getUpperBoundRamAddress();
-            if (address < ovlEarliestRamAddress || address >= ovlEnd)
-                continue;
-
-            if (overlay != null)
-                throw new RuntimeException(String.format("Already found Overlay %d (%s) to contain address 0x%08X",
-                        overlay.number, overlay.name, address));
-
-            overlay = ovl;
+            if (address >= ovlEarliestRamAddress && address < ovlEnd)
+                overlays.add(ovl);
         }
 
-        return overlay;
+        if (overlays.isEmpty())
+            return null; // don't default
+
+        if (overlays.size() == 1)
+            return overlays.get(0);
+
+        ParagonLiteOverlay selectedOverlay = null;
+        for (ParagonLiteOverlay overlay : overlays) {
+            if (!addressMap.get(overlay).containsKey(address))
+                continue;
+
+            if (selectedOverlay != null)
+                throw new RuntimeException(String.format("Already found Overlay %d (%s) to contain address 0x%08X", overlay.number, overlay.name, address));
+
+            selectedOverlay = overlay;
+        }
+
+        return selectedOverlay != null ? selectedOverlay : defaultOverlay;
     }
-    
+
     public void addDefinition(String key, String value) {
         defines.put(key, value);
     }
-    
+
     public void addDefinition(String key, int value) {
         defines.put(key, String.valueOf(value));
     }
 
     public String applyDefinitions(String expression) {
         expression = replaceLabelsInExpression(expression);
-        
+
         StringBuilder stringBuilder = new StringBuilder();
         for (Map.Entry<String, String> entry : defines.entrySet()) {
             stringBuilder.append(entry.getKey());
@@ -640,10 +650,10 @@ public class ParagonLiteAddressMap {
             stringBuilder.append(';');
         }
         stringBuilder.append(expression);
-            
+
         return stringBuilder.toString();
     }
-    
+
     private String replaceLabelsInExpression(String expression) {
         if (!expression.contains("::"))
             return expression;

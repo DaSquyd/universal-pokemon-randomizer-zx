@@ -1,7 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers;
 
 import com.dabomstew.pkrandom.RomFunctions;
-import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.arm.ArmParser;
 
 import java.io.IOException;

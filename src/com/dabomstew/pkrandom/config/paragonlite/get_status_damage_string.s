@@ -15,11 +15,11 @@
     #CASE Curse
     
 Freeze:
-    mov     r0, #((BATTLE_TEXT_HURT_BY_FROSTBITE - 1) >> 1)
+    mov     r0, #((BATTLE_TEXT_HURT_BY_FROSTBITE + 1) >> 1)
     b       ReturnOddShift
     
 Burn:
-    mov     r0, #((BATTLE_TEXT_HURT_BY_BURN - 1) >> 1)
+    mov     r0, #((BATTLE_TEXT_HURT_BY_BURN + 1) >> 1)
     b       ReturnOddShift
     
 Poison:
@@ -32,11 +32,12 @@ Nightmare:
     bx      lr
     
 Curse:
-    mov     r0, #((BATTLE_TEXT_HURT_BY_CURSE - 1) >> 1)
+    mov     r0, #((BATTLE_TEXT_HURT_BY_CURSE + 1) >> 3)
+    lsl     r0, #2
     
 ReturnOddShift:
     lsl     r0, #1
-    add     r0, #1
+    sub     r0, #1
     bx      lr
     
 ReturnNone:

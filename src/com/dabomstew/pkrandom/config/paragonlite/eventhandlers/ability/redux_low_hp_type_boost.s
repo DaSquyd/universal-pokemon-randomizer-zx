@@ -36,7 +36,7 @@
     bne     Return
     
     mov     r0, #0x35 ; offensive stat
-    mov     r1, #4915 ; 1.2x
+    ldr     r1, =4915 ; 1.2x
     bl      Battle::EventVar_MulValue
     
 Return:

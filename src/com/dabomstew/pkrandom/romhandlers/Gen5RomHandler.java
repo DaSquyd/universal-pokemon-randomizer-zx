@@ -470,7 +470,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         pokemonList = Arrays.asList(Arrays.copyOfRange(pokes, 0, Gen5Constants.pokemonCount + 1));
         try {
             movesNarc = this.readNARC(romEntry.getFile("MoveData"));
-            loadMoves(movesNarc);
+            loadMoves(movesNarc, 0);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -543,27 +543,26 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     }
 
-    public void loadMoves(NARCArchive narc) {
-        moves.clear();
-
+    public void loadMoves(NARCArchive narc, int startingIndex) {
         List<String> moveNames = getStrings(false, romEntry.getInt("MoveNamesTextOffset"));
         List<String> moveDescriptions = getStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"));
 
-        int moveIndex = 0;
-        int longestMove = 0;
-        int longest = 0;
-        for (String moveDescription : moveDescriptions) {
-            int descriptionLongest = getLongestLinePixels(moveDescription);
-            if (descriptionLongest > longest) {
-                longestMove = moveIndex;
-                longest = descriptionLongest;
-            }
-            moveIndex++;
-        }
+//        int moveIndex = 0;
+//        int longestMove = 0;
+//        int longest = 0;
+//        for (String moveDescription : moveDescriptions) {
+//            int descriptionLongest = getLongestLinePixels(moveDescription);
+//            if (descriptionLongest > longest) {
+//                longestMove = moveIndex;
+//                longest = descriptionLongest;
+//            }
+//            moveIndex++;
+//        }
         
-        for (int i = 0; i < narc.files.size(); i++) {
-            Move move = new Move();
-            moves.add(move);
+        for (int i = startingIndex; i < narc.files.size(); i++) {
+            if (i >= moves.size())
+                moves.add(new Move());
+            Move move = moves.get(i);
 
             byte[] moveData = narc.files.get(i);
             if (moveData == null)
@@ -629,6 +628,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             move.hitsNonAdjacentTargets = (flags & 0x800) != 0;
             move.isHealMove = (flags & 0x1000) != 0;
             move.bypassesSubstitute = (flags & 0x2000) != 0;
+            
+            // Custom Flags
+            move.isCustomKickMove = (flags & 0x4000) != 0;
+            move.isCustomBiteMove = (flags & 0x8000) != 0;
+            move.isCustomSliceMove = (flags & 0x10000) != 0;
+            move.isCustomTriageMove = (flags & 0x20000) != 0;
+            move.isCustomPowderMove = (flags & 0x40000) != 0;
+            move.isCustomWindMove = (flags & 0x80000) != 0;
+            move.isCustomBallBombMove = (flags & 0x100000) != 0;
+            move.isCustomPulseMove = (flags & 0x200000) != 0;
         }
     }
 
@@ -1136,6 +1145,21 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public List<Move> getMoves() {
         return List.copyOf(moves);
+    }
+
+    @Override
+    public List<Integer> getIllegalMoves() {
+        List<Integer> illegalMoves = new ArrayList<>(super.getIllegalMoves());
+        
+        for (Move move : moves) {
+            if (move.number <= Moves.fusionBolt)
+                continue;
+            
+            if (!ParagonLiteMoves.allowedMoves.contains(move.number))
+                illegalMoves.add(move.number);
+        }
+        
+        return illegalMoves;
     }
 
     @Override
@@ -4190,9 +4214,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public int highestAbilityIndex(Settings settings) {
-        if ((settings.getCurrentMiscTweaks() & MiscTweak.PARAGON_LITE.getValue()) != 0)
-            return ParagonLiteAbilities.MAX;
-
         return Gen5Constants.highestAbilityIndex;
     }
 
@@ -5299,8 +5320,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setBattleEventStrings();
 
         // Code updates
-        paragonLite.setReadPokePersonalData();
-        paragonLite.setReadPokeBoxData();
+        paragonLite.setPokeData();
         paragonLite.fixChallengeModeLevelBug();
         paragonLite.setCalcDamageOffensiveValue();
         paragonLite.setCalcDamageDefensiveValue();
@@ -5330,8 +5350,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 //        if (debugMode)
 //            paragonLite.setTrainerAI(trainerAIScriptsFilename);
 
-        if (debugMode)
-            paragonLite.setTrainers();
+//        if (debugMode)
+        paragonLite.setTrainers();
 
         if (debugMode)
             paragonLite.test();

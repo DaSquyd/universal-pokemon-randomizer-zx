@@ -13,7 +13,7 @@
     cmp     r0, #0
     beq     End
     
-    mov     r1, #3277 ; 80%
+    ldr     r1, =3277 ; 80%
     mov     r0, #53 ; damage
     bl      Battle::EventVar_MulValue
     

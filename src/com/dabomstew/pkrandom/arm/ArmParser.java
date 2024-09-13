@@ -17,7 +17,7 @@ public class ArmParser {
 
     String varDefines = "";
     Map<String, Integer> labelAddressMap = new HashMap<>();
-    Map<Integer, Integer> dataRamAddressMap = new TreeMap<>();
+    Map<Integer, SortedSet<Integer>> dataRamAddressMap = new TreeMap<>();
     Map<Integer, Integer> redirectorAddressMap = new TreeMap<>();
     ParagonLiteOverlay overlay;
     int initialRamAddress = 0;
@@ -143,6 +143,19 @@ public class ArmParser {
                 int labelAddress = labelAddressMap.get(label);
                 int offset = labelAddress - (lastNonSwitchAddress + 4);
                 lines.set(i, "dcw " + offset);
+            } else if (str.startsWith("dcd ")) {
+                String dataValueStr = str.split(" ", 2)[1].trim();
+                int dataValue;
+                try {
+                    dataValue = parseValue(dataValueStr);
+                } catch (DataFormatException e) {
+                    throw new RuntimeException(e);
+                }
+
+                if (!dataRamAddressMap.containsKey(dataValue))
+                    dataRamAddressMap.put(dataValue, new TreeSet<>());
+                SortedSet<Integer> dataRamAddresses = dataRamAddressMap.get(dataValue);
+                dataRamAddresses.add(currentRamAddress);
             } else {
                 lastNonSwitchAddress = currentRamAddress;
             }
@@ -189,22 +202,23 @@ public class ArmParser {
             returnValue[bytes.size() + 1] = (byte) 0x46;
         }
 
-        for (Map.Entry<Integer, Integer> entry : dataRamAddressMap.entrySet()) {
+        for (Map.Entry<Integer, SortedSet<Integer>> entry : dataRamAddressMap.entrySet()) {
             int dataValue = entry.getKey();
 
-            int offset = entry.getValue() - initialRamAddress;
-            returnValue[offset] = (byte) (dataValue & 0xFF);
-            returnValue[offset + 1] = (byte) ((dataValue >> 8) & 0xFF);
-            returnValue[offset + 2] = (byte) ((dataValue >> 16) & 0xFF);
-            returnValue[offset + 3] = (byte) ((dataValue >> 24) & 0xFF);
+            for (int dataAddress : entry.getValue()) {
+                int offset = dataAddress - initialRamAddress;
+                returnValue[offset] = (byte) (dataValue & 0xFF);
+                returnValue[offset + 1] = (byte) ((dataValue >> 8) & 0xFF);
+                returnValue[offset + 2] = (byte) ((dataValue >> 16) & 0xFF);
+                returnValue[offset + 3] = (byte) ((dataValue >> 24) & 0xFF);
 
-            // Assume function refs are between 0x02000000 and 0x08000000
-            if (globalAddressMap == null || overlay == null || !ParagonLiteAddressMap.isValidAddress(dataValue, true))
-                continue;
+                if (globalAddressMap == null || overlay == null || !ParagonLiteAddressMap.isValidAddress(dataValue, true))
+                    continue;
 
-            int targetAddress = alignWord(dataValue);
+                int targetAddress = alignWord(dataValue);
 
-            globalAddressMap.addReference(overlay, targetAddress, entry.getValue());
+                globalAddressMap.addReference(overlay, targetAddress, dataAddress);
+            }
         }
 
         return returnValue;
@@ -450,7 +464,7 @@ public class ArmParser {
             return 2;
 
         if (line.startsWith("dcd "))
-            return 4;
+            return isWordAligned(currentRamAddress) ? 4 : 6;
 
         return 2;
     }
@@ -650,15 +664,30 @@ public class ArmParser {
             // Hack to allow "LDR Rd, =Number" to use "LDR Rd, [PC, #NumberAddressOffset]"
             if (args[1].startsWith("=")) {
                 int imm = parseValue(args[1]);
-                if (!dataRamAddressMap.containsKey(imm)) {
-                    int dataAddress = alignNextWord(initialRamAddress + size);
+                if (!dataRamAddressMap.containsKey(imm))
+                    dataRamAddressMap.put(imm, new TreeSet<>());
+                SortedSet<Integer> dataRamAddresses = dataRamAddressMap.get(imm);
 
-                    dataRamAddressMap.put(imm, dataAddress);
-                    size = dataAddress - initialRamAddress + 4;
+                int maxAddress = alignWord(currentRamAddress + (255 << 2) + 4);
+
+                int newImm = -1;
+                for (int dataAddress : dataRamAddresses) {
+                    if (dataAddress > currentRamAddress && dataAddress <= maxAddress) {
+                        newImm = dataAddress - currentRamAddress;
+                        break;
+                    }
                 }
 
-                imm = dataRamAddressMap.get(imm) - alignWord(currentRamAddress) - 4;
-                return format6(new String[]{args[0], "PC", "#" + imm});
+                if (newImm == -1) {
+                    int endDataAddress = alignNextWord(initialRamAddress + size);
+                    if (endDataAddress <= maxAddress) {
+                        newImm = endDataAddress - currentRamAddress;
+                        dataRamAddresses.add(endDataAddress);
+                        size = endDataAddress - initialRamAddress + 4;
+                    }
+                }
+
+                return format6(new String[]{args[0], "PC", "#" + newImm});
             }
 
             args = new String[]{args[0], args[1].substring(0, args[1].length() - 1), "#0]"};
@@ -945,25 +974,15 @@ public class ArmParser {
         if (rd < 0 || rd > 7)
             throw new DataFormatException();
 
-        // Hack to allow "MOV Rd, #BigNum" to use "LDR Rd, [PC, #BigNumAddressOffset]" 
         if (imm < 0 || imm > 255) {
-            // 0 when word-aligned, 1 when not word-aligned (but still halfword-aligned)
-            if (!dataRamAddressMap.containsKey(imm)) {
-                int dataAddress = alignWord(initialRamAddress + size + 3);
-
-                dataRamAddressMap.put(imm, dataAddress);
-                size = dataAddress - initialRamAddress + 4;
-            }
-
-            imm = dataRamAddressMap.get(imm) - alignWord(currentRamAddress) - 4;
-            return format6(new String[]{args[0], "PC", "#" + imm});
+            throw new DataFormatException("Number was too big; use ldr instead");
         }
 
         return halfwordToBytes(imm | (rd << 8) | (op << 11) | 0x2000);
     }
 
     // Format 4: ALU operations
-    private byte[] format4(String[] args, int op) throws DataFormatException {        
+    private byte[] format4(String[] args, int op) throws DataFormatException {
         if (args.length != 2)
             throw new DataFormatException();
 
@@ -1011,15 +1030,12 @@ public class ArmParser {
     // Format 6: PC-relative load
     private byte[] format6(String[] args) throws DataFormatException {
         int rd = parseRegister(args[0]);
-        int imm = parseValue(args[2]);
+        int imm = alignNextWord(parseValue(args[2]));
 
-        if (rd < 0 || rd > 7 || imm < 0 || imm > 1020)
+        if (rd < 0 || rd > 7 || imm < 0 || imm > ((255 << 2) + 4))
             throw new DataFormatException();
 
-        if (!isWordAligned(imm))
-            throw new DataFormatException("Immediate must be word-aligned.");
-
-        imm = (imm >> 2) & 0xFF;
+        imm = ((imm - 4) >> 2) & 0xFF;
 
         return halfwordToBytes(imm | (rd << 8) | 0x4800);
     }
@@ -1062,18 +1078,15 @@ public class ArmParser {
         int rd = parseRegister(args[0]);
         int rb = parseRegister(args[1]);
         int imm = parseValue(args[2]);
-        if (rd < 0 || rd > 7 || rb < 0 || rb > 7 || imm < 0)
+        if (rd < 0 || rd > 7 || rb < 0 || rb > 7 || imm < 0 || imm > (0x1F << (byteWordFlag == 0 ? 2 : 0)))
             throw new DataFormatException();
 
         if (byteWordFlag == 0) {
             if (!isWordAligned(imm))
                 throw new DataFormatException("Immediate must be word-aligned for STR and LDR.");
 
-            imm >>= 2;
+            imm = imm >> 2;
         }
-
-        if (imm > 31)
-            throw new DataFormatException();
 
         return halfwordToBytes(rd | (rb << 3) | (imm << 6) | (loadStoreFlag << 11) | (byteWordFlag << 12) | 0x6000);
     }
@@ -1383,13 +1396,23 @@ public class ArmParser {
                     (byte) ((value >> 8) & 0xFF),
             };
 
-        if (size == 4)
+        if (size == 4) {
+            if (isWordAligned(currentRamAddress))
+                return new byte[]{
+                        (byte) (value & 0xFF),
+                        (byte) ((value >> 8) & 0xFF),
+                        (byte) ((value >> 16) & 0xFF),
+                        (byte) ((value >> 24) & 0xFF),
+                };
+            
             return new byte[]{
+                    (byte) 0xC0, (byte) 0x46,
                     (byte) (value & 0xFF),
                     (byte) ((value >> 8) & 0xFF),
                     (byte) ((value >> 16) & 0xFF),
                     (byte) ((value >> 24) & 0xFF),
             };
+        }
 
         throw new DataFormatException();
     }

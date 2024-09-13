@@ -61,9 +61,9 @@ public class ParagonLiteAbilities {
             Abilities.triage, // 205
             Abilities.galvanize, // 206
             Abilities.fluffy, // 218
-            Abilities.cottonDown, // 238
+//            Abilities.cottonDown, // 238
             Abilities.windRider, // 274
-            Abilities.windPower, // 277
+//            Abilities.windPower, // 277
             Abilities.sharpness, // 292
             Abilities.supremeOverlord, // 293
             
@@ -74,7 +74,7 @@ public class ParagonLiteAbilities {
             luckyFoot, // 504
             assimilate, // 505
             stoneHome, // 506
-            cacophony, // 507
-            ripTide // 508
+            cacophony // 507
+//            ripTide // 508
     );
 }

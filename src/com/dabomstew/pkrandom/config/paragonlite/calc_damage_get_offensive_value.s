@@ -123,10 +123,12 @@ CallModifyStatValueHandlers:
     mov     r1, r4
     bl      Battle::EventVar_SetValue
     
-    mov     r1, #0x1000
+    mov     r1, #1
+    lsl     r1, #12
     mov     r0, #0x35 ; stat value multiplier
-    ldr     r2, =0x019A
-    lsl     r3, r1, #5 ; 0x20000
+    mov     r2, #0xCD
+    lsl     r2, #1 ; 0x019A (0.1x)
+    lsl     r3, r1, #5 ; 0x50000 (5.0x)
     bl      Battle::EventVar_SetMulValue
     
     mov     r0, r7

@@ -1,445 +1,399 @@
-; r0: void* poke
-; r1: u32   field
-; r2: void* dest
-
-
-; set values
-; unencrypted   = r7
-; Block A       = r5
-; Block B       = r6
-; Block C       = #BLOCK_C
-; Block D       = r1
-
-#DEFINE MAX_FIELD 179
-
-#DEFINE PUSH_STACK_SIZE 0x18 ; r3-r7, lr
-#DEFINE ADD_STACK_SIZE 0x10
-#DEFINE STACK_SIZE (PUSH_STACK_SIZE + ADD_STACK_SIZE)
-
-; Stack Vars
-#DEFINE FIELD (STACK_SIZE - 0x28)
-#DEFINE DEST (STACK_SIZE - 0x24)
-#DEFINE NUM (STACK_SIZE - 0x20)
-#DEFINE BLOCK_C (STACK_SIZE - 0x1C)
-
     push    {r3-r7, lr}
-    sub     sp, #ADD_STACK_SIZE
-    
+    sub     sp, #0x10
     mov     r7, r0
-    str     r1, [sp, #FIELD]
-    str     r2, [sp, #DEST]
-    
-    ; Block A
-    ldr     r1, [r7, #0x00] ; pid
-    mov     r2, #0 ; block num
+    str     r1, [sp, #0x00]
+    str     r2, [sp, #0x04]
+    ldr     r1, [r7, #0x00]
+    mov     r2, #0
     mov     r4, #0
     bl      ARM9::GetPokeBlockShuffle
     mov     r2, #1
     mov     r5, r0
-    str     r2, [sp, #NUM]
-    
-    ; Block B
-    ldr     r1, [r7, #0x00] ; pid
-    mov     r0, r7 ; poke ptr
-    mov     r2, #1 ; block num
+    str     r2, [sp, #0x08]
+    ldr     r1, [r7, #0x00]
+    mov     r0, r7
+    mov     r2, #1
     bl      ARM9::GetPokeBlockShuffle
     mov     r6, r0
-    
-    ; Block C (38)
-    ldr     r1, [r7] ; pid
-    mov     r0, r7 ; poke ptr
-    mov     r2, #2 ; block num
+    ldr     r1, [r7, #0x00]
+    mov     r0, r7
+    mov     r2, #2
     bl      ARM9::GetPokeBlockShuffle
-    str     r0, [sp, #BLOCK_C]
-    
-    ; Block D (50)
-    ldr     r1, [r7] ; pid
-    mov     r0, r7 ; poke ptr
-    mov     r2, #3 ; block num
+    str     r0, [sp, #0x0C]
+    ldr     r1, [r7, #0x00]
+    mov     r0, r7
+    mov     r2, #3
     bl      ARM9::GetPokeBlockShuffle
-    ldr     r2, [sp, #FIELD]
+    ldr     r2, [sp, #0x00]
     mov     r1, r0
-    cmp     r2, #MAX_FIELD
-    bls     Switch
-    b       ReturnZero
-    
-Switch:
+    cmp     r2, #179
+    bls     Label_0x0201DF3A
+    b       Label_0x0201E0AE
+
+Label_0x0201DF3A:
     #SWITCH r2
-    #CASE PID
-    #CASE IsPartyDataDecrypted
-    #CASE BoxDataDecrypted
-    #CASE IsSpeciesEgg
-    #CASE Checksum
-    #CASE Species
-    #CASE Item
-    #CASE OriginalTrainerID
-    #CASE TotalExp
-    #CASE FriendshipOrEggSteps
+    #CASE Label_0x0201E0B2
+    #CASE Label_0x0201E0B6
+    #CASE Label_0x0201E0BE
+    #CASE Label_0x0201E0C2
+    #CASE Label_0x0201E0C8
+    #CASE Label_0x0201E110
+    #CASE Label_0x0201E11E
+    #CASE Label_0x0201E128
+    #CASE Label_0x0201E12C
+    #CASE Label_0x0201E130
     #CASE Ability
     #CASE Markings
-    #CASE Region
-    #CASE EV_HP
-    #CASE EV_Attack
-    #CASE EV_Defense
-    #CASE EV_Speed
-    #CASE EV_SpAtk
-    #CASE EV_SpDef
-    #CASE Contest_Cool
-    #CASE Contest_Beauty
-    #CASE Contest_Cute
-    #CASE Contest_Smart
-    #CASE Contest_Tough
-    #CASE Contest_Sheen
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Ribbon_SinnohUnova
-    #CASE Move
-    #CASE Move
-    #CASE Move
-    #CASE Move
-    #CASE MovePP
-    #CASE MovePP
-    #CASE MovePP
-    #CASE MovePP
-    #CASE MovePPUp
-    #CASE MovePPUp
-    #CASE MovePPUp
-    #CASE MovePPUp
-    #CASE MoveMaxPP
-    #CASE MoveMaxPP
-    #CASE MoveMaxPP
-    #CASE MoveMaxPP
-    #CASE IV_HP
-    #CASE IV_Attack
-    #CASE IV_Defense
-    #CASE IV_Speed
-    #CASE IV_SpAtk
-    #CASE IV_SpDef
-    #CASE IsEgg
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE Ribbon_Hoenn
-    #CASE IsFatefulEncounter
-    #CASE Gender
-    #CASE FormBits
-    #CASE Nature
-    #CASE HasHiddenAbility
-    #CASE UnusedWord_72
-    #CASE PokeName
-    #CASE Nickname
-    #CASE IsNicknamed
-    #CASE UnknownByte_76
-    #CASE OriginGame
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE Ribbon_Sinnoh_Contest
-    #CASE OTNameIn
-    #CASE OTNameOut
-    #CASE DateEggReceived_Year
-    #CASE DateEggReceived_Month
-    #CASE DateEggReceived_Day
-    #CASE DateMet_Year
-    #CASE DateMet_Month
-    #CASE DateMet_Day
-    #CASE EggLocation
-    #CASE MetAtLocation
-    #CASE Pokerus
-    #CASE PokeBall
-    #CASE MetAtLevel
-    #CASE OTGender
-    #CASE EncounterType
-    #CASE UnusedByte_9C
-    #CASE ReturnZero ; Status TPaFBPnSSS
-    #CASE Level
-    #CASE ReturnZero ; Capsule Seal
-    #CASE ReturnZero ; Current HP
-    #CASE ReturnZero ; Max HP
-    #CASE ReturnZero ; Attack Stat
-    #CASE ReturnZero ; Defense Stat
-    #CASE ReturnZero ; Speed Stat
-    #CASE ReturnZero ; Sp. Atk Stat
-    #CASE ReturnZero ; Sp. Def Stat
-    #CASE ReturnZero ; Mail Message
-    #CASE ReturnZero ; Unknown 0xA8
-    #CASE IsSlotFilled
-    #CASE IsEggBothSanityBits
-    #CASE SpeciesIfFilledSlotIsEgg
-    #CASE CombinedIVs
-    #CASE IsNameNotGendered
-    #CASE Type
-    #CASE Type
-    #CASE ReturnZero
-    #CASE ReturnZero
-    #CASE IsNPoke
-    #CASE UnusedByte_B3
-    
-ReturnZero:
+    #CASE Label_0x0201E13C
+    #CASE Label_0x0201E140
+    #CASE Label_0x0201E144
+    #CASE Label_0x0201E148
+    #CASE Label_0x0201E14C
+    #CASE Label_0x0201E150
+    #CASE Label_0x0201E154
+    #CASE Label_0x0201E158
+    #CASE Label_0x0201E15C
+    #CASE Label_0x0201E160
+    #CASE Label_0x0201E164
+    #CASE Label_0x0201E168
+    #CASE Label_0x0201E16C
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E170
+    #CASE Label_0x0201E198
+    #CASE Label_0x0201E198
+    #CASE Label_0x0201E198
+    #CASE Label_0x0201E198
+    #CASE Label_0x0201E1A4
+    #CASE Label_0x0201E1A4
+    #CASE Label_0x0201E1A4
+    #CASE Label_0x0201E1A4
+    #CASE Label_0x0201E1B0
+    #CASE Label_0x0201E1B0
+    #CASE Label_0x0201E1B0
+    #CASE Label_0x0201E1B0
+    #CASE Label_0x0201E1BC
+    #CASE Label_0x0201E1BC
+    #CASE Label_0x0201E1BC
+    #CASE Label_0x0201E1BC
+    #CASE Label_0x0201E1D8
+    #CASE Label_0x0201E1E0
+    #CASE Label_0x0201E1E6
+    #CASE Label_0x0201E1EC
+    #CASE Label_0x0201E1F2
+    #CASE Label_0x0201E1F8
+    #CASE Label_0x0201E1FE
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E212
+    #CASE Label_0x0201E23A
+    #CASE Label_0x0201E23E
+    #CASE Label_0x0201E26E
+    #CASE Label_0x0201E274
+    #CASE Label_0x0201E278
+    #CASE Label_0x0201E282
+    #CASE Label_0x0201E286
+    #CASE Label_0x0201E2A6
+    #CASE Label_0x0201E20E
+    #CASE Label_0x0201E2CA
+    #CASE Label_0x0201E2D0
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E2D6
+    #CASE Label_0x0201E302
+    #CASE Label_0x0201E306
+    #CASE Label_0x0201E30C
+    #CASE Label_0x0201E310
+    #CASE Label_0x0201E314
+    #CASE Label_0x0201E318
+    #CASE Label_0x0201E31C
+    #CASE Label_0x0201E320
+    #CASE Label_0x0201E324
+    #CASE Label_0x0201E328
+    #CASE Label_0x0201E32C
+    #CASE Label_0x0201E330
+    #CASE Label_0x0201E334
+    #CASE Label_0x0201E33C
+    #CASE Label_0x0201E342
+    #CASE Label_0x0201E346
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E100
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E0CC
+    #CASE Label_0x0201E0DA
+    #CASE Label_0x0201E0E4
+    #CASE Label_0x0201E34A
+    #CASE Label_0x0201E37C
+    #CASE Label_0x0201E392
+    #CASE Label_0x0201E392
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E0AE
+    #CASE Label_0x0201E27C
+    #CASE Label_0x0201E3BA
+
+Label_0x0201E0AE:
     mov     r4, #0
-    b       Return
-    
-PID:
-    ldr     r4, [r7]
-    b       Return
-    
-IsPartyDataDecrypted:
+    b       Label_0x0201E3BC
+
+Label_0x0201E0B2:
+    ldr     r4, [r7, #0x00]
+    b       Label_0x0201E3BC
+
+Label_0x0201E0B6:
     ldrh    r0, [r7, #0x04]
-    
-ReturnBit0:
-    lsl     r0, #31
-    
-ReturnBit31:
+
+Label_0x0201E0B8:
+    lsl     r0, r0, #31
+
+Label_0x0201E0BA:
     lsr     r4, r0, #31
-    b       Return
-    
-BoxDataDecrypted:
+    b       Label_0x0201E3BC
+
+Label_0x0201E0BE:
     ldrh    r0, [r7, #0x04]
-    b       ReturnBit1
-    
-IsSpeciesEgg:
+    b       Label_0x0201E27E
+
+Label_0x0201E0C2:
     ldrh    r0, [r7, #0x04]
-    
-ReturnBit2:
-    lsl     r0, #29
-    b       ReturnBit31
-    
-Checksum:
+    lsl     r0, r0, #29
+    b       Label_0x0201E0BA
+
+Label_0x0201E0C8:
     ldrh    r4, [r7, #0x06]
-    b       Return
-    
-IsSlotFilled:
-    ldrh    r0, [r5]
+    b       Label_0x0201E3BC
+
+Label_0x0201E0CC:
+    ldrh    r0, [r5, #0x00]
     cmp     r0, #0
-    bne     ReturnNum
+    bne     Label_0x0201E0D6
     mov     r0, #0
-    str     r0, [sp, #NUM]
-    
-ReturnNum:
-    ldr     r4, [sp, #NUM]
-    b       Return
-    
-IsEggBothSanityBits:
+    str     r0, [sp, #0x08]
+
+Label_0x0201E0D6:
+    ldr     r4, [sp, #0x08]
+    b       Label_0x0201E3BC
+
+Label_0x0201E0DA:
     ldrh    r0, [r7, #0x04]
-    lsl     r0, #29
-    lsr     r4, r0, #31 ; bit 2
-    bne     ReturnJump_0
-    b       ReturnIsEgg
-    
-SpeciesIfFilledSlotIsEgg:
-    ldrh    r4, [r5]
+    lsl     r0, r0, #29
+    lsr     r4, r0, #31
+    bne     Label_0x0201E0FA
+    b       Label_0x0201E208
+
+Label_0x0201E0E4:
+    ldrh    r4, [r5, #0x00]
     cmp     r4, #0
-    beq     ReturnJump_0
+    beq     Label_0x0201E0FA
     ldr     r0, [r6, #0x10]
-    lsl     r0, #1
-    lsr     r0, #31 ; bit 30
-    bne     ReturnEggSpecies
-    
+    lsl     r0, r0, #1
+    lsr     r0, r0, #31
+    bne     Label_0x0201E0FC
     ldrh    r0, [r7, #0x04]
-    lsl     r0, #29
-    lsr     r0, #31 ; bit 2
-    bne     ReturnEggSpecies
-    
-ReturnJump_0:
-    b       Return
-    
-ReturnEggSpecies:
-    ldr     r4, =650 ; egg species
-    b       Return
-    
-Level:
+    lsl     r0, r0, #29
+    lsr     r0, r0, #31
+    bne     Label_0x0201E0FC
+
+Label_0x0201E0FA:
+    b       Label_0x0201E3BC
+
+Label_0x0201E0FC:
+    ldr     r4, =0x028A
+    b       Label_0x0201E3BC
+
+Label_0x0201E100:
     ldrb    r1, [r6, #0x18]
     ldrh    r0, [r5, #0x00]
     ldr     r2, [r5, #0x08]
-    lsl     r1, #24
-    lsr     r1, #27 ; get: 00000000_00000000_00000000_11111000
+    lsl     r1, r1, #24
+    lsr     r1, r1, #27
     bl      ARM9::GetLevelFromExp
-    b       ReturnR0
-    
-Species:
+    b       Label_0x0201E1D4
+
+Label_0x0201E110:
     ldrh    r0, [r7, #0x04]
-    lsl     r0, #29
-    lsr     r0, #31 ; bit 2
-    beq     ReturnSpecies
-    b       ReturnEggSpecies
-    
-ReturnSpecies:
-    ldrh    r4, [r5]
-    b       Return
-    
-Item:
+    lsl     r0, r0, #29
+    lsr     r0, r0, #31
+    beq     Label_0x0201E11A
+    b       Label_0x0201E0FC
+
+Label_0x0201E11A:
+    ldrh    r4, [r5, #0x00]
+    b       Label_0x0201E3BC
+
+Label_0x0201E11E:
     ldrh    r4, [r5, #0x02]
-    ldr     r0, =638 ; Reflecting Glass
+    ldr     r0, =0x027E
     cmp     r4, r0
-    bls     ReturnJump_1
-    b       ReturnZero
-    
-OriginalTrainerID:
+    bls     Label_0x0201E206
+    b       Label_0x0201E0AE
+
+Label_0x0201E128:
     ldr     r4, [r5, #0x04]
-    b       Return
-    
-TotalExp:
+    b       Label_0x0201E3BC
+
+Label_0x0201E12C:
     ldr     r4, [r5, #0x08]
-    b       Return
-    
-FriendshipOrEggSteps:
+    b       Label_0x0201E3BC
+
+Label_0x0201E130:
     ldrb    r4, [r5, #0x0C]
-    b       Return
-   
+    b       Label_0x0201E3BC
+
 Ability:
-; OLD
-;    ldrb    r4, [r5, #0xD]
-;    b       Return
-
-; NEW - Updated to now use bits 6 and 7 of the Markings byte as the high bits of the ability
-    ldrb    r4, [r5, #0x0E]
-    lsr     r4, #6 ; get: 00000000_00000000_00000000_11000000
-    lsl     r4, #8 ; set: 00000000_00000000_00000011_00000000
-    ldrb    r0, [r5, #0x0D]
+    ldrb    r4, [r5, #0x0D]
+    ldrb    r0, [r5, #0x0E]
+    lsr     r0, #6
+    lsl     r0, #8
     orr     r4, r0
-    b       Return
-    
-Markings:
-; OLD
-;    ldrb    r4, [r5, #0x0E]
-;    b       Return
+    b       Label_0x0201E3BC
 
-; NEW - Now has to exclusively use lower 6 bits
+Markings:
     ldrb    r4, [r5, #0x0E]
     lsl     r4, #26
     lsr     r4, #26
-    b       Return
-    
-Region:
+    b       Label_0x0201E3BC
+
+Label_0x0201E13C:
     ldrb    r4, [r5, #0x0F]
-    b       Return
-    
-EV_HP:
+    b       Label_0x0201E3BC
+
+Label_0x0201E140:
     ldrb    r4, [r5, #0x10]
-    b       Return
-    
-EV_Attack:
+    b       Label_0x0201E3BC
+
+Label_0x0201E144:
     ldrb    r4, [r5, #0x11]
-    b       Return
-    
-EV_Defense:
+    b       Label_0x0201E3BC
+
+Label_0x0201E148:
     ldrb    r4, [r5, #0x12]
-    b       Return
-    
-EV_Speed:
+    b       Label_0x0201E3BC
+
+Label_0x0201E14C:
     ldrb    r4, [r5, #0x13]
-    b       Return
-    
-EV_SpAtk:
+    b       Label_0x0201E3BC
+
+Label_0x0201E150:
     ldrb    r4, [r5, #0x14]
-    b       Return
-    
-EV_SpDef:
+    b       Label_0x0201E3BC
+
+Label_0x0201E154:
     ldrb    r4, [r5, #0x15]
-    b       Return
-    
-Contest_Cool:
+    b       Label_0x0201E3BC
+
+Label_0x0201E158:
     ldrb    r4, [r5, #0x16]
-    b       Return
-    
-Contest_Beauty:
+    b       Label_0x0201E3BC
+
+Label_0x0201E15C:
     ldrb    r4, [r5, #0x17]
-    b       Return
-    
-Contest_Cute:
+    b       Label_0x0201E3BC
+
+Label_0x0201E160:
     ldrb    r4, [r5, #0x18]
-    b       Return
-    
-Contest_Smart:
+    b       Label_0x0201E3BC
+
+Label_0x0201E164:
     ldrb    r4, [r5, #0x19]
-    b       Return
-    
-Contest_Tough:
+    b       Label_0x0201E3BC
+
+Label_0x0201E168:
     ldrb    r4, [r5, #0x1A]
-    b       Return
-    
-Contest_Sheen:
+    b       Label_0x0201E3BC
+
+Label_0x0201E16C:
     ldrb    r4, [r5, #0x1B]
-    b       Return
-    
-Ribbon_SinnohUnova:
-    ldr     r2, [sp, #FIELD]
-    ldr     r0, [sp, #NUM]
-    sub     r2, #0x19
+    b       Label_0x0201E3BC
+
+Label_0x0201E170:
+    ldr     r2, [sp, #0x00]
+    ldr     r0, [sp, #0x08]
+    sub     r2, #25
     mov     r1, #0
-    str     r2, [sp, #FIELD]
-    blx     ARM9::LeftShift64
+    str     r2, [sp, #0x00]
+    bl      Unk_208D65A
     ldr     r3, [r5, #0x1C]
     mov     r2, #0
     and     r2, r1
@@ -449,111 +403,112 @@ Ribbon_SinnohUnova:
     eor     r1, r2
     eor     r0, r3
     orr     r0, r1
-    bne     Ribbon_SinnohUnova_ReturnNum
+    bne     Label_0x0201E196
     mov     r0, #0
-    str     r0, [sp, #NUM]
-Ribbon_SinnohUnova_ReturnNum:
-    b       ReturnNum
-    
-Move:
-    ldr     r0, [sp, #FIELD]
-    sub     r0, #0x36
-    str     r0, [sp, #FIELD]
-    lsl     r0, #1
+    str     r0, [sp, #0x08]
+
+Label_0x0201E196:
+    b       Label_0x0201E0D6
+
+Label_0x0201E198:
+    ldr     r0, [sp, #0x00]
+    sub     r0, #54
+    str     r0, [sp, #0x00]
+    lsl     r0, r0, #1
     ldrh    r4, [r6, r0]
-    b       Return
-    
-MovePP:
-    ldr     r0, [sp, #FIELD]
-    sub     r0, #0x3A
-    str     r0, [sp, #FIELD]
-    add     r0, r6
+    b       Label_0x0201E3BC
+
+Label_0x0201E1A4:
+    ldr     r0, [sp, #0x00]
+    sub     r0, #58
+    str     r0, [sp, #0x00]
+    add     r0, r6, r0
     ldrb    r4, [r0, #0x08]
-    b       Return
-    
-MovePPUp:
-    ldr     r0, [sp, #FIELD]
-    sub     r0, #0x3E
-    str     r0, [sp, #FIELD]
-    add     r0, r6
+    b       Label_0x0201E3BC
+
+Label_0x0201E1B0:
+    ldr     r0, [sp, #0x00]
+    sub     r0, #62
+    str     r0, [sp, #0x00]
+    add     r0, r6, r0
     ldrb    r4, [r0, #0x0C]
-    b       Return
-    
-MoveMaxPP:
-    ldr     r0, [sp, #FIELD]
-    sub     r0, #0x42
-    str     r0, [sp, #FIELD]
-    lsl     r0, #1
+    b       Label_0x0201E3BC
+
+Label_0x0201E1BC:
+    ldr     r0, [sp, #0x00]
+    sub     r0, #66
+    str     r0, [sp, #0x00]
+    lsl     r0, r0, #1
     ldrh    r0, [r6, r0]
     cmp     r0, #0
-    beq     ReturnJump_1
-    ldr     r1, [sp, #FIELD]
-    add     r1, r6
+    beq     Label_0x0201E206
+    ldr     r1, [sp, #0x00]
+    add     r1, r6, r1
     ldrb    r1, [r1, #0x0C]
     bl      ARM9::GetMoveMaxPP
-    
-ReturnR0:
-    mov     r4, r0
-    b       Return
-    
-IV_HP:
-    ldr     r0, [r6, #0x10]
-    lsl     r0, #27
 
-ReturnHigh5Bits:
+Label_0x0201E1D4:
+    mov     r4, r0
+    b       Label_0x0201E3BC
+
+Label_0x0201E1D8:
+    ldr     r0, [r6, #0x10]
+    lsl     r0, r0, #27
+
+Label_0x0201E1DC:
     lsr     r4, r0, #27
-    b       Return
-    
-IV_Attack:
+    b       Label_0x0201E3BC
+
+Label_0x0201E1E0:
     ldr     r0, [r6, #0x10]
-    lsl     r0, #22
-    b       ReturnHigh5Bits
-    
-IV_Defense:
+    lsl     r0, r0, #22
+    b       Label_0x0201E1DC
+
+Label_0x0201E1E6:
     ldr     r0, [r6, #0x10]
-    lsl     r0, #17
-    b       ReturnHigh5Bits
-    
-IV_Speed:
+    lsl     r0, r0, #17
+    b       Label_0x0201E1DC
+
+Label_0x0201E1EC:
     ldr     r0, [r6, #0x10]
-    lsl     r0, #12
-    b       ReturnHigh5Bits
-    
-IV_SpAtk:
+    lsl     r0, r0, #12
+    b       Label_0x0201E1DC
+
+Label_0x0201E1F2:
     ldr     r0, [r6, #0x10]
-    lsl     r0, #7
-    b       ReturnHigh5Bits
-    
-IV_SpDef:
+    lsl     r0, r0, #7
+    b       Label_0x0201E1DC
+
+Label_0x0201E1F8:
     ldr     r0, [r6, #0x10]
-    lsl     r0, #2
-    b       ReturnHigh5Bits
-    
-IsEgg:
+    lsl     r0, r0, #2
+    b       Label_0x0201E1DC
+
+Label_0x0201E1FE:
     ldrh    r0, [r7, #0x04]
-    lsl     r0, #29
-    lsr     r4, r0, #31 ; bit 2
-    beq     ReturnIsEgg
-    
-ReturnJump_1:
-    b       Return
-        
-ReturnIsEgg:
+    lsl     r0, r0, #29
+    lsr     r4, r0, #31
+    beq     Label_0x0201E208
+
+Label_0x0201E206:
+    b       Label_0x0201E3BC
+
+Label_0x0201E208:
     ldr     r0, [r6, #0x10]
-    lsl     r0, #1
-    b       ReturnBit31
-    
-IsNicknamed:
+    lsl     r0, r0, #1
+    b       Label_0x0201E0BA
+
+Label_0x0201E20E:
     ldr     r0, [r6, #0x10]
-    b       ReturnBit31
-    
-Ribbon_Hoenn:
-    ldr     r2, [sp, #FIELD]
-    ldr     r0, [sp, #NUM]
-    sub     r2, #0x4D
+    b       Label_0x0201E0BA
+
+Label_0x0201E212:
+    ldr     r2, [sp, #0x00]
+    ldr     r0, [sp, #0x08]
+    sub     r2, #77
     mov     r1, #0
-    str     r2, [sp, #FIELD]
-    blx     ARM9::LeftShift64
+    str     r2, [sp, #0x00]
+    bl      ARM9::LeftShift64
     ldr     r3, [r6, #0x14]
     mov     r2, #0
     and     r2, r1
@@ -563,134 +518,123 @@ Ribbon_Hoenn:
     eor     r1, r2
     eor     r0, r3
     orr     r0, r1
-    bne     Ribbon_Hoenn_ReturnNum
+    bne     Label_0x0201E238
     mov     r0, #0
-    str     r0, [sp, #NUM]
-Ribbon_Hoenn_ReturnNum:
-    b       ReturnNum
-    
-IsFatefulEncounter:
-    ldrb    r0, [r6, #0x18]
-    b       ReturnBit0
-    
-; TODO: investigate when gender is initially set
-Gender:
-; OLD
-;    ldrb    r1, [r6, #0x18]
-;    ldrh    r0, [r5]
-;    ldr     r2, [r7]
-;    lsl     r1, #24
-;    lsr     r1, #27
-;    bl      ARM9::ReduceGenderType
-;    mov     r4, r0
-;    ldrb    r0, [r6, #0x18]
-;    mov     r1, #6
-;    bic     r0, r1
-;    lsl     r1, r4, #24
-;    lsr     r1, #24
-;    lsl     r1, #30
-;    lsr     r1, #29
-;    orr     r0, r1
-;    strb    r0, [r6, #0x18]
-;    mov     r0, r7
-;    add     r0, #8
-;    mov     r1, #0x80
-;    bl      ARM9::GeneratePokeChecksum
-;    strh    r0, [r7, #6]
-;    b       Return
+    str     r0, [sp, #0x08]
 
-; NEW
-    ldrb    r4, [r6, #0x18]
-    lsl     r4, #29
-    lsr     r4, #30 ; bits 1 and 2
-    b       Return
-    
-FormBits:
+Label_0x0201E238:
+    b       Label_0x0201E0D6
+
+Label_0x0201E23A:
     ldrb    r0, [r6, #0x18]
-    lsl     r0, #24
-    b       ReturnHigh5Bits
-    
-Nature:
+    b       Label_0x0201E0B8
+
+Label_0x0201E23E:
+    ldrb    r1, [r6, #0x18]
+    ldrh    r0, [r5, #0x00]
+    ldr     r2, [r7, #0x00]
+    lsl     r1, r1, #24
+    lsr     r1, r1, #27
+    bl      ARM9::ReduceGenderType
+    mov     r4, r0
+    ldrb    r0, [r6, #0x18]
+    mov     r1, #6
+    bic     r0, r1
+    lsl     r1, r4, #30
+    lsr     r1, r1, #29
+    orr     r0, r1
+    strb    r0, [r6, #0x18]
+    mov     r0, r7
+    add     r0, #8
+    mov     r1, #128
+    bl      ARM9::GeneratePokeChecksum
+    strh    r0, [r7, #0x06]
+    b       Label_0x0201E3BC
+
+Label_0x0201E26E:
+    ldrb    r0, [r6, #0x18]
+    lsl     r0, r0, #24
+    b       Label_0x0201E1DC
+
+Label_0x0201E274:
     ldrb    r4, [r6, #0x19]
-    b       Return
-    
-HasHiddenAbility:
+    b       Label_0x0201E3BC
+
+Label_0x0201E278:
     ldrh    r0, [r6, #0x1A]
-    b       ReturnBit0
-    
-IsNPoke:
+    b       Label_0x0201E0B8
+
+Label_0x0201E27C:
     ldrh    r0, [r6, #0x1A]
-    
-ReturnBit1:
-    lsl     r0, #30
-    b       ReturnBit31
-    
-UnusedWord_72:
+
+Label_0x0201E27E:
+    lsl     r0, r0, #30
+    b       Label_0x0201E0BA
+
+Label_0x0201E282:
     ldr     r4, [r6, #0x1C]
-    b       Return
-    
-PokeName:
+    b       Label_0x0201E3BC
+
+Label_0x0201E286:
     ldrh    r0, [r7, #0x04]
-    lsl     r0, #29
-    lsr     r0, #31 ; bit 2 (is egg)
-    beq     PokeName_IsNotEgg
-    
-    ldr     r0, =ARM9::Data_CurrentMsg
-    ldr     r1, =0x028B ; message id
-    ldr     r0, [r0] ; message data ptr
-    ldr     r2, [sp, #DEST] ; str buf ptr
+    lsl     r0, r0, #29
+    lsr     r0, r0, #31
+    beq     Label_0x0201E29C
+    ldr     r0, =0x0209A474
+    ldr     r1, =0x028B
+    ldr     r0, [r0, #0x00]
+    ldr     r2, [sp, #0x04]
     bl      ARM9::GetTextFillStrBuf
-    b       Return
-    
-PokeName_IsNotEgg:
-    ldr     r0, [sp, #DEST] ; dest
-    ldr     r1, [sp, #BLOCK_C] ; src
-    
-ReturnWCharsCopy:
+    b       Label_0x0201E3BC
+
+Label_0x0201E29C:
+    ldr     r0, [sp, #0x04]
+    ldr     r1, [sp, #0x0C]
+
+Label_0x0201E2A0:
     bl      ARM9::WCharsCopy
-    b       Return
-    
-Nickname:
+    b       Label_0x0201E3BC
+
+Label_0x0201E2A6:
     ldrh    r0, [r7, #0x04]
-    lsl     r0, #29
-    lsr     r0, #31 ; bit 2 (is egg)
-    beq     Nickname_IsNotEgg
-    
-    ldr     r0, =ARM9::Data_CurrentMsg
-    ldr     r1, =0x028B ; message id
-    ldr     r0, [r0] ; message data ptr
-    ldr     r2, [sp, #DEST] ; str buf ptr
-    mov     r3, #11 ; length
+    lsl     r0, r0, #29
+    lsr     r0, r0, #31
+    beq     Label_0x0201E2BE
+    ldr     r0, =0x0209A474
+    ldr     r1, =0x028B
+    ldr     r0, [r0, #0x00]
+    ldr     r2, [sp, #0x04]
+    mov     r3, #11
     bl      ARM9::FillStrBufFromFile
-    b       Return
-    
-Nickname_IsNotEgg:
-    ldr     r0, [sp, #BLOCK_C]
-    ldr     r1, [sp, #DEST]
-    mov     r2, #11 ; length
-    
-ReturnWCharsNCopy:
+    b       Label_0x0201E3BC
+
+Label_0x0201E2BE:
+    ldr     r0, [sp, #0x0C]
+    ldr     r1, [sp, #0x04]
+    mov     r2, #11
+
+Label_0x0201E2C4:
     bl      ARM9::WCharsNCopy
-    b       Return
-    
-UnknownByte_76:
-    ldr     r0, [sp, #BLOCK_C]
+    b       Label_0x0201E3BC
+
+Label_0x0201E2CA:
+    ldr     r0, [sp, #0x0C]
     ldrb    r4, [r0, #0x16]
-    b       Return
-    
-OriginGame:
-    ldr     r0, [sp, #BLOCK_C]
+    b       Label_0x0201E3BC
+
+Label_0x0201E2D0:
+    ldr     r0, [sp, #0x0C]
     ldrb    r4, [r0, #0x17]
-    b       Return
-    
-Ribbon_Sinnoh_Contest:
-    ldr     r2, [sp, #FIELD]
-    ldr     r0, [sp, #NUM]
-    sub     r2, #0x78
+    b       Label_0x0201E3BC
+
+Label_0x0201E2D6:
+    ldr     r2, [sp, #0x00]
+    ldr     r0, [sp, #0x08]
+    sub     r2, #120
     mov     r1, #0
-    str     r2, [sp, #FIELD]
-    blx     ARM9::LeftShift64
-    ldr     r2, [sp, #BLOCK_C]
+    str     r2, [sp, #0x00]
+    bl      ARM9::LeftShift64
+    ldr     r2, [sp, #0x0C]
     ldr     r4, [r2, #0x18]
     ldr     r2, [r2, #0x1C]
     mov     r3, r4
@@ -701,165 +645,136 @@ Ribbon_Sinnoh_Contest:
     eor     r1, r2
     eor     r0, r3
     orr     r0, r1
-    bne     Ribbon_Sinnoh_Contest_ReturnNum
+    bne     Label_0x0201E300
     mov     r0, #0
-    str     r0, [sp, #NUM]
-Ribbon_Sinnoh_Contest_ReturnNum:
-    b       ReturnNum
-    
-OTNameIn:
-    ldr     r0, [sp, #DEST]
-    b       ReturnWCharsCopy
-    
-OTNameOut:
-    ldr     r1, [sp, #DEST]
+    str     r0, [sp, #0x08]
+
+Label_0x0201E300:
+    b       Label_0x0201E0D6
+
+Label_0x0201E302:
+    ldr     r0, [sp, #0x04]
+    b       Label_0x0201E2A0
+
+Label_0x0201E306:
+    ldr     r1, [sp, #0x04]
     mov     r2, #8
-    b       ReturnWCharsNCopy
-    
-DateEggReceived_Year:
+    b       Label_0x0201E2C4
+
+Label_0x0201E30C:
     ldrb    r4, [r1, #0x10]
-    b       Return
-    
-DateEggReceived_Month:
+    b       Label_0x0201E3BC
+
+Label_0x0201E310:
     ldrb    r4, [r1, #0x11]
-    b       Return
-    
-DateEggReceived_Day:
+    b       Label_0x0201E3BC
+
+Label_0x0201E314:
     ldrb    r4, [r1, #0x12]
-    b       Return
-    
-DateMet_Year:
+    b       Label_0x0201E3BC
+
+Label_0x0201E318:
     ldrb    r4, [r1, #0x13]
-    b       Return
-    
-DateMet_Month:
+    b       Label_0x0201E3BC
+
+Label_0x0201E31C:
     ldrb    r4, [r1, #0x14]
-    b       Return
-    
-DateMet_Day:
+    b       Label_0x0201E3BC
+
+Label_0x0201E320:
     ldrb    r4, [r1, #0x15]
-    b       Return
-    
-EggLocation:
+    b       Label_0x0201E3BC
+
+Label_0x0201E324:
     ldrh    r4, [r1, #0x16]
-    b       Return
+    b       Label_0x0201E3BC
 
-MetAtLocation:
+Label_0x0201E328:
     ldrh    r4, [r1, #0x18]
-    b       Return
-    
-Pokerus:
-    ldrb    r4, [r1, #0x1A]
-    b       Return
-    
-PokeBall:
-    ldrb    r4, [r1, #0x1B]
-    b       Return
-    
-MetAtLevel:
-    ldrb    r0, [r1, #0x1C]
-    lsl     r0, #25
-    lsr     r4, r0, #25
-    b       Return
-    
-OTGender:
-    ldrb    r0, [r1, #0x1C]
-    lsl     r0, #24
-    b       ReturnBit31
-    
-EncounterType:
-    ldrb    r4, [r1, #0x1D]
-    b       Return
-    
-UnusedByte_9C:
-    ldrb    r4, [r1, #0x1E]
-    b       Return
-    
-CombinedIVs:
-; OLD
-;    ldr     r4, [r6, #0x10]
-;
-;    lsl     r0, r4, #2
-;    lsr     r0, #27
-;    lsl     r5, r0, #25
-;
-;    lsl     r0, r4, #7
-;    lsr     r0, #27
-;    lsl     r3, r0, #20
-;
-;    lsl     r0, r4, #12
-;    lsr     r0, #27
-;    lsl     r2, r0, #15
-;
-;    lsl     r0, r4, #17
-;    lsr     r0, #27
-;    lsl     r1, r0, #10
-;
-;    lsl     r0, r4, #27
-;    lsl     r4, #22
-;    lsr     r4, #27
-;    lsr     r0, #27
-;    lsl     r4, #5
-;
-;    orr     r0, r4
-;    orr     r0, r1
-;    orr     r0, r2
-;    orr     r0, r3
-;    mov     r4, r5
-;    orr     r4, r0
-;    b       Return
+    b       Label_0x0201E3BC
 
-; NEW
+Label_0x0201E32C:
+    ldrb    r4, [r1, #0x1A]
+    b       Label_0x0201E3BC
+
+Label_0x0201E330:
+    ldrb    r4, [r1, #0x1B]
+    b       Label_0x0201E3BC
+
+Label_0x0201E334:
+    ldrb    r0, [r1, #0x1C]
+    lsl     r0, r0, #25
+    lsr     r4, r0, #25
+    b       Label_0x0201E3BC
+
+Label_0x0201E33C:
+    ldrb    r0, [r1, #0x1C]
+    lsl     r0, r0, #24
+    b       Label_0x0201E0BA
+
+Label_0x0201E342:
+    ldrb    r4, [r1, #0x1D]
+    b       Label_0x0201E3BC
+
+Label_0x0201E346:
+    ldrb    r4, [r1, #0x1E]
+    b       Label_0x0201E3BC
+
+Label_0x0201E34A:
     ldr     r4, [r6, #0x10]
     lsl     r4, #2
     lsr     r4, #2
-    b       Return
-    
-IsNameNotGendered:
-    ldrh    r0, [r5]
-    cmp     r0, #29 ; Nidoran F
-    beq     IsNameNotGendered_CheckIsNicknamed
-    cmp     r0, #32 ; Nidoran M
-    bne     ReturnOne
-    
-IsNameNotGendered_CheckIsNicknamed:
+    b       Label_0x0201E3BC
+
+Label_0x0201E37C:
+    ldrh    r0, [r5, #0x00]
+    cmp     r0, #29
+    beq     Label_0x0201E386
+    cmp     r0, #32
+    bne     Label_0x0201E38E
+
+Label_0x0201E386:
     ldr     r0, [r6, #0x10]
-    lsr     r0, #31
-    bne     ReturnOne
-    b       ReturnZero
-    
-ReturnOne:
+    lsr     r0, r0, #31
+    bne     Label_0x0201E38E
+    b       Label_0x0201E0AE
+
+Label_0x0201E38E:
     mov     r4, #1
-    b       Return
-    
-Type:
-    ldrh    r0, [r5]
-    ldr     r1, =493 ; Arecus
+    b       Label_0x0201E3BC
+
+Label_0x0201E392:
+    ldrh    r0, [r5, #0x00]
+    ldr     r1, =0x01ED
     cmp     r0, r1
-    bne     Type_Standard
-    
+    bne     Label_0x0201E3A8
     ldrb    r1, [r5, #0x0D]
-    cmp     r1, #121 ; Multitype
-    bne     Type_Standard
-    
+    cmp     r1, #121
+    bne     Label_0x0201E3A8
     ldrh    r0, [r5, #0x02]
     bl      ARM9::GetTypeForPlate
-    b       ReturnR0
-    
-Type_Standard:
+    b       Label_0x0201E1D4
+
+Label_0x0201E3A8:
     ldrb    r1, [r6, #0x18]
-    ldr     r2, [sp, #FIELD]
-    lsl     r1, #24
-    sub     r2, #0xA8
-    lsr     r1, #27
-    str     r2, [sp, #FIELD]
+    ldr     r2, [sp, #0x00]
+    lsl     r1, r1, #24
+    sub     r2, #168
+    lsr     r1, r1, #27
+    str     r2, [sp, #0x00]
     bl      ARM9::GetPersonalField
-    b       ReturnR0
-    
-UnusedByte_B3:
+    b       Label_0x0201E1D4
+
+Label_0x0201E3BA:
     ldrb    r4, [r1, #0x1F]
-    
-Return:
+
+Label_0x0201E3BC:
     mov     r0, r4
-    add     sp, #ADD_STACK_SIZE
+    add     sp, #0x10
     pop     {r3-r7, pc}
+    
+    dcd     0x028A
+    dcd     0x027E
+    dcd     0x0209A474
+    dcd     0x028B
+    dcd     0x01ED

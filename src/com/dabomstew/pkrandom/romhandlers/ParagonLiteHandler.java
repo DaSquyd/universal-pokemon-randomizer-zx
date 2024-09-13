@@ -4,6 +4,8 @@ import com.dabomstew.pkrandom.BitmapFile;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.GFXFunctions;
 import com.dabomstew.pkrandom.Utils;
+import com.dabomstew.pkrandom.arm.ArmDecoder;
+import com.dabomstew.pkrandom.arm.exceptions.ArmDecodeException;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -63,6 +65,7 @@ public class ParagonLiteHandler {
     ParagonLiteOverlay BattleLevelOvl;
     ParagonLiteOverlay battleServerOvl;
     ParagonLiteOverlay trainerAIOvl;
+    ParagonLiteOverlay pcOvl;
 
     Pokemon[] pokes;
     List<Move> moves;
@@ -162,6 +165,7 @@ public class ParagonLiteHandler {
         int BattleLevelOvlNumber = romEntry.getInt("BattleLevelOvlNumber");
         int battleServerOvlNumber = romEntry.getInt("BattleServerOvlNumber");
         int trainerAIOvlNumber = romEntry.getInt("TrainerAIOvlNumber");
+        int pcOvlNumber = romEntry.getInt("PCOvlNumber");
 
         globalAddressMap = new ParagonLiteAddressMap();
         try {
@@ -182,6 +186,10 @@ public class ParagonLiteHandler {
             byte[] trainerAIOvlData = romHandler.readOverlay(trainerAIOvlNumber);
             int trainerAIOvlAddress = romHandler.getOverlayAddress(trainerAIOvlNumber);
             trainerAIOvl = new ParagonLiteOverlay(romHandler, trainerAIOvlNumber, "TrainerAI", trainerAIOvlData, trainerAIOvlAddress, ParagonLiteOverlay.Insertion.Front, globalAddressMap);
+
+            byte[] pcOvlData = romHandler.readOverlay(pcOvlNumber);
+            int pcOvlAddress = romHandler.getOverlayAddress(pcOvlNumber);
+            pcOvl = new ParagonLiteOverlay(romHandler, pcOvlNumber, "PC", pcOvlData, pcOvlAddress, ParagonLiteOverlay.Insertion.Back, globalAddressMap);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -297,6 +305,7 @@ public class ParagonLiteHandler {
         BattleLevelOvl.save(romHandler);
         battleServerOvl.save(romHandler);
         trainerAIOvl.save(romHandler);
+        pcOvl.save(romHandler);
         System.out.printf(" - done, time=%dms\n", System.currentTimeMillis() - startTime);
     }
 
@@ -474,19 +483,100 @@ public class ParagonLiteHandler {
         battleEventStrings2.add/* 1211*/("The foe's \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
     }
 
-    public void setReadPokePersonalData() {
-        // Updates the personal data to allow for abilities up to index 1023
-        List<String> lines = readLines("read_poke_personal_data.s");
-        arm9.writeCodeForceInline(lines, "ReadPokePersonalData");
-        System.out.println("Set ReadPokePersonalData");
-    }
+    public void setPokeData() {
+        globalAddressMap.addDefinition("BOXPOKE_PID", 0x00);
+        globalAddressMap.addDefinition("BOXPOKE_SANITY_FLAGS", 0x04);
+        globalAddressMap.addDefinition("BOXPOKE_CHECKSUM", 0x06);
+        globalAddressMap.addDefinition("BOXPOKE_CONTENT_BUFFER", 0x08);
+        
+        globalAddressMap.addDefinition("BOXPOKEA_SPECIES", 0x00);
+        globalAddressMap.addDefinition("BOXPOKEA_HELD_ITEM", 0x02);
+        globalAddressMap.addDefinition("BOXPOKEA_OT_ID", 0x04);
+        globalAddressMap.addDefinition("BOXPOKEA_TOTAL_EXP", 0x08);
+        globalAddressMap.addDefinition("BOXPOKEA_FRIENDSHIP", 0x0C);
+        globalAddressMap.addDefinition("BOXPOKEA_MARKINGS", 0x0E);
+        globalAddressMap.addDefinition("BOXPOKEA_REGION", 0x0F);
+        globalAddressMap.addDefinition("BOXPOKEA_EV_HP", 0x10);
+        globalAddressMap.addDefinition("BOXPOKEA_EV_ATK", 0x11);
+        globalAddressMap.addDefinition("BOXPOKEA_EV_DEF", 0x12);
+        globalAddressMap.addDefinition("BOXPOKEA_EV_SPE", 0x13);
+        globalAddressMap.addDefinition("BOXPOKEA_EV_SPA", 0x14);
+        globalAddressMap.addDefinition("BOXPOKEA_EV_SPD", 0x15);
+        globalAddressMap.addDefinition("BOXPOKEA_CONTEST_COOL", 0x16);
+        globalAddressMap.addDefinition("BOXPOKEA_CONTEST_BEAUTY", 0x17);
+        globalAddressMap.addDefinition("BOXPOKEA_CONTEST_CUTE", 0x18);
+        globalAddressMap.addDefinition("BOXPOKEA_CONTEST_SMART", 0x19);
+        globalAddressMap.addDefinition("BOXPOKEA_CONTEST_TOUGH", 0x1A);
+        globalAddressMap.addDefinition("BOXPOKEA_CONTEST_SHEEN", 0x1B);
+        globalAddressMap.addDefinition("BOXPOKEA_RIBBONS_1", 0x1C);
+        
+        globalAddressMap.addDefinition("BOXPOKEB_MOVES", 0x00);
+        globalAddressMap.addDefinition("BOXPOKEB_MOVE_PP", 0x08);
+        globalAddressMap.addDefinition("BOXPOKEB_MOVE_PP_UPS", 0x0C);
+        globalAddressMap.addDefinition("BOXPOKEB_IV_BITS", 0x10);
+        globalAddressMap.addDefinition("BOXPOKEB_RIBBONS_2", 0x14);
+        globalAddressMap.addDefinition("BOXPOKEB_GENDER_AND_FORM", 0x18);
+        globalAddressMap.addDefinition("BOXPOKEB_NATURE", 0x19);
+        globalAddressMap.addDefinition("BOXPOKEB_HIDDEN_ABILITY_AND_N", 0x1A);
+        globalAddressMap.addDefinition("BOXPOKEB_UNK_DWORD_1C", 0x1C);
+        
+        globalAddressMap.addDefinition("BOXPOKEC_NICKNAME", 0x00);
+        globalAddressMap.addDefinition("BOXPOKEC_UNK_BYTE_16", 0x16);
+        globalAddressMap.addDefinition("BOXPOKEC_ORIGIN_GAME", 0x17);
+        globalAddressMap.addDefinition("BOXPOKEC_RIBBONS_3", 0x18);
+        
+        globalAddressMap.addDefinition("BOXPOKED_OT_NAME", 0x00);
+        globalAddressMap.addDefinition("BOXPOKED_HATCH_YEAR", 0x10);
+        globalAddressMap.addDefinition("BOXPOKED_HATCH_MONTH", 0x11);
+        globalAddressMap.addDefinition("BOXPOKED_HATCH_DAY", 0x12);
+        globalAddressMap.addDefinition("BOXPOKED_MET_YEAR", 0x13);
+        globalAddressMap.addDefinition("BOXPOKED_MET_MONTH", 0x14);
+        globalAddressMap.addDefinition("BOXPOKED_MET_DAY", 0x15);
+        globalAddressMap.addDefinition("BOXPOKED_HATCH_LOCATION", 0x16);
+        globalAddressMap.addDefinition("BOXPOKED_MET_LOCATION", 0x18);
+        globalAddressMap.addDefinition("BOXPOKED_POKERUS", 0x1A);
+        globalAddressMap.addDefinition("BOXPOKED_POKE_BALL", 0x1B);
+        globalAddressMap.addDefinition("BOXPOKED_MET_LEVEL_AND_OT_GENDER", 0x1C);
+        globalAddressMap.addDefinition("BOXPOKED_CATCH_TERRAIN_TILE_TYPE", 0x1D);
+        globalAddressMap.addDefinition("BOXPOKED_UNK_BYTE_1E", 0x1E);
+        globalAddressMap.addDefinition("BOXPOKED_POKE_STAR_FAME", 0x1F);
 
-    public void setReadPokeBoxData() {
+        ArmDecoder decoder = new ArmDecoder();
+
+        int start = 0x021BF1E8;
+        int end = 0x021BF220;
+
+        byte[] bytes = new byte[end - start];
+        for (int i = 0; i < bytes.length; i++) {
+            int romAddress = pcOvl.ramToRomAddress(start + i);
+            bytes[i] = (byte)pcOvl.readUnsignedByte(romAddress);
+        }
+
+        List<String> testLines = new ArrayList<>();
+        try {
+            testLines = decoder.decode(pcOvl, start, bytes, globalAddressMap);
+        } catch (ArmDecodeException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        // TODO: Because of PokeStar Studios, these are different between versions!
+        
+        // Updates the personal data to allow for abilities up to index 1023
+        List<String> readPersonalDatalines = readLines("read_poke_personal_data.s");
+        arm9.writeCodeForceInline(readPersonalDatalines, "ReadPokePersonalData");
+
         // Updates the box data to allow for abilities up to index 1023
         // Also fixes the Azurill->Marill gender bug
-        List<String> lines = readLines("read_poke_box_data.s");
-        arm9.writeCodeForceInline(lines, "ReadPokeBoxData");
-        System.out.println("Set ReadPokeBoxData");
+        List<String> readBoxDataLines = readLines("read_poke_box_data.s");
+        arm9.writeCodeForceInline(readBoxDataLines, "ReadPokeBoxData");
+
+        // Updates the box data to allow for abilities up to index 1023
+        // Also fixes the Azurill->Marill gender bug
+        List<String> writeBoxDataLines = readLines("write_poke_box_data.s");
+        arm9.writeCodeForceInline(writeBoxDataLines, "WritePokeBoxData");
+
+        System.out.println("Set Poke Data");
     }
 
     public void fixChallengeModeLevelBug() {
@@ -2575,8 +2665,9 @@ public class ParagonLiteHandler {
         if (mode == Mode.Redux)
             return;
 
-        int number = Abilities.technician;
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "technician.s"));
+        // TODO: Reassess later
+//        int number = Abilities.technician;
+//        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "technician.s"));
     }
 
     private void setLeafGuard() {
@@ -2683,7 +2774,7 @@ public class ParagonLiteHandler {
     private void setFriendGuard() {
         int number = Abilities.friendGuard;
 
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, "friend_guard"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, "friend_guard.s"));
     }
 
     private void setWeakArmor() {
@@ -2847,6 +2938,12 @@ public class ParagonLiteHandler {
         moves.get(Moves.viseGrip).name = "Vise Grip"; // 011
         moves.get(Moves.feintAttack).name = "Feint Attack"; // 185
         moves.get(Moves.smellingSalts).name = "Smelling Salts"; // 265
+        
+        switch (mode) {
+            case ParagonLite -> loadMovesFromFile();
+            case Redux -> loadReduxMoves();
+            default -> throw new IllegalStateException("Unexpected value: " + mode);
+        }
 
         // All sound moves hit through substitute
         for (Move m : moves) {
@@ -2903,8 +3000,7 @@ public class ParagonLiteHandler {
         }
 
         // Triage
-        for (int i = 0; i <= Gen5Constants.moveCount; ++i) {
-            Move move = moves.get(i);
+        for (Move move : moves) {
             if (move == null) continue;
 
             if (move.isHealMove || move.recoil > 0)
@@ -2980,12 +3076,7 @@ public class ParagonLiteHandler {
         }) {
             moves.get(moveIndex).isCustomPulseMove = true;
         }
-
-        switch (mode) {
-            case ParagonLite -> loadMovesFromFile();
-            case Redux -> loadReduxMoves();
-            default -> throw new IllegalStateException("Unexpected value: " + mode);
-        }
+        
 
         int[] newMoves;
         int[] movesToClear;
@@ -3004,12 +3095,15 @@ public class ParagonLiteHandler {
                         Moves.gearGrind, // #544
                         Moves.fellStinger, // #565
                         Moves.freezeDry, // #573
+                        Moves.firstImpression, // #660
                         Moves.darkestLariat, // #663
                         Moves.pollenPuff, // #676
                         Moves.psychicFangs, // #706
                         Moves.meteorBeam, // #800
+                        Moves.flipTurn, // #812
                         Moves.tripleAxel, // #813
                         Moves.dualWingbeat, // #814
+                        Moves.surgingStrikes, // #818
                         Moves.direClaw, // #827
                         Moves.ragingFury, // #833
                         Moves.barbBarrage, // #839
@@ -3017,7 +3111,7 @@ public class ParagonLiteHandler {
                         Moves.makeItRain, // #874
                         Moves.electroShot, // #905
                         Moves.hardPress, // #912
-                        Moves.electroShot, // #905
+                        Moves.supercellSlam, // #916
                 };
 
                 movesToClear = new int[]{
@@ -3044,10 +3138,11 @@ public class ParagonLiteHandler {
                         Moves.gearGrind, // #544
                         Moves.fellStinger, // #565
                         Moves.freezeDry, // #573
+                        Moves.firstImpression, // #660
                         Moves.darkestLariat, // #663
                         Moves.pollenPuff, // #676
                         Moves.psychicFangs, // #706
-                        Moves.meteorBeam, // #800
+                        Moves.flipTurn, // #812
                         Moves.tripleAxel, // #813
                         Moves.dualWingbeat, // #814
                         Moves.direClaw, // #827
@@ -3057,7 +3152,7 @@ public class ParagonLiteHandler {
                         Moves.makeItRain, // #874
                         Moves.electroShot, // #905
                         Moves.hardPress, // #912
-                        Moves.electroShot, // #905
+                        Moves.supercellSlam, // #916
                 };
 
                 movesToClear = new int[]{
@@ -3084,13 +3179,6 @@ public class ParagonLiteHandler {
         // TODO: For some reason the relocator addresses values are wrong
         relocateMoveListRamAddress(newMoves.length - movesToClear.length);
 
-        // + #121 Egg Bomb
-        cloneMoveEventHandlers(Moves.eggBomb, Moves.psystrike);
-
-        // + #310 Astonish
-        if (mode == Mode.ParagonLite)
-            cloneMoveEventHandlers(Moves.astonish, Moves.fakeOut);
-
 
         // TODO #564 Sticky Web
 
@@ -3101,10 +3189,12 @@ public class ParagonLiteHandler {
 
         // #570 Parabolic Charge
         moves.get(Moves.parabolicCharge).name = "Parabolic Charge";
+        setMoveAnimations(Moves.parabolicCharge);
 
         // + #573 Freeze-Dry
         moves.get(Moves.freezeDry).name = "Freeze-Dry";
         setMoveEventHandlers(Moves.freezeDry, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "freeze-dry.s"));
+        setMoveAnimations(Moves.freezeDry);
 
         // #574 Disarming Voice
         moves.get(Moves.disarmingVoice).name = "Disarming Voice";
@@ -3118,6 +3208,10 @@ public class ParagonLiteHandler {
         moves.get(Moves.playRough).name = "Play Rough";
         setMoveAnimations(Moves.playRough, 740);
 
+        // #584 Fairy Wind
+        moves.get(Moves.fairyWind).name = "Fairy Wind";
+        setMoveAnimations(Moves.fairyWind);
+
         // #585 Moonblast
         moves.get(Moves.moonblast).name = "Moonblast";
         setMoveAnimations(Moves.moonblast, 741, 742);
@@ -3126,9 +3220,21 @@ public class ParagonLiteHandler {
         moves.get(Moves.boomburst).name = "Boomburst";
         setMoveAnimations(Moves.boomburst, 752);
 
+        // #591 Diamond Storm
+        moves.get(Moves.diamondStorm).name = "Diamond Storm";
+        setMoveAnimations(Moves.diamondStorm);
+
+        // #594 Water Shuriken
+        moves.get(Moves.waterShuriken).name = "Water Shuriken";
+        setMoveAnimations(Moves.waterShuriken, 763);
+
         // #595 Mystical Fire
         moves.get(Moves.mysticalFire).name = "Mystical Fire";
         setMoveAnimations(Moves.mysticalFire);
+
+        // #598 Eerie Impulse
+        moves.get(Moves.eerieImpulse).name = "Eerie Impulse";
+        setMoveAnimations(Moves.eerieImpulse);
 
         // #605 Dazzling Gleam
         moves.get(Moves.dazzlingGleam).name = "Dazzling Gleam";
@@ -3149,20 +3255,25 @@ public class ParagonLiteHandler {
 
         // #660 First Impression
         moves.get(Moves.firstImpression).name = "FirstImpression";
+        cloneMoveEventHandlers(Moves.firstImpression, Moves.fakeOut);
         setMoveAnimations(Moves.firstImpression, 760);
 
         // + #663 Darkest Lariat
-        moves.get(Moves.darkestLariat).name = "DarkestLariat";
+        moves.get(Moves.darkestLariat).name = "Darkest Lariat";
         cloneMoveEventHandlers(Moves.darkestLariat, Moves.chipAway);
+        setMoveAnimations(Moves.darkestLariat);
 
         // #665 Ice Hammer
         moves.get(Moves.iceHammer).name = "Ice Hammer";
+        setMoveAnimations(Moves.iceHammer);
 
         // #667 High Horsepower
         moves.get(Moves.highHorsepower).name = "High Horsepower";
         setMoveAnimations(Moves.highHorsepower, 739);
 
         // TODO #668 Strength Sap
+        moves.get(Moves.strengthSap).name = "Strength Sap";
+        setMoveAnimations(Moves.strengthSap);
 
         // + #676 Pollen Puff
         setMoveEventHandlers(Moves.pollenPuff,
@@ -3185,6 +3296,10 @@ public class ParagonLiteHandler {
         moves.get(Moves.brutalSwing).name = "Brutal Swing";
         setMoveAnimations(Moves.brutalSwing);
 
+        // #705 Fleur Cannon
+        moves.get(Moves.fleurCannon).name = "Fleur Cannon";
+        setMoveAnimations(Moves.fleurCannon, 761);
+
         // #706 Psychic Fangs
         moves.get(Moves.psychicFangs).name = "Psychic Fangs";
         cloneMoveEventHandlers(Moves.psychicFangs, Moves.brickBreak);
@@ -3205,25 +3320,34 @@ public class ParagonLiteHandler {
         moves.get(Moves.breakingSwipe).name = "Breaking Swipe";
         setMoveAnimations(Moves.breakingSwipe, 755);
 
+        // #794 Meteor Assault
+        moves.get(Moves.meteorAssault).name = "Meteor Assault";
+        setMoveAnimations(Moves.meteorAssault);
+
+        // #796 Steel Beam
+        moves.get(Moves.steelBeam).name = "Steel Beam";
+        setMoveAnimations(Moves.steelBeam, 762);
+
         // #799 Scale Shot
         moves.get(Moves.scaleShot).name = "Scale Shot";
         setMoveAnimations(Moves.scaleShot, 758);
 
         // #800 Meteor Beam
-        moves.get(Moves.meteorBeam).name = "Meteor Beam";
-        if (mode != Mode.Redux)
-            setMoveEventHandlers(Moves.meteorBeam, new MoveEventHandler(Gen5BattleEventType.onChargeUpStartDone, "meteor_beam.s"));
+//        moves.get(Moves.meteorBeam).name = "Meteor Beam";
+//        if (mode != Mode.Redux)
+//            setMoveEventHandlers(Moves.meteorBeam, new MoveEventHandler(Gen5BattleEventType.onChargeUpStartDone, "meteor_beam.s"));
+//        setMoveAnimations(Moves.meteorBeam);
 
-        // #812 Flip Turn
+        // + #812 Flip Turn
         moves.get(Moves.flipTurn).name = "Flip Turn";
+        cloneMoveEventHandlers(Moves.flipTurn, Moves.uTurn);
         setMoveAnimations(Moves.flipTurn, 759);
 
         // + #813 Triple Axel
         moves.get(Moves.tripleAxel).name = "Triple Axel";
         switch (mode) {
-            case ParagonLite -> setMoveEventHandlers(Moves.tripleAxel,
-                    new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "triple_kick.s"),
-                    new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
+            // No longer changes damage
+            case ParagonLite -> setMoveEventHandlers(Moves.tripleAxel, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
             case Redux -> setMoveEventHandlers(Moves.tripleAxel,
                     new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "redux_triple_axel.s"),
                     new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
@@ -3233,27 +3357,39 @@ public class ParagonLiteHandler {
 
         // + #814 Dual Wingbeat
         moves.get(Moves.dualWingbeat).name = "Dual Wingbeat";
-        setMoveEventHandlers(Moves.dualWingbeat, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+        setMoveEventHandlers(Moves.dualWingbeat, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
         setMoveAnimations(Moves.dualWingbeat, 746);
 
         // #815 Scorching Sands
         moves.get(Moves.scorchingSands).name = "Scorching Sands";
         setMoveAnimations(Moves.scorchingSands);
 
-        // #827 Dire Claw
+        // #817 Wicked Blow
+        moves.get(Moves.wickedBlow).name = "Wicked Blow";
+        setMoveAnimations(Moves.wickedBlow);
+        
+        // + #818 Surging Strikes
+        moves.get(Moves.surgingStrikes).name = "Surging Strikes";
+        if (mode == Mode.ParagonLite)
+            setMoveEventHandlers(Moves.surgingStrikes, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
+        setMoveAnimations(Moves.surgingStrikes);
+
+        // + #827 Dire Claw
         moves.get(Moves.direClaw).name = "Dire Claw";
         setMoveEventHandlers(Moves.direClaw, new MoveEventHandler(Gen5BattleEventType.onAddCondition, "dire_claw.s"));
-
-        // #833 Raging Fury
-        moves.get(Moves.ragingFury).name = "Raging Fury";
-        cloneMoveEventHandlers(Moves.ragingFury, Moves.thrash);
+        setMoveAnimations(Moves.direClaw);
 
         // #828 Psyshield Bash
         moves.get(Moves.psyshieldBash).name = "Psyshield Bash";
         setMoveAnimations(Moves.psyshieldBash);
 
+        // TODO: + #830 Stone Axe
+        moves.get(Moves.stoneAxe).name = "Stone Axe";
+        setMoveAnimations(Moves.stoneAxe);
+
         // #833 Raging Fury
         moves.get(Moves.ragingFury).name = "Raging Fury";
+        cloneMoveEventHandlers(Moves.ragingFury, Moves.thrash);
         setMoveAnimations(Moves.ragingFury);
 
         // #834 Wave Crash
@@ -3264,7 +3400,7 @@ public class ParagonLiteHandler {
         moves.get(Moves.headlongRush).name = "Headlong Rush";
         setMoveAnimations(Moves.headlongRush);
 
-        // #839 Barb Barrage
+        // + #839 Barb Barrage
         moves.get(Moves.barbBarrage).name = "Barb Barrage";
         setMoveEventHandlers(Moves.barbBarrage, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "barb_barrage.s"));
         setMoveAnimations(Moves.barbBarrage, 757);
@@ -3276,10 +3412,36 @@ public class ParagonLiteHandler {
         // + #844 Infernal Parade
         moves.get(Moves.infernalParade).name = "Infernal Parade";
         cloneMoveEventHandlers(Moves.infernalParade, Moves.hex);
+        setMoveAnimations(Moves.infernalParade);
+
+        // TODO: + #845 Ceaseless Edge
+        moves.get(Moves.ceaselessEdge).name = "Ceaseless Edge";
+        setMoveAnimations(Moves.ceaselessEdge);
+        
+        // #855 Lumina Crash
+        moves.get(Moves.luminaCrash).name = "Lumina Crash";
+        setMoveAnimations(Moves.luminaCrash);
+
+        // #859 Spin Out
+        moves.get(Moves.spinOut).name = "Spin Out";
+        setMoveAnimations(Moves.spinOut);
 
         // + #874 Make It Rain
         moves.get(Moves.makeItRain).name = "Make It Rain";
         cloneMoveEventHandlers(Moves.makeItRain, Moves.payDay);
+        setMoveAnimations(Moves.makeItRain);
+        
+        // #885 Trailblaze
+        moves.get(Moves.trailblaze).name = "Trailblaze";
+        setMoveAnimations(Moves.trailblaze);
+
+        // TODO: + #889 Rage Fist
+        moves.get(Moves.rageFist).name = "Rage Fist";
+        setMoveAnimations(Moves.rageFist);
+        
+        // #891 Bitter Blade
+        moves.get(Moves.bitterBlade).name = "Bitter Blade";
+        setMoveAnimations(Moves.bitterBlade);
 
         // #895 Aqua Cutter
         moves.get(Moves.aquaCutter).name = "Aqua Cutter";
@@ -3290,14 +3452,17 @@ public class ParagonLiteHandler {
         setMoveEventHandlers(Moves.electroShot,
                 new MoveEventHandler(Gen5BattleEventType.onCheckChargeUpSkip, "electro_shot_charge_up_skip.s"),
                 new MoveEventHandler(Gen5BattleEventType.onChargeUpStart, "electro_shot_charge_up_start.s"));
+        setMoveAnimations(Moves.electroShot);
 
         // + #912 Hard Press
         moves.get(Moves.hardPress).name = "Hard Press";
         cloneMoveEventHandlers(Moves.hardPress, Moves.wringOut);
+        setMoveAnimations(Moves.hardPress);
 
         // #916 Supercell Slam
         moves.get(Moves.supercellSlam).name = "Supercell Slam";
         cloneMoveEventHandlers(Moves.supercellSlam, Moves.jumpKick);
+        setMoveAnimations(Moves.supercellSlam);
 
         // #917 Psychic Noise
         moves.get(Moves.psychicNoise).name = "Psychic Noise";
@@ -3309,17 +3474,20 @@ public class ParagonLiteHandler {
         ///////////////
 
         // + #024 Double Kick
-        setMoveEventHandlers(Moves.doubleKick, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+        setMoveEventHandlers(Moves.doubleKick, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
 
         // + #041 Twineedle
-        setMoveEventHandlers(Moves.twineedle, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+        setMoveEventHandlers(Moves.twineedle, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
+        
+        // + #121 Egg Bomb
+        cloneMoveEventHandlers(Moves.eggBomb, Moves.psystrike);
 
         // + #155 Bonemerang
-        setMoveEventHandlers(Moves.bonemerang, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+        setMoveEventHandlers(Moves.bonemerang, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
 
         // #167 Triple Kick
         if (mode == Mode.ParagonLite)
-            setMoveEventHandlers(Moves.tripleKick, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "triple_kick.s"));
+            setMoveEventHandlers(Moves.tripleKick, new MoveEventHandler(Gen5BattleEventType.onGetHitCount));
 
         // + #190 Octazooka
         if (mode == Mode.Redux)
@@ -3340,7 +3508,11 @@ public class ParagonLiteHandler {
 //        setMoveEventHandlers(Moves.knockOff,
 //                new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal),
 //                new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "knock_off.s"));
-
+        
+        // + #310 Astonish
+        if (mode == Mode.ParagonLite)
+            cloneMoveEventHandlers(Moves.astonish, Moves.fakeOut);
+        
         // #327 Sky Uppercut
         setMoveEventHandlers(Moves.skyUppercut,
                 new MoveEventHandler(Gen5BattleEventType.onCheckSemiInvulnerable),
@@ -3372,17 +3544,17 @@ public class ParagonLiteHandler {
         setMoveEventHandlers(Moves.judgment, new MoveEventHandler(Gen5BattleEventType.onGetMoveParam, "judgment.s"));
 
         // + #458 Double Hit
-        setMoveEventHandlers(Moves.doubleHit, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+        setMoveEventHandlers(Moves.doubleHit, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
 
         // #486 Electro Ball
         if (mode == Mode.ParagonLite)
             setMoveEventHandlers(Moves.electroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "electro_ball.s"));
 
         // + #530 Dual Chop
-        setMoveEventHandlers(Moves.dualChop, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+        setMoveEventHandlers(Moves.dualChop, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
 
         // + #544 Gear Grind
-        setMoveEventHandlers(Moves.gearGrind, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, "hit_twice.s"));
+        setMoveEventHandlers(Moves.gearGrind, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
 
         System.out.println("Set moves");
     }
@@ -3446,6 +3618,8 @@ public class ParagonLiteHandler {
     }
 
     private void loadMovesFromFile() {
+        loadOnlyNewReduxMoves();
+        
         Scanner sc;
         try {
             sc = new Scanner(FileFunctions.openConfig("paragonlite/moves.ini"), StandardCharsets.UTF_8);
@@ -3474,7 +3648,7 @@ public class ParagonLiteHandler {
                 String regex = "[- ]";
                 String moveNameCheck = move.name.replaceAll(regex, "");
                 String nameStrCheck = nameStr.replaceAll(regex, "");
-                if (!moveNameCheck.equalsIgnoreCase(nameStrCheck)) {
+                if (!moveNameCheck.equalsIgnoreCase(nameStrCheck) && num <= Moves.fusionBolt) {
                     throw new RuntimeException(String.format("Move names didn't match: %s and %s", move.name, nameStr));
                 }
 
@@ -3697,7 +3871,24 @@ public class ParagonLiteHandler {
         try {
             byte[] bytes = readBytes("redux_moves.narc");
             NARCArchive reduxMovesNarc = new NARCArchive(bytes);
-            romHandler.loadMoves(reduxMovesNarc);
+            romHandler.loadMoves(reduxMovesNarc, 0);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        
+        // TODO: Remove this test
+        if (mode == Mode.Redux)
+            moves.get(Moves.freezeDry).statusPercentChance = 100;
+    }
+
+    // This is a temporary func to load in redux move data, but only
+    // the new moves!
+    // TODO: Remove this
+    private void loadOnlyNewReduxMoves() {
+        try {
+            byte[] bytes = readBytes("redux_moves.narc");
+            NARCArchive reduxMovesNarc = new NARCArchive(bytes);
+            romHandler.loadMoves(reduxMovesNarc, 560);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -4062,8 +4253,6 @@ public class ParagonLiteHandler {
         System.out.println("- test");
 
 //        battleOvl.writeHalfword(0x021A9BB4, 0x2801);
-
-        moves.get(Moves.iceBeam).statusPercentChance = 100;
 
         disableRandomness();
 

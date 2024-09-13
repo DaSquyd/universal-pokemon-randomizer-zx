@@ -61,7 +61,7 @@ DisplayFullHPMessage:
     
     add     r0, r5, #4
     mov     r1, #2 ; file 0x12
-    mov     r2, #893 ; "[poke]'s HP is full!"
+    ldr     r2, =893 ; "[poke]'s HP is full!"
     bl      Battle::Handler_StrSetup
     
     add     r0, r5, #4
