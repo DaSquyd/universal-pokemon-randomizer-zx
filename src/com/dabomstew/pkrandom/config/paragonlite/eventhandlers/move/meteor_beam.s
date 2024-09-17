@@ -47,4 +47,4 @@
     bl      Battle::Handler_PopWork
     
 Return:
-    pop     {r}
+    pop     {r3-r7, lr}

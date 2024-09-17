@@ -25,7 +25,7 @@
     bge     ConditionLoop_End
     
     mov     r6, r4
-    add     r6, #BTLV_MCSS_DATA_FIELD_4C
+    add     r6, #BtlvMcssData.arr4C
     mov     r7, #0x5C
     
 ConditionLoop_Start:
@@ -49,7 +49,7 @@ ConditionLoop_Start:
     and     r0, r2
     str     r0, [r6, r1]
     add     r0, r4, r1
-    ldr     r0, [r0, #BTLV_MCSS_DATA]
+    ldr     r0, [r0, #BtlvMcss.mcssData]
     bl      ARM9::Unk_201B27C
     
 ConditionLoop_CheckContinue:
@@ -58,9 +58,9 @@ ConditionLoop_CheckContinue:
     blt     ConditionLoop_Start
     
 ConditionLoop_End:
-    ldr     r0, [r4, #BTLV_MCSS_4C]
+    ldr     r0, [r4, #BtlvMcss.btlvMcss_4C]
     bl      ARM9::Unk_2019B14
-    mov     r0, #(BTLV_MCSS_FIELD_510 >> 4)
+    mov     r0, #(BtlvMcss.field510 >> 4)
     lsl     r0, #4
     str     r0, [sp, #SP_FIELD_510]
     ldr     r0, [r4, r0]
@@ -172,7 +172,7 @@ FieldPokeLoop_Skip2:
     mov     r0, #0x5C
     mul     r0, r1
     add     r0, r4
-    ldr     r0, [r0, #BTLV_MCSS_DATA_FIELD_4C]
+    ldr     r0, [r0, #(BtlvMcss.mcssData + BtlvMcssData.arr4C)]
     lsl     r0, #24
     lsr     r0, #31
     bne     FieldPokeLoop_CheckContinueLink

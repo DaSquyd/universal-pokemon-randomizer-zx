@@ -1,0 +1,16 @@
+{
+  "boxPoke": 0,
+  "species": 4,
+  "item": 6,
+  "pid": 8,
+  "type1": 12,
+  "type2": 13,
+  "markings": 14,
+  "nature": 15,
+  "ability": 16,
+  "levelAndEgg": 18,
+  "flags": 19,
+  "moves": [
+    20, 22, 24, 26
+  ]
+}

@@ -141,8 +141,6 @@ public class ArmDecoder {
         if (offset + 12 > bytes.length)
             return result;
 
-        ArmFormat.Comparator comparator = new ArmFormat.Comparator();
-
         int instruction0 = readUnsignedHalfword(bytes, offset);
         ArmThumbFormat format0 = getThumbFormat(instruction0);
         if (format0 == null || format0 != thumbFormats[2] /* Add/subtract */)

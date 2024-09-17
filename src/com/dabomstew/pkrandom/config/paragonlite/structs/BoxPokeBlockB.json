@@ -1,0 +1,11 @@
+{
+  "moves": 0,
+  "movePPs": 8,
+  "movePPUpStages": 12,
+  "ivBits": 16,
+  "ribbons2": 20,
+  "genderAndForme": 24,
+  "nature": 25,
+  "hiddenAbilityAndNPoke": 26,
+  "unknown1C": 28
+}

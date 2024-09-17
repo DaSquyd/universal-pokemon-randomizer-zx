@@ -9,6 +9,7 @@
     bl      Battle::EventVar_GetValue
     lsl     r0, #16
     lsr     r0, #16
+    
     bl      ARM9::GetMoveCategory
     cmp     r0, #1 ; physical
     bne     End

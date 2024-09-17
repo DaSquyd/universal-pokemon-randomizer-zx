@@ -27,7 +27,7 @@
     
     ldr     r6, [sp, #ARG_IS_CRITICAL_HIT]
     
-    ldrh    r0, [r4, #MOVE_PARAM_MOVE_ID]
+    ldrh    r0, [r4, #MoveParam.moveId]
     bl      ARM9::GetMoveCategory
     str     r0, [sp, #SP_MOVE_CATEGORY]
     
@@ -38,46 +38,46 @@
     
 DamageProcess1:
     ldr     r1, [sp, #ARG_EFFECTIVENESS]
-    mov     r0, #VAR_TYPE_EFFECTIVENESS
+    mov     r0, #VAR_Effectiveness
     bl      Battle::EventVar_SetConstValue
     
     ldr     r0, [sp, #SP_ATTACKING_MON]
     bl      Battle::GetPokeId
     mov     r1, r0
-    mov     r0, #VAR_ATTACKING_MON
+    mov     r0, #VAR_AttackingPoke
     bl      Battle::EventVar_SetConstValue
     
     ldr     r0, [sp, #SP_DEFENDING_MON]
     bl      Battle::GetPokeId
     mov     r1, r0
-    mov     r0, #VAR_DEFENDING_MON
+    mov     r0, #VAR_DefendingPoke
     bl      Battle::EventVar_SetConstValue
     
-    mov     r0, #VAR_CRITICAL_FLAG
+    mov     r0, #VAR_CriticalFlag
     mov     r1, r6
     bl      Battle::EventVar_SetConstValue
     
-    ldrb    r1, [r4, #MOVE_PARAM_MOVE_TYPE]
-    mov     r0, #VAR_MOVE_TYPE
+    ldrb    r1, [r4, #MoveParam.moveType]
+    mov     r0, #VAR_MoveType
     bl      Battle::EventVar_SetConstValue
     
-    ldrh    r1, [r4, #MOVE_PARAM_MOVE_ID]
-    mov     r0, #VAR_MOVE_ID
+    ldrh    r1, [r4, #MoveParam.moveId]
+    mov     r0, #VAR_MoveId
     bl      Battle::EventVar_SetConstValue
     
     ldr     r1, [sp, #SP_MOVE_CATEGORY]
-    mov     r0, #VAR_MOVE_CATEGORY
+    mov     r0, #VAR_MoveCategory
     bl      Battle::EventVar_SetConstValue
     
-    mov     r0, #VAR_FIXED_DAMAGE
+    mov     r0, #VAR_FixedDamage
     mov     r1, #0
     bl      Battle::EventVar_SetValue
     
     mov     r0, r5
-    mov     r1, #EVENT_MOVE_DAMAGE_PROCESSING_1
+    mov     r1, #EVENT_OnMoveDamageProcessing1
     bl      Battle::Event_CallHandlers
     
-    mov     r0, #VAR_FIXED_DAMAGE
+    mov     r0, #VAR_FixedDamage
     bl      Battle::EventVar_GetValue
     mov     r7, r0
     cmp     r0, #0
@@ -116,7 +116,7 @@ DefensiveValue:
 BaseDamage:
     ; level
     ldr     r0, [sp, #SP_ATTACKING_MON]
-    mov     r1, #BATTLE_STAT_LEVEL
+    mov     r1, #BPV_Level
     bl      Battle::GetPokeStat
     mov     r2, r0 ; r2 := level
     ldr     r0, [sp, #SP_POWER]
@@ -138,7 +138,7 @@ DamageRatio:
 Weather:
     mov     r0, r5
     bl      Battle::ServerEvent_GetWeather
-    ldrb    r1, [r4, #MOVE_PARAM_MOVE_TYPE]
+    ldrb    r1, [r4, #MoveParam.moveType]
     bl      Battle::ServerEvent_WeatherPowerMod
     mov     r1, #1
     lsl     r1, #12 ; 4096
@@ -156,8 +156,8 @@ CriticalHit:
     add     r7, r0
     
 Debug:
-;    ldr     r0, [r5, #SERVER_FLOW_MAIN_MODULE]
-;    mov     r1, #DEBUG_NO_RAND_DAMAGE
+;    ldr     r0, [r5, #ServerFlow.mainModule]
+;    mov     r1, #DEBUG_NoRandDamage
 ;    bl      Battle::MainModule_GetDebugFlag
 ;    cmp     r0, #0
 ;    bne     STAB
@@ -191,7 +191,7 @@ Random_Divide:
     mov     r7, r0
     
 STAB:
-    ldrb    r2, [r4, #MOVE_PARAM_MOVE_TYPE]
+    ldrb    r2, [r4, #MoveParam.moveType]
     cmp     r2, #18 ; null type
     beq     Effectiveness
     
@@ -212,38 +212,38 @@ Effectiveness:
 Condition_Frostbite:
     ; Special
     ldr     r0, [sp, #SP_MOVE_CATEGORY]
-    cmp     r0, #MOVE_CATEGORY_SPECIAL
+    cmp     r0, #CAT_Special
     bne     Condition_Burn
     
     ; Frostbite
     ldr     r0, [sp, #SP_ATTACKING_MON]
     bl      Battle::GetPokeStatus
-    cmp     r0, #CONDITION_FROSTBITE
+    cmp     r0, #MC_Frostbite
     beq     Condition_HalveDamage
     
 Condition_Burn:
     ; Physical
     ldr     r0, [sp, #SP_MOVE_CATEGORY]
-    cmp     r0, #MOVE_CATEGORY_PHYSICAL
+    cmp     r0, #CAT_Physical
     bne     ZeroHandle
     
     ; Burn
     ldr     r0, [sp, #SP_ATTACKING_MON]
     bl      Battle::GetPokeStatus
-    cmp     r0, #CONDITION_BURN
+    cmp     r0, #MC_Burn
     bne     ZeroHandle
     
     ; Guts
     ldr     r0, [sp, #SP_ATTACKING_MON]
-    mov     r1, #BATTLE_STAT_EFFECTIVE_ABILITY
+    mov     r1, #BPV_EffectiveAbility
     bl      Battle::GetPokeStat
-    cmp     r0, #ABILITY_062_GUTS
+    cmp     r0, #62 ; Guts
     beq     ZeroHandle
     
 Condition_HalveDamage:
     ; Facade
-    ldr     r0, [r4, #MOVE_PARAM_MOVE_ID]
-    sub     r0, #(MOVE_263_FACADE - 0xFF)
+    ldr     r0, [r4, #MoveParam.moveId]
+    sub     r0, #(263 - 0xFF) ; Facade
     cmp     r0, #0xFF
     beq     ZeroHandle
     
@@ -258,24 +258,24 @@ ZeroHandle:
 FinalDamage:
     mov     r1, #1
     lsl     r1, #12
-    mov     r0, #VAR_RATIO
+    mov     r0, #VAR_Ratio
     mov     r2, #(Math.round(4096 * 0.01)) ; (0.01x) min
     lsl     r3, r1, #5 ; (5x) max
     bl      Battle::EventVar_SetMulValue
     
-    mov     r0, #VAR_DAMAGE
+    mov     r0, #VAR_Damage
     mov     r1, r7
     bl      Battle::EventVar_SetValue
     
     mov     r0, r5
-    mov     r1, #EVENT_MOVE_DAMAGE_PROCESSING_2
+    mov     r1, #EVENT_OnMoveDamageProcessing2
     bl      Battle::Event_CallHandlers
     
-    mov     r0, #VAR_DAMAGE
+    mov     r0, #VAR_Damage
     bl      Battle::EventVar_GetValue
     mov     r7, r0
     
-    mov     r0, #VAR_RATIO
+    mov     r0, #VAR_Ratio
     bl      Battle::EventVar_GetValue
     mov     r1, r7
     bl      Battle::FixedRound
@@ -283,7 +283,7 @@ FinalDamage:
     
 CallEndProcess:
     mov     r0, r5
-    mov     r1, #EVENT_MOVE_DAMAGE_PROCESSING_END
+    mov     r1, #EVENT_OnMoveDamageProcessingEnd
     bl      Battle::Event_CallHandlers
     
     bl      Battle::EventVar_Pop

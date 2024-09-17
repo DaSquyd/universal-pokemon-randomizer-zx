@@ -1,12 +1,13 @@
 package com.dabomstew.pkrandom.romhandlers;
 
+import com.dabomstew.pkrandom.arm.ArmParser;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 
 import java.util.*;
 
 public class ParagonLiteArm9 extends ParagonLiteOverlay {
-    public ParagonLiteArm9(Gen5RomHandler romHandler, byte[] arm9, ParagonLiteAddressMap addressMap) {
-        super(romHandler, -1, "ARM9", Arrays.copyOf(arm9, arm9.length), Gen5Constants.arm9Offset, Insertion.Front, addressMap);
+    public ParagonLiteArm9(Gen5RomHandler romHandler, byte[] arm9, ArmParser armParser, ParagonLiteAddressMap addressMap) {
+        super(romHandler, -1, "ARM9", Arrays.copyOf(arm9, arm9.length), Gen5Constants.arm9Offset, Insertion.Front, armParser, addressMap);
     }
 
     private int getItcmSrcAddress() {

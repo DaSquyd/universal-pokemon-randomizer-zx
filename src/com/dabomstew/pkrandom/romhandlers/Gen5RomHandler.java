@@ -767,6 +767,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         movesNarc.files.clear();
         for (int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
+            if (move.name.length() > 15)
+                throw new RuntimeException(String.format("Move name '%s' was too long!", move.name));
 
             if (!move.name.equals(moveNames.get(0))) {
                 moveNames.set(i, move.name);
@@ -5227,6 +5229,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         boolean debugMode = (settings.getCurrentMiscTweaks() & MiscTweak.DEBUG_MODE.getValue()) != 0;
         Utils.debugMode = debugMode;
 
+        // TODO: Redux
         if ((isWhite2() || isBlack2()))
             customAddFairy();
 
@@ -5239,12 +5242,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         
         String pokemonGraphicsFilename = romEntry.getFile("PokemonGraphics");
         String moveAnimationsFilename = romEntry.getFile("MoveAnimations");
-        String trainerAIScriptsFilename = romEntry.getFile("TrainerAIScripts");
         String itemDataFilename = romEntry.getFile("ItemData");
         String itemGraphicsFilename = romEntry.getFile("ItemGraphics");
         String moveAnimationScriptsFilename = romEntry.getFile("MoveAnimationScripts");
         String battleAnimationScriptsFilename = romEntry.getFile("BattleAnimationScripts");
         String battleUIGraphicsFilename = romEntry.getFile("BattleUIGraphics");
+        String trainerAIScriptsFilename = romEntry.getFile("TrainerAIScripts");
         try {
             params.pokemonGraphicsNarc = readNARC(pokemonGraphicsFilename);
             params.moveAnimationsNarc = readNARC(moveAnimationsFilename);
@@ -5253,6 +5256,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             params.moveAnimationScriptsNarc = readNARC(moveAnimationScriptsFilename);
             params.battleAnimationScriptsNarc = readNARC(battleAnimationScriptsFilename);
             params.battleUIGraphicsNarc = readNARC(battleUIGraphicsFilename);
+            params.trainerAIScriptsNarc = readNARC(trainerAIScriptsFilename);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -5309,6 +5313,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             writeNARC(moveAnimationScriptsFilename, params.moveAnimationScriptsNarc);
             writeNARC(battleAnimationScriptsFilename, params.battleAnimationScriptsNarc);
             writeNARC(battleUIGraphicsFilename, params.battleUIGraphicsNarc);
+            writeNARC(trainerAIScriptsFilename, params.trainerAIScriptsNarc);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -5320,7 +5325,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setBattleEventStrings();
 
         // Code updates
+        paragonLite.tempFixFairyStruggle();
         paragonLite.setPokeData();
+        paragonLite.setBoxPreview();
         paragonLite.fixChallengeModeLevelBug();
         paragonLite.setCalcDamageOffensiveValue();
         paragonLite.setCalcDamageDefensiveValue();
@@ -5348,7 +5355,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             paragonLite.setPokemonData();
 
 //        if (debugMode)
-//            paragonLite.setTrainerAI(trainerAIScriptsFilename);
+//            paragonLite.setTrainerAI();
 
 //        if (debugMode)
         paragonLite.setTrainers();

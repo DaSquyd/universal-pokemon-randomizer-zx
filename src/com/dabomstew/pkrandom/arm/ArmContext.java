@@ -46,8 +46,30 @@ public class ArmContext {
         return dataValues.get(address);
     }
     
+    public void setDataAtAddress(int address, int value) {
+        address = address & 0xFFFFFFFC;
+        dataValues.put(address, value);
+    }
+    
     public void addLabelAddress(int address) {
         labelAddresses.add(address);
+    }
+    
+    public int getFuncEncoding(int ramAddress) {
+        int defaultEncoding = 2;
+        
+        ParagonLiteOverlay overlay = addressMap.findOverlay(ramAddress, this.overlay);
+        if (overlay == null)
+            return defaultEncoding;
+
+        ParagonLiteAddressMap.AddressBase addressBase = addressMap.getAddressData(overlay, ramAddress);
+        if (addressBase == null)
+            return defaultEncoding;
+
+        if (addressBase instanceof ParagonLiteAddressMap.CodeAddress codeAddress)
+            return codeAddress.getEncoding();
+        
+        return defaultEncoding;
     }
     
     public String getFuncName(int ramAddress) {

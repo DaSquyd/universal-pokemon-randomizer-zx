@@ -1,0 +1,23 @@
+{
+  "species": 0,
+  "heldItem": 2,
+  "otId": 4,
+  "totalExp": 8,
+  "friendship": 12,
+  "abilityLow": 13,
+  "markingsAbilityHigh": 14,
+  "region": 15,
+  "ev_hp": 16,
+  "ev_attack": 17,
+  "ev_defense": 18,
+  "ev_speed": 19,
+  "ev_spatk": 20,
+  "ev_spdef": 21,
+  "contest_cool": 22,
+  "contest_beauty": 23,
+  "contest_cute": 24,
+  "contest_smart": 25,
+  "contest_tough": 26,
+  "contest_sheen": 27,
+  "ribbons1": 28
+}

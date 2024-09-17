@@ -20,8 +20,8 @@ public class ArmThumbFormat_15 extends ArmThumbFormat {
     public static final Identifier IDENTIFIER = new Identifier(0xC000, 0xF000);
 
     private enum Opcode {
-        stmia,
-        ldmia
+        stm,
+        ldm
     }
     
     @Override
@@ -36,7 +36,7 @@ public class ArmThumbFormat_15 extends ArmThumbFormat {
 
     @Override
     public ArmLine decode(int instruction) throws ArmDecodeException {
-        int opcodeValue = readInstructionSegment(instruction, 7, 1);
+        int opcodeValue = readInstructionSegment(instruction, 11, 1);
         Opcode opcode = Opcode.values()[opcodeValue];
         
         int rbValue = readInstructionSegment(instruction, 8, 3);

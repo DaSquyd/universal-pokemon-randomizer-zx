@@ -45,7 +45,7 @@ Continue:
     lsl     r4, #2 ; 392
     ldr     r0, [r0, r4] ; script_vm
     ldr     r1, [r5, #0x04] ; a2
-    bl      BattleLevel::VM_LoadScript
+    bl      BattleLevel::BtlvEffVM_LoadScript
     
     ldr     r0, [r6, #0x00]
     mov     r1, #1

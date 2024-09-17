@@ -43,7 +43,7 @@ public class ParagonLiteOverlay {
         }
     }
 
-    public ParagonLiteOverlay(Gen5RomHandler romHandler, int number, String name, byte[] data, int address, Insertion insertion, ParagonLiteAddressMap globalAddressMap) {
+    public ParagonLiteOverlay(Gen5RomHandler romHandler, int number, String name, byte[] data, int address, Insertion insertion, ArmParser armParser, ParagonLiteAddressMap globalAddressMap) {
         this.romHandler = romHandler;
         this.number = number;
         this.name = name;
@@ -51,7 +51,7 @@ public class ParagonLiteOverlay {
         this.address = address;
         this.insertion = insertion;
         this.globalAddressMap = globalAddressMap;
-        this.armParser = new ArmParser(globalAddressMap);
+        this.armParser = armParser;
 
         globalAddressMap.registerOverlay(this);
     }

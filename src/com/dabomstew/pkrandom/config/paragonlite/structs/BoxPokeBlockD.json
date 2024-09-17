@@ -1,0 +1,17 @@
+{
+  "otName": 0,
+  "hatchYear": 16,
+  "hatchMonth": 17,
+  "hatchDay": 18,
+  "metYear": 19,
+  "metMonth": 20,
+  "metDay": 21,
+  "hatchLocation": 22,
+  "metLocation": 24,
+  "pokerus": 26,
+  "pokeBall": 27,
+  "metLevelAndOTGender": 28,
+  "catchTerrainTileType": 29,
+  "unknown1E": 30,
+  "pokeStarFame": 31
+}

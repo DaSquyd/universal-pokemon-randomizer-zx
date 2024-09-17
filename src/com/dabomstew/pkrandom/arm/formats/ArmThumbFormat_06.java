@@ -22,7 +22,15 @@ public class ArmThumbFormat_06 extends ArmThumbFormat {
         }
 
         @Override
-        public String getArgsString(ArmContext context) throws ArmDecodeException {
+        public void updateContext(ArmContext context) {
+            int dataAddress = context.getCurrentAddress() + getWord8() + 4;
+            int dataValue = context.getDataAtAddress(dataAddress);
+
+            context.setDataAtAddress(dataAddress, dataValue);
+        }
+
+        @Override
+        public String getArgsString(ArmContext context) {
             int dataAddress = context.getCurrentAddress() + getWord8() + 4;
             int dataValue = context.getDataAtAddress(dataAddress);
 

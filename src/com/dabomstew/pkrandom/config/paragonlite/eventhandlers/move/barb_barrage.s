@@ -1,19 +1,15 @@
-#DEFINE VAR_ATTACKING_MON 0x03
-#DEFINE VAR_DEFENDING_MON 0x04
-#DEFINE CONDITION_BURN 0x05
-
     push    {r3-r5, lr}
     mov     r4, r1
     mov     r5, r2
     
-    mov     r0, #VAR_ATTACKING_MON
+    mov     r0, #VAR_AttackingPoke
     bl      Battle::EventVar_GetValue
     cmp     r5, r0
     bne     Return
     
-    mov     r0, #VAR_DEFENDING_MON
+    mov     r0, #VAR_DefendingPoke
     bl      Battle::EventVar_GetValue
-    mov     r1, #CONDITION_POISON
+    mov     r1, #MC_Poison
     bl      Battle::CheckCondition
     cmp     r0, #0
     beq     Return

@@ -393,7 +393,7 @@ Label_0x0201E170:
     sub     r2, #25
     mov     r1, #0
     str     r2, [sp, #0x00]
-    bl      Unk_208D65A
+    blx     ARM9::LeftShift64
     ldr     r3, [r5, #0x1C]
     mov     r2, #0
     and     r2, r1
@@ -605,7 +605,7 @@ Label_0x0201E2A6:
     ldr     r0, [r0, #0x00]
     ldr     r2, [sp, #0x04]
     mov     r3, #11
-    bl      ARM9::FillStrBufFromFile
+    bl      ARM9::GFL_MsgDataLoadRawStr
     b       Label_0x0201E3BC
 
 Label_0x0201E2BE:

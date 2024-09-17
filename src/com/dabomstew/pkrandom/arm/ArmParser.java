@@ -1,12 +1,15 @@
 package com.dabomstew.pkrandom.arm;
 
+import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.romhandlers.ParagonLiteAddressMap;
 import com.dabomstew.pkrandom.romhandlers.ParagonLiteOverlay;
+import org.openjdk.nashorn.api.scripting.JSObject;
 import org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import javax.script.*;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -15,7 +18,6 @@ import java.util.zip.DataFormatException;
 public class ArmParser {
     ParagonLiteAddressMap globalAddressMap;
 
-    String varDefines = "";
     Map<String, Integer> labelAddressMap = new HashMap<>();
     Map<Integer, SortedSet<Integer>> dataRamAddressMap = new TreeMap<>();
     Map<Integer, Integer> redirectorAddressMap = new TreeMap<>();
@@ -24,26 +26,128 @@ public class ArmParser {
     int currentRamAddress = 0;
     int size = 0;
 
+    ScriptEngineManager engineManager;
     ScriptEngine engine;
+    ScriptContext currentContext;
 
     public ArmParser() {
-        setupJavaScriptEngine();
+        setupJavaScriptEngineManager();
     }
 
     public ArmParser(ParagonLiteAddressMap globalAddressMap) {
         this.globalAddressMap = globalAddressMap;
-        setupJavaScriptEngine();
+        setupJavaScriptEngineManager();
     }
 
-    private void setupJavaScriptEngine() {
-        ScriptEngineManager mgr = new ScriptEngineManager();
-        engine = mgr.getEngineByName("JavaScript");
+    private void setupJavaScriptEngineManager() {
+        engineManager = new ScriptEngineManager();
+        
+        engine = engineManager.getEngineByName("nashorn");
+        if (engine == null) {
+            NashornScriptEngineFactory engineFactory = new NashornScriptEngineFactory();
+            engine = engineFactory.getScriptEngine();
+        }
+        
+        setEnums();
+        setStructs();
+    }
 
-        if (engine != null)
-            return;
+    private void setEnums() {
+        Scanner sc;
+        try {
+            InputStream stream = FileFunctions.openConfig("paragonlite/enums.ini");
+            sc = new Scanner(stream, StandardCharsets.UTF_8);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
-        NashornScriptEngineFactory engineFactory = new NashornScriptEngineFactory();
-        engine = engineFactory.getScriptEngine();
+        while (sc.hasNextLine()) {
+            String line = sc.nextLine();
+            if (!line.contains("="))
+                continue;
+
+            String[] keyVal = line.split("=", 2);
+            String key = keyVal[0].trim();
+            String valStr = keyVal[1].trim();
+            int val = parseInt(valStr);
+
+            engineManager.put(key, val);
+        }
+    }
+
+    private void setStructs() {
+        String[] structNames = new String[]{
+                "BattleParty",
+                "Box2Main",
+                "BoxPoke",
+                "BoxPokeBlockA",
+                "BoxPokeBlockB",
+                "BoxPokeBlockC",
+                "BoxPokeBlockD",
+                "BtlClientWk",
+                "BtlvMcss",
+                "BtlvMcssData",
+                "HandlerParam_ChangeStatStage",
+                "MainModule",
+                "MoveParam",
+                "PartyPoke",
+                "PokeCon",
+                "ServerFlow",
+                "TrainerAIEnv",
+        };
+        
+        for (String structName : structNames) {
+            String filename = String.format("paragonlite/structs/%s.json", structName);
+
+            Scanner sc;
+            try {
+                InputStream stream = FileFunctions.openConfig(filename);
+                sc = new Scanner(stream, StandardCharsets.UTF_8);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
+            StringBuilder stringBuilder = new StringBuilder();
+            while (sc.hasNextLine()) {
+                stringBuilder.append(sc.nextLine());
+            }
+            
+            Object object;
+            try {
+                // Is there a better way to do this?
+                object = engine.eval(String.format("function f(){return %s} f()", stringBuilder));
+            } catch (ScriptException e) {
+                throw new RuntimeException(e);
+            }
+
+            engineManager.put(structName, object);
+        }
+    }
+    
+    public void addGlobalValue(String name, int value) {
+        engineManager.put(name, value);
+    }
+    
+    public void addStruct(String structName) {
+        JSObject object;
+        try {
+            object = (JSObject) engine.eval("Object");
+            engineManager.put(structName, object);
+        } catch (ScriptException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public void setStructFieldOffset(String structName, String memberName, int offset) {
+        JSObject structObject = (JSObject)engineManager.get(structName);
+        structObject.setMember(memberName, offset);
+    }
+
+    private int parseInt(String str) {
+        if (str.startsWith("0x"))
+            return Integer.parseInt(str, 2, str.length(), 16);
+
+        return Integer.parseInt(str);
     }
 
     public byte[] parse(List<String> lines) {
@@ -64,7 +168,9 @@ public class ArmParser {
         this.initialRamAddress = initialRamAddress;
         this.currentRamAddress = initialRamAddress;
 
-        StringBuilder varDefinesStringBuilder = new StringBuilder();
+        currentContext = new SimpleScriptContext();
+        currentContext.setBindings(engineManager.getBindings(), ScriptContext.GLOBAL_SCOPE);
+
         for (int i = 0; i < lines.size(); ++i) {
             String str = stripComment(lines.get(i)).trim();
             if (str.endsWith(":")) {
@@ -74,11 +180,13 @@ public class ArmParser {
             } else if (str.toUpperCase().startsWith("#DEFINE ")) {
                 String[] defSplit = str.split(" ", 3);
                 String varName = defSplit[1];
-                String varValue = defSplit[2];
-                varDefinesStringBuilder.append(varName);
-                varDefinesStringBuilder.append('=');
-                varDefinesStringBuilder.append(varValue);
-                varDefinesStringBuilder.append(';');
+                String varValueStr = defSplit[2];
+                try {
+                    int varValue = parseValue(varValueStr);
+                    currentContext.setAttribute(varName, varValue, ScriptContext.ENGINE_SCOPE);
+                } catch (DataFormatException e) {
+                    throw new RuntimeException(e);
+                }
             } else if (str.toUpperCase().startsWith("#SWITCH ")) {
                 String[] switchSplit = str.split(" ", 3);
                 String switchRegister1 = switchSplit[1];
@@ -121,16 +229,6 @@ public class ArmParser {
 
             currentRamAddress += getLineByteLength(str);
         }
-        this.varDefines = varDefinesStringBuilder.toString();
-
-
-        try {
-            Object evalObj = engine.eval(varDefines + "0");
-            if (!(evalObj instanceof Integer intValue) || intValue != 0)
-                throw new RuntimeException("Error while parsing defines: " + varDefines);
-        } catch (ScriptException e) {
-            throw new RuntimeException("Error while parsing defines: " + e);
-        }
 
         int lastNonSwitchAddress = initialRamAddress;
         currentRamAddress = initialRamAddress;
@@ -155,7 +253,7 @@ public class ArmParser {
                 if (!dataRamAddressMap.containsKey(dataValue))
                     dataRamAddressMap.put(dataValue, new TreeSet<>());
                 SortedSet<Integer> dataRamAddresses = dataRamAddressMap.get(dataValue);
-                dataRamAddresses.add(currentRamAddress);
+                dataRamAddresses.add(alignNextWord(currentRamAddress));
             } else {
                 lastNonSwitchAddress = currentRamAddress;
             }
@@ -220,6 +318,8 @@ public class ArmParser {
                 globalAddressMap.addReference(overlay, targetAddress, dataAddress);
             }
         }
+
+        currentContext = null;
 
         return returnValue;
     }
@@ -491,7 +591,7 @@ public class ArmParser {
             case "cmn" -> format4(args.split(","), 11);
             case "cmp" -> parseCmp(args);
             case "eor" -> format4(args.split(","), 1);
-            case "ldmia", "stmia" -> parseLdmiaStmia(args, op);
+            case "ldm", "stm" -> parseLdmStmia(args, op);
             case "ldr", "str" -> parseLdrStr(args, op);
             case "ldrb", "strb" -> parseLdrbStrb(args, op);
             case "ldrh", "strh" -> parseLdrhStrh(args, op);
@@ -617,8 +717,8 @@ public class ArmParser {
         return format4(args, 10);
     }
 
-    private byte[] parseLdmiaStmia(String argsStr, String op) throws DataFormatException {
-        // Format 15    LDMIA Rb!, { Rlist }
+    private byte[] parseLdmStmia(String argsStr, String op) throws DataFormatException {
+        // Format 15    LDM Rb!, { Rlist }
 
         String[] args = argsStr.split(",");
 
@@ -643,10 +743,10 @@ public class ArmParser {
 
         args[args.length - 1] = rlistLast.substring(0, rlistLast.length() - 1);
 
-        if (op.equalsIgnoreCase("ldmia"))
+        if (op.equalsIgnoreCase("ldm"))
             return format15(args, 1);
 
-        if (op.equalsIgnoreCase("stmia"))
+        if (op.equalsIgnoreCase("stm"))
             return format15(args, 0);
 
         throw new DataFormatException();
@@ -682,7 +782,7 @@ public class ArmParser {
                     int endDataAddress = alignNextWord(initialRamAddress + size);
                     if (endDataAddress <= maxAddress) {
                         newImm = endDataAddress - currentRamAddress;
-                        dataRamAddresses.add(endDataAddress);
+                        dataRamAddresses.add(alignNextWord(endDataAddress));
                         size = endDataAddress - initialRamAddress + 4;
                     }
                 }
@@ -1404,7 +1504,7 @@ public class ArmParser {
                         (byte) ((value >> 16) & 0xFF),
                         (byte) ((value >> 24) & 0xFF),
                 };
-            
+
             return new byte[]{
                     (byte) 0xC0, (byte) 0x46,
                     (byte) (value & 0xFF),
@@ -1444,10 +1544,10 @@ public class ArmParser {
             valueStr = valueStr.substring(1).trim(); // remove = or #
         }
 
-        String fullStr = varDefines + globalAddressMap.applyDefinitions(valueStr);
+        String fullStr = globalAddressMap.replaceLabelsInExpression(valueStr);
 
         try {
-            Object evalObj = engine.eval(fullStr);
+            Object evalObj = engine.eval(fullStr, currentContext);
             if (evalObj instanceof Double)
                 return (int) Math.round((double) evalObj);
             return (int) evalObj;

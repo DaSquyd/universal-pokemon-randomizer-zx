@@ -81,7 +81,7 @@ GetMoveParam:
     mov     r0, r5 ; r0 := serverFlow
     mov     r1, r4 ; r1 := moveId
     add     r3, sp, #MOVE_PARAM ; r3 := *moveParam
-    bl      Battle::GetMoveParam
+    bl      Battle::ServerEvent_GetMoveParam
     
 CheckDebug:
     ldr     r0, [sp, #DEBUG_MODE]

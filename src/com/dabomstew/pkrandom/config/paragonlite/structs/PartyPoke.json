@@ -1,0 +1,13 @@
+{
+  "base": 0,
+  "statusCond": 136,
+  "level": 140,
+  "currentHP": 142,
+  "maxHP": 144,
+  "attack": 146,
+  "defense": 148,
+  "speed": 150,
+  "spatk": 152,
+  "spdef": 154,
+  "mail": 156
+}

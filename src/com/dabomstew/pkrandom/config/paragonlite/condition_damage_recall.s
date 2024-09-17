@@ -2,7 +2,7 @@
 
     push    {r3-r7, lr}
     mov     r4, r0
-    ldr     r0, =SERVER_FLOW_HE_MANAGER
+    ldr     r0, =ServerFlow.heManager
     mov     r5, r1
     ldr     r1, =0x2624 ; TODO: unused?
     mov     r6, r2
@@ -43,26 +43,26 @@
     #CASE Condition_Curse
     
 Condition_Frostbite:
-    ldr     r2, =CONDITION_ANIM_POISON
-    add     r2, #(CONDITION_ANIM_FROSTBITE - CONDITION_ANIM_POISON)
+    ldr     r2, =BTLANM_Poison
+    add     r2, #(BTLANM_Frostbite - BTLANM_Poison)
     b       AddEffect
     
 Condition_Burn:
-    ldr     r2, =CONDITION_ANIM_POISON
-    add     r2, #(CONDITION_ANIM_BURN - CONDITION_ANIM_POISON)
+    ldr     r2, =BTLANM_Poison
+    add     r2, #(BTLANM_Burn - BTLANM_Poison)
     b       AddEffect
     
 Condition_Poison:
-    ldr     r2, =CONDITION_ANIM_POISON
+    ldr     r2, =BTLANM_Poison
     b       AddEffect
     
 Condition_Curse:
-    ldr     r2, =CONDITION_ANIM_CURSE
+    ldr     r2, =BTLANM_Curse
     b       AddEffect
     
 Condition_Nightmare:
-    ldr     r2, =CONDITION_ANIM_CURSE
-    add     r2, #(CONDITION_ANIM_NIGHTMARE - CONDITION_ANIM_CURSE)
+    ldr     r2, =BTLANM_Curse
+    add     r2, #(BTLANM_Nightmare - BTLANM_Curse)
     
 AddEffect:
     mov     r0, r4
@@ -71,17 +71,17 @@ AddEffect:
     
     
 Condition_None:
-    ldr     r0, =SERVER_FLOW_STR_PARAM
+    ldr     r0, =ServerFlow.strParam
     add     r0, r4
     bl      Battle::Handler_StrClear
     
-    ldr     r0, =SERVER_FLOW_STR_PARAM
+    ldr     r0, =ServerFlow.strParam
     mov     r1, r5
     add     r0, r4
     mov     r2, r6
     bl      BattleServer::CreateDamageMessage
     
-    ldr     r3, =SERVER_FLOW_STR_PARAM
+    ldr     r3, =ServerFlow.strParam
     mov     r0, r4
     mov     r1, r5
     mov     r2, r7
@@ -89,7 +89,7 @@ Condition_None:
     bl      Battle::ServerControl_SimpleDamageCore
     
 Return:
-    ldr     r0, =SERVER_FLOW_HE_MANAGER
+    ldr     r0, =ServerFlow.heManager
     ldr     r1, [sp, #SP_R3]
     ldr     r2, =0x2644
     add     r0, r4

@@ -36,8 +36,10 @@ public class Gen5BattleEventType {
     public static final int unknown0A = 0x0A;
     public static final int onSkipRunCalc = 0x0B;
     public static final int onPreventRun = 0x0C;
+    public static final int onRunExitMessage = 0x0D;
     public static final int onCheckSleep = 0x0E;
     public static final int onCheckSpecialPriority = 0x0F;
+    public static final int unknown10 = 0x10;
     public static final int onGetMovePriority = 0x11;
     public static final int onCheckFloating = 0x12;
     public static final int onCalcSpeed = 0x13;
@@ -71,6 +73,8 @@ public class Gen5BattleEventType {
     public static final int onAvoidMove = 0x2F;
     public static final int onCheckDamageToRecover = 0x30;
     public static final int onApplyDamageToRecover = 0x31;
+    public static final int onBypassAccuracyCheck = 0x32;
+    public static final int onGetMoveAccuracyStage = 0x33;
     public static final int onGetMoveAccuracy = 0x34;
     public static final int onGetHitCount = 0x35;
     public static final int onGetIsCriticalHit = 0x36;
@@ -80,11 +84,11 @@ public class Gen5BattleEventType {
     public static final int onGetDefendingStat = 0x3A;
     public static final int onGetAttackingStatValue = 0x3B;
     public static final int onGetDefendingStatValue = 0x3C;
-    public static final int onGetEffectivenessEnable = 0x3D;
+    public static final int onGetEffectivenessEnabled = 0x3D;
     public static final int onGetEffectiveness = 0x3E;
     public static final int onRewriteEffectiveness = 0x3F;
-    public static final int onGetIsStab = 0x40;
-    public static final int onApplyStab = 0x41;
+    public static final int onGetIsSTAB = 0x40;
+    public static final int onApplySTAB = 0x41;
     public static final int onGetAttackerType = 0x42;
     public static final int onGetDefenderType = 0x43;
     public static final int onPostDamageReaction = 0x44;
@@ -96,7 +100,7 @@ public class Gen5BattleEventType {
     public static final int onPreviousMoveReaction = 0x4A;
     public static final int onMoveDamageReaction1 = 0x4B;
     public static final int onMoveDamageReaction2 = 0x4C;
-    public static final int onMoveDamageSideAfter = 0x4D;
+    public static final int onPostMoveDamageSide = 0x4D;
     public static final int onDecrementPP = 0x4E;
     public static final int onDecrementPPDone = 0x4F;
     public static final int onCalcRecoil = 0x50;
@@ -131,8 +135,8 @@ public class Gen5BattleEventType {
     public static final int onFlinchCheck = 0x6D;
     public static final int onFlinchFail = 0x6E;
     public static final int onFlinchSuccess = 0x6F;
-    public static final int onOhkoCheck = 0x70;
-    public static final int onOhkoPrevent = 0x71;
+    public static final int onOHKOCheck = 0x70;
+    public static final int onOHKOPrevent = 0x71;
     public static final int onUseItem = 0x72;
     public static final int onUseItemTemp = 0x73;
     public static final int onEndureCheck = 0x74;
@@ -142,7 +146,7 @@ public class Gen5BattleEventType {
     public static final int onTurnCheckDone = 0x78;
     public static final int onNotifyAirLock = 0x79;
     public static final int onWeatherCheck = 0x7A;
-    public static final int onGetPokeWeight = 0x7B;
+    public static final int onGetWeight = 0x7B;
     public static final int onMoveWeatherTurnCount = 0x7C;
     public static final int onWeatherChange = 0x7D;
     public static final int onPostWeatherChange = 0x7E;

@@ -1,0 +1,16 @@
+{
+  "flags": 0,
+  "stat": 4,
+  "amount": 12,
+  "fMoveAnimation": 14,
+  "pokeCount": 15,
+  "pokeIds": [
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+  ],
+  "exStr": 24
+}

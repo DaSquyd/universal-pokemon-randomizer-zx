@@ -10,6 +10,11 @@
     cmp     r4, r0
     beq     Return ; cannot be user
     
+    mov     r1, r4
+    bl      Battle::IsAllyPokeId
+    cmp     r0, #0
+    beq     Return ; must be ally
+    
     mov     r1, r0
     mov     r0, r5
     bl      Battle::GetPoke
@@ -17,11 +22,6 @@
     bl      Battle::IsPokeFainted
     cmp     r0, #0
     beq     Return ; must be fainted
-    
-;    mov     r1, r4
-;    bl      Battle::IsAllyPokeId
-;    cmp     r0, #0
-;    beq     Return ; must be ally
 
     bl      Battle::GetTeamIdFromPokePos
     mov     r1, r0

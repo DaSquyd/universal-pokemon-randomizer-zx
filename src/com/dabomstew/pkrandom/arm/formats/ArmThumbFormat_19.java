@@ -11,13 +11,29 @@ public class ArmThumbFormat_19 extends ArmThumbFormat {
         }
 
         @Override
-        public String getArgsString(ArmContext context) throws ArmDecodeException {
+        public void updateContext(ArmContext context) throws ArmDecodeException {
             if (!(args[0] instanceof ArmArg_SignedImmediate imm))
                 throw new ArmDecodeException();
 
             int currentAddress = context.getCurrentAddress();
-            int funcAddress = currentAddress + imm.getValue() + 4;
+            int funcAddress = align(currentAddress + imm.getValue() + 4);
+            
+            if (context.getFuncEncoding(funcAddress) == 4)
+                operation = "blx";
+        }
+
+        @Override
+        public String getArgsString(ArmContext context) throws ArmDecodeException {
+            if (!(args[0] instanceof ArmArg_SignedImmediate imm))
+                throw new ArmDecodeException();
+            
+            int currentAddress = context.getCurrentAddress();
+            int funcAddress = align(currentAddress + imm.getValue() + 4);
             return context.getFuncName(funcAddress);
+        }
+        
+        private int align(int address) {
+            return address & 0xFFFFFFFC;
         }
     }
     
