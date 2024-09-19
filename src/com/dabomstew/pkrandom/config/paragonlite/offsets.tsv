@@ -214,6 +214,7 @@ Battle	GetIllusionDisguise	Code		thumb	0x021B939C	0x021B937C	0x0219CC98	0x0219CC
 Battle	GetPokeParam	Code		thumb	0x021B9954	0x021B9934	0x0219D250	0x0219D210
 Battle	IsAllyPokeId	Code		thumb	0x021B9A44	0x021B9A24	0x0219D340	0x0219D300
 Battle	GetTeamIdFromPokePos	Code		thumb	0x021B9A60	0x021B9A40	0x0219D35C	0x0219D31C
+Battle	GetSideFromOpposingPokeId	Code		thumb	0x021B9A70	0x021B9A50	0x0219D36C	0x0219D32C
 Battle	PartyIdToTeamId	Code		thumb	0x021B9B00	0x021B9AE0	0x0219D3FC	0x0219D3BC
 Battle	GetParty	Code		thumb	0x021B9B0C	0x021B9AEC	0x0219D408	0x0219D3C8
 Battle	ServerEvent_CalculateSpeed	Code		thumb	0x021BC968	0x021BC948	0x021A041C	0x021A03DC
@@ -250,6 +251,7 @@ Battle	GetBattleStyle	Code		thumb	0x021C817C	0x021C815C	0x021ABCDC	0x021ABC9C
 Battle	GetBattleType	Code		thumb	0x021C8188	0x021C8168	0x021ABCE8	0x021ABCA8
 Battle	CheckEvolution	Code		thumb	0x021C81AC	0x021C818C	0x021ABD0C	0x021ABCCC
 Battle	ServerEvent_CalcSpeed	Code		thumb	0x021C81E8	0x021C81C8	0x021ABD48	0x021ABD08
+Battle	Handler_CheckFloating	Code		thumb	0x021C8254	0x021C8234	0x021ABDB4	0x021ABD74
 Battle	CanUseItemFromPokeData	Code		thumb	0x021C826C	0x021C824C	0x021ABDCC	0x021ABD8C
 Battle	Handler_GetWeather	Code		thumb	0x021C82A8	0x021C8288	0x021ABE08	0x021ABDC8
 Battle	PokeSideHasCondition	Code		thumb	0x021C82F0	0x021C82D0	0x021ABE50	0x021ABE10
@@ -418,6 +420,7 @@ Battle	Data_MoveEffectListAddress	Data	4	*	0x021E0368	0x021E0348	0x021C5BB0	0x02
 Battle	Data_MoveEffectListCount	Data	4	*	0x021E036C	0x021E034C	0x021C5BB4	0x021C5B74
 Battle	Data_MoveEffectListAddress4	Data	4	*	0x021E0370	0x021E0350	0x021C5BB8	0x021C5B78
 Battle	MoveEvent_RemoveItem	Code		thumb	0x021E03B4	0x021E0394	0x021C5BFC	0x021C5BBC
+Battle	HandlerCommon_CreateSideStatus	Code		thumb	0x021E558C	0x021E556C	0x021CADE4	0x021CADA4
 Battle	HandlerCommon_CheckTargetMonID	Code		thumb	0x021E8618	0x021E85F8	0x021CDE78	0x021CDE38
 Battle	HandlerCommon_CheckIfCanStealPokeItem	Code		thumb	0x021E8708	0x021E86E8	0x021CDF68	0x021CDF28
 Battle	CommonMultiplyBasePower	Code		thumb	0x021E8880	0x021E8860	0x021CE0E0	0x021CE0A0
@@ -486,6 +489,13 @@ BattleLevel	Mcss_GetDataIndex	Code		thumb	0x02201A14	0x022019F4	0x021E97D4	0x021
 BattleLevel	Btlv_EffectC	Data	14		0x0220ACB0	0x0220AC90	0x021F3FDC	0x021F3F9C
 BattleLevel	Data_Unk21F4280	Data	0		0x0220AF40	0x0220AF20	0x021F4280	0x021F4240
 BattleServer	WonderRoomEventHandler	Code		thumb	0x068981A0	0x068981A0	0x068981A0	0x068981A0
+BattleServer	SideStatus_Init	Code		thumb	0x06898BFC	0x06898BFC	0x06898BFC	0x06898BFC
+BattleServer	SideStatus_AddItem	Code		thumb	0x06898C10	0x06898C10	0x06898C10	0x06898C10
+BattleServer	SideStatus_GetCount	Code		thumb	0x06898CE0	0x06898CE0	0x06898CE0	0x06898CE0
+BattleServer	SideStatus_IsEffectActive	Code		thumb			0x06898CF4	0x06898CF4
+BattleServer	SideStatus_RemoveItem	Code		thumb			0x06898D10	0x06898D10
+BattleServer	SideStatus_TurnCheck	Code		thumb			0x06898D54	0x06898D54
+BattleServer	SideStatus_GetCountFromEventItem	Code		thumb			0x06898DE0	0x06898DE0
 BattleServer	CreateDamageMessage	Code		thumb	0x0689B8CC	0x0689B8CC	0x0689BA5C	0x0689BA5C
 BattleServer	Condition_GetDamageText	Code		thumb	0x0689B92C	0x0689B92C	0x0689BABC	0x0689BABC
 BattleServer	RunTrapped	Code		thumb	0x0689BC30	0x0689BC30	0x0689BDC0	0x0689BDC0
@@ -493,9 +503,11 @@ BattleServer	ConditionEffectivenessModifiers	Code		thumb	0x0689C540	0x0689C540	0
 BattleServer	IsPlateItem	Code		thumb	0x0689C980	0x0689C980	0x0689CB08	0x0689CB08
 BattleServer	IsMoldBreakerIgnoredAbility	Code		thumb	0x0689C9B0	0x0689C9B0	0x0689CB38	0x0689CB38
 BattleServer	Data_WonderRoomEventHandlerAddress	Data	4	*	0x0689D62C	0x0689D62C	0x0689D7B4	0x0689D7B4
-BattleServer	Data_FieldStatusEffectList	Data	56	4*	0x0689D650	0x0689D650	0x0689D7D8	0x0689D7D8
+BattleServer	Data_FieldStatusEffectTable	Data	56	4*	0x0689D650	0x0689D650	0x0689D7D8	0x0689D7D8
+BattleServer	Data_SideStatusEffectTable	Data	112	4*	0x0689D780	0x0689D780	0x0689D908	0x0689D908
 BattleServer	Data_PlateItems	Data	32		0x0689E38C	0x0689E38C	0x0689E514	0x0689E514
 BattleServer	Data_MoldBreakerIgnoredAbilities	Data	112		0x0689E450	0x0689E450	0x0689E5D8	0x0689E5D8
+BattleServer	SideStatusManager	Data	448		0x0689E7E0	0x0689E7E0	0x0689E960	0x0689E960
 Storage	MakeBox2Main	Code		thumb	0x021DEDF8	0x021DEDD8	0x021BF060	0x021BF020
 Storage	DisplayPreview	Code		thumb	0x021DEF80	0x021DEF60	0x021BF1E8	0x021BF1A8
 Storage	Unk_21BF3A4	Code		thumb			0x021BF3A4	0x021BF364

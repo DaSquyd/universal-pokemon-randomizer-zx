@@ -519,13 +519,14 @@ public class ParagonLiteOverlay {
         globalAddressMap.relocateCodeAddress(this, label, ramAddress);
     }
 
-    public void writeData(byte[] bytes, String label) {
-        writeData(bytes, label, null);
+    public int writeData(byte[] bytes, String label) {
+        return writeData(bytes, label, null);
     }
 
-    public void writeData(byte[] bytes, String label, String refPattern) {
+    public int writeData(byte[] bytes, String label, String refPattern) {
         int romAddress = allocateRom(bytes.length);
         writeDataInternal(bytes, label, romAddress, refPattern);
+        return romAddress;
     }
 
     public int writeDataUnnamed(byte[] bytes, String refPattern) {

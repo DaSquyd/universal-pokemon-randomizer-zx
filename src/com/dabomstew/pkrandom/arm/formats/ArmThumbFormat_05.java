@@ -29,7 +29,7 @@ public class ArmThumbFormat_05 extends ArmThumbFormat {
 
     @Override
     public ArmLine decode(int instruction) throws ArmDecodeException {
-        int opcodeValue = readInstructionSegment(instruction, 6, 4);
+        int opcodeValue = readInstructionSegment(instruction, 8, 2);
         if (!isValidOpCode(opcodeValue))
             throw new ArmInvalidOpcodeException(opcodeValue);
         Opcode opcode = Opcode.values()[opcodeValue];

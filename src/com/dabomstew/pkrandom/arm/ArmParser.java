@@ -87,7 +87,9 @@ public class ArmParser {
                 "BtlClientWk",
                 "BtlvMcss",
                 "BtlvMcssData",
+                "HandlerParam_AddSideStatus",
                 "HandlerParam_ChangeStatStage",
+                "HandlerParam_Message",
                 "MainModule",
                 "MoveParam",
                 "PartyPoke",
@@ -1548,9 +1550,11 @@ public class ArmParser {
 
         try {
             Object evalObj = engine.eval(fullStr, currentContext);
-            if (evalObj instanceof Double)
-                return (int) Math.round((double) evalObj);
-            return (int) evalObj;
+            if (evalObj instanceof Double asDouble)
+                return (int) Math.round(asDouble);
+            if (evalObj instanceof Integer asInt)
+                return asInt;
+            throw new DataFormatException();
         } catch (ScriptException e) {
             throw new DataFormatException(String.format("Could not parse %s: %s", valueStr, e));
         }

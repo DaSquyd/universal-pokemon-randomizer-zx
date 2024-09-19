@@ -56,7 +56,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.ParagonLite;
+    public static Mode mode = Mode.Redux;
 
     Gen5RomHandler romHandler;
 
@@ -262,7 +262,7 @@ public class ParagonLiteHandler {
         Utils.printProgressFinished(startTime, total);
 
         globalAddressMap.addAllReferences();
-//        decode(BattleLevelOvl, "BtlvEffVM_LoadScript");
+//        decode(battleServerOvl, "SideStatus_AddItem");
 
         pokes = params.pokes;
         moves = params.moves;
@@ -344,11 +344,7 @@ public class ParagonLiteHandler {
     }
 
     private void setBattleEventStrings1() {
-        while (battleEventStrings1.size() < 221) battleEventStrings1.add("");
-
-        // Assault Vest
-        battleEventStrings1.add /* 221 */("The effects of the Assault Vest prevent\\xFFFEstatus moves from being used!");
-        battleEventStrings1.add /* 222 */("\uF000Č\\x0001\\x0000 can't use status moves!");
+//        while (battleEventStrings1.size() < 221) battleEventStrings1.add("");
     }
 
     private void setBattleEventStrings2() {
@@ -462,29 +458,38 @@ public class ParagonLiteHandler {
         battleEventStrings2.add/* 1196 */("The foe's \uF000Ă\\x0001\\x0000 protects its allies with\\xFFFEits stone shell!");
 
         // Water Veil
-        battleEventStrings2.add/* 1197*/("\uF000Ă\\x0001\\x0000 is veiled\\xFFFEin water!");
-        battleEventStrings2.add/* 1198*/("The wild \uF000Ă\\x0001\\x0000 is veiled\\xFFFEin water!");
-        battleEventStrings2.add/* 1199*/("The foe's \uF000Ă\\x0001\\x0000 is veiled\\xFFFEin water!");
+        battleEventStrings2.add/* 1197 */("\uF000Ă\\x0001\\x0000 is veiled\\xFFFEin water!");
+        battleEventStrings2.add/* 1198 */("The wild \uF000Ă\\x0001\\x0000 is veiled\\xFFFEin water!");
+        battleEventStrings2.add/* 1199 */("The foe's \uF000Ă\\x0001\\x0000 is veiled\\xFFFEin water!");
 
         // Wind Power
-        battleEventStrings2.add/* 1200*/("Being hit by \uF000ć\\x0001\\x0000 charged\\xFFFE\uF000Ă\\x0001\\x0001 with power!");
-        battleEventStrings2.add/* 1201*/("Being hit by \uF000ć\\x0001\\x0000 charged\\xFFFEthe wild \uF000Ă\\x0001\\x0001 with power!");
-        battleEventStrings2.add/* 1202*/("Being hit by \uF000ć\\x0001\\x0000 charged\\xFFFEthe foe's \uF000Ă\\x0001\\x0001 with power!");
+        battleEventStrings2.add/* 1200 */("Being hit by \uF000ć\\x0001\\x0000 charged\\xFFFE\uF000Ă\\x0001\\x0001 with power!");
+        battleEventStrings2.add/* 1201 */("Being hit by \uF000ć\\x0001\\x0000 charged\\xFFFEthe wild \uF000Ă\\x0001\\x0001 with power!");
+        battleEventStrings2.add/* 1202 */("Being hit by \uF000ć\\x0001\\x0000 charged\\xFFFEthe foe's \uF000Ă\\x0001\\x0001 with power!");
 
         // Supreme Overloard
-        battleEventStrings2.add/* 1203*/("\uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
-        battleEventStrings2.add/* 1204*/("The wild \uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
-        battleEventStrings2.add/* 1205*/("The foe's \uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
+        battleEventStrings2.add/* 1203 */("\uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
+        battleEventStrings2.add/* 1204 */("The wild \uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
+        battleEventStrings2.add/* 1205 */("The foe's \uF000Ă\\x0001\\x0000 gained strength\\xFFFEfrom the fallen!");
 
         // Electro Shot
-        battleEventStrings2.add/* 1206*/("\uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
-        battleEventStrings2.add/* 1207*/("The wild \uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
-        battleEventStrings2.add/* 1208*/("The foe's \uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
+        battleEventStrings2.add/* 1206 */("\uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
+        battleEventStrings2.add/* 1207 */("The wild \uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
+        battleEventStrings2.add/* 1208 */("The foe's \uF000Ă\\x0001\\x0000 absorbed\\xFFFEelectricity!");
 
         // Meteor Beam
-        battleEventStrings2.add/* 1209*/("\uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
-        battleEventStrings2.add/* 1210*/("The wild \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
-        battleEventStrings2.add/* 1211*/("The foe's \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
+        battleEventStrings2.add/* 1209 */("\uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
+        battleEventStrings2.add/* 1210 */("The wild \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
+        battleEventStrings2.add/* 1211 */("The foe's \uF000Ă\\x0001\\x0000 is overflowing\\xFFFEwith space power!");
+        
+        // Sticky Web
+        battleEventStrings2.add/* 1212 */("\uF000Ă\\x0001\\x0000 was caught\\xFFFEin a sticky web!");
+        battleEventStrings2.add/* 1213 */("The wild \uF000Ă\\x0001\\x0000 was caught\\xFFFEin a sticky web!");
+        battleEventStrings2.add/* 1214 */("The foe's \uF000Ă\\x0001\\x0000 was caught\\xFFFEin a sticky web!");
+        battleEventStrings1.add/* 1215 */("A sticky web has been laid out on the ground\\xFFFEaround your team!");
+        battleEventStrings1.add/* 1216 */("A sticky web has been laid out on the ground\\xFFFEaround the foe's team!");
+        battleEventStrings1.add/* 1217 */("The sticky web disappeared from\\xFFFEaround your team!");
+        battleEventStrings1.add/* 1218 */("The sticky web disappeared from\\xFFFEaround the foe's team!");
     }
     
     public void tempFixFairyStruggle() {
@@ -768,6 +773,74 @@ public class ParagonLiteHandler {
         battleOvl.writeCodeForceInline(simulationDamageLines, "Handler_SimulationDamage");
 
         System.out.println("Set Handler Simulation Damage");
+    }
+    
+    public void setNewSideStatus() {
+        int sideEffectEventAddItemRamAddress = globalAddressMap.getRamAddress(battleServerOvl, "SideStatus_AddItem");
+        int sideEffectEventAddItemRomAddress = battleServerOvl.ramToRomAddress(sideEffectEventAddItemRamAddress);
+
+        int sideStatusCountByteAddress = sideEffectEventAddItemRomAddress + 0x92;
+        int sideStatusAddTableRef = sideEffectEventAddItemRomAddress + 0xA8;
+        int sideStatusAddTable4Ref = sideEffectEventAddItemRomAddress + 0xAC;
+        
+        int newCount = 15;
+        battleServerOvl.writeByte(sideStatusCountByteAddress, newCount);
+
+        int battleSideStatusInitRamAddress = globalAddressMap.getRamAddress(battleServerOvl, "SideStatus_Init");
+        int battleSideStatusInitRomAddress = battleServerOvl.ramToRomAddress(battleSideStatusInitRamAddress);
+        battleServerOvl.writeByte(battleSideStatusInitRomAddress, newCount); // mov r2, #newCount
+        battleServerOvl.writeHalfword(battleSideStatusInitRomAddress + 0x08, 0x0152); // lsl r1, #5
+        
+        updateBattleServerFunctionSideStatusCount("SideStatus_AddItem", 0x0C, newCount);
+        updateBattleServerFunctionSideStatusCount("SideStatus_GetCount", 0x00, newCount);
+        updateBattleServerFunctionSideStatusCount("SideStatus_IsEffectActive", 0x00, newCount);
+        updateBattleServerFunctionSideStatusCount("SideStatus_RemoveItem", 0x02, newCount);
+        updateBattleServerFunctionSideStatusCount("SideStatus_TurnCheck", 0x0E, newCount);
+        updateBattleServerFunctionSideStatusCount("SideStatus_GetCountFromEventItem", 0x08, newCount);
+        
+        int oldSideStatusAddTable = battleServerOvl.readWord(sideStatusAddTableRef);
+        
+        byte[] newData = new byte[12 * newCount];
+        
+        for (int i = 0; i < 14; ++i) {
+            int sideStatusId = battleServerOvl.readWord(oldSideStatusAddTable + i * 12);
+            int sideStatusEffectRef = battleServerOvl.readWord(oldSideStatusAddTable + i * 12 + 4);
+            int sideStatusMaxLevel = battleServerOvl.readWord(oldSideStatusAddTable + i * 12 + 8);
+            
+            writeWord(newData, i * 12, sideStatusId);
+            writeWord(newData, i * 12 + 4, sideStatusEffectRef);
+            writeWord(newData, i * 12 + 8, sideStatusMaxLevel);
+        }
+        
+        List<String> handlerSideStickyWebLines = readLines("battleserver/handler_side_sticky_web.s");
+        int handlerSideStickyWebLinesRomAddress = battleOvl.writeCode(handlerSideStickyWebLines, "HandlerSide_StickyWeb");
+        int handlerSideStickyWebLinesRamAddress = battleOvl.romToRamAddress(handlerSideStickyWebLinesRomAddress);
+        
+        byte[] stickyWebEventTable = new byte[8];
+        writeWord(stickyWebEventTable, 0, Gen5BattleEventType.onSwitchIn);
+        writeWord(stickyWebEventTable, 4, handlerSideStickyWebLinesRamAddress + 1);
+        battleOvl.writeData(stickyWebEventTable, "HandlerSide_StickyWeb_EventTable");
+
+        List<String> eventAddStickyWebLines = readLines("battleserver/side_status_event_add_sticky_web.s");
+        int sideStatusEventAddStickyWebRomAddress = battleOvl.writeCode(eventAddStickyWebLines, "SideStatusEventAdd_StickWeb");
+        int sideStatusEventAddStickyWebRamAddress = battleOvl.romToRamAddress(sideStatusEventAddStickyWebRomAddress);
+
+        int stickyWebSideStatusId = 14;
+        writeWord(newData, stickyWebSideStatusId * 12, stickyWebSideStatusId);
+        writeWord(newData, stickyWebSideStatusId * 12 + 4, sideStatusEventAddStickyWebRamAddress + 1);
+        writeWord(newData, stickyWebSideStatusId * 12 + 8, 1);
+        
+        int effectTableRomAddress = battleOvl.writeData(newData, "Data_SideStatusEffectTable");
+        int effectTableRamAddress = battleOvl.romToRamAddress(effectTableRomAddress);
+        battleServerOvl.writeWord(sideStatusAddTableRef, effectTableRamAddress, true);
+        battleServerOvl.writeWord(sideStatusAddTable4Ref, effectTableRamAddress + 4, true);
+    }
+    
+    private void updateBattleServerFunctionSideStatusCount(String functionName, int instructionOffset, int newSideStatusCount) {
+        int funcRamAddress = globalAddressMap.getRamAddress(battleServerOvl, functionName);
+        int funcRomAddress = battleServerOvl.ramToRomAddress(funcRamAddress);
+        
+        battleServerOvl.writeByte(funcRomAddress + instructionOffset, newSideStatusCount * 16);
     }
 
     public void setPokemonData() {
@@ -2979,6 +3052,7 @@ public class ParagonLiteHandler {
                         Moves.doubleHit, // #458
                         Moves.dualChop, // #530
                         Moves.gearGrind, // #544
+                        Moves.stickyWeb, // #564
                         Moves.fellStinger, // #565
                         Moves.freezeDry, // #573
                         Moves.firstImpression, // #660
@@ -3022,6 +3096,7 @@ public class ParagonLiteHandler {
                         Moves.doubleHit, // #458
                         Moves.dualChop, // #530
                         Moves.gearGrind, // #544
+                        Moves.stickyWeb, // #564
                         Moves.fellStinger, // #565
                         Moves.freezeDry, // #573
                         Moves.firstImpression, // #660
@@ -3071,8 +3146,12 @@ public class ParagonLiteHandler {
         
         // TODO #564 Sticky Web
         moves.get(Moves.stickyWeb).name = "Sticky Web";
+        setMoveEventHandlers(Moves.stickyWeb, new MoveEventHandler(Gen5BattleEventType.onUncategorizedMoveNoTarget, "sticky_web.s"));
         setMoveAnimations(Moves.stickyWeb, 761);
-
+        byte[] tempStealthRockScript = moveAnimationScriptsNarc.files.get(Moves.stealthRock);
+        byte[] tempStickyWebScript = Arrays.copyOf(tempStealthRockScript, tempStealthRockScript.length);
+        battleAnimationScriptsNarc.files.set(Moves.stickyWeb + highMoveOffset - battleAnimationScriptsOffset, tempStickyWebScript);
+        
         // + #565 Fell Stinger
         moves.get(Moves.fellStinger).name = "Fell Stinger";
         setMoveEventHandlers(Moves.fellStinger, new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "fell_stinger.s"));
@@ -3144,7 +3223,7 @@ public class ParagonLiteHandler {
         moves.get(Moves.powerUpPunch).name = "Power-Up Punch";
         setMoveAnimations(Moves.powerUpPunch);
 
-        // #660 First Impression
+        // + #660 First Impression
         moves.get(Moves.firstImpression).name = "FirstImpression";
         cloneMoveEventHandlers(Moves.firstImpression, Moves.fakeOut);
         setMoveAnimations(Moves.firstImpression, 760);
@@ -3231,7 +3310,7 @@ public class ParagonLiteHandler {
         moves.get(Moves.scaleShot).name = "Scale Shot";
         setMoveAnimations(Moves.scaleShot, 758);
 
-        // #800 Meteor Beam
+        // + #800 Meteor Beam
         moves.get(Moves.meteorBeam).name = "Meteor Beam";
         if (mode == Mode.Redux) {
             setMoveAnimations(Moves.meteorBeam, "redux");
@@ -3885,7 +3964,10 @@ public class ParagonLiteHandler {
 
         itemDescriptions.set(index, "An item to be held by a Pokémon.\\xFFFEThis rock summons a hailstorm\\xFFFEwhen the holder enters battle.");
 
-        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "icy_rock_hail"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "icy_rock_hail"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "icy_rock_immune"));
+        setItemEventHandlers(index,
+                new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "icy_rock_hail"),
+                new ItemEventHandler(Gen5BattleEventType.onCheckActivation, "icy_rock_hail"),
+                new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "icy_rock_immune"));
     }
 
     void setSmoothRock() {
@@ -3893,7 +3975,10 @@ public class ParagonLiteHandler {
 
         itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock summons a sandstorm\\xFFFEwhen the holder enters battle.");
 
-        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "smooth_rock_sandstorm"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "smooth_rock_sandstorm"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "smooth_rock_immune"));
+        setItemEventHandlers(number,
+                new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "smooth_rock_sandstorm"),
+                new ItemEventHandler(Gen5BattleEventType.onCheckActivation, "smooth_rock_sandstorm"),
+                new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "smooth_rock_immune"));
     }
 
     void setHeatRock() {
@@ -3901,7 +3986,9 @@ public class ParagonLiteHandler {
 
         itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock turns the sunlight harsh\\xFFFEwhen the holder enters battle.");
 
-        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "heat_rock"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "heat_rock"));
+        setItemEventHandlers(number,
+                new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "heat_rock"),
+                new ItemEventHandler(Gen5BattleEventType.onCheckActivation, "heat_rock"));
     }
 
     void setDampRock() {
@@ -3909,7 +3996,9 @@ public class ParagonLiteHandler {
 
         itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock makes it rain\\xFFFEwhen the holder enters battle.");
 
-        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "damp_rock"), new ItemEventHandler(Gen5BattleEventType.onCheckItemReaction, "damp_rock"));
+        setItemEventHandlers(number,
+                new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "damp_rock"),
+                new ItemEventHandler(Gen5BattleEventType.onCheckActivation, "damp_rock"));
     }
 
     void setBigNugget() {
