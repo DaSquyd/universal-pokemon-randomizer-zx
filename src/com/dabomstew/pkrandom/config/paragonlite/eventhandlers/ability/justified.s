@@ -3,14 +3,15 @@
     mov     r4, r2
     mov     r0, r5
     mov     r1, r4
-    mov     r2, #16 ; Dark-type
-    bl      Battle::CommonDamageRecoverCheck
+    
+    mov     r2, #TYPE_Dark
+    bl      Battle::CommonTypeImmuneCheck
     cmp     r0, #0
     beq     End
     
     mov     r0, r5
     mov     r1, r4
-    mov     r2, #1 ; attack
+    mov     r2, #STSG_Attack
     mov     r3, #1 ; boost amount
     bl      Battle::CommonTypeNoEffectBoost
     

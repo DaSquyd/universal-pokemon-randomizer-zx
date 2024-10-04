@@ -14,13 +14,14 @@
     lsr     r1, r0, #16
     
     ; Captivate
-    ldr     r0, =445 ; Captivate
+    mov     r0, #255
+    add     r0, #(445 - 255) ; Captivate
     cmp     r1, r0
     beq     CancelMove
     
     ; Taunt
-    ldr     r0, =269 ; Taunt
-    cmp     r1, r0
+    mov     r0, #255
+    add     r0, #(269 - 255) ; Taunt
     bne     End
     
 CancelMove:

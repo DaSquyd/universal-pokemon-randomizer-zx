@@ -35,12 +35,12 @@
     cmp     r0, #0
     beq     ReturnFalse
     
-    ldr     r0, [r5, #0x08] ; r0 := serverFlow->pokeCon
+    ldr     r0, [r5, #ServerFlow.pokeCon] ; r0 := serverFlow->pokeCon
     mov     r1, r6 ; r1 := attackingMonId
     bl      Battle::GetPokeParam
     str     r0, [sp, #ATTACKING_MON_PARAM]
     
-    ldr     r0, [r5, #0x08] ; r0 := serverFlow->pokeCon
+    ldr     r0, [r5, #ServerFlow.pokeCon] ; r0 := serverFlow->pokeCon
     mov     r1, r7
     bl      Battle::GetPokeParam
     
@@ -54,8 +54,8 @@
     beq     BindMoveEvent
     
 Illusion:
-    ldr     r0, [r5, #0x04] ; r0 := serverFlow->mainModule
-    ldr     r1, [r5, #0x08] ; r1 := serverFlow->pokeCon
+    ldr     r0, [r5, #ServerFlow.mainModule] ; r0 := serverFlow->mainModule
+    ldr     r1, [r5, #ServerFlow.pokeCon] ; r1 := serverFlow->pokeCon
     ldr     r2, [sp, #DEFENDING_MON_PARAM]
     bl      Battle::GetIllusionDisguise
     str     r0, [sp, #DEFENDING_MON_PARAM]

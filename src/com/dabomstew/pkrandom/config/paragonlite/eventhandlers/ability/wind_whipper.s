@@ -8,7 +8,7 @@
     
     mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
-    mov     r1, #MF_Punch
+    mov     r1, #MF_Wind
     bl      ARM9::MoveHasFlag
     cmp     r0, #0
     beq     Return

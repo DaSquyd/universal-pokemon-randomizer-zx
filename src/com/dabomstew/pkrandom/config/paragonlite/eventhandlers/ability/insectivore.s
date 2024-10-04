@@ -4,7 +4,7 @@
     mov  r0, r5
     mov  r1, r4
     mov  r2, #6 ; Bug-type
-    bl   Battle::CommonDamageRecoverCheck
+    bl   Battle::CommonTypeImmuneCheck
     cmp  r0, #0
     beq  End
     

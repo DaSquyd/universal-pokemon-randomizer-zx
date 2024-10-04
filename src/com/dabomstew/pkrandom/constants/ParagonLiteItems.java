@@ -72,12 +72,13 @@ public class ParagonLiteItems {
     public static final int /*1249*/ jollyMint = Items.dataCard11;
     public static final int /*1250*/ naiveMint = Items.dataCard12;
     public static final int /*1251*/ seriousMint = Items.dataCard13;
-    public static final int /*1780*/ blankPlate = Items.dataCard14;
-    public static final int /*1828*/ legendPlate = Items.dataCard15;
-    public static final int /*1881*/ abilityShield = Items.dataCard16;
-    public static final int /*1882*/ clearAmulet = Items.dataCard17;
-    public static final int /*1883*/ mirrorHerb = Items.dataCard18;
-    public static final int /*1884*/ punchingGlove = Items.dataCard19;
-    public static final int /*1885*/ covertCloak = Items.dataCard20;
-    public static final int /*1886*/ loadedDice = Items.dataCard21;
+    public static final int /*1611*/ linkingCord = Items.dataCard14;
+    public static final int /*1780*/ blankPlate = Items.dataCard15;
+    public static final int /*1828*/ legendPlate = Items.dataCard16;
+    public static final int /*1881*/ abilityShield = Items.dataCard17;
+    public static final int /*1882*/ clearAmulet = Items.dataCard18;
+    public static final int /*1883*/ mirrorHerb = Items.dataCard19;
+    public static final int /*1884*/ punchingGlove = Items.dataCard20;
+    public static final int /*1885*/ covertCloak = Items.dataCard21;
+    public static final int /*1886*/ loadedDice = Items.dataCard22;
 }

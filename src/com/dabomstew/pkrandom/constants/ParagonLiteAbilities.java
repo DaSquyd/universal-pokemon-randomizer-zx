@@ -39,6 +39,14 @@ public class ParagonLiteAbilities {
     public static final int stoneHome = 506;
     public static final int cacophony = 507;
     public static final int ripTide = 508;
+    public static final int windWhipper = 509;
+    public static final int glazeware = 510;
+    public static final int sunSoaked = 511;
+    public static final int colossal = 512;
+    public static final int finalThread = 513;
+    public static final int homeGrown = 514;
+    public static final int ravenousTorque = 515;
+    public static final int superconductor = 516;
 
     public static final int MAX = ripTide;
     
@@ -75,6 +83,14 @@ public class ParagonLiteAbilities {
             assimilate, // 505
             stoneHome, // 506
             cacophony // 507
-//            ripTide // 508
+//            ripTide, // 508
+//            windWhipper, // 509
+//            glazeware, // 510
+//            sunSoaked, // 511
+//            colossal, // 512
+//            finalThread, // 513
+//            homeGrown, // 514
+//            ravenousTorque, // 515
+//            superconductor, // 516
     );
 }

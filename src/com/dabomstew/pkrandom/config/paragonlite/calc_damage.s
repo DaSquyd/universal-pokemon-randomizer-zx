@@ -137,11 +137,12 @@ DamageRatio:
     
 Weather:
     mov     r0, r5
-    bl      Battle::ServerEvent_GetWeather
+    ldr     r1, [sp, #SP_ATTACKING_MON]
+    bl      Battle::GetEffectiveWeather
     ldrb    r1, [r4, #MoveParam.moveType]
     bl      Battle::ServerEvent_WeatherPowerMod
-    mov     r1, #1
-    lsl     r1, #12 ; 4096
+    mov     r1, #4
+    lsl     r1, #10 ; 4096
     cmp     r0, r1
     beq     CriticalHit
     mov     r1, r7

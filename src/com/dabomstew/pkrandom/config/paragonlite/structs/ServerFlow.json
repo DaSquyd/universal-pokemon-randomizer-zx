@@ -42,7 +42,7 @@
   "pokesetStackPtr": 6756,
   "moveParam": 6832,
   "moveParamOriginal": 6836,
-  "pokePos": 6840,
+  "posPoke": 6840,
   "strParam": 6884,
   "levelUpInfo": 6924,
   "heManager": 7544,

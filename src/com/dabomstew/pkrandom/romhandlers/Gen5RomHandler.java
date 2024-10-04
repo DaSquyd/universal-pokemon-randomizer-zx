@@ -5329,11 +5329,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setPokeData();
         paragonLite.setBoxPreview();
         paragonLite.fixChallengeModeLevelBug();
+        paragonLite.setGetEffectiveWeather();
         paragonLite.setCalcDamageOffensiveValue();
         paragonLite.setCalcDamageDefensiveValue();
         paragonLite.setCalcDamage();
         paragonLite.setCritRatio();
         paragonLite.setStatus();
+        paragonLite.setStatChangeIntimidateFlag();
         paragonLite.setTrapDamage();
         paragonLite.setTypeForPlate();
         paragonLite.setGemDamageBoost();
@@ -5344,6 +5346,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setGhostEscape();
         paragonLite.setCallModifyEffectivenessHandler();
         paragonLite.setHandlerSimulationDamage();
+        paragonLite.setScreenPower();
         paragonLite.setNewSideStatus();
 
         paragonLite.setMoves();

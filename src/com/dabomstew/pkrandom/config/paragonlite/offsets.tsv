@@ -218,6 +218,10 @@ Battle	GetSideFromOpposingPokeId	Code		thumb	0x021B9A70	0x021B9A50	0x0219D36C	0x
 Battle	PartyIdToTeamId	Code		thumb	0x021B9B00	0x021B9AE0	0x0219D3FC	0x0219D3BC
 Battle	GetParty	Code		thumb	0x021B9B0C	0x021B9AEC	0x0219D408	0x0219D3C8
 Battle	ServerEvent_CalculateSpeed	Code		thumb	0x021BC968	0x021BC948	0x021A041C	0x021A03DC
+Battle	ServerControl_MoveStart	Code		thumb			0x021A2740	0x021A2700
+Battle	ServerControl_IsGuaranteedHit	Code		thumb			0x021A2E0C	0x021A2DCC
+Battle	ServerControl_CheckNoEffect	Code		thumb			0x021A2F94	0x021A2F54
+Battle	ServerControl_CheckNoEffectCore	Code		thumb			0x021A31D0	0x021A3190
 Battle	ServerControl_MoveExeCheck1	Code		thumb	0x021C003C	0x021C001C	0x021A3B00	0x021A3AC0
 Battle	ServerControl_CheckMoveExeFreezeThaw	Code		thumb	0x021C0424	0x021C0404	0x021A3EE8	0x021A3EA8
 Battle	ServerControl_DamageRoot	Code		thumb	0x021C093C	0x021C091C	0x021A4400	0x021A43C0
@@ -226,13 +230,23 @@ Battle	ServerEvent_CalcDamage	Code		thumb	0x021C1E94	0x021C1E74	0x021A5958	0x021
 Battle	ServerControl_CheckSimpleDamageEnabled	Code		thumb	0x021C20DC	0x021C20BC	0x021A5BAC	0x021A5B6C
 Battle	ServerControl_SimpleDamageCore	Code		thumb	0x021C20F0	0x021C20D0	0x021A5BC0	0x021A5B80
 Battle	ServerEvent_GetWeather	Code		thumb	0x021C2AD0	0x021C2AB0	0x021A65A0	0x021A6560
+Battle	WazaSerial_Inc	Code		thumb			0x021A693C	0x021A68FC
+Battle	ServerControl_MoveStatStageChangeEffectCommon	Code		thumb			0x021A6954	0x021A6914
+Battle	ServerEvent_GetMoveStatChangeValue	Code		thumb			0x021A6A60	0x021A6A20
+Battle	ServerControl_StatStageChangeCore	Code		thumb			0x021A6AF8	0x021A6AB8
+Battle	ServerEvent_CheckSubstituteInteraction	Code		thumb			0x021A6C1C	0x021A6BDC
 Battle	ConditionDamageRecall	Code		thumb	0x021C4A84	0x021C4A64	0x021A8564	0x021A8524
 Battle	ServerEvent_ConditionDamage	Code		thumb	0x021C4B5C	0x021C4B3C	0x021A863C	0x021A85FC
 Battle	Run_PostTurnWeather	Code		thumb	0x021C4D3C	0x021C4D1C	0x021A881C	0x021A87DC
 Battle	ServerControl_CheckExpGet	Code		thumb	0x021C5220	0x021C5200	0x021A8D00	0x021A8CC0
 Battle	ServerControl_GetExp	Code		thumb	0x021C5328	0x021C5308	0x021A8E2C	0x021A8DEC
 Battle	ServerDisplay_AddEffectAtPosition	Code		thumb	0x021C54A0	0x021C5480	0x021A8FD8	0x021A8F98
+Battle	ServerDisplay_AbilityPopupAdd	Code		thumb	0x021C5A3C	0x021C5A1C	0x021A9574	0x021A9534
+Battle	ServerDisplay_AbilityPopupRemove	Code		thumb	0x021C5A54	0x021C5A34	0x021A958C	0x021A954C
+Battle	ServerDisplay_StatStageLimit	Code		thumb	0x021C5A6C	0x021C5A4C	0x021A95A4	0x021A9564
+Battle	ServerDisplay_StatStage	Code		thumb	0x021C5AAC	0x021C5A8C	0x021A95E4	0x021A95A4
 Battle	ServerEvent_GetMoveParam	Code		thumb	0x021C64D4	0x021C64B4	0x021AA00C	0x021A9FCC
+Battle	ServerEvent_CheckProtectBreak	Code		thumb	0x021C6688	0x021C6668	0x021AA1C0	0x021AA180
 Battle	CheckCriticalHit	Code		thumb	0x021C6C18	0x021C6BF8	0x021AA750	0x021AA710
 Battle	CallModifyEffectivenessHandler	Code		thumb	0x021C7058	0x021C7038	0x021AAB90	0x021AAB50
 Battle	SetMultiStrikeData	Code		thumb	0x021C7200	0x021C71E0	0x021AAD38	0x021AACF8
@@ -240,13 +254,19 @@ Battle	ServerEvent_GetMovePower	Code		thumb	0x021C72AC	0x021C728C	0x021AADE4	0x0
 Battle	ServerEvent_GetOffensiveValue	Code		thumb	0x021C7394	0x021C7374	0x021AAECC	0x021AAE8C
 Battle	ServerEvent_GetDefensiveValue	Code		thumb	0x021C7494	0x021C7474	0x021AAFCC	0x021AAF8C
 Battle	ServerEvent_SameTypeAttackBonus	Code		thumb	0x021C760C	0x021C75EC	0x021AB144	0x021AB104
+Battle	ServerEvent_CheckStatChangeSuccess	Code		thumb			0x021AB308	0x021AB2C8
+Battle	ServerEvent_StatStageChangeFailed	Code		thumb			0x021AB378	0x021AB338
+Battle	ServerEvent_StatStageChangeApplied	Code		thumb			0x021AB3B4	0x021AB374
+Battle	ServerEvent_MoveStatStageChangeApplied	Code		thumb			0x021AB400	0x021AB3C0
 Battle	GetPoke	Code		thumb	0x021C7D14	0x021C7CF4	0x021AB874	0x021AB834
+Battle	Handler_GetExistFrontPokePos	Code		thumb	0x021C7D20	0x021C7D00	0x021AB880	0x021AB840
 Battle	Handler_SimulationEffectivenessCore	Code		thumb	0x021C7DCC	0x021C7DAC	0x021AB92C	0x021AB8EC
 Battle	Handler_SimulationDamage	Code		thumb	0x021C7E34	0x021C7E14	0x021AB994	0x021AB954
 Battle	Handler_IsSimulationMode	Code		thumb	0x021C7EE4	0x021C7EC4	0x021ABA44	0x021ABA04
 Battle	Handler_ExpandPokeID	Code		thumb	0x021C7F88	0x021C7F68	0x021ABAE8	0x021ABAA8
 Battle	Handler_PokeIDToPokePos	Code		thumb	0x021C8030	0x021C8010	0x021ABB90	0x021ABB50
 Battle	Handler_GetThisTurnAction	Code		thumb	0x021C806C	0x021C804C	0x021ABBCC	0x021ABB8C
+Battle	Handler_GetTempWork	Code		thumb	0x021C8140	0x021C8120	0x021ABCA0	0x021ABC60
 Battle	GetBattleStyle	Code		thumb	0x021C817C	0x021C815C	0x021ABCDC	0x021ABC9C
 Battle	GetBattleType	Code		thumb	0x021C8188	0x021C8168	0x021ABCE8	0x021ABCA8
 Battle	CheckEvolution	Code		thumb	0x021C81AC	0x021C818C	0x021ABD0C	0x021ABCCC
@@ -270,10 +290,13 @@ Battle	Handler_Result	Code		thumb	0x021C8904	0x021C88E4	0x021AC464	0x021AC424
 Battle	Handler_Execute	Code		thumb	0x021C8938	0x021C8918	0x021AC498	0x021AC458
 Battle	AddHandler_AbilityPopup	Code		thumb	0x021C8CDC	0x021C8CBC	0x021AC83C	0x021AC7FC
 Battle	AddHandler_RecoverHP	Code		thumb	0x021C8D4C	0x021C8D2C	0x021AC8AC	0x021AC86C
+Battle	Handler_ChangeStatStage	Code		thumb			0x021ACDD0	0x021ACD90
+Battle	Handler_SetString	Code		thumb			0x021AD520	0x021AD4E0
 Battle	ServerFlow_IsCompetitorScenarioMode	Code		thumb	--	--	0x021AE34C	0x021AE30C
 Battle	AddExpAndEVs	Code		thumb	0x021CB2F4	0x021CB2D4	0x021AEE4C	0x021AEE0C
 Battle	HEManager_PushState	Code		thumb	0x021CC8F8	0x021CC8D8	0x021B088C	0x021B084C
 Battle	HEManager_PopState	Code		thumb	0x021CC97C	0x021CC95C	0x021B0910	0x021B08D0
+Battle	ServerDisplay_AddMessageImpl	Code		thumb			0x021B1610	0x021B15D0
 Battle	BattleClient_Init	Code		thumb	0x021CD710	0x021CD6F0	0x021B16B4	0x021B1674
 Battle	Inst_BattleClient_Init_AllocModify	Inst	2		0x021CD72E	0x021CD70E	0x021B16D2	0x021B1692
 Battle	Data_BattleClient_Init_LineNum	Data	4		0x021CD8E8	0x021CD8C8	0x021B18B8	0x021B1878
@@ -300,6 +323,7 @@ Battle	GetCritPokeStat	Code		thumb	0x021D5AF8	0x021D5AD8	0x021BB318	0x021BB2D8
 Battle	GetPokeHeldItem	Code		thumb	0x021D5B60	0x021D5B40	0x021BB380	0x021BB340
 Battle	IsPokeFullHP	Code		thumb	0x021D5B68	0x021D5B48	0x021BB388	0x021BB348
 Battle	IsPokeFainted	Code		thumb	0x021D5B88	0x021D5B68	0x021BB3A8	0x021BB368
+Battle	Poke_GetTurnFlag	Code		thumb	0x021D5BD0	0x021D5BB0	0x021BB3F0	0x021BB3B0
 Battle	IsStatChangeValid	Code		thumb	0x021D5D34	0x021D5D14	0x021BB554	0x021BB514
 Battle	GetCritStage	Code		thumb	0x021D5F34	0x021D5F14	0x021BB754	0x021BB714
 Battle	GetPokeStatus	Code		thumb	0x021D62C8	0x021D62A8	0x021BBAE8	0x021BBAA8
@@ -401,7 +425,7 @@ Battle	CommonAddStatusFailed	Code		thumb	0x021D9690	0x021D9670	0x021BEED8	0x021B
 Battle	CommonRemoveStatus	Code		thumb	0x021D96FC	0x021D96DC	0x021BEF44	0x021BEF04
 Battle	CommonWeatherChangeAbility	Code		thumb	0x021D97D4	0x021D97B4	0x021BF01C	0x021BEFDC
 Battle	CommonContactStatusAbility	Code		thumb	0x021D9E28	0x021D9E08	0x021BF670	0x021BF630
-Battle	CommonDamageRecoverCheck	Code		thumb	0x021DA8C8	0x021DA8A8	0x021C0110	0x021C00D0
+Battle	CommonTypeImmuneCheck	Code		thumb	0x021DA8C8	0x021DA8A8	0x021C0110	0x021C00D0
 Battle	CommonTypeRecoverHP	Code		thumb	0x021DA8FC	0x021DA8DC	0x021C0144	0x021C0104
 Battle	CommonTypeNoEffectBoost	Code		thumb	0x021DA98C	0x021DA96C	0x021C01D4	0x021C0194
 Battle	Handler_MoldBreakerSkipCheck	Code		thumb	0x021DB1C8	0x021DB1A8	0x021C0A10	0x021C09D0
@@ -496,12 +520,17 @@ BattleServer	SideStatus_IsEffectActive	Code		thumb			0x06898CF4	0x06898CF4
 BattleServer	SideStatus_RemoveItem	Code		thumb			0x06898D10	0x06898D10
 BattleServer	SideStatus_TurnCheck	Code		thumb			0x06898D54	0x06898D54
 BattleServer	SideStatus_GetCountFromEventItem	Code		thumb			0x06898DE0	0x06898DE0
+BattleServer	CommonScreenEffect	Code		thumb			0x06898E54	0x06898E54
 BattleServer	CreateDamageMessage	Code		thumb	0x0689B8CC	0x0689B8CC	0x0689BA5C	0x0689BA5C
 BattleServer	Condition_GetDamageText	Code		thumb	0x0689B92C	0x0689B92C	0x0689BABC	0x0689BABC
 BattleServer	RunTrapped	Code		thumb	0x0689BC30	0x0689BC30	0x0689BDC0	0x0689BDC0
 BattleServer	ConditionEffectivenessModifiers	Code		thumb	0x0689C540	0x0689C540	0x0689C6C8	0x0689C6C8
 BattleServer	IsPlateItem	Code		thumb	0x0689C980	0x0689C980	0x0689CB08	0x0689CB08
 BattleServer	IsMoldBreakerIgnoredAbility	Code		thumb	0x0689C9B0	0x0689C9B0	0x0689CB38	0x0689CB38
+BattleServer	PokeSet_Remove	Code		thumb	0x0689CC14	0x0689CC14	0x0689CD9C	0x0689CD9C
+BattleServer	PokeSet_SeekStart	Code		thumb	0x0689CC84	0x0689CC84	0x0689CE0C	0x0689CE0C
+BattleServer	PokeSet_SeekNext	Code		thumb	0x0689CC8C	0x0689CC8C	0x0689CE14	0x0689CE14
+BattleServer	PosPoke_IsExist	Code		thumb	0x0689D588	0x0689D588	0x0689D710	0x0689D710
 BattleServer	Data_WonderRoomEventHandlerAddress	Data	4	*	0x0689D62C	0x0689D62C	0x0689D7B4	0x0689D7B4
 BattleServer	Data_FieldStatusEffectTable	Data	56	4*	0x0689D650	0x0689D650	0x0689D7D8	0x0689D7D8
 BattleServer	Data_SideStatusEffectTable	Data	112	4*	0x0689D780	0x0689D780	0x0689D908	0x0689D908

@@ -1,13 +1,8 @@
-#DEFINE VAR_ATTACKING_MON 0x03
-#DEFINE VAR_GENERAL_USE_FLAG 0x51
-#DEFINE WEATHER_RAIN 2
-#DEFINE TRUE 1
-
     push    {r3-r5, lr}
     mov     r5, r1
     mov     r4, r2
     
-    mov     r0, #VAR_ATTACKING_MON
+    mov     r0, #VAR_AttackingPoke
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
     bne     Return
@@ -15,10 +10,11 @@
     mov     r0, r5
     mov     r1, r4
     bl      Battle::Handler_GetEffectiveWeather
-    cmp     r0, #WEATHER_RAIN
+    cmp     r0, #WEATHER_Sun
     bne     Return
     
-    mov     r0, #VAR_GENERAL_USE_FLAG
+Apply:
+    mov     r0, #VAR_GeneralUseFlag
     mov     r1, #1
     bl      Battle::EventVar_RewriteValue
     
