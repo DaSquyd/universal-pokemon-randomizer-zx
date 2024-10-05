@@ -1,67 +1,49 @@
-#DEFINE NUM_POKES 0x00
-#DEFINE POKES_ARRAY 0x04
-
-#DEFINE ADD_STACK_SIZE 0x08
-
-#DEFINE EFFECT_CHANGE_STAT_STAGE 0x0E
-#DEFINE STATSTAGE_ATTACK 0x01
-
-    push    {r3-r7, lr}
-    sub     sp, #ADD_STACK_SIZE
+    push    {r3-r4, lr}
     mov     r5, r1
     mov     r4, r2
     
-;    mov     r0, r5
-;    mov     r1, r4
-;    bl      Battle::Handler_PokeIDToPokePos
-;    mov     r2, r0
-;    
-;    mov     r0, r5
-;    mov     r1, #2
-;    lsl     r1, #9 ; 00000100_00000000
-;    orr     r1, r2
-;    add     r2, sp, #POKES_ARRAY
-;    bl      Battle::Handler_ExpandPokeID
-;    str     r0, [sp, #NUM_POKES]
-;    cmp     r0, #0
-;    bls     Return
+    mov     r0, r5
+    bl      Battle::Handler_GetTempWork
+    mov     r6, r0
     
-    mov     r0, r5 ; server_flow
-    mov     r1, #EFFECT_CHANGE_STAT_STAGE
-    mov     r2, r4
-    bl      Battle::Handler_PushWork
+    mov     r0, r5
+    mov     r1, #EXND_TargetAndAllies
+    lsl     r1, #8
+    orr     r1, r4
+    lsl     r1, #16
+    lsr     r1, #16
+    mov     r2, r6
+    bl      Battle::Handler_ExpandPokeId
     mov     r7, r0
+    beq     Return
     
-    mov     r1, #STATSTAGE_ATTACK
-    str     r1, [r7, #0x04] ; rank type
-    strb    r1, [r7, #0x0C] ; rank volume
-    strb    r1, [r7, #0x0E]
-;    ldr     r0, [sp, #NUM_POKES]
-;    strb    r0, [r7, #0x0F]
+    mov     r0, r5
+    mov     r1, #HE_ChangeStatStage
+    mov     r2, r4
+    bl      BattleHandler_PushWork
+    mov     r1, r0
     
-;    mov     r3, #0 ; iteration
- 
+    mov     r2, #STSG_Attack
+    str     r2, [r1, #HandlerParam_ChangeStatStage.stat]
+    strb    r2, [r1, #HandlerParam_ChangeStatStage.amount]
+    strb    r2, [r1, #HandlerParam_ChangeStatStage.fMoveAnimation]
+    strb    r7, [r1, #HandlerParam_ChangeStatStage.pokeCount]
     
-    mov     r0, #1
-    strb    r0, [r7, #0x0F]
-    mov     r0, r4
-    strb    r0, [r7, #0x10]
+    mov     r3, #0
+    cmp     r7, #0
+    bls     PopWork
     
-;LoopStart:
-;    add     r0, sp, #POKES_ARRAY
-;    ldrb    r1, [r0, r3]   
-;    add     r0, r7, r3
-;    strb    r1, [r0, #0x10]
-;    
-;    add     r3, #1
-;    ldr     r0, [sp, #NUM_POKES]
-;    cmp     r3, r0
-;    bcc     LoopStart
+LoopStart
+    ldrb    r2, [r6, r3]
+    add     r0, r1, r3
+    add     r3, #1
+    strb    r2, [r0, #HandlerParam_ChangeStatStage.pokeIds[0]]
+    cmp     r3, r7
+    bcc     LoopStart
     
 PopWork:
     mov     r0, r5
     bl      Battle::Handler_PopWork
     
 Return:
-    add     sp, #ADD_STACK_SIZE
-    pop     {r3-r7, pc}
+    pop     {r3-r4, pc}

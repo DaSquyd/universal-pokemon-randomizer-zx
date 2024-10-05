@@ -36,7 +36,7 @@ CheckMode:
     
 SetMoveAnimationIndex:
     mov     r0, r6
-    bl      Battle::SetMoveAnimationIndex
+    bl      Battle::Handler_SetMoveAnimationIndex
     
 Return:
     pop     {r4-r6, pc}

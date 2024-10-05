@@ -561,7 +561,7 @@ public class ParagonLiteHandler {
 
         List<String> getHandlerEffectiveWeatherLines = readLines("battle/handler_get_effective_weather.s");
         battleOvl.writeCode(getHandlerEffectiveWeatherLines, "Handler_GetEffectiveWeather");
-        
+
         System.out.println("Set GetEffectiveWeather");
     }
 
@@ -1257,7 +1257,7 @@ public class ParagonLiteHandler {
             abilityExplanations.add(eggExplanation);
         }
 
-        int totalChanges = 89;
+        int totalChanges = 90;
         int currentChanges = -1;
         long startTime = System.currentTimeMillis();
         System.out.println("setting abilities...");
@@ -1543,6 +1543,10 @@ public class ParagonLiteHandler {
         // #074 Pure Power (1.5x Sp. Atk)
         Utils.printProgress(totalChanges, ++currentChanges, "Pure Power");
         setPurePower();
+        
+        // #077 Tangled Feet (Boost Speed on miss)
+        Utils.printProgress(totalChanges, ++currentChanges, "Tangled Feet");
+        setTangledFeet();
 
         // #079 Rivalry (1.0x opposite gender, 1.2x same gender)
         Utils.printProgress(totalChanges, ++currentChanges, "Rivalry");
@@ -1684,7 +1688,7 @@ public class ParagonLiteHandler {
                 abilityDescriptions.set(number, "Halves the damage\\xFFFEfrom physical moves.");
 
                 // Data
-                setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStatValue, "redux_fur_coat.s"));
+                setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStatValue, "fur_coat_redux.s"));
             }
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
@@ -2001,7 +2005,7 @@ public class ParagonLiteHandler {
         String filename;
         switch (mode) {
             case ParagonLite -> filename = "fluffy.s";
-            case Redux -> filename = "redux_fluffy.s";
+            case Redux -> filename = "fluffy_redux.s";
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, filename));
@@ -2275,10 +2279,10 @@ public class ParagonLiteHandler {
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "wind_whipper.s"));
     }
-    
+
     private void addGlazeware() {
         int number = ParagonLiteAbilities.glazeware;
-        
+
         // Name
         abilityNames.set(number, "Glazeware");
 
@@ -2293,11 +2297,11 @@ public class ParagonLiteHandler {
                     .replace("Ice", "Poison");
             abilityExplanations.set(number, explanation);
         }
-        
+
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "glazeware.s"));
     }
-    
+
     private void addSunSoaked() {
         int number = ParagonLiteAbilities.sunSoaked;
 
@@ -2307,7 +2311,7 @@ public class ParagonLiteHandler {
         // Description
         String description = "All moves get the effects\\xFFFEof harsh sunlight.";
         abilityDescriptions.set(number, description);
-        
+
         // TODO: Explanation
 
         // Data
@@ -2316,7 +2320,7 @@ public class ParagonLiteHandler {
 
     private void addColossal() {
         int number = ParagonLiteAbilities.colossal;
-        
+
         // Name
         abilityNames.set(number, "Colossal");
 
@@ -2331,11 +2335,53 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, "colossal_damage.s"),
                 new AbilityEventHandler(Gen5BattleEventType.onGetMoveAccuracy, "colossal_accuracy.s"));
     }
-    
+
+    private void addFinalThread() {
+        int number = ParagonLiteAbilities.finalThread;
+
+        // Name
+        abilityNames.set(number, "Final Thread");
+
+        // Description
+        String description = "Sets Sticky Web and\\xFFFEToxic Spikes on faint.";
+        abilityDescriptions.set(number, description);
+
+        // TODO: Explanation
+
+        // Data
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "final_thread.s"));
+    }
+
+    private void addHomeGrown() {
+        // TODO
+    }
+
+    private void addRavenousTorque() {
+        // TODO
+    }
+
+    private void addSuperconductor() {
+        int number = ParagonLiteAbilities.superconductor;
+
+        // Name
+        switch (mode) {
+            case ParagonLite -> abilityNames.set(number, "Superconductor");
+            case Redux -> abilityNames.set(number, "Coolant Boost");
+            default -> throw new IllegalStateException("Unexpected value: " + mode);
+        }
+
+        // Description
+        String description = abilityDescriptions.get(Abilities.flareBoost).replace("burned", "frostbitten");
+        abilityDescriptions.set(number, description);
+        
+        // Data
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "superconductor.s"));
+    }
+
     private void setStench() {
         if (mode == Mode.Redux) {
             int number = Abilities.stench;
-            setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMoveFlinchChance, "redux_stench.s"));
+            setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMoveFlinchChance, "stench_redux.s"));
         }
     }
 
@@ -2347,7 +2393,7 @@ public class ParagonLiteHandler {
                 // TODO Description
                 String description = "All moves get the\\xFFFEeffects of rain.";
                 abilityDescriptions.set(number, description);
-                
+
                 setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, Abilities.heatproof));
             }
             case Redux -> {
@@ -2498,7 +2544,7 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, "Ups resistance to Dark-\\xFFFEand Ghost-type moves.");
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "redux_illuminate.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "illuminate_redux.s"));
     }
 
     private void setHugePower() {
@@ -2632,7 +2678,7 @@ public class ParagonLiteHandler {
                 break;
             }
             case Redux: {
-                setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePriority, "redux_hustle.s"));
+                setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePriority, "hustle_redux.s"));
                 break;
             }
             default:
@@ -2658,7 +2704,7 @@ public class ParagonLiteHandler {
             case Redux -> {
                 // Data
                 setAbilityEventHandlers(number,
-                        new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "redux_plus_spatk.s"),
+                        new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "plus_spatk_redux.s"),
                         new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "plus_message.s"),
                         new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "plus_message.s"));
             }
@@ -2687,7 +2733,7 @@ public class ParagonLiteHandler {
 
                 // Data
                 setAbilityEventHandlers(number,
-                        new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "redux_minus_attack.s"),
+                        new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "minus_attack_redux.s"),
                         new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "minus_message.s"),
                         new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "minus_message.s"));
             }
@@ -2770,10 +2816,22 @@ public class ParagonLiteHandler {
 
                 // Data
                 setAbilityEventHandlers(number,
-                        new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "redux_pure_power.s"));
+                        new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "pure_power_redux.s"));
             }
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
+    }
+    
+    private void setTangledFeet() {
+        int number = Abilities.tangledFeet;
+
+        // Description
+        abilityDescriptions.set(number, "Boosts Speed when moves\\xFFFEfail or miss.");
+
+        // Data
+        setAbilityEventHandlers(number,
+                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "tangled_feet_flinch.s"),
+                new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteNoEffect, "tangled_feet_miss.s"));
     }
 
     private void setRivalry() {
@@ -3023,7 +3081,7 @@ public class ParagonLiteHandler {
 
         if (mode == Mode.Redux) {
             // Data
-            setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onSwitchOutEnd, "redux_regenerator.s"));
+            setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onSwitchOutEnd, "regenerator_redux.s"));
         }
     }
 
@@ -3595,7 +3653,7 @@ public class ParagonLiteHandler {
             // No longer changes damage
             case ParagonLite -> setMoveEventHandlers(Moves.tripleAxel, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
             case Redux -> setMoveEventHandlers(Moves.tripleAxel,
-                    new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "redux_triple_axel.s"),
+                    new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "triple_axel_redux.s"),
                     new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
@@ -3757,28 +3815,28 @@ public class ParagonLiteHandler {
 
         // #059 Blizzard
         setMoveEventHandlers(Moves.blizzard, new MoveEventHandler(Gen5BattleEventType.onBypassAccuracyCheck, "blizzard.s"));
-        
+
         // #074 Growth
         setMoveEventHandlers(Moves.growth, new MoveEventHandler(Gen5BattleEventType.onGetStatStageChangeValue, "growth.s"));
-        
+
         // #076 Solar Beam
-        setMoveEventHandlers(Moves.solarBeam, 
+        setMoveEventHandlers(Moves.solarBeam,
                 new MoveEventHandler(Gen5BattleEventType.onCheckChargeUpSkip, "solar_beam_charge_up_skip.s"),
                 new MoveEventHandler(Gen5BattleEventType.onChargeUpStart),
                 new MoveEventHandler(Gen5BattleEventType.onGetMovePower, "solar_beam_move_power.s"));
-        
+
         // #087 Thunder
         setMoveEventHandlers(Moves.thunder,
                 new MoveEventHandler(Gen5BattleEventType.onCheckSemiInvulnerable),
                 new MoveEventHandler(Gen5BattleEventType.onBypassAccuracyCheck, "thunder_bypass_accuracy_check.s"),
                 new MoveEventHandler(Gen5BattleEventType.onGetMoveAccuracy, "thunder_accuracy.s"));
-        
+
         // + #121 Egg Bomb
         cloneMoveEventHandlers(Moves.eggBomb, Moves.psystrike);
-        
+
         // + #155 Bonemerang
         setMoveEventHandlers(Moves.bonemerang, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
-        
+
         // #167 Triple Kick
         if (mode == Mode.ParagonLite)
             setMoveEventHandlers(Moves.tripleKick, new MoveEventHandler(Gen5BattleEventType.onGetHitCount));
@@ -3793,13 +3851,13 @@ public class ParagonLiteHandler {
 
         // #234 Morning Sun
         setMoveEventHandlers(Moves.morningSun, new MoveEventHandler(Gen5BattleEventType.onRecoverHealth, "morning_sun.s"));
-        
+
         // #235 Synthesis
         cloneMoveEventHandlers(Moves.synthesis, Moves.morningSun);
-        
+
         // #236 Moonlight
         cloneMoveEventHandlers(Moves.moonlight, Moves.morningSun);
-        
+
         // #237 Hidden Power
         setMoveEventHandlers(Moves.hiddenPower, new MoveEventHandler(Gen5BattleEventType.onGetMoveParam));
 
@@ -3815,6 +3873,11 @@ public class ParagonLiteHandler {
         // + #310 Astonish
         if (mode == Mode.ParagonLite)
             cloneMoveEventHandlers(Moves.astonish, Moves.fakeOut);
+
+        // #311 Weather Ball
+        setMoveEventHandlers(Moves.weatherBall,
+                new MoveEventHandler(Gen5BattleEventType.onGetMoveParam, "weather_ball_type.s"),
+                new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "weather_ball_base_power.s"));
 
         // #327 Sky Uppercut
         setMoveEventHandlers(Moves.skyUppercut,
@@ -3852,13 +3915,13 @@ public class ParagonLiteHandler {
         // #486 Electro Ball
         if (mode == Mode.ParagonLite)
             setMoveEventHandlers(Moves.electroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "electro_ball.s"));
-        
+
         // + #530 Dual Chop
         setMoveEventHandlers(Moves.dualChop, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
 
         // #542 Hurricane
         cloneMoveEventHandlers(Moves.hurricane, Moves.thunder);
-        
+
         // + #544 Gear Grind
         setMoveEventHandlers(Moves.gearGrind, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
 

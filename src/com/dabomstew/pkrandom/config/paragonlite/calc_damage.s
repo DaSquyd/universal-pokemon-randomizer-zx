@@ -210,19 +210,29 @@ Effectiveness:
     bl      Battle::ServerEvent_GetEffectivenessMod
     mov     r7, r0
     
-Condition_Frostbite:
+CheckSpecial:
     ; Special
     ldr     r0, [sp, #SP_MOVE_CATEGORY]
     cmp     r0, #CAT_Special
-    bne     Condition_Burn
+    bne     CheckPhysical
     
     ; Frostbite
     ldr     r0, [sp, #SP_ATTACKING_MON]
     bl      Battle::GetPokeStatus
     cmp     r0, #MC_Frostbite
-    beq     Condition_HalveDamage
+    bne     ZeroHandle
     
-Condition_Burn:
+    ; Superconductor
+    ldr     r0, [sp, #SP_ATTACKING_MON]
+    mov     r1, #BPV_EffectiveAbility
+    bl      Battle::GetPokeStat
+    mov     r1, #(516 >> 2)
+    lsl     r1, #2 ; Superconductor
+    cmp     r0, r1
+    bne     Condition_HalveDamage
+    b       ZeroHandle
+    
+CheckPhysical:
     ; Physical
     ldr     r0, [sp, #SP_MOVE_CATEGORY]
     cmp     r0, #CAT_Physical

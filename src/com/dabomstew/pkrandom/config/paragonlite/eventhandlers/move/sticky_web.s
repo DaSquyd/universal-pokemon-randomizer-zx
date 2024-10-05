@@ -20,8 +20,7 @@
     mov     r0, #SC_StickyWeb
     str     r0, [sp, #CONDITION_TYPE]
     str     r4, [sp, #CONDITION_PTR]
-    mov     r0, #148
-;    ldr     r0, =1215 ; message id
+    ldr     r0, =1215 ; message id
     str     r0, [sp, #MESSAGE_ID]
     
     ldr     r3, [sp, #VAR_20]
@@ -30,40 +29,6 @@
     mov     r1, r7
     mov     r2, r5
     bl      Battle::HandlerCommon_CreateSideStatus
-    
-;    mov     r0, #VAR_AttackingPoke
-;    bl      Battle::EventVar_GetValue
-;    cmp     r5, r0
-;    bne     Return
-;    
-;    mov     r0, r7
-;    mov     r1, #HE_AddSideStatus
-;    mov     r2, r5
-;    bl      Battle::Handler_PushWork
-;    mov     r4, r0
-;    
-;    ldr     r0, [sp, #CONDITION_TYPE]
-;    add     r6, sp, #OPPOSING_SIDE
-;    str     r0, [r4, #HandlerParam_AddSideStatus.conditionType]
-;    
-;    ldrb    r0, [r6]
-;    mov     r1, #2
-;    strb    r0, [r4, #HandlerParam_AddSideStatus.side]
-;    
-;    ldr     r0, [sp, #CONDITION_PTR]
-;    str     r0, [r4, #HandlerParam_AddSideStatus.conditionPtr]
-;    
-;    mov     r0, r4
-;    ldrh    r2, [r6, #0x0C] ; message id
-;    add     r0, #HandlerParam_AddSideStatus.exStr
-;    bl      Battle::Handler_StrSetup
-;    mov     r0, r4
-;    
-;    ldrb    r1, [r6]
-;    add     r0, #HandlerParam_AddSideStatus.exStr
-;    bl      Battle::Handler_AddArg
-;    mov     r0, r7
-;    mov     r1, r4
     
 Return:
     add     sp, #0x1C

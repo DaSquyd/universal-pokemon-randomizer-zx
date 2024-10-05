@@ -23,9 +23,9 @@
     lsl     r0, #23
     orr     r0, r2
     str     r0, [r1, #HandlerParam_ChangeStateStage.header]
-    mov     r0, #STSG_Attack
+    mov     r0, #STSG_Speed
     str     r0, [r1, #HandlerParam_ChangeStateStage.stat]
-    mov     r2, #1 ; stat boost amount
+    mov     r2, #2 ; stat boost amount
     strb    r2, [r1, #HandlerParam_ChangeStateStage.amount]
     mov     r0, #0
     strb    r0, [r1, #HandlerParam_ChangeStateStage.fMoveAnimation]
