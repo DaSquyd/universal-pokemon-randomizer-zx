@@ -430,12 +430,17 @@ public class ParagonLiteOverlay {
         globalAddressMap.registerCodeAddress(this, label, ramAddress, 2);
     }
 
-    public void writeCodeForceInline(List<String> lines, String label) {
+    public void writeCodeForceInline(List<String> lines, String label, boolean ensureSize) {
         int ramAddress = globalAddressMap.getRamAddress(this, label);
         int romAddress = ramToRomAddress(ramAddress);
         int oldSize = getFuncSizeRam(ramAddress);
 
         byte[] bytes = armParser.parse(lines, this, ramAddress);
+        
+        if (ensureSize && bytes.length > oldSize) {
+            throw new RuntimeException(String.format("Inline for %s was too big", label));
+        }
+        
         if (true || (bytes.length == oldSize)) {
             for (int i = 0; i < bytes.length; i += 2) {
                 int address = romAddress + i;
@@ -453,6 +458,7 @@ public class ParagonLiteOverlay {
 
             int newRomAddress = allocateRom(bytes.length);
             int newRamAddress = romToRamAddress(newRomAddress);
+            System.out.printf("%s::%s: ROM=0x%08X; RAM=0x%08X%n", name, label, newRomAddress, newRamAddress);
             bytes = armParser.parse(lines, this, newRamAddress);
             writeBytes(newRomAddress, bytes);
             globalAddressMap.relocateCodeAddress(this, label, newRamAddress);

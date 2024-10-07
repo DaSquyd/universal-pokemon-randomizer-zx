@@ -1,9 +1,9 @@
 {
   "header": 0,
   "stat": 4,
-  "pad1": 8,
+  "moveSerial": 8,
   "amount": 12,
-  "pad2": 13,
+  "fHideMessage": 13,
   "fMoveAnimation": 14,
   "pokeCount": 15,
   "pokeId": 16,

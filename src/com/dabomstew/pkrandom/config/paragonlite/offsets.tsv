@@ -277,7 +277,7 @@ Battle	Handler_GetWeather	Code		thumb	0x021C82A8	0x021C8288	0x021ABE08	0x021ABDC
 Battle	PokeSideHasCondition	Code		thumb	0x021C82F0	0x021C82D0	0x021ABE50	0x021ABE10
 Battle	IsPokeSwitchingOut	Code		thumb	0x021C832C	0x021C830C	0x021ABE8C	0x021ABE4C
 Battle	AddSwitchOutInterrupt	Code		thumb	0x021C833C	0x021C831C	0x021ABE9C	0x021ABE5C
-Battle	SetMoveAnimationIndex	Code		thumb	0x021C83FC	0x021C83DC	0x021ABF5C	0x021ABF1C
+Battle	Handler_SetMoveAnimationIndex	Code		thumb	0x021C83FC	0x021C83DC	0x021ABF5C	0x021ABF1C
 Battle	Handler_StrClear	Code		thumb	0x021C8830	0x021C8810	0x021AC390	0x021AC350
 Battle	Handler_StrIsEnabled	Code		thumb	0x021C8848	0x021C8828	0x021AC3A8	0x021AC368
 Battle	Handler_StrSetup	Code		thumb	0x021C8858	0x021C8838	0x021AC3B8	0x021AC378

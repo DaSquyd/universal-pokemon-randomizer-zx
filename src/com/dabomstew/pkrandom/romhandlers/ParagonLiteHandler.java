@@ -56,7 +56,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.Redux;
+    public static Mode mode = Mode.ParagonLite;
 
     Gen5RomHandler romHandler;
 
@@ -506,17 +506,17 @@ public class ParagonLiteHandler {
 
         // Updates the personal data to allow for abilities up to index 1023
         List<String> readPersonalDatalines = readLines("read_poke_personal_data.s");
-        arm9.writeCodeForceInline(readPersonalDatalines, "ReadPokePersonalData");
+        arm9.writeCodeForceInline(readPersonalDatalines, "ReadPokePersonalData", false);
 
         // Updates the box data to allow for abilities up to index 1023
         // Also fixes the Azurill->Marill gender bug
         List<String> readBoxDataLines = readLines("read_poke_box_data.s");
-        arm9.writeCodeForceInline(readBoxDataLines, "ReadPokeBoxData");
+        arm9.writeCodeForceInline(readBoxDataLines, "ReadPokeBoxData", true);
 
         // Updates the box data to allow for abilities up to index 1023
         // Also fixes the Azurill->Marill gender bug
         List<String> writeBoxDataLines = readLines("write_poke_box_data.s");
-        arm9.writeCodeForceInline(writeBoxDataLines, "WritePokeBoxData");
+        arm9.writeCodeForceInline(writeBoxDataLines, "WritePokeBoxData", true);
 
         System.out.println("Set Poke Data");
     }
@@ -525,15 +525,15 @@ public class ParagonLiteHandler {
         // This is the function that creates the struct used for a Pokémon's preview in the PC.
         // We are essentially swapping the markings (which is given 2 bytes despite only using 1) and ability.
         List<String> makeBox2MainLines = readLines("storage/make_box2_main.s");
-        storageOvl.writeCodeForceInline(makeBox2MainLines, "MakeBox2Main");
+        storageOvl.writeCodeForceInline(makeBox2MainLines, "MakeBox2Main", false);
 
         // This function calls PreviewCore as well as gets the Box2Main's markings, which have been moved, so we adjust
         List<String> displayPreviewLines = readLines("storage/display_preview.s");
-        storageOvl.writeCodeForceInline(displayPreviewLines, "DisplayPreview");
+        storageOvl.writeCodeForceInline(displayPreviewLines, "DisplayPreview", false);
 
         // Update to use the correct ability string when filling out the display field for ability
         List<String> previewAbilityLines = readLines("storage/preview_ability.s");
-        storageOvl.writeCodeForceInline(previewAbilityLines, "Preview_Ability");
+        storageOvl.writeCodeForceInline(previewAbilityLines, "Preview_Ability", false);
     }
 
     public void fixChallengeModeLevelBug() {
@@ -543,7 +543,7 @@ public class ParagonLiteHandler {
         // After updating the levels for the Pokémon in an enemy trainer's team, the game doesn't recalculate the stats
         // the Pokémon should have.
         List<String> lines = readLines("difficulty_adjust_poke_level.s");
-        arm9.writeCodeForceInline(lines, "Difficulty_AdjustPokeLevel");
+        arm9.writeCodeForceInline(lines, "Difficulty_AdjustPokeLevel", true);
         System.out.println("Fixed Challenge/Easy Mode level bug");
     }
 
@@ -587,13 +587,13 @@ public class ParagonLiteHandler {
         // Facade ignores
 
         List<String> lines = readLines("calc_damage.s");
-        battleOvl.writeCodeForceInline(lines, "ServerEvent_CalcDamage");
+        battleOvl.writeCodeForceInline(lines, "ServerEvent_CalcDamage", false);
         System.out.println("Set damage calc");
     }
 
     public void setCritRatio() {
         List<String> lines = readLines("check_critical_hit.s");
-        battleOvl.writeCodeForceInline(lines, "CheckCriticalHit");
+        battleOvl.writeCodeForceInline(lines, "CheckCriticalHit", false);
 
         byte[] critChanceData = new byte[]{24, 8, 2, 1};
         battleOvl.writeData(critChanceData, "Data_CriticalHitChances");
@@ -609,16 +609,16 @@ public class ParagonLiteHandler {
         // 1/16
 
         List<String> conditionDamageRecallLines = readLines("condition_damage_recall.s");
-        battleOvl.writeCodeForceInline(conditionDamageRecallLines, "ConditionDamageRecall");
+        battleOvl.writeCodeForceInline(conditionDamageRecallLines, "ConditionDamageRecall", false);
 
         List<String> statusDamageLines = readLines("get_status_damage.s");
-        battleOvl.writeCodeForceInline(statusDamageLines, "GetStatusDamage");
+        battleOvl.writeCodeForceInline(statusDamageLines, "GetStatusDamage", false);
 
         List<String> statusDamageStringLines = readLines("get_status_damage_string.s");
-        battleServerOvl.writeCodeForceInline(statusDamageStringLines, "Condition_GetDamageText");
+        battleServerOvl.writeCodeForceInline(statusDamageStringLines, "Condition_GetDamageText", true);
 
         List<String> effectMainUpdateConditionLines = readLines("effect_main_update_condition.s");
-        BattleLevelOvl.writeCodeForceInline(effectMainUpdateConditionLines, "EffectMain_UpdateCondition");
+        BattleLevelOvl.writeCodeForceInline(effectMainUpdateConditionLines, "EffectMain_UpdateCondition", true);
 
         // Replaces Freeze with Frostbite
 
@@ -657,22 +657,22 @@ public class ParagonLiteHandler {
         // Updates the stat change functions to include a flag for a stat change being caused by intimidate
 
         List<String> checkStatChangeSuccessLines = readLines("battle/server_event_check_stat_change_success.s");
-        battleOvl.writeCodeForceInline(checkStatChangeSuccessLines, "ServerEvent_CheckStatChangeSuccess");
+        battleOvl.writeCodeForceInline(checkStatChangeSuccessLines, "ServerEvent_CheckStatChangeSuccess", false);
 
         List<String> statStageChangeAppliedLines = readLines("battle/server_event_stat_stage_change_applied.s");
-        battleOvl.writeCodeForceInline(statStageChangeAppliedLines, "ServerEvent_StatStageChangeApplied");
+        battleOvl.writeCodeForceInline(statStageChangeAppliedLines, "ServerEvent_StatStageChangeApplied", false);
 
         List<String> statStageChangeFailedLines = readLines("battle/server_event_stat_stage_change_failed.s");
-        battleOvl.writeCodeForceInline(statStageChangeFailedLines, "ServerEvent_StatStageChangeFailed");
+        battleOvl.writeCodeForceInline(statStageChangeFailedLines, "ServerEvent_StatStageChangeFailed", false);
 
         List<String> statStageChangeCoreLines = readLines("battle/server_control_stat_stage_change_core.s");
-        battleOvl.writeCodeForceInline(statStageChangeCoreLines, "ServerControl_StatStageChangeCore");
+        battleOvl.writeCodeForceInline(statStageChangeCoreLines, "ServerControl_StatStageChangeCore", false);
 
         List<String> handlerChangeStatStageLines = readLines("battle/handler_change_stat_stage.s");
-        battleOvl.writeCodeForceInline(handlerChangeStatStageLines, "Handler_ChangeStatStage");
+        battleOvl.writeCodeForceInline(handlerChangeStatStageLines, "Handler_ChangeStatStage", false);
 
         List<String> moveStatStageChangeEffectCommonLines = readLines("battle/server_control_move_stat_stage_change_effect_common.s");
-        battleOvl.writeCodeForceInline(moveStatStageChangeEffectCommonLines, "ServerControl_MoveStatStageChangeEffectCommon");
+        battleOvl.writeCodeForceInline(moveStatStageChangeEffectCommonLines, "ServerControl_MoveStatStageChangeEffectCommon", false);
     }
 
     public void setTrapDamage() {
@@ -691,7 +691,7 @@ public class ParagonLiteHandler {
     public void setTypeForPlate() {
         // Adds Pixie Plate functionality for Judgment and Arceus
         List<String> lines = readLines("get_type_for_plate.s");
-        arm9.writeCodeForceInline(lines, "GetTypeForPlate");
+        arm9.writeCodeForceInline(lines, "GetTypeForPlate", false);
 
         int[] arceusFairyStandard = new int[]{
                 // Background (Transparent)
@@ -780,7 +780,7 @@ public class ParagonLiteHandler {
 
         // Increases shiny odds
         List<String> lines = readLines("shiny_32.s");
-        arm9.writeCodeForceInline(lines, "IsShiny");
+        arm9.writeCodeForceInline(lines, "IsShiny", true);
 
         System.out.println("Set shiny rate");
     }
@@ -788,7 +788,7 @@ public class ParagonLiteHandler {
     public void setGhostEscape() {
         // Allow Ghost to always escape
         List<String> lines = readLines("is_poke_trapped.s");
-        battleOvl.writeCodeForceInline(lines, "IsPokeTrapped");
+        battleOvl.writeCodeForceInline(lines, "IsPokeTrapped", false);
 
         System.out.println("Set Ghost Escape");
     }
@@ -799,7 +799,7 @@ public class ParagonLiteHandler {
         // Now, it allows for modification of type effectiveness beyond removing immunities
 
         List<String> lines = readLines("call_modify_effectiveness_handler.s");
-        battleOvl.writeCodeForceInline(lines, "CallModifyEffectivenessHandler");
+        battleOvl.writeCodeForceInline(lines, "CallModifyEffectivenessHandler", false);
 
         System.out.println("Set Call Modify Effectiveness Handler");
     }
@@ -810,7 +810,7 @@ public class ParagonLiteHandler {
 
         // Updates simulation damage to include move bindings for variable power, type, effectiveness, etc.
         List<String> simulationDamageLines = readLines("handler_simulation_damage.s");
-        battleOvl.writeCodeForceInline(simulationDamageLines, "Handler_SimulationDamage");
+        battleOvl.writeCodeForceInline(simulationDamageLines, "Handler_SimulationDamage", false);
 
         System.out.println("Set Handler Simulation Damage");
     }
@@ -1225,10 +1225,10 @@ public class ParagonLiteHandler {
     }
 
     public void setTrainers() {
-        arm9.writeCode(readLines("lcg.s"), "LCG");
-        arm9.writeCode(readLines("lcg_seed.s"), "SeedLCG");
+//        arm9.writeCode(readLines("lcg.s"), "LCG");
+//        arm9.writeCode(readLines("lcg_seed.s"), "SeedLCG");
 
-        arm9.writeCodeForceInline(readLines("get_trainer_data.s"), "GetTrainerData");
+        arm9.writeCodeForceInline(readLines("get_trainer_data.s"), "GetTrainerData", false);
 
         System.out.println("Set trainers");
     }
@@ -1236,7 +1236,7 @@ public class ParagonLiteHandler {
     public void setAbilities() {
         registerAbilityEffects();
 
-        int abilityListAdditions = 30;
+        int abilityListAdditions = 37;
 
         // Move AbilityList
         relocateAbilityListRamAddress(abilityListAdditions);
@@ -1414,8 +1414,8 @@ public class ParagonLiteHandler {
         addColossal();
 
         // #513 Final Thread
-        Utils.printProgress(totalChanges, ++currentChanges, "Final Thread");
-        addFinalThread();
+//        Utils.printProgress(totalChanges, ++currentChanges, "Final Thread");
+//        addFinalThread();
 
         // #514 Home Grown
         Utils.printProgress(totalChanges, ++currentChanges, "Home Grown");
@@ -1497,7 +1497,7 @@ public class ParagonLiteHandler {
         setMagmaArmor();
 
         // #041 Water Veil
-        Utils.printProgress(totalChanges, ++currentChanges, "Magma Armor");
+        Utils.printProgress(totalChanges, ++currentChanges, "Water Veil");
         setWaterVeil();
 
         // #042 Magnet Pull
@@ -3008,7 +3008,7 @@ public class ParagonLiteHandler {
 
         int number = Abilities.healer;
 
-        abilityDescriptions.set(number, "Heals ally HP and\\xFFFEsometimes status condition.");
+        abilityDescriptions.set(number, "Restores ally HP and may\\xFFFEcure status conditions.");
 
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onTurnCheckBegin, "healer_recover_hp.s"));
     }
@@ -3147,12 +3147,12 @@ public class ParagonLiteHandler {
         String filename;
         switch (mode) {
             case ParagonLite -> filename = "eventhandlers/ability/low_hp_type_boost.s";
-            case Redux -> filename = "eventhandlers/ability/redux_low_hp_type_boost.s";
+            case Redux -> filename = "eventhandlers/ability/low_hp_type_boost_redux.s";
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
         List<String> lines = readLines(filename);
 
-        battleOvl.writeCodeForceInline(lines, "CommonLowHPTypeBoostAbility");
+        battleOvl.writeCodeForceInline(lines, "CommonLowHPTypeBoostAbility", false);
     }
 
     public void setMoves() {
@@ -3163,13 +3163,13 @@ public class ParagonLiteHandler {
         battleOvl.writeCode(btlvEffVMLoadScriptLines, "BtlvEffVM_LoadScript");
 
         List<String> btlvEffVMLoadScriptJumpLines = readLines("battlelevel/btlveffvm_load_script_jump.s");
-        BattleLevelOvl.writeCodeForceInline(btlvEffVMLoadScriptJumpLines, "BtlvEffVM_LoadScript");
+        BattleLevelOvl.writeCodeForceInline(btlvEffVMLoadScriptJumpLines, "BtlvEffVM_LoadScript", true);
 
         List<String> playMoveAnimationLines = readLines("battlelevel/play_move_animation.s");
         battleOvl.writeCode(playMoveAnimationLines, "PlayMoveAnimation");
 
         List<String> playMoveAnimationJumpLines = readLines("battlelevel/play_move_animation_jump.s");
-        BattleLevelOvl.writeCodeForceInline(playMoveAnimationJumpLines, "PlayMoveAnimation");
+        BattleLevelOvl.writeCodeForceInline(playMoveAnimationJumpLines, "PlayMoveAnimation", true);
 
         int maxMoveIndex = Moves.malignantChain;
         int highMoveOffset = 116;
@@ -3358,7 +3358,9 @@ public class ParagonLiteHandler {
                         Moves.firstImpression, // #660
                         Moves.darkestLariat, // #663
                         Moves.sparklingAria, // #664
+                        Moves.solarBlade, // #669
                         Moves.pollenPuff, // #676
+                        Moves.powerTrip, // #681
                         Moves.psychicFangs, // #706
                         Moves.bodyPress, // #776
                         Moves.meteorBeam, // #800
@@ -3407,7 +3409,9 @@ public class ParagonLiteHandler {
                         Moves.firstImpression, // #660
                         Moves.darkestLariat, // #663
                         Moves.sparklingAria, // #664
+                        Moves.solarBlade, // #669
                         Moves.pollenPuff, // #676
+                        Moves.powerTrip, // #681
                         Moves.psychicFangs, // #706
                         Moves.bodyPress, // #776
                         Moves.flipTurn, // #812
@@ -3559,6 +3563,10 @@ public class ParagonLiteHandler {
         // TODO: #668 Strength Sap
         moves.get(Moves.strengthSap).name = "Strength Sap";
         setMoveAnimations(Moves.strengthSap);
+        
+        // + #669 Solar Blade
+        moves.get(Moves.solarBlade).name = "Solar Blade";
+        cloneMoveEventHandlers(Moves.solarBlade, Moves.solarBeam);
 
         // + #676 Pollen Puff
         moves.get(Moves.pollenPuff).name = "Pollen Puff";
@@ -3574,6 +3582,10 @@ public class ParagonLiteHandler {
         // #680 Fire Lash
         moves.get(Moves.fireLash).name = "Fire Lash";
         setMoveAnimations(Moves.fireLash);
+        
+        // + #681 Power Trip
+        moves.get(Moves.powerTrip).name = "Power Trip";
+        cloneMoveEventHandlers(Moves.powerTrip, Moves.storedPower);
 
         // #684 Smart Strike
         moves.get(Moves.smartStrike).name = "Smart Strike";
@@ -4647,6 +4659,8 @@ public class ParagonLiteHandler {
 
         List<Trainer> trainers = romHandler.getTrainers();
 
+        pokes[Species.registeel].ability1 = Abilities.healer;
+        
         for (Trainer tr : trainers) {
             if (tr.pokemon.isEmpty())
                 continue;
@@ -4656,9 +4670,9 @@ public class ParagonLiteHandler {
 
             TrainerPokemon poke1 = tr.pokemon.get(0);
             poke1.pokemon = romHandler.getPokemon().get(Species.registeel);
-            poke1.level = 15;
+            poke1.level = 20;
             poke1.abilitySlot = 1;
-            poke1.moves = new int[]{Moves.recover, 0, 0, 0};
+            poke1.moves = new int[]{Moves.tackle, 0, 0, 0};
             poke1.heldItem = Items.sitrusBerry;
             poke1.IVs = 0;
 
@@ -4666,17 +4680,17 @@ public class ParagonLiteHandler {
                 tr.pokemon.add(tr.pokemon.get(0).copy());
             if (tr.pokemon.size() < 3)
                 tr.pokemon.add(tr.pokemon.get(0).copy());
-//            TrainerPokemon poke2 = tr.pokemon.get(1);
-//            poke2.pokemon = romHandler.getPokemon().get(Species.carracosta);
-//            poke2.level = 100;
-//            pokes[Species.lanturn].ability1 = Abilities.voltAbsorb;
-//            poke2.abilitySlot = 1;
-//            poke2.moves = new int[]{Moves.recover, 0, 0, 0};
-//            poke2.IVs = 0;
-//            poke2.heldItem = Items.rindoBerry;
+            TrainerPokemon poke2 = tr.pokemon.get(1);
+            poke2.pokemon = romHandler.getPokemon().get(Species.carracosta);
+            poke2.level = 20;
+            pokes[Species.lanturn].ability1 = Abilities.voltAbsorb;
+            poke2.abilitySlot = 1;
+            poke2.moves = new int[]{Moves.tackle, 0, 0, 0};
+            poke2.IVs = 0;
+            poke2.heldItem = Items.rindoBerry;
         }
 
-        romHandler.setTrainers(trainers, false, true);
+        romHandler.setTrainers(trainers, true, true);
 
         // Set debug AI Flag
 //        for (Trainer tr : trainers) {

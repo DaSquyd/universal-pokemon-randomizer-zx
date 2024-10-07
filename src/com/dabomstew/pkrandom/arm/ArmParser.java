@@ -90,6 +90,7 @@ public class ArmParser {
                 "HandlerParam_AddSideStatus",
                 "HandlerParam_ChangeStatStage",
                 "HandlerParam_Message",
+                "HandlerParam_RecoverHP",
                 "MainModule",
                 "MoveParam",
                 "PartyPoke",

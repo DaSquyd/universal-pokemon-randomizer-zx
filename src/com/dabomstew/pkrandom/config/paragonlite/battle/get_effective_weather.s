@@ -14,7 +14,7 @@ CheckDamp:
     mov     r1, #6 ; Damp
     cmp     r6, r1
     bne     CheckSunSoaked
-    mov     r0, #Weather_Rain
+    mov     r0, #WEATHER_Rain
     b       Return
     
 CheckSunSoaked:
@@ -26,7 +26,7 @@ CheckSunSoaked:
     
 GetWeather:
     mov     r0, r5
-    bl      Battle::GetWeather
+    bl      Battle::ServerEvent_GetWeather
     
 Return:
     pop     {r3-r6, pc}

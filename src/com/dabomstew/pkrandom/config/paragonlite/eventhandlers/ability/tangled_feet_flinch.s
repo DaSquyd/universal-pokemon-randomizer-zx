@@ -18,20 +18,20 @@
     bl      Battle::Handler_PushWork
     
     mov     r1, r0
-    ldr     r2, [r1, #HandlerParam_ChangeStateStage.header]
+    ldr     r2, [r1, #HandlerParam_ChangeStatStage.header]
     mov     r0, #(BHP_AbilityPopup >> 23)
     lsl     r0, #23
     orr     r0, r2
-    str     r0, [r1, #HandlerParam_ChangeStateStage.header]
+    str     r0, [r1, #HandlerParam_ChangeStatStage.header]
     mov     r0, #STSG_Speed
-    str     r0, [r1, #HandlerParam_ChangeStateStage.stat]
+    str     r0, [r1, #HandlerParam_ChangeStatStage.stat]
     mov     r2, #2 ; stat boost amount
-    strb    r2, [r1, #HandlerParam_ChangeStateStage.amount]
+    strb    r2, [r1, #HandlerParam_ChangeStatStage.amount]
     mov     r0, #0
-    strb    r0, [r1, #HandlerParam_ChangeStateStage.fMoveAnimation]
-    strb    r2, [r1, #HandlerParam_ChangeStateStage.pokeCount]
+    strb    r0, [r1, #HandlerParam_ChangeStatStage.fMoveAnimation]
+    strb    r2, [r1, #HandlerParam_ChangeStatStage.pokeCount]
     mov     r0, r5
-    strb    r4, [r1, #HandlerParam_ChangeStateStage.pokeId]
+    strb    r4, [r1, #HandlerParam_ChangeStatStage.pokeId]
     bl      Battle::Handler_PopWork
     
 End:

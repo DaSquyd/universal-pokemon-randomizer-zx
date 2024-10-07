@@ -103,7 +103,7 @@ Label_0x021ACE62:
     bl      Battle::IsPokeFainted
     cmp     r0, #0
     bne     Label_0x021ACECC
-    ldrb    r0, [r4, #HandlerParam_ChangeStatStage.pad2]
+    ldrb    r0, [r4, #HandlerParam_ChangeStatStage.fHideMessage]
     cmp     r0, #0
     bne     Label_0x021ACE8E
     mov     r0, #1
@@ -122,7 +122,7 @@ Label_0x021ACE90:
     str     r1, [sp, #VAR_01]
     ldr     r1, [sp, #VAR_USE_ITEM_ID]
     str     r1, [sp, #VAR_02]
-    ldr     r1, [r4, #HandlerParam_ChangeStatStage.pad1]
+    ldr     r1, [r4, #HandlerParam_ChangeStatStage.moveSerial]
     str     r1, [sp, #VAR_03]
     ldrb    r1, [r4, #HandlerParam_ChangeStatStage.fMoveAnimation]
     str     r1, [sp, #VAR_04]

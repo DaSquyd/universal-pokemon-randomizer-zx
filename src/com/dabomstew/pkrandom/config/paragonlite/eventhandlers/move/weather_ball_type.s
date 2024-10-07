@@ -20,7 +20,7 @@
     cmp     r6, #WEATHER_Sand
     bhi     RewriteValue
     
-    #SWITCH r0, r6
+    #SWITCH r0 r6
     #CASE RewriteValue
     #CASE Sun
     #CASE Rain
@@ -48,7 +48,7 @@ Sand:
     
 RewriteValue:
     mov     r0, #VAR_MoveType
-    bl      Battle::EventVar_RewriteType
+    bl      Battle::EventVar_RewriteValue
     
     mov     r0, r5
     mov     r1, r4

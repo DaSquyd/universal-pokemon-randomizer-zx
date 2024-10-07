@@ -101,7 +101,7 @@ Label_0x021A6B7C:
     bl      Battle::ServerEvent_CheckStatChangeSuccess
     cmp     r0, #0
     beq     Label_0x021A6BD6
-    ldr     r0, [r0, #ARG_USE_ITEM_ID]
+    ldr     r0, [sp, #ARG_USE_ITEM_ID]
     mov     r1, r4
     mov     r2, r7
     str     r0, [sp, #VAR_00]

@@ -48,7 +48,7 @@ public class ParagonLiteAbilities {
     public static final int ravenousTorque = 515;
     public static final int superconductor = 516;
 
-    public static final int MAX = ripTide;
+    public static final int MAX = superconductor;
     
     public static Set<Integer> allowedAbilities = Set.of(
             Abilities.protean, // 168

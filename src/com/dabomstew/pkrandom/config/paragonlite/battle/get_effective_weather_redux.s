@@ -19,7 +19,7 @@ CheckSunSoaked:
     
 GetWeather:
     mov     r0, r5
-    bl      Battle::GetWeather
+    bl      Battle::ServerEvent_GetWeather
     
 Return:
     pop     {r3-r6, pc}
