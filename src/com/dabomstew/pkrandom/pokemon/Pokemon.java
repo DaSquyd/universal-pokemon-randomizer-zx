@@ -84,24 +84,26 @@ public class Pokemon implements Comparable<Pokemon> {
     public Pokemon() {
         shuffledStatsOrder = Arrays.asList(0, 1, 2, 3, 4, 5);
     }
+    
+    public int getAbilityBySlot(int abilityIndex) {
+        return switch (abilityIndex) {
+            case 1 -> ability1;
+            case 2 -> ability2;
+            case 3 -> ability3;
+            default -> throw new IndexOutOfBoundsException();
+        };
+    }
 
     public int getStatByIndex(int statIndex) {
-        switch (statIndex) {
-            case 0:
-                return hp;
-            case 1:
-                return attack;
-            case 2:
-                return defense;
-            case 3:
-                return spatk;
-            case 4:
-                return spdef;
-            case 5:
-                return speed;
-            default:
-                throw new IndexOutOfBoundsException();
-        }
+        return switch (statIndex) {
+            case 0 -> hp;
+            case 1 -> attack;
+            case 2 -> defense;
+            case 3 -> spatk;
+            case 4 -> spdef;
+            case 5 -> speed;
+            default -> throw new IndexOutOfBoundsException();
+        };
     }
     
     public void shuffleStats(Random random) {
@@ -234,7 +236,10 @@ public class Pokemon implements Comparable<Pokemon> {
     }
 
     public double getAttackSpecialAttackRatio() {
-        return (double)attack / ((double)attack + (double)spatk);
+        return Math.sqrt((double)attack / ((double)attack + (double)spatk));
+    }
+    public double getDefenseSpecialDefenseRatio() {
+        return Math.sqrt((double)defense / ((double)defense + (double)spdef));
     }
 
     public int getBaseNumber() {

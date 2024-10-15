@@ -1691,6 +1691,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean[] getTMsAvailableInMainGame() {
+        return new boolean[0];
+    }
+
+    @Override
     public boolean hasMoveTutors() {
         return romEntry.isCrystal;
     }
@@ -1737,6 +1742,11 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
             int pointerOffset = romEntry.getValue("MoveTutorMenuOffset");
             writeWord(pointerOffset, makeGBPointer(romEntry.getValue("MoveTutorMenuNewSpace")));
         }
+    }
+
+    @Override
+    public int getMoveTutorMainGameCount() {
+        return 0;
     }
 
     @Override

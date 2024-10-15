@@ -30,12 +30,24 @@ AssaultVestCheck:
     cmp     r0, #0
     beq     CheckChoiceItem
     
+    ; Assault Vest
+#IF !PARAGONLITE
     mov     r0, r6
     bl      Battle::GetPokeHeldItem
-    ldr     r1, =114 ; Assault Vest
+    cmp     r0, #114 ; Assault Vest
+    bne     CheckChoiceItem
+#ELSE
+    mov     r0, r6
+    bl      Battle::GetPokeHeldItem
+    mov     r1, #114 ; Assault Vest
+    cmp     r0, r1
+    beq     PreventNonDamageMove
+    add     r1, #(321 - 114) ; Protector
     cmp     r0, r1
     bne     CheckChoiceItem
+#ENDIF
     
+PreventNonDamageMove:
     mov     r0, r5
     bl      ARM9::IsMoveDamaging
     cmp     r0, #0

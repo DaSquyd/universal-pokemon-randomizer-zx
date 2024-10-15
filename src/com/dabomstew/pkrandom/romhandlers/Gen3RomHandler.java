@@ -2737,6 +2737,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
+    public boolean[] getTMsAvailableInMainGame() {
+        return new boolean[0];
+    }
+
+    @Override
     public boolean hasMoveTutors() {
         return (romEntry.romType == Gen3Constants.RomType_Em || romEntry.romType == Gen3Constants.RomType_FRLG);
     }
@@ -2810,6 +2815,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 }
             }
         }
+    }
+
+    @Override
+    public int getMoveTutorMainGameCount() {
+        return 0;
     }
 
     @Override
@@ -4429,7 +4439,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
+    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves, Map<Weather, Double> weatherFrequencies) {
         List<Integer> items = new ArrayList<>();
         items.addAll(Gen3Constants.generalPurposeConsumableItems);
         if (!consumableOnly) {

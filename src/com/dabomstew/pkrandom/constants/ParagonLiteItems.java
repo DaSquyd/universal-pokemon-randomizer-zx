@@ -23,6 +23,8 @@ package com.dabomstew.pkrandom.constants;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import java.util.Set;
+
 public class ParagonLiteItems {
     // 55 new
     public static final int /*0639*/ weaknessPolicy = 113;
@@ -81,4 +83,17 @@ public class ParagonLiteItems {
     public static final int /*1884*/ punchingGlove = Items.dataCard20;
     public static final int /*1885*/ covertCloak = Items.dataCard21;
     public static final int /*1886*/ loadedDice = Items.dataCard22;
+    
+    public static Set<Integer> getAllowed() {
+        return Set.of(
+                weaknessPolicy,
+                assaultVest,
+                pixiePlate,
+                roseliBerry,
+                fairyGem,
+                blankPlate,
+                clearAmulet,
+                covertCloak,
+                loadedDice);
+    }
 }

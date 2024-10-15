@@ -558,7 +558,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 //            }
 //            moveIndex++;
 //        }
-        
+
         for (int i = startingIndex; i < narc.files.size(); i++) {
             if (i >= moves.size())
                 moves.add(new Move());
@@ -628,7 +628,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             move.hitsNonAdjacentTargets = (flags & 0x800) != 0;
             move.isHealMove = (flags & 0x1000) != 0;
             move.bypassesSubstitute = (flags & 0x2000) != 0;
-            
+
             // Custom Flags
             move.isCustomKickMove = (flags & 0x4000) != 0;
             move.isCustomBiteMove = (flags & 0x8000) != 0;
@@ -1152,15 +1152,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public List<Integer> getIllegalMoves() {
         List<Integer> illegalMoves = new ArrayList<>(super.getIllegalMoves());
-        
+
         for (Move move : moves) {
             if (move.number <= Moves.fusionBolt)
                 continue;
-            
+
             if (!ParagonLiteMoves.allowedMoves.contains(move.number))
                 illegalMoves.add(move.number);
         }
-        
+
         return illegalMoves;
     }
 
@@ -2088,7 +2088,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public Map<Integer, List<MoveLearnt>> getMovesLearnt() {
         Map<Integer, List<MoveLearnt>> movesets = new TreeMap<>();
         try {
-            NARCArchive movesLearnt = this.readNARC(romEntry.getFile("PokemonMovesets"));            
+            NARCArchive movesLearnt = this.readNARC(romEntry.getFile("PokemonMovesets"));
             int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
             int formeOffset = Gen5Constants.getFormeOffset(romEntry.romType);
             for (int i = 1; i <= Gen5Constants.pokemonCount + formeCount; i++) {
@@ -3547,6 +3547,166 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public boolean[] getTMsAvailableInMainGame() {
+        boolean[] available = new boolean[101];
+        if (isBlack2() || isWhite2()) {
+            available[0] = true;
+            available[2] = true;
+            available[4] = true;
+            available[6] = true;
+            available[8] = true;
+            available[9] = true;
+            available[10] = true;
+            available[11] = true;
+            available[12] = true;
+            available[13] = true;
+            available[14] = true;
+            available[15] = true;
+            available[16] = true;
+            available[17] = true;
+            available[19] = true;
+            available[20] = true;
+            available[22] = true;
+            available[23] = true;
+            available[24] = true;
+            available[26] = true;
+            available[27] = true;
+            available[28] = true;
+            available[29] = true;
+            available[30] = true;
+            available[31] = true;
+            available[32] = true;
+            available[33] = true;
+            available[34] = true;
+            available[36] = true;
+            available[37] = true;
+            available[38] = true;
+            available[39] = true;
+            available[40] = true;
+            available[41] = true;
+            available[43] = true;
+            available[44] = true;
+            available[45] = true;
+            available[47] = true;
+            available[48] = true;
+            available[50] = true;
+            available[52] = true;
+            available[54] = true;
+            available[55] = true;
+            available[56] = true;
+            available[57] = true;
+            available[58] = true;
+            available[59] = true;
+            available[60] = true;
+            available[61] = true;
+            available[62] = true;
+            available[63] = true;
+            available[64] = true;
+            available[66] = true;
+            available[67] = true;
+            available[68] = true;
+            available[69] = true;
+            available[71] = true;
+            available[72] = true;
+            available[73] = true;
+            available[74] = true;
+            available[75] = true;
+            available[76] = true;
+            available[77] = true;
+            available[78] = true;
+            available[79] = true;
+            available[80] = true;
+            available[81] = true;
+            available[82] = true;
+            available[86] = true;
+            available[87] = true;
+            available[88] = true;
+            available[92] = true;
+            available[93] = true;
+            available[94] = true;
+            available[95] = true;
+            available[96] = true;
+            available[97] = true;
+            available[98] = true;
+            available[99] = true;
+        } else {
+            available[1] = true;
+            available[4] = true;
+            available[5] = true;
+            available[6] = true;
+            available[10] = true;
+            available[11] = true;
+            available[13] = true;
+            available[14] = true;
+            available[15] = true;
+            available[16] = true;
+            available[17] = true;
+            available[18] = true;
+            available[19] = true;
+            available[20] = true;
+            available[21] = true;
+            available[22] = true;
+            available[23] = true;
+            available[24] = true;
+            available[26] = true;
+            available[27] = true;
+            available[29] = true;
+            available[30] = true;
+            available[32] = true;
+            available[33] = true;
+            available[35] = true;
+            available[36] = true;
+            available[37] = true;
+            available[38] = true;
+            available[39] = true;
+            available[40] = true;
+            available[41] = true;
+            available[42] = true;
+            available[43] = true;
+            available[44] = true;
+            available[45] = true;
+            available[46] = true;
+            available[47] = true;
+            available[48] = true;
+            available[50] = true;
+            available[51] = true;
+            available[53] = true;
+            available[54] = true;
+            available[55] = true;
+            available[56] = true;
+            available[57] = true;
+            available[58] = true;
+            available[59] = true;
+            available[60] = true;
+            available[62] = true;
+            available[63] = true;
+            available[64] = true;
+            available[65] = true;
+            available[67] = true;
+            available[69] = true;
+            available[72] = true;
+            available[73] = true;
+            available[76] = true;
+            available[79] = true;
+            available[80] = true;
+            available[83] = true;
+            available[85] = true;
+            available[86] = true;
+            available[87] = true;
+            available[89] = true;
+            available[90] = true;
+            available[92] = true;
+            available[93] = true;
+            available[95] = true;
+            available[96] = true;
+            available[97] = true;
+            available[98] = true;
+            available[99] = true;
+        }
+        return available;
+    }
+
+    @Override
     public boolean hasMoveTutors() {
         return romEntry.romType == Gen5Constants.Type_BW2;
     }
@@ -3591,6 +3751,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    @Override
+    public int getMoveTutorMainGameCount() {
+        return 15 + 17 + 13;
     }
 
     @Override
@@ -5067,9 +5232,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
-        List<Integer> items = new ArrayList<>();
-        items.addAll(Gen5Constants.generalPurposeConsumableItems);
+    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves, Map<Weather, Double> weatherFrequencies) {
+        List<Integer> items = new ArrayList<>(Gen5Constants.generalPurposeConsumableItems);
         int frequencyBoostCount = 6; // Make some very good items more common, but not too common
         if (!consumableOnly) {
             frequencyBoostCount = 8; // bigger to account for larger item pool.
@@ -5116,8 +5280,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         boolean customTypeEffectiveness = (settings.getCurrentMiscTweaks() & MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue()) == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
         boolean addFairy = (settings.getCurrentMiscTweaks() & MiscTweak.CUSTOM_ADD_FAIRY.getValue()) == MiscTweak.CUSTOM_ADD_FAIRY.getValue();
 
-        Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.primaryType, tp.pokemon.secondaryType,
-                5, effectivenessUpdated, customTypeEffectiveness, addFairy);
+        Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.primaryType, tp.pokemon.secondaryType, 5, effectivenessUpdated, customTypeEffectiveness, addFairy);
         assert byType != null;
         for (Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
             if (!Gen5Constants.weaknessReducingBerries.containsKey(entry.getKey()))
@@ -5138,7 +5301,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         int ability = this.getAbilityForTrainerPokemon(tp);
         if (ability == Abilities.levitate) {
-            items.removeAll(Arrays.asList(Items.shucaBerry));
+            items.removeAll(List.of(Items.shucaBerry));
         } else if (byType.get(Type.GROUND) == Effectiveness.DOUBLE || byType.get(Type.GROUND) == Effectiveness.QUADRUPLE) {
             items.add(Items.airBalloon);
         }
@@ -5169,12 +5332,41 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             if (byType.get(type) == Effectiveness.DOUBLE)
                 ++totalDoubleEffectiveness;
         }
+        if (totalDoubleEffectiveness >= 4)
+            items.add(ParagonLiteItems.weaknessPolicy);
         if (totalDoubleEffectiveness >= 5)
             items.add(ParagonLiteItems.weaknessPolicy);
 
-        if (!consumableOnly && !hasStatusMoves)
-            for (int i = 0; i < frequencyBoostCount; ++i)
+        if (!consumableOnly && !hasStatusMoves) {
+            double defenseRatio = tp.pokemon.getDefenseSpecialDefenseRatio();
+
+            int protectorFrequency = 0;
+            int assaultVestFrequency = frequencyBoostCount;
+            if ((settings.getCurrentMiscTweaks() & MiscTweak.PARAGON_LITE.getValue()) != 0) {
+                protectorFrequency = (int) Math.round(frequencyBoostCount * defenseRatio);
+                assaultVestFrequency = frequencyBoostCount - protectorFrequency;
+            }
+
+            for (int i = 0; i < protectorFrequency; ++i) {
+                items.add(Items.protector);
+            }
+
+            for (int i = 0; i < assaultVestFrequency; ++i) {
                 items.add(ParagonLiteItems.assaultVest);
+            }
+        }
+
+        Map<Weather, Integer> weatherItems = new HashMap<>();
+        weatherItems.put(Weather.Sun, Items.heatRock);
+        weatherItems.put(Weather.Rain, Items.dampRock);
+        weatherItems.put(Weather.Hail, Items.icyRock);
+        weatherItems.put(Weather.Sand, Items.smoothRock);
+        for (Map.Entry<Weather, Integer> weatherItem : weatherItems.entrySet()) {            
+            int weatherRockFrequency = (int) Math.round(weatherFrequencies.getOrDefault(weatherItem.getKey(), 0.0) * frequencyBoostCount);
+            for (int j = 0; j < weatherRockFrequency; ++j) {
+                items.add(weatherItem.getValue());
+            }
+        }
 
         return items;
     }
@@ -5197,7 +5389,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         arm9 = newArm9;
     }
 
-    private void applyParagonLite(Settings settings) {        
+    private void applyParagonLite(Settings settings) {
         // Find String
 //        String searchKey = "Resolute";
 //        List<String> strs = new ArrayList<>();
@@ -5239,7 +5431,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         params.arm9Data = arm9;
         params.pokes = pokes;
         params.moves = moves;
-        
+
         String pokemonGraphicsFilename = romEntry.getFile("PokemonGraphics");
         String moveAnimationsFilename = romEntry.getFile("MoveAnimations");
         String itemDataFilename = romEntry.getFile("ItemData");
@@ -5287,7 +5479,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         params.itemNameMessages = getStrings(false, itemNameMessagesTextOffset);
         params.itemPluralNames = getStrings(false, itemPluralNamesTextOffset);
         params.itemDescriptions = getStrings(false, itemDescriptionsTextOffset);
-        
+
         ParagonLiteHandler paragonLite = new ParagonLiteHandler(params);
         processParagonLiteHandler(paragonLite, debugMode);
         paragonLite.save();
@@ -5344,10 +5536,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setWeatherDamage();
         paragonLite.setShinyRate();
         paragonLite.setGhostEscape();
+        paragonLite.setCheckNoEffect();
         paragonLite.setCallModifyEffectivenessHandler();
         paragonLite.setHandlerSimulationDamage();
         paragonLite.setScreenPower();
         paragonLite.setNewSideStatus();
+        paragonLite.setBattlePokeCreate();
+        paragonLite.setMaxSpeedFix();
+        paragonLite.setDynamicTurnOrder();
 
         paragonLite.setMoves();
         paragonLite.setItems();

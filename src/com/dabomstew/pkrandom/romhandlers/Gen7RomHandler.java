@@ -2566,6 +2566,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
+    public boolean[] getTMsAvailableInMainGame() {
+        return new boolean[0];
+    }
+
+    @Override
     public boolean hasMoveTutors() {
         return romEntry.romType == Gen7Constants.Type_USUM;
     }
@@ -2610,6 +2615,11 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    @Override
+    public int getMoveTutorMainGameCount() {
+        return 0;
     }
 
     @Override
@@ -3680,7 +3690,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
+    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves, Map<Weather, Double> weatherFrequencies) {
         List<Integer> items = new ArrayList<>();
         items.addAll(Gen7Constants.generalPurposeConsumableItems);
         int frequencyBoostCount = 6; // Make some very good items more common, but not too common

@@ -321,8 +321,8 @@ public class Move {
         double hitCount = getHitCount(generation);
         double acc = hasPerfectAccuracy() ? 1.0 : accuracy / 100.0;
         double damage = power * hitCount * acc;
-        if (effect == MoveEffect.TRIPLE_KICK)
-            damage += (10 * acc) + (20 * acc * acc); // 2nd and 3rd hit additional damages
+//        if (effect == MoveEffect.TRIPLE_KICK)
+//            damage += (10 * acc) + (20 * acc * acc); // 2nd and 3rd hit additional damages
 
         return damage >= GlobalConstants.MIN_DAMAGING_MOVE_POWER;
     }

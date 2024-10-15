@@ -1,0 +1,15 @@
+{
+  "previous": 0,
+  "next": 4,
+  "handlerTable": 8,
+  "skipCheckHandler": 12,
+  "factorType": 16,
+  "priority": 20,
+  "currentStackPtr": 24,
+  "numHandlers": 26,
+  "flags": 27,
+  "work": 28,
+  "subId": 56,
+  "dependId": 58,
+  "pokeId": 59
+}

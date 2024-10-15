@@ -600,7 +600,7 @@ public class ParagonLiteAddressMap {
         return getAddressData(overlay, label).address;
     }
 
-    public ParagonLiteOverlay findOverlay(int address, ParagonLiteOverlay defaultOverlay) {
+    public ParagonLiteOverlay findOverlay(int address, ParagonLiteOverlay contextOverlay) {
         List<ParagonLiteOverlay> overlays = new ArrayList<>();
         for (Map.Entry<ParagonLiteOverlay, Map<String, LabeledAddressInterface>> entry : labelMap.entrySet()) {
             ParagonLiteOverlay ovl = entry.getKey();
@@ -618,6 +618,9 @@ public class ParagonLiteAddressMap {
 
         ParagonLiteOverlay selectedOverlay = null;
         for (ParagonLiteOverlay overlay : overlays) {
+            if (!contextOverlay.hasContextOverlay(overlay))
+                continue;
+                
             if (!addressMap.get(overlay).containsKey(address))
                 continue;
 
@@ -627,7 +630,10 @@ public class ParagonLiteAddressMap {
             selectedOverlay = overlay;
         }
 
-        return selectedOverlay != null ? selectedOverlay : defaultOverlay;
+//        if (selectedOverlay == null)
+//            throw new RuntimeException(String.format("Could not find function at address 0x%08X within context of %s", address, contextOverlay));
+        
+        return selectedOverlay == null ? contextOverlay : selectedOverlay;
     }
 
     public String replaceLabelsInExpression(String expression) {

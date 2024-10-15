@@ -43,7 +43,7 @@ public class ParagonLiteMoves {
             Moves.moonblast, // 585
             Moves.boomburst, // 586
             Moves.diamondStorm, // 591
-            Moves.steamEruption, // 592
+//            Moves.steamEruption, // 592
             Moves.waterShuriken, // 594
             Moves.mysticalFire, // 595
 //            Moves.spikyShield, // 596

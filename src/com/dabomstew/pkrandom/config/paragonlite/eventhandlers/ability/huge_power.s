@@ -1,23 +1,27 @@
     push    {r4, lr}
-    mov     r0, #3
     mov     r4, r2
+    
+    mov     r0, #VAR_AttackingPoke
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
-    bne     End
+    bne     Return
     
-    mov     r0, #18 ; move id
+    mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
-    lsl     r0, #16
-    lsr     r0, #16
     
     bl      ARM9::GetMoveCategory
-    cmp     r0, #1 ; physical
-    bne     End
+    cmp     r0, #CAT_Physical
+    bne     Return
     
-    mov     r0, #53 ; stat
+    mov     r0, #VAR_Ratio
+#if PARAGONLITE
     mov     r1, #6
     lsl     r1, #10 ; 6144 (1.5x)
+#else
+    mov     r1, #8
+    lsl     r1, #10 ; 8192 (2.0x)
+#endif
     bl      Battle::EventVar_MulValue
     
-End:
+Return:
     pop     {r4, pc}

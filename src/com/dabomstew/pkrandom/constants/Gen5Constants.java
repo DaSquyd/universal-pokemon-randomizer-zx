@@ -903,10 +903,12 @@ public class Gen5Constants {
         allowedItems = new ItemList(Items.revealGlass);
         // Key items + version exclusives
         allowedItems.banRange(Items.explorerKit, 76);
-        allowedItems.banRange(Items.dataCard01, 13);
-        allowedItems.banRange(Items.dataCard15, 2);
-        allowedItems.banRange(Items.dataCard18, 2);
-        allowedItems.banRange(Items.dataCard22, 11);
+        allowedItems.banRange(Items.dataCard01, 32);
+        Set<Integer> paragonLiteAllowedItems = ParagonLiteItems.getAllowed();
+        for (int paragonLiteItem : paragonLiteAllowedItems) {
+            allowedItems.unbanSingles(paragonLiteItem);
+        }
+        allowedItems.unbanSingles();
         allowedItems.banRange(Items.xtransceiverMale, 18);
         allowedItems.banSingles(Items.libertyPass, Items.propCase, Items.dragonSkull, Items.lightStone, Items.darkStone);
         // Unknown blank items or version exclusives

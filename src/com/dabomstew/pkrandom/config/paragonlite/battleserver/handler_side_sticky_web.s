@@ -22,12 +22,12 @@
     bl      Battle::Handler_PushWork
     mov     r4, r0
     
-    add     r0, r4, #HandlerParam_Message.result
+    add     r0, r4, #HandlerParam_Message.exStr
     mov     r1, #2
     ldr     r2, =1212
     bl      Battle::Handler_StrSetup
     
-    add     r0, r4, #HandlerParam_Message.result
+    add     r0, r4, #HandlerParam_Message.exStr
     mov     r1, r7
     bl      Battle::Handler_AddArg
     

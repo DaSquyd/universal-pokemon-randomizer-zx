@@ -1,22 +1,21 @@
-; 0x3C
     push    {r4, lr}
     mov     r4, r2
     
-    mov     r0, #4
+    mov     r0, #VAR_DefendingPoke
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
-    bne     End
+    bne     Return
     
-    mov     r0, #18 ; move id
+    mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
-    mov     r0, #26 ; move category
+    mov     r0, #VAR_MoveCategory
     bl      Battle::EventVar_GetValue
-    cmp     r0, #1 ; physical
-    bne     End
+    cmp     r0, #CAT_Physical
+    bne     Return
     
-    mov     r0, #53 ; stat
+    mov     r0, #VAR_Ratio ; stat
     ldr     r1, =3686 ; 0.9x
     bl      Battle::EventVar_MulValue
     
-End:
+Return:
     pop     {r4, pc}

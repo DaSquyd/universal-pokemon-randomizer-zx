@@ -1,10 +1,8 @@
-#DEFINE FIRE 9
-
     push    {r4-r6, lr}
     mov     r5, r1
     mov     r4, r2
     
-    mov     r0, #0x04
+    mov     r0, #VAR_DefendingPoke
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
     bne     Return
@@ -13,16 +11,20 @@
     lsl     r6, #10
     
 CheckFire:
-    mov     r0, #0x16 ; move type
+    mov     r0, #VAR_MoveType
     bl      Battle::EventVar_GetValue
-    cmp     r0, #FIRE
+    cmp     r0, #TYPE_Fire
     bne     CheckContact
     
+#if PARAGONLITE
     lsr     r0, r6, #1
     add     r6, r0 ; x1.5
+#else
+    lsl     r6, #1 ; x2.0
+#endif
     
 CheckContact:
-    mov     r0, #0x12 ; move id
+    mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
     mov     r1, #0 ; contact flag
     bl      ARM9::MoveHasFlag
@@ -37,7 +39,7 @@ ApplyModifier:
     cmp     r0, r6
     beq     Return
 
-    mov     r0, #0x35
+    mov     r0, #VAR_Ratio
     bl      Battle::EventVar_MulValue
     
 Return:

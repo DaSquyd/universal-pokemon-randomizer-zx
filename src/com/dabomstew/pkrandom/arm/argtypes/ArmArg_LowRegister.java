@@ -5,8 +5,8 @@ import com.dabomstew.pkrandom.arm.exceptions.ArmParseException;
 
 public class ArmArg_LowRegister extends ArmArg_Register {
 
-    public ArmArg_LowRegister(String arg) throws ArmParseException {
-        super(arg);
+    public ArmArg_LowRegister(int line, String arg) throws ArmParseException {
+        super(line, arg);
     }
 
     public ArmArg_LowRegister(int value) throws ArmDecodeException {

@@ -7,7 +7,7 @@ public class ArmParseException extends Exception {
     public ArmParseException() {
         super();
     }
-    public ArmParseException(String s) {
-        super(s);
+    public ArmParseException(int line, String s) {
+        super(String.format("Line %d; %s", line + 1, s));
     }
 }

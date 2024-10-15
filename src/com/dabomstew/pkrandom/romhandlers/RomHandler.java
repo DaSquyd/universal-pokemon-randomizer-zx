@@ -261,8 +261,15 @@ public interface RomHandler {
     void randomizeTrainerPokes(Settings settings);
 
     void randomizeTrainerHeldItems(Settings settings);
-
-    List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves);
+    
+    enum Weather {
+        Sun,
+        Rain,
+        Hail,
+        Sand
+    };
+    
+    List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves, Map<Weather, Double> weatherFrequencies);
 
     List<Integer> getAllConsumableHeldItems();
 
@@ -416,6 +423,8 @@ public interface RomHandler {
 
     void fullHMCompatibility();
 
+    boolean[] getTMsAvailableInMainGame();
+
     // ===========
     // Move Tutors
     // ===========
@@ -430,6 +439,8 @@ public interface RomHandler {
 
     void randomizeMoveTutorMoves(Settings settings);
 
+    int getMoveTutorMainGameCount();
+    
     Map<Pokemon, boolean[]> getMoveTutorCompatibility();
 
     void setMoveTutorCompatibility(Map<Pokemon, boolean[]> compatData);

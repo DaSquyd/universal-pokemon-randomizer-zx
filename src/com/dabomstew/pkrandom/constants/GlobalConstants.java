@@ -200,8 +200,11 @@ public class GlobalConstants {
     );
 
     public static final Set<Integer> bannedMoves = new HashSet<>(Arrays.asList(
-            Moves.sandAttack, Moves.minimize, Moves.flash, Moves.sketch, Moves.assist, Moves.darkVoid, Moves.allySwitch,
-            Moves.returnTheMoveNotTheKeyword, Moves.frustration
+            Moves.sandAttack, Moves.minimize, Moves.flash, Moves.sketch, Moves.pursuit, Moves.assist, Moves.darkVoid, Moves.allySwitch,
+            Moves.returnTheMoveNotTheKeyword, Moves.frustration,
+            
+            // TODO: Remove
+            Moves.waterPledge, Moves.firePledge, Moves.grassPledge
     ));
 
     public static final List<Integer> tmBannedMoves = Arrays.asList(

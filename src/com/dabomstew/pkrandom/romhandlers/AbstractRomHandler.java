@@ -849,7 +849,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (int i = 1; i <= maxAbility; ++i) {
             availableAbilities.add(i);
         }
-        
+
         return availableAbilities;
     }
 
@@ -1054,9 +1054,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean higherOrEqualSpAtk = pk.spatk >= pk.attack; // minSpAtk >= maxAttack;
 
         long miscTweaks = settings.getCurrentMiscTweaks();
-        boolean customTypeEffectiveness = (miscTweaks & MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue()) == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
+        boolean isCustomTypeEffectiveness = (miscTweaks & MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue()) == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
 
-        Map<Type, Effectiveness> against = Effectiveness.against(pk.primaryType, pk.secondaryType, generationOfPokemon(), customTypeEffectiveness);
+        Map<Type, Effectiveness> against = Effectiveness.against(pk.primaryType, pk.secondaryType, generationOfPokemon(), true, isCustomTypeEffectiveness, typeInGame(Type.FAIRY));
 
         boolean isNormal = pk.primaryType == Type.NORMAL || pk.secondaryType == Type.NORMAL;
 
@@ -1110,6 +1110,192 @@ public abstract class AbstractRomHandler implements RomHandler {
             weaknesses += (e == Effectiveness.DOUBLE || e == Effectiveness.QUADRUPLE) ? 1 : 0;
         }
 
+        List<Move> moves = this.getMoves();
+
+        List<MoveLearnt> moveset = this.getMovesLearnt().get(pk.number);
+        int tutorMoveCount = getMoveTutorMainGameCount();
+        List<Integer> tutorMoves = this.getMoveTutorMoves();
+        boolean[] tutorMoveCompatibility = this.getMoveTutorCompatibility().get(pk);
+
+        List<Integer> tmMoves = this.getTMMoves();
+        boolean[] tmCompatibility = this.getTMHMCompatibility().get(pk);
+        boolean[] tmsAvailable = this.getTMsAvailableInMainGame();
+
+        Set<Integer> technicianMoves = new HashSet<>();
+        int technicianMovesFromLevel = 0;
+        Set<Integer> multiStrikeMoves = new HashSet<>();
+        int multiStrikeMovesFromLevel = 0;
+        Set<Integer> punchMoves = new HashSet<>();
+        int punchMovesFromLevel = 0;
+        Set<Integer> soundMoves = new HashSet<>();
+        int soundMovesFromLevel = 0;
+        Set<Integer> kickMoves = new HashSet<>();
+        int kickMovesFromLevel = 0;
+        Set<Integer> biteMoves = new HashSet<>();
+        int biteMovesFromLevel = 0;
+        Set<Integer> sliceMoves = new HashSet<>();
+        int sliceMovesFromLevel = 0;
+        Set<Integer> windMoves = new HashSet<>();
+        int windMovesFromLevel = 0;
+        Set<Integer> ballBombPulseMoves = new HashSet<>();
+        int ballBombPulseMovesFromLevel = 0;
+        Set<Integer> offensiveSunMoves = new HashSet<>();
+        Set<Integer> supportSunMoves = new HashSet<>();
+        Set<Integer> rainMoves = new HashSet<>();
+
+        for (MoveLearnt ml : moveset) {
+            Move m = moves.get(ml.move);
+
+            if (m.power > 0 && (m.power == 60 || m.minHits > 1)) {
+                technicianMoves.add(m.number);
+                technicianMovesFromLevel++;
+            }
+
+            if (m.maxHits == 5) {
+                multiStrikeMoves.add(m.number);
+                multiStrikeMovesFromLevel++;
+            }
+
+            if (!m.isGoodDamaging(generationOfPokemon()))
+                continue;
+
+            if (m.isPunchMove) {
+                punchMoves.add(m.number);
+                punchMovesFromLevel++;
+            }
+
+            if (m.isSoundMove) {
+                soundMoves.add(m.number);
+                soundMovesFromLevel++;
+            }
+
+            if (m.isCustomKickMove) {
+                kickMoves.add(m.number);
+                kickMovesFromLevel++;
+            }
+
+            if (m.isCustomBiteMove) {
+                biteMoves.add(m.number);
+                biteMovesFromLevel++;
+            }
+
+            if (m.isCustomSliceMove) {
+                sliceMoves.add(m.number);
+                sliceMovesFromLevel++;
+            }
+
+            if (m.isCustomWindMove) {
+                windMoves.add(m.number);
+                windMovesFromLevel++;
+            }
+
+            if (m.isCustomBallBombMove || m.isCustomPulseMove) {
+                ballBombPulseMoves.add(m.number);
+                ballBombPulseMovesFromLevel++;
+            }
+
+            if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
+                offensiveSunMoves.add(m.number);
+
+            if (m.effect == MoveEffect.RECOVER_HP_50_WEATHER || m.effect == MoveEffect.GROWTH)
+                supportSunMoves.add(m.number);
+
+            if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL)
+                rainMoves.add(m.number);
+        }
+
+        for (int tmIdx = 0; tmIdx < tmMoves.size(); tmIdx++) {
+            if (!tmCompatibility[tmIdx] || !tmsAvailable[tmIdx])
+                continue;
+
+            Move m = moves.get(tmMoves.get(tmIdx));
+
+            if (m.power > 0 && (m.power == 60 || m.minHits > 1))
+                technicianMoves.add(m.number);
+
+            if (m.maxHits == 5)
+                multiStrikeMoves.add(m.number);
+
+            if (!m.isGoodDamaging(generationOfPokemon()))
+                continue;
+
+            if (m.isPunchMove)
+                punchMoves.add(m.number);
+
+            if (m.isSoundMove)
+                soundMoves.add(m.number);
+
+            if (m.isCustomKickMove)
+                kickMoves.add(m.number);
+
+            if (m.isCustomBiteMove)
+                biteMoves.add(m.number);
+
+            if (m.isCustomSliceMove)
+                sliceMoves.add(m.number);
+
+            if (m.isCustomWindMove)
+                windMoves.add(m.number);
+
+            if (m.isCustomBallBombMove || m.isCustomPulseMove)
+                ballBombPulseMoves.add(m.number);
+
+            if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
+                offensiveSunMoves.add(m.number);
+
+            if (m.effect == MoveEffect.RECOVER_HP_50_WEATHER || m.effect == MoveEffect.GROWTH)
+                supportSunMoves.add(m.number);
+
+            if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL)
+                rainMoves.add(m.number);
+        }
+
+        for (int tutorMoveIdx = 0; tutorMoveIdx < tutorMoveCount; tutorMoveIdx++) {
+            if (!tutorMoveCompatibility[tutorMoveIdx])
+                continue;
+
+            Move m = moves.get(tutorMoves.get(tutorMoveIdx));
+
+            if (m.power > 0 && (m.power == 60 || m.minHits > 1))
+                technicianMoves.add(m.number);
+
+            if (m.maxHits == 5)
+                multiStrikeMoves.add(m.number);
+
+            if (!m.isGoodDamaging(generationOfPokemon()))
+                continue;
+
+            if (m.isPunchMove)
+                punchMoves.add(m.number);
+
+            if (m.isSoundMove)
+                soundMoves.add(m.number);
+
+            if (m.isCustomKickMove)
+                kickMoves.add(m.number);
+
+            if (m.isCustomBiteMove)
+                biteMoves.add(m.number);
+
+            if (m.isCustomSliceMove)
+                sliceMoves.add(m.number);
+
+            if (m.isCustomWindMove)
+                windMoves.add(m.number);
+
+            if (m.isCustomBallBombMove || m.isCustomPulseMove)
+                ballBombPulseMoves.add(m.number);
+
+            if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
+                offensiveSunMoves.add(m.number);
+
+            if (m.effect == MoveEffect.RECOVER_HP_50_WEATHER || m.effect == MoveEffect.GROWTH)
+                supportSunMoves.add(m.number);
+
+            if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL)
+                rainMoves.add(m.number);
+        }
+
         HashSet<Integer> irrelevantAbilities = new HashSet<>();
 
         if (settings.isEnsureRelevantAbilities()) {
@@ -1141,7 +1327,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.infiltrator); // 151
 
             // Too niche
-            irrelevantAbilities.add(Abilities.damp); // 006
+//            irrelevantAbilities.add(Abilities.damp); // 006
             irrelevantAbilities.add(Abilities.oblivious); // 012
             irrelevantAbilities.add(Abilities.suctionCups); // 021
             irrelevantAbilities.add(Abilities.runAway); // 050
@@ -1245,9 +1431,10 @@ public abstract class AbstractRomHandler implements RomHandler {
                 irrelevantAbilities.add(Abilities.angerShell); // 271
                 irrelevantAbilities.add(Abilities.electromorphosis); // 280
                 irrelevantAbilities.add(Abilities.toxicDebris); // 295
-                
+
                 if (isParagonLite) {
                     irrelevantAbilities.add(Abilities.innerFocus);
+                    irrelevantAbilities.add(ParagonLiteAbilities.colossal);
                 }
             }
 
@@ -1271,6 +1458,10 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (generationOfPokemon() >= 6 && generationOfPokemon() < 9) {
                 irrelevantAbilities.add(Abilities.protean);
                 irrelevantAbilities.add(Abilities.libero);
+            }
+
+            if (generationOfPokemon() == 5 && (highAtk || highSpA)) {
+                irrelevantAbilities.add(Abilities.protean);
             }
 
             // Abilities that activate on contact
@@ -1402,7 +1593,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (!(isNormal || isFighting))
                 irrelevantAbilities.add(Abilities.scrappy);
 
-            if (!(isNormal || isFighting || isGround || isRock || isBug || isSteel || isGrass || isIce || isDark || isFairy))
+            if (multiStrikeMoves.size() < 2 || multiStrikeMovesFromLevel == 0)
                 irrelevantAbilities.add(Abilities.skillLink);
 
             if (resistsWater && !higherOrEqualSpAtk)
@@ -1456,13 +1647,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (highPhysBulk)
                 irrelevantAbilities.add(Abilities.marvelScale);
-            
-            if (!higherOrEqualAttack || pk.primaryType == Type.NORMAL || pk.secondaryType == Type.NORMAL) {
-                irrelevantAbilities.add(Abilities.refrigerate);
-                irrelevantAbilities.add(Abilities.pixilate);
-                irrelevantAbilities.add(Abilities.aerilate);
-                irrelevantAbilities.add(Abilities.galvanize);
-            }
+
+            setTypeChangeAbilityIrrelevant(pk, Abilities.refrigerate, Type.ICE, isCustomTypeEffectiveness, against, higherOrEqualAttack, irrelevantAbilities);
+            setTypeChangeAbilityIrrelevant(pk, Abilities.pixilate, Type.FAIRY, isCustomTypeEffectiveness, against, higherOrEqualAttack, irrelevantAbilities);
+            setTypeChangeAbilityIrrelevant(pk, Abilities.aerilate, Type.FLYING, isCustomTypeEffectiveness, against, higherOrEqualAttack, irrelevantAbilities);
+            setTypeChangeAbilityIrrelevant(pk, Abilities.galvanize, Type.ELECTRIC, isCustomTypeEffectiveness, against, higherOrEqualAttack, irrelevantAbilities);
 
             if (lowSpeed || highSpeed)
                 irrelevantAbilities.add(Abilities.slushRush);
@@ -1470,12 +1659,33 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (highSpeed)
                 irrelevantAbilities.add(Abilities.triage);
 
+            if (technicianMovesFromLevel == 0 || technicianMoves.size() < 2)
+                irrelevantAbilities.add(Abilities.technician);
+
+            if (multiStrikeMovesFromLevel == 0 || multiStrikeMoves.size() < 2)
+                irrelevantAbilities.add(Abilities.skillLink);
+
+            if (punchMovesFromLevel == 0 || punchMoves.size() < 2)
+                irrelevantAbilities.add(Abilities.ironFist);
+
+            if (biteMovesFromLevel == 0 || biteMoves.size() < 2)
+                irrelevantAbilities.add(Abilities.strongJaw);
+
+            if (sliceMovesFromLevel == 0 || sliceMoves.size() < 2)
+                irrelevantAbilities.add(Abilities.sharpness);
+
+            if (ballBombPulseMovesFromLevel == 0 || ballBombPulseMoves.size() < 2)
+                irrelevantAbilities.add(Abilities.megaLauncher);
+            
             if (isParagonLite) {
-                if (!higherOrEqualAttack && resistsDark)
-                    irrelevantAbilities.add(Abilities.justified);
+                if ((isWater && (!lowAtk || !lowSpA)) || rainMoves.size() < 2)
+                    irrelevantAbilities.add(Abilities.damp);
 
                 if (resistsGround && resistsWater)
                     irrelevantAbilities.add(Abilities.magmaArmor);
+
+                if (!higherOrEqualAttack && resistsDark)
+                    irrelevantAbilities.add(Abilities.justified);
 
                 if (isFlying)
                     irrelevantAbilities.add(ParagonLiteAbilities.heavyWing);
@@ -1486,11 +1696,23 @@ public abstract class AbstractRomHandler implements RomHandler {
                 if (!higherOrEqualSpAtk)
                     irrelevantAbilities.add(ParagonLiteAbilities.prestige);
 
-                if (!higherOrEqualAttack)
+                if (!higherOrEqualAttack || kickMovesFromLevel == 0 || kickMoves.size() < 2)
                     irrelevantAbilities.add(ParagonLiteAbilities.luckyFoot);
 
                 if (resistsPsychic)
                     irrelevantAbilities.add(ParagonLiteAbilities.assimilate);
+
+                if (!higherOrEqualSpAtk || soundMovesFromLevel == 0 || soundMoves.size() < 2)
+                    irrelevantAbilities.add(ParagonLiteAbilities.cacophony);
+
+                if (windMovesFromLevel == 0 || windMoves.size() < 2)
+                    irrelevantAbilities.add(ParagonLiteAbilities.windWhipper);
+
+                if (resistsWater && resistsGround)
+                    irrelevantAbilities.add(ParagonLiteAbilities.glazeware);
+
+                if ((isFire && (!lowAtk || !lowSpA)) || ((highAtk || highSpA) && isGrass && !offensiveSunMoves.isEmpty()) || offensiveSunMoves.size() < (supportSunMoves.isEmpty() ? 2 : 1))
+                    irrelevantAbilities.add(ParagonLiteAbilities.sunSoaked);
             }
         }
 
@@ -1522,11 +1744,45 @@ public abstract class AbstractRomHandler implements RomHandler {
                 break;
             }
         }
-        
+
         if (newAbility == -1)
             throw new RandomizationException("Failed to get ability");
 
         return newAbility;
+    }
+
+    private void setTypeChangeAbilityIrrelevant(Pokemon pk, int ability, Type type, boolean isCustomTypeEffectiveness, Map<Type, Effectiveness> against,
+                                                boolean higherOrEqualAttack, HashSet<Integer> irrelevantAbilities) {
+        if (!higherOrEqualAttack || pk.primaryType == Type.NORMAL || pk.secondaryType == Type.NORMAL) {
+            irrelevantAbilities.add(ability);
+            return;
+        }
+
+        if (irrelevantAbilities.contains(ability) || pk.primaryType == type || pk.secondaryType == type)
+            return;
+
+        boolean shouldInclude = false;
+        List<Type> superEffectiveTypes = Effectiveness.superEffective(type, generationOfPokemon(), true, isCustomTypeEffectiveness, typeInGame(Type.FAIRY));
+        for (Type superEffectiveType : superEffectiveTypes) {
+            if (against.get(superEffectiveType) == Effectiveness.DOUBLE || against.get(superEffectiveType) == Effectiveness.QUADRUPLE)
+                continue;
+
+            Map<Type, Effectiveness> effectivenessMap = Effectiveness.against(superEffectiveType, null, generationOfPokemon(), true, isCustomTypeEffectiveness, typeInGame(Type.FAIRY));
+            assert effectivenessMap != null;
+
+            Effectiveness primaryEffectiveness = effectivenessMap.get(pk.primaryType);
+            Effectiveness secondaryEffectiveness = pk.secondaryType == null ? null : effectivenessMap.get(pk.secondaryType);
+
+            if ((primaryEffectiveness.ordinal() > Effectiveness.NEUTRAL.ordinal()) || (secondaryEffectiveness != null && secondaryEffectiveness.ordinal() > Effectiveness.NEUTRAL.ordinal()))
+                continue;
+
+            if (against.get(superEffectiveType).ordinal() <= Effectiveness.NEUTRAL.ordinal()) {
+                shouldInclude = true;
+                break;
+            }
+        }
+        if (!shouldInclude)
+            irrelevantAbilities.add(ability);
     }
 
     @Override
@@ -2796,7 +3052,126 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean giveToImportantPokemon = settings.isRandomizeHeldItemsForImportantTrainerPokemon();
         boolean giveToRegularPokemon = settings.isRandomizeHeldItemsForRegularTrainerPokemon();
         boolean highestLevelOnly = settings.isHighestLevelGetsItemsForTrainers();
+        boolean customTypeChart = (settings.getCurrentMiscTweaks() & MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue()) > 0;
         boolean allSmart = (settings.getCurrentMiscTweaks() & MiscTweak.NPC_SMART_AI.getValue()) > 0;
+
+        Map<Weather, Type> weatherBoostTypes = new HashMap<>();
+        weatherBoostTypes.put(Weather.Sun, Type.FIRE);
+        weatherBoostTypes.put(Weather.Rain, Type.WATER);
+
+        Map<Weather, Type> weatherWeakTypes = new HashMap<>();
+        weatherBoostTypes.put(Weather.Sun, Type.WATER);
+        weatherBoostTypes.put(Weather.Rain, Type.FIRE);
+
+        Map<Weather, Set<Type>> weatherImmuneTypes = new HashMap<>();
+        weatherImmuneTypes.put(Weather.Hail, Set.of(Type.ICE, Type.FIGHTING, Type.STEEL));
+        weatherImmuneTypes.put(Weather.Sand, Set.of(Type.GROUND, Type.ROCK, Type.STEEL));
+
+        Set<Integer> sunBoostMoves = new HashSet<>();
+        Set<Integer> rainBoostMoves = new HashSet<>();
+        Set<Integer> hailBoostMoves = new HashSet<>();
+        Set<Integer> sandBoostMoves = new HashSet<>();
+
+        Set<Integer> sunWeakMoves = new HashSet<>();
+        Set<Integer> rainWeakMoves = new HashSet<>();
+        Set<Integer> hailWeakMoves = new HashSet<>();
+        Set<Integer> sandWeakMoves = new HashSet<>();
+
+        for (Move move : getMoves()) {
+            // Sun
+            if (move.type == Type.FIRE || move.effect == MoveEffect.WEATHER_BALL
+                    || move.effect == MoveEffect.SOLAR_BEAM || move.effect == MoveEffect.GROWTH || move.effect == MoveEffect.RECOVER_HP_50_WEATHER)
+                sunBoostMoves.add(move.number);
+
+            if (move.type == Type.WATER
+                    || move.effect == MoveEffect.THUNDER || move.effect == MoveEffect.HURRICANE)
+                sunWeakMoves.add(move.number);
+
+            // Rain
+            if (move.type == Type.WATER || move.effect == MoveEffect.WEATHER_BALL
+                    || move.effect == MoveEffect.THUNDER || move.effect == MoveEffect.HURRICANE)
+                rainBoostMoves.add(move.number);
+
+            if (move.type == Type.FIRE
+                    || move.effect == MoveEffect.SOLAR_BEAM || move.effect == MoveEffect.GROWTH || move.effect == MoveEffect.RECOVER_HP_50_WEATHER)
+                rainWeakMoves.add(move.number);
+
+            // Hail
+            if (move.effect == MoveEffect.WEATHER_BALL || move.effect == MoveEffect.BLIZZARD || move.number == Moves.auroraVeil)
+                hailBoostMoves.add(move.number);
+
+            if (move.effect == MoveEffect.SOLAR_BEAM || move.effect == MoveEffect.GROWTH || move.effect == MoveEffect.RECOVER_HP_50_WEATHER)
+                hailWeakMoves.add(move.number);
+
+            // Sand
+            if (move.effect == MoveEffect.WEATHER_BALL)
+                sandBoostMoves.add(move.number);
+
+            if (move.effect == MoveEffect.SOLAR_BEAM || move.effect == MoveEffect.GROWTH || move.effect == MoveEffect.RECOVER_HP_50_WEATHER)
+                sandWeakMoves.add(move.number);
+        }
+
+        Map<Weather, Set<Integer>> weatherBoostMoves = new HashMap<>();
+        weatherBoostMoves.put(Weather.Sun, sunBoostMoves);
+        weatherBoostMoves.put(Weather.Rain, rainBoostMoves);
+        weatherBoostMoves.put(Weather.Hail, hailBoostMoves);
+        weatherBoostMoves.put(Weather.Sand, sandBoostMoves);
+
+        Map<Weather, Set<Integer>> weatherWeakMoves = new HashMap<>();
+        weatherWeakMoves.put(Weather.Sun, sunWeakMoves);
+        weatherWeakMoves.put(Weather.Rain, rainWeakMoves);
+        weatherWeakMoves.put(Weather.Hail, hailWeakMoves);
+        weatherWeakMoves.put(Weather.Sand, sandWeakMoves);
+
+        Map<Weather, Set<Integer>> weatherBoostAbilities = new HashMap<>();
+        weatherBoostAbilities.put(Weather.Sun, Set.of(
+                Abilities.chlorophyll, // #034
+                Abilities.forecast, // #059
+                Abilities.solarPower, // #094
+                Abilities.leafGuard, // #102
+                Abilities.flowerGift // #122
+        ));
+        weatherBoostAbilities.put(Weather.Rain, Set.of(
+                Abilities.swiftSwim, // #033
+                Abilities.rainDish, // #044
+                Abilities.forecast, // #059
+                Abilities.drySkin, // #087
+                Abilities.hydration // #093
+        ));
+        weatherBoostAbilities.put(Weather.Hail, Set.of(
+                Abilities.forecast, // #059
+                Abilities.snowCloak, // #081
+                Abilities.iceBody, // #115
+                Abilities.slushRush // #202
+        ));
+        weatherBoostAbilities.put(Weather.Sand, Set.of(
+                Abilities.sandVeil, // #008
+                Abilities.sandRush, // #146
+                Abilities.sandForce // #159
+        ));
+
+        Map<Weather, Set<Integer>> weatherWeakAbilities = new HashMap<>();
+        weatherWeakAbilities.put(Weather.Sun, Set.of(
+                Abilities.drizzle, // #002
+                Abilities.sandStream, // #045
+                Abilities.drySkin, // #087
+                Abilities.snowWarning // #117
+        ));
+        weatherWeakAbilities.put(Weather.Rain, Set.of(
+                Abilities.sandStream, // #045
+                Abilities.drought, // #070
+                Abilities.snowWarning // #117
+        ));
+        weatherWeakAbilities.put(Weather.Hail, Set.of(
+                Abilities.drizzle, // #117
+                Abilities.sandStream, // #045
+                Abilities.drought // #070
+        ));
+        weatherWeakAbilities.put(Weather.Sand, Set.of(
+                Abilities.drizzle, // #117
+                Abilities.drought, // #070
+                Abilities.snowWarning // #117
+        ));
 
         List<Move> moves = this.getMoves();
         Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
@@ -2814,6 +3189,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (!giveToBossPokemon && t.isBoss()) {
                 continue;
             }
+
+            Map<Weather, Double> baseWeatherFrequencies = new HashMap<>();
+
             t.setPokemonHaveItems(true);
             if (highestLevelOnly) {
                 int maxLevel = -1;
@@ -2833,28 +3211,85 @@ public abstract class AbstractRomHandler implements RomHandler {
                                 movesets,
                                 highestLevelPoke.level) :
                         highestLevelPoke.moves;
-                randomizeHeldItem(highestLevelPoke, settings, moves, moveset);
+                randomizeHeldItem(highestLevelPoke, settings, moves, moveset, baseWeatherFrequencies);
             } else {
+                for (Weather w : Weather.values()) {
+                    baseWeatherFrequencies.put(w, 0.0);
+                }
+
                 for (TrainerPokemon tp : t.pokemon) {
-                    int[] moveset = tp.resetMoves ?
-                            RomFunctions.getMovesAtLevel(getAltFormeOfPokemon(
-                                            tp.pokemon, tp.forme).number,
-                                    movesets,
-                                    tp.level) :
-                            tp.moves;
-                    randomizeHeldItem(tp, settings, moves, moveset);
-                    if (t.requiresUniqueHeldItems) {
-                        while (!t.pokemonHaveUniqueHeldItems()) {
-                            randomizeHeldItem(tp, settings, moves, moveset);
-                        }
+
+                    Pokemon forme = getAltFormeOfPokemon(tp.pokemon, tp.forme);
+
+                    if (tp.resetMoves) {
+                        tp.moves = RomFunctions.getMovesAtLevel(forme.number, movesets, tp.level);
                     }
+                    int[] moveset = tp.moves;
+
+                    Map<Type, Effectiveness> against = Effectiveness.against(forme.primaryType, forme.secondaryType, generationOfPokemon(), true, customTypeChart, typeInGame(Type.FAIRY));
+                    if (against == null)
+                        against = new HashMap<>();
+
+                    for (Weather w : Weather.values()) {
+                        double frequency = baseWeatherFrequencies.get(w);
+
+                        Type weatherBoostType = weatherBoostTypes.get(w);
+                        switch (against.getOrDefault(weatherBoostType, Effectiveness.NEUTRAL)) {
+                            case DOUBLE -> frequency -= 1.5;
+                            case QUADRUPLE -> frequency -= 2.0;
+                        }
+
+                        Type weatherWeakType = weatherBoostTypes.get(w);
+                        switch (against.getOrDefault(weatherWeakType, Effectiveness.NEUTRAL)) {
+                            case DOUBLE -> frequency += 1.5;
+                            case QUADRUPLE -> frequency += 2.0;
+                        }
+
+                        if (weatherImmuneTypes.containsKey(w) && forme.primaryType != null) {
+                            if (weatherImmuneTypes.get(w).contains(forme.primaryType) || (forme.secondaryType != null && weatherImmuneTypes.get(w).contains(forme.secondaryType)))
+                                frequency += 0.25;
+                            else
+                                frequency -= 0.25;
+                        }
+
+                        if (tp.abilitySlot != 0 && weatherBoostAbilities.getOrDefault(w, Set.of()).contains(forme.getAbilityBySlot(tp.abilitySlot)))
+                            frequency += 1.0;
+                        if (tp.abilitySlot != 0 && weatherWeakAbilities.getOrDefault(w, Set.of()).contains(forme.getAbilityBySlot(tp.abilitySlot)))
+                            frequency -= 1.0;
+
+                        for (int m : moveset) {
+                            if (weatherBoostMoves.getOrDefault(w, Set.of()).contains(m))
+                                frequency += 0.5;
+                            if (weatherWeakMoves.getOrDefault(w, Set.of()).contains(m))
+                                frequency -= 0.5;
+                        }
+
+                        baseWeatherFrequencies.put(w, frequency);
+                    }
+                }
+
+                for (Weather w : Weather.values()) {
+                    double frequency = baseWeatherFrequencies.getOrDefault(w, 0.0);
+                    baseWeatherFrequencies.put(w, Math.max(0.0, frequency / t.pokemon.size()));
+                }
+
+                for (TrainerPokemon tp : t.pokemon) {
+                    if (tp.resetMoves) {
+                        Pokemon altForme = getAltFormeOfPokemon(tp.pokemon, tp.forme);
+                        tp.moves = RomFunctions.getMovesAtLevel(altForme.number, movesets, tp.level);
+                    }
+                    int[] moveset = tp.moves;
+
+                    do {
+                        randomizeHeldItem(tp, settings, moves, moveset, baseWeatherFrequencies);
+                    } while (t.requiresUniqueHeldItems && !t.pokemonHaveUniqueHeldItems());
                 }
             }
         }
         this.setTrainers(currentTrainers, false, allSmart);
     }
 
-    private void randomizeHeldItem(TrainerPokemon tp, Settings settings, List<Move> moves, int[] moveset) {
+    private void randomizeHeldItem(TrainerPokemon tp, Settings settings, List<Move> moves, int[] moveset, Map<RomHandler.Weather, Double> weatherFrequencies) {
         boolean sensibleItemsOnly = settings.isSensibleItemsOnlyForTrainers();
         boolean consumableItemsOnly = settings.isConsumableItemsOnlyForTrainers();
         boolean swapMegaEvolutions = settings.isSwapTrainerMegaEvos();
@@ -2866,7 +3301,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         List<Integer> toChooseFrom;
         if (sensibleItemsOnly) {
-            toChooseFrom = getSensibleHeldItemsFor(tp, settings, consumableItemsOnly, moves, moveset);
+            toChooseFrom = getSensibleHeldItemsFor(tp, settings, consumableItemsOnly, moves, moveset, weatherFrequencies);
         } else if (consumableItemsOnly) {
             toChooseFrom = getAllConsumableHeldItems();
         } else {
@@ -5370,7 +5805,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             // TOO LONG! May happen with many TMs
             if (throwOnOverflow)
                 throw new RuntimeException("Text was too long: " + inText);
-            
+
             return String.join(getLineBreakString(), lines);
         }
 
@@ -6572,6 +7007,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         banned.addAll(getMovesBannedFromLevelup());
         banned.addAll(this.getIllegalMoves());
         banned.addAll(GlobalConstants.tmBannedMoves);
+        banned.addAll(GlobalConstants.bannedMoves);
         // field moves?
         List<Integer> fieldMoves = this.getFieldMoves();
         int preservedFieldMoveCount = 0;
@@ -6595,11 +7031,6 @@ public abstract class AbstractRomHandler implements RomHandler {
                 unusableMoves.add(mv);
             } else if (!mv.canBeDamagingMove(generationOfPokemon()) || !mv.isGoodDamaging(generationOfPokemon())) {
                 unusableDamagingMoves.add(mv);
-            }
-
-            // TODO Remove stuff from here later
-            else if (GlobalConstants.bannedMoves.contains(mv.number)) {
-                unusableMoves.add(mv);
             }
         }
 
@@ -9662,7 +10093,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public List<Integer> getMovesBannedFromLevelup() {
-        return new ArrayList<>();
+        return GlobalConstants.bannedMoves.stream().toList();
     }
 
     @Override
@@ -9766,7 +10197,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     @Override
-    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
+    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves, Map<Weather, Double> weatherFrequencies) {
         return Arrays.asList(0);
     }
 

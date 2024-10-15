@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.arm;
 
 import com.dabomstew.pkrandom.FileFunctions;
+import com.dabomstew.pkrandom.arm.exceptions.ArmParseException;
 import com.dabomstew.pkrandom.romhandlers.ParagonLiteAddressMap;
 import com.dabomstew.pkrandom.romhandlers.ParagonLiteOverlay;
 import org.openjdk.nashorn.api.scripting.JSObject;
@@ -41,13 +42,13 @@ public class ArmParser {
 
     private void setupJavaScriptEngineManager() {
         engineManager = new ScriptEngineManager();
-        
+
         engine = engineManager.getEngineByName("nashorn");
         if (engine == null) {
             NashornScriptEngineFactory engineFactory = new NashornScriptEngineFactory();
             engine = engineFactory.getScriptEngine();
         }
-        
+
         setEnums();
         setStructs();
     }
@@ -77,6 +78,7 @@ public class ArmParser {
 
     private void setStructs() {
         String[] structNames = new String[]{
+                "ActionOrderWork",
                 "BattleParty",
                 "Box2Main",
                 "BoxPoke",
@@ -85,10 +87,12 @@ public class ArmParser {
                 "BoxPokeBlockC",
                 "BoxPokeBlockD",
                 "BtlClientWk",
+                "BtlEventFactor",
                 "BtlvMcss",
                 "BtlvMcssData",
                 "HandlerParam_AddSideStatus",
                 "HandlerParam_ChangeStatStage",
+                "HandlerParam_ChangeWeather",
                 "HandlerParam_Message",
                 "HandlerParam_RecoverHP",
                 "MainModule",
@@ -98,7 +102,7 @@ public class ArmParser {
                 "ServerFlow",
                 "TrainerAIEnv",
         };
-        
+
         for (String structName : structNames) {
             String filename = String.format("paragonlite/structs/%s.json", structName);
 
@@ -114,7 +118,7 @@ public class ArmParser {
             while (sc.hasNextLine()) {
                 stringBuilder.append(sc.nextLine());
             }
-            
+
             Object object;
             try {
                 // Is there a better way to do this?
@@ -126,11 +130,11 @@ public class ArmParser {
             engineManager.put(structName, object);
         }
     }
-    
+
     public void addGlobalValue(String name, int value) {
         engineManager.put(name, value);
     }
-    
+
     public void addStruct(String structName) {
         JSObject object;
         try {
@@ -140,9 +144,9 @@ public class ArmParser {
             throw new RuntimeException(e);
         }
     }
-    
+
     public void setStructFieldOffset(String structName, String memberName, int offset) {
-        JSObject structObject = (JSObject)engineManager.get(structName);
+        JSObject structObject = (JSObject) engineManager.get(structName);
         structObject.setMember(memberName, offset);
     }
 
@@ -153,11 +157,18 @@ public class ArmParser {
         return Integer.parseInt(str);
     }
 
-    public byte[] parse(List<String> lines) {
+    public byte[] parse(List<String> lines) throws ArmParseException {
         return parse(lines, null, 0);
     }
 
-    public byte[] parse(List<String> lines, ParagonLiteOverlay overlay, int initialRamAddress) {
+    enum IfState {
+        Processing,
+        Idle,
+        Complete,
+        Invalid
+    }
+
+    public byte[] parse(List<String> lines, ParagonLiteOverlay overlay, int initialRamAddress) throws ArmParseException {
         if (!isWordAligned(initialRamAddress))
             throw new RuntimeException("Initial RAM offset must be word-aligned.");
 
@@ -174,13 +185,76 @@ public class ArmParser {
         currentContext = new SimpleScriptContext();
         currentContext.setBindings(engineManager.getBindings(), ScriptContext.GLOBAL_SCOPE);
 
+        Stack<IfState> ifStateStack = new Stack<>();
+
         for (int i = 0; i < lines.size(); ++i) {
             String str = stripComment(lines.get(i)).trim();
-            if (str.endsWith(":")) {
-                // Label
-                String labelName = str.substring(0, str.length() - 1).trim();
-                labelAddressMap.put(labelName, currentRamAddress);
-            } else if (str.toUpperCase().startsWith("#DEFINE ")) {
+            if (str.toUpperCase().startsWith("#ELSE")) {
+                if (ifStateStack.isEmpty())
+                    throw new ArmParseException(i, "ELSE used when no IF was stated");
+
+                switch (ifStateStack.pop()) {
+                    case Processing, Complete -> ifStateStack.push(IfState.Complete);
+                    case Idle -> ifStateStack.push(IfState.Processing);
+                    case Invalid -> ifStateStack.push(IfState.Invalid);
+                    default -> throw new IllegalStateException("Unexpected value: " + ifStateStack.pop());
+                }
+
+                continue;
+            } else if (str.toUpperCase().startsWith("#ELIF ")) {
+                if (ifStateStack.isEmpty())
+                    throw new ArmParseException(i, "ELIF used when no IF was stated");
+
+                String[] elifSplit = str.split(" ", 2);
+                String expression = elifSplit[1];
+                int expressionValue;
+                try {
+                    expressionValue = parseValue(expression);
+                } catch (DataFormatException e) {
+                    throw new RuntimeException(e);
+                }
+
+                switch (ifStateStack.pop()) {
+                    case Processing, Complete -> ifStateStack.push(IfState.Complete);
+                    case Idle -> ifStateStack.push(expressionValue == 0 ? IfState.Idle : IfState.Processing);
+                    case Invalid -> ifStateStack.push(IfState.Invalid);
+                    default -> throw new IllegalStateException("Unexpected value: " + ifStateStack.pop());
+                }
+
+                continue;
+            } else if (str.toUpperCase().startsWith("#ENDIF")) {
+                if (ifStateStack.isEmpty())
+                    throw new ArmParseException(i, "ENDIF used when no IF was stated");
+
+                ifStateStack.pop();
+                continue;
+            }
+
+            if (!ifStateStack.isEmpty() && ifStateStack.peek() != IfState.Processing) {
+                lines.set(i, "");
+                continue;
+            }
+
+            if (str.toUpperCase().startsWith("#IF ")) {
+                if (!ifStateStack.isEmpty() && ifStateStack.peek() != IfState.Processing) {
+                    ifStateStack.push(IfState.Invalid);
+                    continue;
+                }
+
+                String[] ifSplit = str.split(" ", 2);
+                String expression = ifSplit[1];
+                int expressionValue;
+                try {
+                    expressionValue = parseValue(expression);
+                } catch (DataFormatException e) {
+                    throw new RuntimeException(e);
+                }
+
+                ifStateStack.push(expressionValue == 0 ? IfState.Idle : IfState.Processing);
+                continue;
+            }
+
+            if (str.toUpperCase().startsWith("#DEFINE ")) {
                 String[] defSplit = str.split(" ", 3);
                 String varName = defSplit[1];
                 String varValueStr = defSplit[2];
@@ -228,15 +302,26 @@ public class ArmParser {
                 }
                 --i;
                 continue;
+            } else if (str.endsWith(":")) {
+                // Label
+                String labelName = str.substring(0, str.length() - 1).trim();
+                labelAddressMap.put(labelName, currentRamAddress);
             }
 
             currentRamAddress += getLineByteLength(str);
         }
 
+        if (!ifStateStack.isEmpty())
+            throw new ArmParseException(lines.size(), "No #ENDIF found");
+
         int lastNonSwitchAddress = initialRamAddress;
         currentRamAddress = initialRamAddress;
         for (int i = 0; i < lines.size(); ++i) {
-            String str = stripComment(lines.get(i)).trim();
+            String line = lines.get(i);
+            if (line == null)
+                continue;
+
+            String str = stripComment(line).trim();
             if (str.toUpperCase().startsWith("#CASE ")) {
                 String label = str.split(" ", 2)[1].trim();
                 if (!labelAddressMap.containsKey(label))
@@ -268,6 +353,9 @@ public class ArmParser {
 
         currentRamAddress = initialRamAddress;
         for (String str : lines) {
+            if (str.startsWith("#"))
+                continue;
+            
             str = stripComment(str).trim();
 
             if (str.isEmpty() || str.endsWith(":"))
@@ -327,7 +415,7 @@ public class ArmParser {
         return returnValue;
     }
 
-    public int getByteLength(List<String> lines) {
+    public int getByteLength(List<String> lines) throws ArmParseException {
         byte[] bytes = parse(lines);
         return bytes.length;
     }
@@ -550,6 +638,18 @@ public class ArmParser {
             return 0;
 
         if (line.toUpperCase().startsWith("#DEFINE "))
+            return 0;
+
+        if (line.toUpperCase().startsWith("#IF"))
+            return 0;
+
+        if (line.toUpperCase().startsWith("#ELSE"))
+            return 0;
+
+        if (line.toUpperCase().startsWith("#ELSEIF"))
+            return 0;
+
+        if (line.toUpperCase().startsWith("#ENDIF"))
             return 0;
 
         if (line.toUpperCase().startsWith("#CASE "))
@@ -1555,6 +1655,8 @@ public class ArmParser {
                 return (int) Math.round(asDouble);
             if (evalObj instanceof Integer asInt)
                 return asInt;
+            if (evalObj instanceof Boolean asBoolean)
+                return asBoolean ? 1 : 0;
             throw new DataFormatException();
         } catch (ScriptException e) {
             throw new DataFormatException(String.format("Could not parse %s: %s", valueStr, e));

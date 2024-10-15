@@ -201,19 +201,6 @@ public class Randomizer {
                 break;
         }
 
-        // Abilities
-        if (settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
-            romHandler.randomizeAbilities(settings);
-            pokemonTraitsChanged = true;
-        }
-
-        // Log Pokemon traits (stats, abilities, etc) if any have changed
-        if (pokemonTraitsChanged) {
-            logPokemonTraitChanges(log);
-        } else {
-            log.println("Pokemon base stats & type: unchanged" + NEWLINE);
-        }
-
         for (Pokemon pkmn : romHandler.getPokemon()) {
             if (pkmn != null) {
                 checkValue = addToCV(checkValue, pkmn.hp, pkmn.attack, pkmn.defense, pkmn.speed, pkmn.spatk,
@@ -431,6 +418,19 @@ public class Randomizer {
                 logTutorCompatibility(log);
             }
 
+        }
+
+        // Abilities
+        if (settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE) {
+            romHandler.randomizeAbilities(settings);
+            pokemonTraitsChanged = true;
+        }
+
+        // Log Pokemon traits (stats, abilities, etc) if any have changed
+        if (pokemonTraitsChanged) {
+            logPokemonTraitChanges(log);
+        } else {
+            log.println("Pokemon base stats & type: unchanged" + NEWLINE);
         }
 
         // Trainer Pokemon

@@ -56,6 +56,12 @@ public class ItemList {
         }
     }
 
+    public void unbanSingles(int... indexes) {
+        for (int index : indexes) {
+            items[index] = true;
+        }
+    }
+
     public void banRange(int startIndex, int length) {
         for (int i = 0; i < length; i++) {
             items[i + startIndex] = false;

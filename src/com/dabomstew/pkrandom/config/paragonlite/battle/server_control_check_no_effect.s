@@ -1,10 +1,14 @@
-#DEFINE EFF_REC 0x00
-#DEFINE EVENT_TYPE 0x04
-#DEFINE MOVE_PARAM 0x08
-#DEFINE IN_EFF_REC 0x20
+#DEFINE PUSH_SIZE (4 * 5) ; r4-r7,lr
+
+#define VAR_00 0x00
+#define EVENT_TYPE 0x04
+#define MOVE_PARAM 0x08
+#DEFINE STACK_SIZE (0x0C + PUSH_SIZE)
+
+#define IN_EFF_REC (STACK_SIZE + 0x00)
 
     push    {r4-r7, lr}
-    sub     sp, #0x0C
+    sub     sp, #(STACK_SIZE - PUSH_SIZE)
     mov     r5, r0
     mov     r4, r3
     mov     r6, r2
@@ -26,7 +30,7 @@ RedirectLoop_Start:
     bne     RedirectLoop_CheckContinue
     ldr     r0, [sp, #IN_EFF_REC]
     ldr     r1, [sp, #MOVE_PARAM]
-    str     r0, [sp, #EFF_REC]
+    str     r0, [sp, #VAR_00] ; effRec
     mov     r0, #EVENT_OnRedirectTargetEnd
     str     r0, [sp, #EVENT_TYPE]
     mov     r0, r5
@@ -58,7 +62,7 @@ NoEffectLoop_Setup:
 NoEffectLoop_Start:
     ldr     r0, [sp, #IN_EFF_REC]
     ldr     r1, [sp, #MOVE_PARAM]
-    str     r0, [sp, #EFF_REC]
+    str     r0, [sp, #VAR_00] ; effRec
     mov     r0, #EVENT_OnNoEffectCheck
     str     r0, [sp, #EVENT_TYPE]
     mov     r0, r5
@@ -94,16 +98,16 @@ ProtectLoop_Setup:
 
 ProtectLoop_Start:
     mov     r0, r7
-    mov     r1, #7
+    mov     r1, #TF_Protect
     bl      Battle::Poke_GetTurnFlag
     cmp     r0, #0
     beq     ProtectLoop_CheckContinue
     
-    ldr     r3, [sp, #MOVE_PARAM]
     mov     r0, r5
-    ldrh    r3, [r3, #MoveParam.moveId]
     mov     r1, r6
     mov     r2, r7
+    ldr     r3, [sp, #MOVE_PARAM]
+    ldrh    r3, [r3, #MoveParam.moveId]
     bl      Battle::ServerEvent_CheckProtectBreak
     cmp     r0, #0
     bne     ProtectLoop_CheckContinue
@@ -115,12 +119,55 @@ ProtectLoop_Start:
     mov     r0, r7
     bl      Battle::GetPokeId
     mov     r3, r0
+    ldr     r2, =523 ; "[poke] protected itself!"
+    
     ldr     r0, =0xFFFF0000
-    ldr     r2, =0x020B
-    str     r0, [sp, #EFF_REC]
+    str     r0, [sp, #VAR_00] ; -1
+    
     ldr     r0, [r5, #ServerFlow.serverCommandQueue]
-    mov     r1, #91
+    mov     r1, #SCMD_SetMessage
     bl      Battle::ServerDisplay_AddMessageImpl
+    
+ProtectLoop_CheckSpikyShield:
+    mov     r0, r7
+    mov     r1, #TF_SpikyShield
+    bl      Battle::Poke_GetTurnFlag
+    cmp     r0, #0
+    beq     ProtectLoop_CheckContinue
+    
+ProtectLoop_CheckContact:
+;    mov     r0, r5 ; r0 := *serverFlow
+;    ldr     r1, [sp, #MOVE_PARAM] ; r1 := *moveParam
+;    mov     r2, r6 ; r2 := *attackingPoke
+;    mov     r3, r7 ; r3 := *defendingPoke
+;    bl      Battle::ServerEvent_CheckContact
+;    cmp     r0, #0
+;    beq     ProtectLoop_CheckContinue
+
+    ldr     r0, [sp, #MOVE_PARAM]
+    ldrh    r0, [r0, #MoveParam.moveId]
+    mov     r1, #MF_Contact
+    bl      ARM9::MoveHasFlag
+    cmp     r0, #0
+    beq     ProtectLoop_CheckContinue
+    
+ProtectLoop_SpikyShield:
+    mov     r1, #SCMD_SetMessage
+    ldr     r2, =1219
+    
+    mov     r0, r6
+    bl      Battle::GetPokeId
+    mov     r3, r0
+    
+    ldr     r0, [sp, #MOVE_PARAM]
+    ldrh    r3, [r3, #MoveParam.moveId]
+    
+    ldr     r0, =0xFFFF0000
+    str     r0, [sp, #0x00] ; -1
+    
+    ldr     r0, [r5, #ServerFlow.serverCommandQueue]
+    bl      Battle::ServerDisplay_AddMessageImpl
+
 
 ProtectLoop_CheckContinue:
     mov     r0, r4
@@ -132,14 +179,14 @@ AbilityNoEffectLoop_Setup:
     mov     r0, r4
     bl      BattleServer::PokeSet_SeekStart
     mov     r0, r4
-    bl      Unk_21A31A0
+    bl      BattleServer::PokeSet_SeekNext
     mov     r7, r0
     beq     GrassPowderLoop_Setup
 
 AbilityNoEffectLoop_Start:
     ldr     r0, [sp, #IN_EFF_REC]
     ldr     r1, [sp, #MOVE_PARAM]
-    str     r0, [sp, #EFF_REC]
+    str     r0, [sp, #VAR_00]
     mov     r0, #EVENT_OnAbilityCheckNoEffect
     str     r0, [sp, #EVENT_TYPE]
     mov     r0, r5
@@ -184,7 +231,18 @@ GrassPowderLoop_Start:
     cmp     r0, #0
     beq     GrassPowderLoop_CheckContinue
     
-    ; remove
+    ; remove    
+    mov     r0, r7
+    bl      Battle::GetPokeId
+    mov     r3, r0
+    
+    ldr     r0, =0xFFFF0000
+    str     r0, [sp, #0x00] ; -1
+    mov     r1, #SCMD_SetMessage
+    mov     r2, #210 ; "It doesn't affect [poke]..."
+    ldr     r0, [r5, #ServerFlow.serverCommandQueue]
+    bl      Battle::ServerDisplay_AddMessageImpl
+    
     mov     r0, r4
     mov     r1, r7
     bl      BattleServer::PokeSet_Remove
@@ -201,7 +259,8 @@ DarkPranksterLoop_Setup:
     ; check if prankster
     ldr     r0, [sp, #MOVE_PARAM]
     ldr     r0, [r0, #MoveParam.flags]
-    tst     r0, #MPF_Prankster
+    mov     r1, #MPF_Prankster
+    tst     r0, r1
     beq     Return
 
     mov     r0, r4
@@ -241,7 +300,7 @@ DarkPranksterLoop_CheckContinue:
     bne     DarkPranksterLoop_Start
 
 Return:
-    add     sp, #0x0C
+    add     sp, #(STACK_SIZE - PUSH_SIZE)
     pop     {r4-r7, pc}
     
     

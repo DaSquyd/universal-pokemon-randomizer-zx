@@ -82,12 +82,12 @@ public class ParagonLiteAbilities {
             luckyFoot, // 504
             assimilate, // 505
             stoneHome, // 506
-            cacophony // 507
+            cacophony, // 507
 //            ripTide, // 508
-//            windWhipper, // 509
-//            glazeware, // 510
-//            sunSoaked, // 511
-//            colossal, // 512
+            windWhipper, // 509
+            glazeware, // 510
+            sunSoaked, // 511
+            colossal // 512
 //            finalThread, // 513
 //            homeGrown, // 514
 //            ravenousTorque, // 515

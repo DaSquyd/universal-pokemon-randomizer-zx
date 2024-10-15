@@ -3938,6 +3938,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
+    public boolean[] getTMsAvailableInMainGame() {
+        return new boolean[0];
+    }
+
+    @Override
     public boolean hasMoveTutors() {
         return romEntry.romType != Gen4Constants.Type_DP;
     }
@@ -3988,6 +3993,11 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
+    }
+
+    @Override
+    public int getMoveTutorMainGameCount() {
+        return 0;
     }
 
     private void setHGSSHeadbuttTutor(int headbuttReplacement) {
@@ -5949,7 +5959,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves) {
+    public List<Integer> getSensibleHeldItemsFor(TrainerPokemon tp, Settings settings, boolean consumableOnly, List<Move> moves, int[] pokeMoves, Map<Weather, Double> weatherFrequencies) {
         List<Integer> items = new ArrayList<>();
         items.addAll(Gen4Constants.generalPurposeConsumableItems);
         int frequencyBoostCount = 6; // Make some very good items more common, but not too common

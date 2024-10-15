@@ -1767,6 +1767,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
+    public boolean[] getTMsAvailableInMainGame() {
+        return new boolean[0];
+    }
+
+    @Override
     public boolean hasMoveTutors() {
         return false;
     }
@@ -1779,6 +1784,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     @Override
     public void setMoveTutorMoves(List<Integer> moves) {
         // Do nothing
+    }
+
+    @Override
+    public int getMoveTutorMainGameCount() {
+        return 0;
     }
 
     @Override

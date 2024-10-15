@@ -5,7 +5,7 @@
     mov     r5, r1
     mov     r4, r2
     
-    mov     r0, #3
+    mov     r0, #VAR_AttackingPoke
     bl      Battle::EventVar_GetValue
     cmp     r5, r0
     bne     Return
@@ -16,7 +16,11 @@
     mov     r6, r0
     
 ; Get Target HP
+#if PARAGONLITE
     mov     r1, #2 ; 1/2 HP
+#else
+    mov     r1, #3 ; 1/3 HP
+#endif
     bl      Battle::DivideMaxHP
     mov     r5, r0
     
@@ -29,14 +33,21 @@
     cmp     r0, r5
     bhi     Return
     
-; Check move type (passed in as r2 initially)
-    mov     r0, #0x16 ; move type
+; Check move type
+    mov     r0, #VAR_MoveType ; move type
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
     bne     Return
     
-    mov     r0, #0x35 ; offensive stat
+    mov     r0, #VAR_Ratio
+#if PARAGONLITE
     ldr     r1, =5325 ; 1.3x
+#elif REDUX
+    ldr     r1, =4915 ; 1.2x
+#else
+    mov     r1, #6
+    lsl     r1, #10 ; 6144 (1.5x)
+#endif
     bl      Battle::EventVar_MulValue
     
 Return:
