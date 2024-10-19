@@ -20,7 +20,7 @@
     
     add     r0, r6, #4
     mov     r1, #2 ; file 0x12
-    ldr     r2, =1209 ; "[poke] is overflowing with space power!"
+    ldr     r2, =BTLTXT_MeteorBeam_Charge
     bl      Battle::Handler_StrSetup
     
     add     r0, r6, #4

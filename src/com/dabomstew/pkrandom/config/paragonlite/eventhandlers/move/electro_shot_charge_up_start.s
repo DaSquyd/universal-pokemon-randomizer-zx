@@ -18,7 +18,7 @@
     bl      Battle::Handler_PushWork
     mov     r4, r0
     
-    ldr     r2, =1206 ; message id
+    ldr     r2, =BTLTXT_ElectroShot_Charge
     add     r0, r4, #4
     mov     r1, #2 ; file 0x12
     bl      Battle::Handler_StrSetup

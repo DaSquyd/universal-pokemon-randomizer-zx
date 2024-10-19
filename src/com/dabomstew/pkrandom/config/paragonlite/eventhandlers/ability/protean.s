@@ -34,7 +34,7 @@
     mov     r7, r0
     
     mov     r0, r6
-    bl      Battle::MakeSetTypeData1
+    bl      Battle::TypePair_MakeMono
     strh    r0, [r7, #0x04]
     
     mov     r0, r5

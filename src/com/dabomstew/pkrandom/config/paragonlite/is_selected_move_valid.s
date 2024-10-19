@@ -31,47 +31,40 @@ AssaultVestCheck:
     beq     CheckChoiceItem
     
     ; Assault Vest
-#IF !PARAGONLITE
-    mov     r0, r6
-    bl      Battle::GetPokeHeldItem
-    cmp     r0, #114 ; Assault Vest
-    bne     CheckChoiceItem
-#ELSE
     mov     r0, r6
     bl      Battle::GetPokeHeldItem
     mov     r1, #114 ; Assault Vest
     cmp     r0, r1
-    beq     PreventNonDamageMove
-    add     r1, #(321 - 114) ; Protector
+#IF PARAGONLITE
+    beq     NoStatusMove
+    ; Protector
+    add     r1, #(321 - 114)
     cmp     r0, r1
-    bne     CheckChoiceItem
 #ENDIF
+    bne     CheckChoiceItem
     
-PreventNonDamageMove:
+NoStatusMove:
     mov     r0, r5
     bl      ARM9::IsMoveDamaging
     cmp     r0, #0
     bne     CheckChoiceItem
     
     cmp     r4, #0
-    beq     AssaultVestReturnTrue
+    beq     NoStatusMove_ReturnTrue
     
     mov     r0, r4
-    ldr     r2, =1189 ; "The effects of the Assault Vest prevent status moves from being used!"
-    mov     r1, #2 ; File 0x11
+    ldr     r2, =BTLTXT_Common_StatusMovePreventItem_StatusMoveSelected
+    mov     r1, #1
     bl      Battle::DisplayMessage
     
     mov     r0, r6
-    bl      Battle::GetPokeId
+    bl      Battle::GetPokeHeldItem
+    
     mov     r1, r0
     mov     r0, r4
     bl      Battle::StringParam_AddArg
     
-    mov     r0, r4
-    mov     r1, r5
-    bl      Battle::StringParam_AddArg
-    
-AssaultVestReturnTrue:
+NoStatusMove_ReturnTrue:
     add     sp, #20
     mov     r0, #1
     pop     {r4-r7, pc}

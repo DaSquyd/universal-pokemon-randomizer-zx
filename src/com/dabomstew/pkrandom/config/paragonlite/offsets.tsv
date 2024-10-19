@@ -10,6 +10,7 @@ ARM9	Difficulty_AdjustPokeLevel	Code		thumb	--	--	0x020185D0	0x020185D0
 ARM9	GetDifficultyLevelChange	Code		thumb	--	--	0x02018D08	0x02018CDC
 ARM9	Unk_2019B14	Code		thumb	0x02014C24	0x02014C08	0x02019B14	0x02019AE8
 ARM9	Unk_201B27C	Code		thumb	0x02016390	0x02016374	0x0201B27C	0x0201B250
+ARM9	PML_CreatePoke	Code		thumb	0x02017638	0x0201761C	0x0201C524	0x0201C4F8
 ARM9	GetPokeStat	Code		thumb	0x02017E38	0x02017E1C	0x0201CD24	0x0201CCF8
 ARM9	SetPokeStat	Code		thumb	0x02017E5C	0x02017E40	0x0201CD48	0x0201CD1C
 ARM9	GetPokeBoxData	Code		thumb	0x02017EA4	0x02017E88	0x0201CDB4	0x0201CD88
@@ -241,6 +242,7 @@ Battle	ServerControl_CheckNoEffect	Code		thumb			0x021A2F94	0x021A2F54
 Battle	ServerControl_CheckNoEffectCore	Code		thumb			0x021A31D0	0x021A3190
 Battle	ServerControl_MoveExeCheck1	Code		thumb	0x021C003C	0x021C001C	0x021A3B00	0x021A3AC0
 Battle	ServerControl_CheckMoveExeFreezeThaw	Code		thumb	0x021C0424	0x021C0404	0x021A3EE8	0x021A3EA8
+Battle	ServerDisplay_MoveExecuteFailMessage	Code		thumb	0x021C0540	0x021C0520	0x021A4004	0x021A3FC4
 Battle	ServerControl_DamageRoot	Code		thumb	0x021C093C	0x021C091C	0x021A4400	0x021A43C0
 Battle	ServerControl_DamageFreezeThaw	Code		thumb	0x021C1D00	0x021C1CE0	0x021A57C4	0x021A5784
 Battle	ServerEvent_CalcDamage	Code		thumb	0x021C1E94	0x021C1E74	0x021A5958	0x021A5918
@@ -260,6 +262,7 @@ Battle	Run_PostTurnWeather	Code		thumb	0x021C4D3C	0x021C4D1C	0x021A881C	0x021A87
 Battle	ServerControl_CheckExpGet	Code		thumb	0x021C5220	0x021C5200	0x021A8D00	0x021A8CC0
 Battle	ServerControl_GetExp	Code		thumb	0x021C5328	0x021C5308	0x021A8E2C	0x021A8DEC
 Battle	ServerDisplay_AddEffectAtPosition	Code		thumb	0x021C54A0	0x021C5480	0x021A8FD8	0x021A8F98
+Battle	ServerDisplay_MoveMessage	Code		thumb	0x021C5624	0x021C5604	0x021A915C	0x021A911C
 Battle	ServerDisplay_AbilityPopupAdd	Code		thumb	0x021C5A3C	0x021C5A1C	0x021A9574	0x021A9534
 Battle	ServerDisplay_AbilityPopupRemove	Code		thumb	0x021C5A54	0x021C5A34	0x021A958C	0x021A954C
 Battle	ServerDisplay_StatStageLimit	Code		thumb	0x021C5A6C	0x021C5A4C	0x021A95A4	0x021A9564
@@ -318,6 +321,7 @@ Battle	ServerFlow_IsCompetitorScenarioMode	Code		thumb	--	--	0x021AE34C	0x021AE3
 Battle	AddExpAndEVs	Code		thumb	0x021CB2F4	0x021CB2D4	0x021AEE4C	0x021AEE0C
 Battle	HEManager_PushState	Code		thumb	0x021CC8F8	0x021CC8D8	0x021B088C	0x021B084C
 Battle	HEManager_PopState	Code		thumb	0x021CC97C	0x021CC95C	0x021B0910	0x021B08D0
+Battle	ServerDisplay_AddCommon	Code		thumb			0x021B1474	0x021B1434
 Battle	ServerDisplay_AddMessageImpl	Code		thumb			0x021B1610	0x021B15D0
 Battle	BattleClient_Init	Code		thumb	0x021CD710	0x021CD6F0	0x021B16B4	0x021B1674
 Battle	Inst_BattleClient_Init_AllocModify	Inst	2		0x021CD72E	0x021CD70E	0x021B16D2	0x021B1692
@@ -496,8 +500,14 @@ Battle	ConditionPtr_SetIsFlagged	Code		thumb	0x021E8BF0	0x021E8BD0	0x021CE450	0x
 Battle	ConditionPtr_GetIsFlagged	Code		thumb	0x021E8C44	0x021E8C24	0x021CE4A4	0x021CE464
 Battle	ConditionPtr_AddTurns	Code		thumb	0x021E8C70	0x021E8C50	0x021CE4D0	0x021CE490
 Battle	ConditionPtr_SetTurns	Code		thumb	0x021E8CBC	0x021E8C9C	0x021CE51C	0x021CE4DC
-Battle	MakeSetTypeData2	Code		thumb	0x021E8D00	0x021E8CE0	0x021CE560	0x021CE520
-Battle	MakeSetTypeData1	Code		thumb	0x021E8D10	0x021E8CF0	0x021CE570	0x021CE530
+Battle	TypePair_Make	Code		thumb	0x021E8D00	0x021E8CE0	0x021CE560	0x021CE520
+Battle	TypePair_MakeMono	Code		thumb	0x021E8D10	0x021E8CF0	0x021CE570	0x021CE530
+Battle	TypePair_GetType1	Code		thumb			0x021CE57C	0x021CE53C
+Battle	TypePair_GetType2	Code		thumb			0x021CE584	0x021CE544
+Battle	TypePair_LoadTypes	Code		thumb			0x021CE58C	0x021CE54C
+Battle	TypePair_HasType	Code		thumb			0x021CE5A4	0x021CE564
+Battle	TypePair_HasSharedType	Code		thumb			0x021CE5C8	0x021CE588
+Battle	TypePair_IsMonoType	Code		thumb			0x021CE628	0x021CE5E8
 Battle	DisplayMessage	Code		thumb	0x021EAF38	0x021EAF18	0x021D0B2C	0x021D0AEC
 Battle	StringParam_AddArg	Code		thumb	0x021EAF70	0x021EAF50	0x021D0B64	0x021D0B24
 Battle	Inst_Unknown1ListCountCmp	Inst	2		0x021EEF2C	0x021EEF0C	0x021D4FE8	0x021D4FA8
@@ -566,6 +576,8 @@ BattleServer	Data_SideStatusEffectTable	Data	112	4*	0x0689D780	0x0689D780	0x0689
 BattleServer	Data_PlateItems	Data	32		0x0689E38C	0x0689E38C	0x0689E514	0x0689E514
 BattleServer	Data_MoldBreakerIgnoredAbilities	Data	112		0x0689E450	0x0689E450	0x0689E5D8	0x0689E5D8
 BattleServer	SideStatusManager	Data	448		0x0689E7E0	0x0689E7E0	0x0689E960	0x0689E960
+Field	Encounter_CreateWildPoke	Code		thumb			0x021A0E00	0x021A0DC0
+Field	Encounter_GenPID	Code		thumb			0x021A1548	0x021A1508
 Storage	MakeBox2Main	Code		thumb	0x021DEDF8	0x021DEDD8	0x021BF060	0x021BF020
 Storage	DisplayPreview	Code		thumb	0x021DEF80	0x021DEF60	0x021BF1E8	0x021BF1A8
 Storage	Unk_21BF3A4	Code		thumb			0x021BF3A4	0x021BF364

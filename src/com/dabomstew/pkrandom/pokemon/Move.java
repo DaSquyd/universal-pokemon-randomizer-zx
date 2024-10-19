@@ -278,43 +278,30 @@ public class Move {
     }
 
     public double getHitCount(int generation) {
-        switch (effect) {
-            case HIT_2_TO_5_TIMES:
-                return generation < 5 ? 3.0 : 3.1;
-            case HIT_2_TIMES:
-            case HIT_2_TIMES_POISON:
-                return 2.0;
-            case TRIPLE_KICK:
-                double acc = accuracy / 100.0;
-                return 1 + acc + (acc * acc); // Assumes first hit lands
-            default:
-                return 1.0;
-        }
+        double acc = accuracy / 100.0;
+        return switch (effect) {
+            case HIT_2_TO_5_TIMES -> generation < 5 ? 3.0 : 3.1;
+            case HIT_2_TIMES, HIT_2_TIMES_POISON -> 1 + acc; // TODO: This is dependent on ParagonLite settings
+            case TRIPLE_KICK -> 1 + acc + (acc * acc); // Assumes first hit lands
+            default -> 1.0;
+        };
     }
 
     public StatusMoveType getStatusMoveType() {
         if (qualities == null) {
             // TODO: Finish this later for Gen IV
 
-            switch (category) {
-                case PHYSICAL:
-                case SPECIAL:
-                    return StatusMoveType.DAMAGE;
-                case STATUS:
-                    return StatusMoveType.NO_DAMAGE;
-                default:
-                    return StatusMoveType.NONE_OR_UNKNOWN;
-            }
+            return switch (category) {
+                case PHYSICAL, SPECIAL -> StatusMoveType.DAMAGE;
+                case STATUS -> StatusMoveType.NO_DAMAGE;
+            };
         }
 
-        switch (qualities) {
-            case NO_DAMAGE_STATUS:
-                return StatusMoveType.NO_DAMAGE;
-            case DAMAGE_TARGET_STATUS:
-                return StatusMoveType.DAMAGE;
-            default:
-                return StatusMoveType.NONE_OR_UNKNOWN;
-        }
+        return switch (qualities) {
+            case NO_DAMAGE_STATUS -> StatusMoveType.NO_DAMAGE;
+            case DAMAGE_TARGET_STATUS -> StatusMoveType.DAMAGE;
+            default -> StatusMoveType.NONE_OR_UNKNOWN;
+        };
     }
 
     public boolean isGoodDamaging(int generation) {

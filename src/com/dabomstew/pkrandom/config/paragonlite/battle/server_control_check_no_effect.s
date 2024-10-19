@@ -153,7 +153,7 @@ ProtectLoop_CheckContact:
     
 ProtectLoop_SpikyShield:
     mov     r1, #SCMD_SetMessage
-    ldr     r2, =1219
+    ldr     r2, =BTLTXT_SpikyShield_Activate
     
     mov     r0, r6
     bl      Battle::GetPokeId

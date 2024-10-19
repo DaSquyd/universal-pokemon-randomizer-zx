@@ -48,7 +48,7 @@ DisplayMessage:
     bl      Battle::Handler_PushWork
     
     mov     r7, r0
-    ldr     r2, =1203 ; message id
+    ldr     r2, =BTLTXT_SupremeOverlord_Activate
     add     r0, r7, #4
     mov     r1, #2
     bl      Battle::Handler_StrSetup

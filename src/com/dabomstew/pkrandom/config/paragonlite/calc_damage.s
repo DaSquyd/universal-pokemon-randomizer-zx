@@ -270,7 +270,7 @@ FinalDamage:
     mov     r1, #1
     lsl     r1, #12
     mov     r0, #VAR_Ratio
-    mov     r2, #(Math.round(4096 * 0.01)) ; (0.01x) min
+    mov     r2, #(4096 * 0.01) ; (0.01x) min
     lsl     r3, r1, #5 ; (5x) max
     bl      Battle::EventVar_SetMulValue
     

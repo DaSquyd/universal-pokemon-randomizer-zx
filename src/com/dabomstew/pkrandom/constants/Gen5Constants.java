@@ -457,26 +457,102 @@ public class Gen5Constants {
 
     private static Map<Type, List<Integer>> initializeTypeBoostingItems() {
         Map<Type, List<Integer>> map = new HashMap<>();
-        map.put(Type.BUG, Arrays.asList(Items.silverPowder, Items.insectPlate));
-        map.put(Type.DARK, Arrays.asList(Items.blackGlasses, Items.dreadPlate));
-        map.put(Type.DRAGON, Arrays.asList(Items.dragonFang, Items.dracoPlate));
-        map.put(Type.ELECTRIC, Arrays.asList(Items.magnet, Items.zapPlate));
-        map.put(Type.FAIRY, Arrays.asList(ParagonLiteItems.pixiePlate)); // TODO
-        map.put(Type.FIGHTING, Arrays.asList(Items.blackBelt, Items.fistPlate));
-        map.put(Type.FIRE, Arrays.asList(Items.charcoal, Items.flamePlate));
-        map.put(Type.FLYING, Arrays.asList(Items.sharpBeak, Items.skyPlate));
-        map.put(Type.GHOST, Arrays.asList(Items.spellTag, Items.spookyPlate));
-        map.put(Type.GRASS, Arrays.asList(Items.miracleSeed, Items.meadowPlate, Items.roseIncense));
-        map.put(Type.GROUND, Arrays.asList(Items.softSand, Items.earthPlate));
-        map.put(Type.ICE, Arrays.asList(Items.neverMeltIce, Items.iciclePlate));
-        map.put(Type.NORMAL, Arrays.asList(Items.silkScarf, ParagonLiteItems.blankPlate));
-        map.put(Type.POISON, Arrays.asList(Items.poisonBarb, Items.toxicPlate));
-        map.put(Type.PSYCHIC, Arrays.asList(Items.twistedSpoon, Items.mindPlate, Items.oddIncense));
-        map.put(Type.ROCK, Arrays.asList(Items.hardStone, Items.stonePlate, Items.rockIncense));
-        map.put(Type.STEEL, Arrays.asList(Items.metalCoat, Items.ironPlate));
-        map.put(Type.WATER, Arrays.asList(Items.mysticWater, Items.seaIncense, Items.splashPlate, Items.waveIncense));
+        map.put(Type.BUG, List.of(Items.silverPowder, Items.insectPlate));
+        map.put(Type.DARK, List.of(Items.blackGlasses, Items.dreadPlate));
+        map.put(Type.DRAGON, List.of(Items.dragonFang, Items.dracoPlate));
+        map.put(Type.ELECTRIC, List.of(Items.magnet, Items.zapPlate));
+        map.put(Type.FAIRY, List.of(ParagonLiteItems.pixiePlate)); // TODO
+        map.put(Type.FIGHTING, List.of(Items.blackBelt, Items.fistPlate));
+        map.put(Type.FIRE, List.of(Items.charcoal, Items.flamePlate));
+        map.put(Type.FLYING, List.of(Items.sharpBeak, Items.skyPlate));
+        map.put(Type.GHOST, List.of(Items.spellTag, Items.spookyPlate));
+        map.put(Type.GRASS, List.of(Items.miracleSeed, Items.meadowPlate, Items.roseIncense));
+        map.put(Type.GROUND, List.of(Items.softSand, Items.earthPlate));
+        map.put(Type.ICE, List.of(Items.neverMeltIce, Items.iciclePlate));
+        map.put(Type.NORMAL, List.of(Items.silkScarf, ParagonLiteItems.blankPlate));
+        map.put(Type.POISON, List.of(Items.poisonBarb, Items.toxicPlate));
+        map.put(Type.PSYCHIC, List.of(Items.twistedSpoon, Items.mindPlate, Items.oddIncense));
+        map.put(Type.ROCK, List.of(Items.hardStone, Items.stonePlate, Items.rockIncense));
+        map.put(Type.STEEL, List.of(Items.metalCoat, Items.ironPlate));
+        map.put(Type.WATER, List.of(Items.mysticWater, Items.seaIncense, Items.splashPlate, Items.waveIncense));
         map.put(null, Collections.emptyList()); // ??? type
         return Collections.unmodifiableMap(map);
+    }
+    
+    public static final Map<Type, List<Integer>> typeBoostingItemsNoPlates = initializeTypeBoostingItemsNoPlates();
+
+    private static Map<Type, List<Integer>> initializeTypeBoostingItemsNoPlates() {
+        Map<Type, List<Integer>> map = new HashMap<>();
+        map.put(Type.BUG, List.of(Items.silverPowder));
+        map.put(Type.DARK, List.of(Items.blackGlasses));
+        map.put(Type.DRAGON, List.of(Items.dragonFang));
+        map.put(Type.ELECTRIC, List.of(Items.magnet));
+        map.put(Type.FAIRY, List.of()); // TODO
+        map.put(Type.FIGHTING, List.of(Items.blackBelt));
+        map.put(Type.FIRE, List.of(Items.charcoal));
+        map.put(Type.FLYING, List.of(Items.sharpBeak));
+        map.put(Type.GHOST, List.of(Items.spellTag));
+        map.put(Type.GRASS, List.of(Items.miracleSeed, Items.roseIncense));
+        map.put(Type.GROUND, List.of(Items.softSand));
+        map.put(Type.ICE, List.of(Items.neverMeltIce));
+        map.put(Type.NORMAL, List.of(Items.silkScarf));
+        map.put(Type.POISON, List.of(Items.poisonBarb));
+        map.put(Type.PSYCHIC, List.of(Items.twistedSpoon, Items.oddIncense));
+        map.put(Type.ROCK, List.of(Items.hardStone, Items.rockIncense));
+        map.put(Type.STEEL, List.of(Items.metalCoat));
+        map.put(Type.WATER, List.of(Items.mysticWater, Items.seaIncense, Items.waveIncense));
+        map.put(null, Collections.emptyList()); // ??? type
+        return Collections.unmodifiableMap(map);
+    }
+
+    public static final Map<Type, Integer> typeToPlate = initializeTypeToPlate();
+
+    private static Map<Type, Integer> initializeTypeToPlate() {
+        Map<Type, Integer> map = new HashMap<>();
+        map.put(Type.NORMAL, ParagonLiteItems.blankPlate);
+        map.put(Type.FIGHTING, Items.fistPlate);
+        map.put(Type.FLYING, Items.skyPlate);
+        map.put(Type.POISON, Items.toxicPlate);
+        map.put(Type.GROUND, Items.earthPlate);
+        map.put(Type.ROCK, Items.stonePlate);
+        map.put(Type.BUG, Items.insectPlate);
+        map.put(Type.GHOST, Items.spookyPlate);
+        map.put(Type.STEEL, Items.ironPlate);
+        map.put(Type.FIRE, Items.flamePlate);
+        map.put(Type.WATER, Items.splashPlate);
+        map.put(Type.GRASS, Items.meadowPlate);
+        map.put(Type.ELECTRIC, Items.zapPlate);
+        map.put(Type.PSYCHIC, Items.mindPlate);
+        map.put(Type.ICE, Items.iciclePlate);
+        map.put(Type.DRAGON, Items.dracoPlate);
+        map.put(Type.DARK, Items.dreadPlate);
+        map.put(Type.FAIRY, ParagonLiteItems.pixiePlate);
+        return map;
+    }
+
+    public static final Map<Integer, Type> plateToType = initializePlateToType();
+
+    private static Map<Integer, Type> initializePlateToType() {
+        Map<Integer, Type> map = new HashMap<>();
+        map.put(ParagonLiteItems.blankPlate, Type.NORMAL);
+        map.put(Items.fistPlate, Type.FIGHTING);
+        map.put(Items.skyPlate, Type.FLYING);
+        map.put(Items.toxicPlate, Type.POISON);
+        map.put(Items.earthPlate, Type.GROUND);
+        map.put(Items.stonePlate, Type.ROCK);
+        map.put(Items.insectPlate, Type.BUG);
+        map.put(Items.spookyPlate, Type.GHOST);
+        map.put(Items.ironPlate, Type.STEEL);
+        map.put(Items.flamePlate, Type.FIRE);
+        map.put(Items.splashPlate, Type.WATER);
+        map.put(Items.meadowPlate, Type.GRASS);
+        map.put(Items.zapPlate, Type.ELECTRIC);
+        map.put(Items.mindPlate, Type.PSYCHIC);
+        map.put(Items.iciclePlate, Type.ICE);
+        map.put(Items.dracoPlate, Type.DRAGON);
+        map.put(Items.dreadPlate, Type.DARK);
+        map.put(ParagonLiteItems.pixiePlate, Type.FAIRY);
+        return map;
     }
     
     public static final Map<Type, Integer> weaknessReducingBerries = initializeWeaknessReducingBerries();

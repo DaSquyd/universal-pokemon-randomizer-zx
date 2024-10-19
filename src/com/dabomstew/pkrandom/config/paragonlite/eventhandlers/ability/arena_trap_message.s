@@ -17,7 +17,7 @@
     bl      Battle::Handler_PushWork
     
     mov     r6, r0
-    ldr     r2, =1183 ; message id
+    ldr     r2, =BTLTXT_ArenaTrap_Activate
     add     r0, r6, #4
     mov     r1, #2
     bl      Battle::Handler_StrSetup

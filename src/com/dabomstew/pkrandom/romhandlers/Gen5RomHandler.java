@@ -1666,27 +1666,27 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     public boolean isWhite() {
-        if (romEntry.romType == Gen5Constants.Type_BW)
-            return romEntry.romCode.startsWith("IRA");
-        return false;
+        return isLowerVersion() && romEntry.romCode.startsWith("IRA");
     }
 
     public boolean isBlack() {
-        if (romEntry.romType == Gen5Constants.Type_BW)
-            return romEntry.romCode.startsWith("IRB");
-        return false;
+        return isLowerVersion() && romEntry.romCode.startsWith("IRB");
     }
 
     public boolean isWhite2() {
-        if (romEntry.romType == Gen5Constants.Type_BW2)
-            return romEntry.romCode.startsWith("IRD");
-        return false;
+        return isUpperVersion() && romEntry.romCode.startsWith("IRD");
     }
 
     public boolean isBlack2() {
-        if (romEntry.romType == Gen5Constants.Type_BW2)
-            return romEntry.romCode.startsWith("IRE");
-        return false;
+        return isUpperVersion() && romEntry.romCode.startsWith("IRE");
+    }
+
+    public boolean isLowerVersion() {
+        return romEntry.romType == Gen5Constants.Type_BW;
+    }
+    
+    public boolean isUpperVersion() {
+        return romEntry.romType == Gen5Constants.Type_BW2;
     }
 
     public int getGen5GameIndex() {
@@ -3549,7 +3549,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public boolean[] getTMsAvailableInMainGame() {
         boolean[] available = new boolean[101];
-        if (isBlack2() || isWhite2()) {
+        if (isUpperVersion()) {
             available[0] = true;
             available[2] = true;
             available[4] = true;
@@ -3624,11 +3624,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             available[92] = true;
             available[93] = true;
             available[94] = true;
-            available[95] = true;
-            available[96] = true;
-            available[97] = true;
-            available[98] = true;
-            available[99] = true;
         } else {
             available[1] = true;
             available[4] = true;
@@ -3697,12 +3692,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             available[90] = true;
             available[92] = true;
             available[93] = true;
-            available[95] = true;
-            available[96] = true;
-            available[97] = true;
-            available[98] = true;
-            available[99] = true;
         }
+        
+        // HMs
+        available[95] = true;
+        available[96] = true;
+        available[97] = true;
+        available[98] = true;
+        available[99] = true;
         return available;
     }
 
@@ -3991,7 +3988,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private void writeFairy() throws IOException {
-        if (isWhite() || isBlack())
+        if (isLowerVersion())
             throw new RuntimeException();
 
         // We need to use an expanded ovl167 (of known length 0x000418C0) because our modification results in a larger file
@@ -5239,7 +5236,27 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             frequencyBoostCount = 8; // bigger to account for larger item pool.
             items.addAll(Gen5Constants.generalPurposeItems);
         }
+        
+        // TODO: Make settings have ParagonLite vs Redux
+        Map<Type, List<Integer>> typeBoostingItems = Gen5Constants.typeBoostingItemsNoPlates;
 
+        boolean customTypeEffectiveness = (settings.getCurrentMiscTweaks() & MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue()) == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
+        boolean addFairy = (settings.getCurrentMiscTweaks() & MiscTweak.CUSTOM_ADD_FAIRY.getValue()) == MiscTweak.CUSTOM_ADD_FAIRY.getValue();
+        
+        Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.primaryType, tp.pokemon.secondaryType, 5, effectivenessUpdated, customTypeEffectiveness, addFairy);
+        assert byType != null;
+
+        int totalDoubleEffectiveness = 0;
+        int totalQuadrupleEffectiveness = 0;
+        for (Type type : byType.keySet()) {
+            // we only care about double effectiveness because quad is too dangerous to run Weakness Policy strategies
+            if (byType.get(type) == Effectiveness.DOUBLE)
+                ++totalDoubleEffectiveness;
+
+            if (byType.get(type) == Effectiveness.QUADRUPLE)
+                ++totalQuadrupleEffectiveness;
+        }
+        
         boolean hasStatusMoves = false;
         for (int moveIdx : pokeMoves) {
             Move move = moves.get(moveIdx);
@@ -5251,7 +5268,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 if (Gen5Constants.consumableTypeBoostingItems.containsKey(move.type))
                     items.add(Gen5Constants.consumableTypeBoostingItems.get(move.type));
                 if (!consumableOnly) {
-                    items.addAll(Gen5Constants.typeBoostingItems.getOrDefault(move.type, new ArrayList<>()));
+                    items.addAll(typeBoostingItems.getOrDefault(move.type, new ArrayList<>()));
                     items.add(Items.choiceBand);
                     items.add(Items.muscleBand);
                 }
@@ -5261,7 +5278,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 if (Gen5Constants.consumableTypeBoostingItems.containsKey(move.type))
                     items.add(Gen5Constants.consumableTypeBoostingItems.get(move.type));
                 if (!consumableOnly) {
-                    items.addAll(Gen5Constants.typeBoostingItems.getOrDefault(move.type, new ArrayList<>()));
+                    items.addAll(typeBoostingItems.getOrDefault(move.type, new ArrayList<>()));
                     items.add(Items.wiseGlasses);
                     items.add(Items.choiceSpecs);
                 }
@@ -5275,13 +5292,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             if (!consumableOnly && (move.effect == MoveEffect.HIT_2_TO_5_TIMES || move.effect == MoveEffect.TRIPLE_KICK))
                 items.add(ParagonLiteItems.loadedDice);
+            
+            if (!consumableOnly && totalQuadrupleEffectiveness > 0 && move.isGoodDamaging(generationOfPokemon())) {
+                int plateItem = Gen5Constants.typeToPlate.get(move.type);
+                for (int i = 0; i < frequencyBoostCount; i++) {
+                    items.add(plateItem);
+                }
+            }
         }
 
-        boolean customTypeEffectiveness = (settings.getCurrentMiscTweaks() & MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue()) == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
-        boolean addFairy = (settings.getCurrentMiscTweaks() & MiscTweak.CUSTOM_ADD_FAIRY.getValue()) == MiscTweak.CUSTOM_ADD_FAIRY.getValue();
-
-        Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.primaryType, tp.pokemon.secondaryType, 5, effectivenessUpdated, customTypeEffectiveness, addFairy);
-        assert byType != null;
         for (Map.Entry<Type, Effectiveness> entry : byType.entrySet()) {
             if (!Gen5Constants.weaknessReducingBerries.containsKey(entry.getKey()))
                 continue;
@@ -5325,16 +5344,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 items.add(Items.eviolite);
             }
         }
-
-        int totalDoubleEffectiveness = 0;
-        for (Type type : byType.keySet()) {
-            // we only care about double effectiveness because quad is too dangerous to run Weakness Policy strategies
-            if (byType.get(type) == Effectiveness.DOUBLE)
-                ++totalDoubleEffectiveness;
-        }
+        
+        if (totalDoubleEffectiveness >= 3)
+            items.add(ParagonLiteItems.weaknessPolicy);
         if (totalDoubleEffectiveness >= 4)
             items.add(ParagonLiteItems.weaknessPolicy);
         if (totalDoubleEffectiveness >= 5)
+            items.add(ParagonLiteItems.weaknessPolicy);
+        if (totalDoubleEffectiveness >= 6)
             items.add(ParagonLiteItems.weaknessPolicy);
 
         if (!consumableOnly && !hasStatusMoves) {
@@ -5453,8 +5470,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             throw new RuntimeException(e);
         }
 
-        int battleEventTextOffset1 = romEntry.getInt("BattleEventText1Offset");
-        int battleEventTextOffset2 = romEntry.getInt("BattleEventText2Offset");
+        int battleTextOffset1 = romEntry.getInt("BattleEventText1Offset");
+        int battleTextOffset2 = romEntry.getInt("BattleEventText2Offset");
+        int battleTextOffsetPokestar = romEntry.getInt("BattleEventTextPokestarOffset");
         int abilityNamesTextOffset = romEntry.getInt("AbilityNamesTextOffset");
         int abilityDescriptionsTextOffset = romEntry.getInt("AbilityDescriptionsTextOffset");
         int abilityExplanationsTextOffset = romEntry.getInt("AbilityExplanationsTextOffset");
@@ -5465,12 +5483,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int itemPluralNamesTextOffset = romEntry.getInt("ItemPluralNamesTextOffset");
         int itemDescriptionsTextOffset = romEntry.getInt("ItemDescriptionsTextOffset");
 
-        params.battleEventStrings1 = getStrings(false, battleEventTextOffset1);
-        params.battleEventStrings2 = getStrings(false, battleEventTextOffset2);
+        params.battleStrings1 = getStrings(false, battleTextOffset1);
+        params.battleStrings2 = getStrings(false, battleTextOffset2);
+        params.battleStringsPokestar = (isWhite2() || isBlack2()) ? getStrings(false, battleTextOffsetPokestar) : null;
 
         params.abilityNames = abilityNames;
         params.abilityDescriptions = getStrings(false, abilityDescriptionsTextOffset);
-        params.abilityExplanations = (isWhite() || isBlack()) ? null : getStrings(false, abilityExplanationsTextOffset);
+        params.abilityExplanations = (isWhite2() || isBlack2()) ? getStrings(false, abilityExplanationsTextOffset) : null;
 
         params.moveNames = getStrings(false, moveNamesTextOffset);
         params.moveDescriptions = getStrings(false, moveDescriptionsTextOffset);
@@ -5484,8 +5503,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         processParagonLiteHandler(paragonLite, debugMode);
         paragonLite.save();
 
-        setStrings(false, battleEventTextOffset1, params.battleEventStrings1);
-        setStrings(false, battleEventTextOffset2, params.battleEventStrings2);
+        setStrings(false, battleTextOffset1, params.battleStrings1);
+        setStrings(false, battleTextOffset2, params.battleStrings2);
+        if (isWhite2() || isBlack2())
+            setStrings(false, battleTextOffsetPokestar, params.battleStringsPokestar);
         setStrings(false, abilityNamesTextOffset, abilityNames);
         setStrings(false, abilityDescriptionsTextOffset, params.abilityDescriptions);
         if (isWhite2() || isBlack2())
@@ -5535,6 +5556,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setIsSelectedMoveValid();
         paragonLite.setWeatherDamage();
         paragonLite.setShinyRate();
+        paragonLite.setTrainerShiny();
         paragonLite.setGhostEscape();
         paragonLite.setCheckNoEffect();
         paragonLite.setCallModifyEffectivenessHandler();

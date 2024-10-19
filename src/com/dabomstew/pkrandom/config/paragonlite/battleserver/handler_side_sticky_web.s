@@ -24,7 +24,7 @@
     
     add     r0, r4, #HandlerParam_Message.exStr
     mov     r1, #2
-    ldr     r2, =1212
+    ldr     r2, =BTLTXT_StickyWeb_Laid
     bl      Battle::Handler_StrSetup
     
     add     r0, r4, #HandlerParam_Message.exStr

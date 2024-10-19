@@ -600,6 +600,11 @@ public class ParagonLiteAddressMap {
         return getAddressData(overlay, label).address;
     }
 
+    public int getRomAddress(ParagonLiteOverlay overlay, String label) {
+        int ramAddress = getAddressData(overlay, label).address;
+        return overlay.ramToRomAddress(ramAddress);
+    }
+
     public ParagonLiteOverlay findOverlay(int address, ParagonLiteOverlay contextOverlay) {
         List<ParagonLiteOverlay> overlays = new ArrayList<>();
         for (Map.Entry<ParagonLiteOverlay, Map<String, LabeledAddressInterface>> entry : labelMap.entrySet()) {

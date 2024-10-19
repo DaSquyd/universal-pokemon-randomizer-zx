@@ -18,9 +18,13 @@
     
     mov     r0, r5
     bl      ARM9::GetMoveBasePower
+    
+    ; ignore stronger moves
     cmp     r0, #60
-    bcs     Return ; >= 60
-    cmp     r0, #1 ; variable power moves don't get priority
+    bhi     Return
+    
+    ; ignore variable power moves
+    cmp     r0, #1
     beq     Return
     
     ; ignore guaranteed crit moves
@@ -28,6 +32,13 @@
     bl      ARM9::IsMoveAlwaysCrit
     cmp     r0, #0 ; not crit
     bne     Return
+    
+    ; ignore multi-strike moves
+    mov     r0, r5
+    mov     r1, #MVD_MaxHits
+    bl      ARM9::GetMoveMetadata
+    cmp     r0, #1
+    bhi     Return
     
     mov     r0, #24
     bl      Battle::EventVar_GetValue

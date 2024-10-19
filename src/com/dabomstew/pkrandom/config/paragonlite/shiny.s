@@ -9,7 +9,7 @@
     eor     r0, r1
     eor     r0, r2
     eor     r0, r3
-    ldr     r1, =256 ; 256/65536 = 1/256 odds
+    ldr     r1, =(65536 / SHINY_RATE)
     cmp     r0, r1
     bcs     IsNotShiny
     

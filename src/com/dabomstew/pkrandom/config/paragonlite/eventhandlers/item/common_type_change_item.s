@@ -1,14 +1,13 @@
-#define VAR_ITEM_ID 0x00
-
-    push    {r4-r7, lr}
-    sub     sp, #0x04
-    
+    push    {r4-r7, lr}    
     mov     r5, r1
     mov     r4, r2
-    mov     r6, r3
     
     bl      Battle::EventObject_GetSubId
-    str     r0, [sp, #VAR_ITEM_ID]
+    mov     r6, r0 ; itemId
+    
+    bl      BattleServer::IsPlateItem
+    cmp     r0, #0
+    beq     Return
     
     mov     r0, #VAR_PokeId
     bl      Battle::EventVar_GetValue
@@ -34,7 +33,7 @@
 
     ; Item
     add     r0, r7, #HandlerParam_Message.exStr
-    ldr     r1, [sp, #VAR_ITEM_ID]
+    mov     r1, r6
     bl      Battle::Handler_AddArg
 
     ; Pop Text
@@ -43,22 +42,24 @@
     bl      Battle::Handler_PopWork
     
     
-    ; Set weather
+    ; Set type
     mov     r0, r5
-    mov     r1, #HE_ChangeWeather
+    mov     r1, #HE_ChangeType
     mov     r2, r4
     bl      Battle::Handler_PushWork
     mov     r7, r0
     
-    strb    r6, [r7, #HandlerParam_ChangeWeather.weather]
+    mov     r0, r6
+    bl      ARM9::GetTypeForPlate
+    bl      Battle::TypePair_MakeMono
+    strh    r0, [r7, #HandlerParam_ChangeType.type]
     
-    mov     r0, #3 ; turn count
-    strb    r0, [r7, #HandlerParam_ChangeWeather.turns]
+    mov     r0, r4
+    strb    r0, [r7, #HandlerParam_ChangeType.pokeId]
     
     mov     r0, r5
     mov     r1, r7
     bl      Battle::Handler_PopWork
     
 Return:
-    add     sp, #0x04
     pop     {r4-r7, pc}

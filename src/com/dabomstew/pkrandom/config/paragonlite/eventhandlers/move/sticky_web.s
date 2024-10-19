@@ -21,7 +21,7 @@
     mov     r0, #SC_StickyWeb
     str     r0, [sp, #SP_ConditionType]
     str     r4, [sp, #SP_ConditionPtr]
-    ldr     r0, =TXT_StickyWeb_LaidOnTheGround
+    ldr     r0, =BTLTXT_StickyWeb_Laid
     str     r0, [sp, #SP_MessageId]
     
     ldr     r3, [sp, #SP_Work]
