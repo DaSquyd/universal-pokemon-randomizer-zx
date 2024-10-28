@@ -184,6 +184,10 @@ public class ParagonLiteAddressMap {
     }
 
     public void registerCodeAddress(ParagonLiteOverlay overlay, String label, int address, int encoding, boolean addReferences) {
+        // TODO: Remove this test
+        if (!labelMap.containsKey(overlay))
+            return;
+            
         // Already exists
         if (labelMap.get(overlay).containsKey(label))
             throw new RuntimeException(String.format("An entry for %s already exists in %s", label, overlay));

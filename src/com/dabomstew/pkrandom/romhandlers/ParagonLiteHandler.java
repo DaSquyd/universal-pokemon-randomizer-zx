@@ -185,9 +185,9 @@ public class ParagonLiteHandler {
         try {
             arm9 = new ParagonLiteArm9(romHandler, params.arm9Data, armParser, globalAddressMap);
 
-            byte[] fieldOvlData = romHandler.readOverlay(fieldOvlNumber);
-            int fieldOvlAddress = romHandler.getOverlayAddress(fieldOvlNumber);
-            fieldOvl = new ParagonLiteOverlay(romHandler, fieldOvlNumber, "Field", fieldOvlData, fieldOvlAddress, ParagonLiteOverlay.Insertion.Front, armParser, globalAddressMap);
+//            byte[] fieldOvlData = romHandler.readOverlay(fieldOvlNumber);
+//            int fieldOvlAddress = romHandler.getOverlayAddress(fieldOvlNumber);
+//            fieldOvl = new ParagonLiteOverlay(romHandler, fieldOvlNumber, "Field", fieldOvlData, fieldOvlAddress, ParagonLiteOverlay.Insertion.Front, armParser, globalAddressMap);
 
             byte[] battleOvlData = romHandler.readOverlay(battleOvlNumber);
             int battleOvlAddress = romHandler.getOverlayAddress(battleOvlNumber);
@@ -333,7 +333,7 @@ public class ParagonLiteHandler {
         System.out.print("Writing overlays");
         long startTime = System.currentTimeMillis();
         arm9.save(romHandler);
-        fieldOvl.save(romHandler);
+//        fieldOvl.save(romHandler);
         battleOvl.save(romHandler);
         battleLevelOvl.save(romHandler);
         battleServerOvl.save(romHandler);
@@ -575,11 +575,11 @@ public class ParagonLiteHandler {
 
         // Sticky Web
         addGlobalBattleTextValue(battleStrings2, "StickyWeb", "Laid");
-        addBattleStringStandard("A sticky web has been laid out on the ground\naround your team!");
-        addBattleStringStandard("A sticky web has been laid out on the ground\naround the foe's team!");
+        addBattleStringStandard("A sticky web has been laid out\non the ground around your team!");
+        addBattleStringStandard("A sticky web has been laid out\non the ground around the foe's team!");
         addGlobalBattleTextValue(battleStrings2, "StickyWeb", "Disappeared");
-        addBattleStringStandard("The sticky web disappeared from\naround your team!");
-        addBattleStringStandard("The sticky web disappeared from\naround the foe's team!");
+        addBattleStringStandard("The sticky web disappeared\nfrom around your team!");
+        addBattleStringStandard("The sticky web disappeared\nfrom around the foe's team!");
     }
 
     public void tempFixFairyStruggle() {
@@ -4993,7 +4993,7 @@ public class ParagonLiteHandler {
 
             TrainerPokemon poke1 = tr.pokemon.get(0);
             poke1.pokemon = romHandler.getPokemon().get(Species.crobat);
-            pokes[poke1.pokemon.number].ability1 = Abilities.intimidate;
+            pokes[poke1.pokemon.number].ability1 = Abilities.battleArmor;
             poke1.level = 20;
             poke1.abilitySlot = 1;
             poke1.moves = new int[]{Moves.tackle, 0, 0, 0};
@@ -5004,10 +5004,10 @@ public class ParagonLiteHandler {
                 tr.pokemon.add(poke1.copy());
             TrainerPokemon poke2 = tr.pokemon.get(1);
             poke2.pokemon = romHandler.getPokemon().get(Species.slowpoke);
-            pokes[poke2.pokemon.number].ability1 = Abilities.intimidate;
+            pokes[poke2.pokemon.number].ability1 = Abilities.battleArmor;
             poke2.level = 20;
             poke2.abilitySlot = 1;
-            poke2.moves = new int[]{Moves.tackle, 0, 0, 0};
+            poke2.moves = new int[]{Moves.stealthRock, 0, 0, 0};
             poke2.IVs = 0;
             poke2.heldItem = Items.sitrusBerry;
             
