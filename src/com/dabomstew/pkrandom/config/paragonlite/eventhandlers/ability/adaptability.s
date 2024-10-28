@@ -10,8 +10,6 @@
     cmp     r5, r0
     bne     End
     
-    mov     r0, #0x12 
-    
     mov     r0, #0x16 ; move type
     bl      Battle::EventVar_GetValue
     mov     r4, r0
@@ -26,7 +24,7 @@
     bne     End
     
     mov     r0, #53 ; damage
-    ldr     r1, =5325 ; 1.3x
+    ldr     r1, =(4096 * 1.3)
     bl      Battle::EventVar_MulValue
     
 End:

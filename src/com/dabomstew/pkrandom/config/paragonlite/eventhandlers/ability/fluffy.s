@@ -26,7 +26,7 @@ CheckFire:
 CheckContact:
     mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
-    mov     r1, #0 ; contact flag
+    mov     r1, #MF_Contact
     bl      ARM9::MoveHasFlag
     cmp     r0, #0
     beq     ApplyModifier
@@ -40,6 +40,7 @@ ApplyModifier:
     beq     Return
 
     mov     r0, #VAR_Ratio
+    mov     r1, r6
     bl      Battle::EventVar_MulValue
     
 Return:

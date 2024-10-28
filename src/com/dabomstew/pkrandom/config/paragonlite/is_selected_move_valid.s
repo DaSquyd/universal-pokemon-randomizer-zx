@@ -27,7 +27,7 @@
 ; NEW SECTION:
 AssaultVestCheck:
     bl      Battle::CanPokeUseHeldItem
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     CheckChoiceItem
     
     ; Assault Vest
@@ -38,7 +38,7 @@ AssaultVestCheck:
 #IF PARAGONLITE
     beq     NoStatusMove
     ; Protector
-    add     r1, #(321 - 114)
+    add     r1, #(321 - 114) ; Protector
     cmp     r0, r1
 #ENDIF
     bne     CheckChoiceItem
@@ -79,13 +79,13 @@ CheckChoiceItem:
     beq     CheckEncore
     
     mov     r0, r6
-    mov     r1, #27 ; Choice Item Lock
+    mov     r1, #MC_ChoiceLock
     bl      Battle::CheckCondition
     cmp     r0, #0
     beq     CheckEncore
     
     mov     r0, r6
-    mov     r1, #27 ; Choice Item Check
+    mov     r1, #MC_ChoiceLock
     bl      Battle::GetConditionData
     bl      Battle::ConditionPtr_GetMove
     str     r0, [sp, #0]
@@ -93,7 +93,7 @@ CheckChoiceItem:
     ldr     r1, [sp, #0]
     mov     r0, r6
     bl      Battle::HasMove
-    cmp     r0, #0 ; false
+    cmp     r0, #FALSE
     beq     CheckEncore
     
     ldr     r0, [sp, #0]

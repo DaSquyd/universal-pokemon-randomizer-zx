@@ -10,12 +10,14 @@
     bl      Battle::GetPokeStat
     mov     r6, r0
     
+#if PARAGONLITE
 CheckDamp:
     mov     r1, #6 ; Damp
     cmp     r6, r1
     bne     CheckSunSoaked
     mov     r0, #WEATHER_Rain
     b       Return
+#endif
     
 CheckSunSoaked:
     ldr     r1, =511 ; Sun-Soaked

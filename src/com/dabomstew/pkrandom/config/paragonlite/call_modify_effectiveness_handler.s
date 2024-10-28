@@ -1,7 +1,3 @@
-#DEFINE EFFECTIVENESS_ZERO 0
-#DEFINE EFFECTIVENESS_NEUTRAL 3
-#DEFINE EFFECTIVENESS_DOUBLE 4
-
 #DEFINE STACK_SIZE 0x18
 
 #DEFINE POKE (STACK_SIZE - 0x18)
@@ -82,15 +78,15 @@ CheckIgnoreImmune:
     add     r1, sp, #ARG_0
     ldrb    r1, [r1]
     mov     r0, r6
-    bl      Battle::GetEffectivenessForAttack
-    cmp     r0, #EFFECTIVENESS_ZERO
+    bl      Battle::GetMoveEffectiveness
+    cmp     r0, #EFF_Zero
     bne     Return
     
     cmp     r5, #0
     beq     Return ; not ignoring immunity
     
 ReturnNeutral:
-    mov     r0, #EFFECTIVENESS_NEUTRAL
+    mov     r0, #EFF_Neutral
     
     
 Return:

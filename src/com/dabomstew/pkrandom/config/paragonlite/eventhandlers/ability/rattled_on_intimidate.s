@@ -12,6 +12,12 @@
     cmp     r0, #0
     beq     Return
     
+    mov     r0, #VAR_Volume
+    bl      Battle::EventVar_GetValue
+    add     r0, #1
+    cmp     r0, #0
+    bne     Return ; must equal -1
+    
     mov     r0, r5
     mov     r1, #HE_ChangeStatStage
     mov     r2, r4

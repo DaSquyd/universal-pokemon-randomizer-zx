@@ -83,6 +83,7 @@ public class ParagonLiteItems {
     public static final int /*1884*/ punchingGlove = Items.dataCard20;
     public static final int /*1885*/ covertCloak = Items.dataCard21;
     public static final int /*1886*/ loadedDice = Items.dataCard22;
+    public static final int /*2401*/ fairyFeather = Items.dataCard23;
     
     public static Set<Integer> getAllowed() {
         return Set.of(
@@ -94,6 +95,7 @@ public class ParagonLiteItems {
                 blankPlate,
                 clearAmulet,
                 covertCloak,
-                loadedDice);
+                loadedDice,
+                fairyFeather);
     }
 }

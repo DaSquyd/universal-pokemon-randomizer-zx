@@ -58,7 +58,8 @@ public class ParagonLiteHandler {
     public enum Mode {
         ParagonLite, Redux
     }
-    public static Mode mode = Mode.ParagonLite;
+
+    public static Mode mode = Mode.Redux;
 
     Gen5RomHandler romHandler;
 
@@ -191,7 +192,7 @@ public class ParagonLiteHandler {
             byte[] battleOvlData = romHandler.readOverlay(battleOvlNumber);
             int battleOvlAddress = romHandler.getOverlayAddress(battleOvlNumber);
             battleOvl = new ParagonLiteOverlay(romHandler, battleOvlNumber, "Battle", battleOvlData, battleOvlAddress, ParagonLiteOverlay.Insertion.Front, armParser, globalAddressMap);
-            
+
             byte[] BattleLevelOvlData = romHandler.readOverlay(BattleLevelOvlNumber);
             int BattleLevelOvlAddress = romHandler.getOverlayAddress(BattleLevelOvlNumber);
             battleLevelOvl = new ParagonLiteOverlay(romHandler, BattleLevelOvlNumber, "BattleLevel", BattleLevelOvlData, BattleLevelOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
@@ -367,7 +368,7 @@ public class ParagonLiteHandler {
         setbattleEventStrings1();
         setbattleEventStrings2();
     }
-    
+
     private enum BattleTextVar {
         TrainerName('Ā'),
         Species('ā'),
@@ -378,13 +379,14 @@ public class ParagonLiteHandler {
         Item('ĉ'),
         RealNickname('Č'),
         TrainerClass('Ď');
-        
+
         final char value;
+
         BattleTextVar(char value) {
             this.value = value;
         }
     }
-    
+
     private String makeBattleString(String format, BattleTextVar... vars) {
         for (int i = 0; i < vars.length; i++) {
             BattleTextVar var = vars[i];
@@ -392,31 +394,32 @@ public class ParagonLiteHandler {
         }
         return format.replaceAll("\n", "\\\\xFFFE");
     }
-    
+
     private void setBattleStringWildFoe(int index, String format, BattleTextVar... vars) {
         String[] strings = makeBattleStringWildFoe(format, vars);
         for (int i = 0; i < strings.length; i++) {
-            battleStrings1.set(index + i, strings[i]);
+            battleStrings1.set(index + i, makeBattleString(strings[i], vars));
         }
     }
-    
+
     private void addBattleStringWildFoe(String format, BattleTextVar... vars) {
         String[] strings = makeBattleStringWildFoe(format, vars);
 
-        for (int i = 0; i < strings.length; i++)
-            battleStrings1.add(makeBattleString(strings[0], vars));
+        for (String string : strings)
+            battleStrings1.add(makeBattleString(string, vars));
     }
-    
+
     private void addBattleStringStandard(String format, BattleTextVar... vars) {
         String string = makeBattleString(format, vars);
         int maxIndex = Math.max(battleStrings2.size(), battleStringsPokestar.size());
         battleStrings2.addAll(Collections.nCopies(maxIndex - battleStrings2.size(), ""));
         battleStringsPokestar.addAll(Collections.nCopies(maxIndex - battleStringsPokestar.size(), ""));
-            
-        battleStrings2.add(makeBattleString(string, vars));
-        battleStringsPokestar.add(makeBattleString(string, vars));
+
+        string = makeBattleString(string, vars);
+        battleStrings2.add(string);
+        battleStringsPokestar.add(string);
     }
-    
+
     private String[] makeBattleStringWildFoe(String format, BattleTextVar... vars) {
         if (vars.length < 1 || vars[0] != BattleTextVar.Nickname)
             throw new RuntimeException();
@@ -425,37 +428,37 @@ public class ParagonLiteHandler {
         Pattern pattern = Pattern.compile("\\{0+}");
         Matcher matcher = pattern.matcher(format);
         format = matcher.replaceAll(nicknameVarStr);
-        
+
         String[] strings = new String[]{format, format, format};
-        String[] formats =  new String[]{"{0}", "%s wild {0}", "%s foe's {0}"};
+        String[] formats = new String[]{"{0}", "%s wild {0}", "%s foe's {0}"};
 
         for (int i = 0; i < strings.length; i++) {
             for (int startIndex = strings[i].indexOf(nicknameVarStr); startIndex > -1; startIndex = strings[i].indexOf(nicknameVarStr)) {
                 String theStr = isStartOfSentence(strings[i], startIndex) ? "The" : "the";
-    
+
                 strings[i] = strings[i].replaceFirst(nicknameVarStr, String.format(formats[i], theStr));
             }
         }
-        
+
         return strings;
     }
-    
+
     private boolean isStartOfSentence(String string, int offset) {
         // This isn't particularly robust, but it works for our purposes here
-        
+
         if (offset == 0)
             return true;
-        
+
         if (offset == 1)
             return string.charAt(0) == ' ';
-        
+
         return (string.charAt(offset - 1) == '\n' || string.charAt(offset - 1) == ' ') && string.charAt(offset - 2) == '.';
     }
-    
+
     private void addGlobalBattleTextValue(List<String> strings, String namespace, String message) {
         armParser.addGlobalValue(String.format("BTLTXT_%s_%s", namespace, message), strings.size());
     }
-    
+
     private void addCommonGlobalBattleTextValue(List<String> strings, String namespace, String message) {
         armParser.addGlobalValue(String.format("BTLTXT_Common_%s_%s", namespace, message), strings.size());
     }
@@ -552,7 +555,7 @@ public class ParagonLiteHandler {
         // Sticky Web
         addGlobalBattleTextValue(battleStrings1, "StickyWeb", "Enter");
         addBattleStringWildFoe("{0} was caught\nin a sticky web!", BattleTextVar.Nickname);
-        
+
         // Spiky Shield
         addGlobalBattleTextValue(battleStrings1, "SpikyShield", "Activate");
         addBattleStringWildFoe("{0} was hurt\nby Spiky Shield!", BattleTextVar.Nickname);
@@ -635,19 +638,35 @@ public class ParagonLiteHandler {
     public void setGetEffectiveWeather() {
         // Allows for Damp and Sun-Soaked to override the current weather for outgoing moves
 
-        String getEffectiveWeatherFilename;
-        switch (mode) {
-            case ParagonLite -> getEffectiveWeatherFilename = "battle/get_effective_weather.s";
-            case Redux -> getEffectiveWeatherFilename = "battle/get_effective_weather_redux.s";
-            default -> throw new IllegalStateException("Unexpected value: " + mode);
-        }
-        List<String> getEffectiveWeatherLines = readLines(getEffectiveWeatherFilename);
+        List<String> getEffectiveWeatherLines = readLines("battle/get_effective_weather.s");
         battleOvl.writeCode(getEffectiveWeatherLines, "GetEffectiveWeather");
 
         List<String> getHandlerEffectiveWeatherLines = readLines("battle/handler_get_effective_weather.s");
         battleOvl.writeCode(getHandlerEffectiveWeatherLines, "Handler_GetEffectiveWeather");
 
         System.out.println("Set GetEffectiveWeather");
+    }
+    
+    public void setWeatherPowerMod() {
+        if (mode != Mode.ParagonLite)
+            return;
+
+        List<String> stabLines = readLines("battle/server_event_weather_power_mod.s");
+        battleOvl.replaceCode(stabLines, "ServerEvent_WeatherPowerMod");
+
+        System.out.println("Set Weather Power Mod");
+    }
+    
+    public void setMonoTypeSTAB() {
+        if (mode != Mode.ParagonLite)
+            return;
+        
+        // Allows mono-type Pokémon to get 2.0x STAB
+        
+        List<String> stabLines = readLines("battle/server_event_stab.s");
+        battleOvl.replaceCode(stabLines, "ServerEvent_STAB");
+        
+        System.out.println("Set Mono-Type STAB");
     }
 
     public void setCalcDamageOffensiveValue() {
@@ -737,22 +756,22 @@ public class ParagonLiteHandler {
     public void setStatChangeIntimidateFlag() {
         // Updates the stat change functions to include a flag for a stat change being caused by intimidate
 
-        List<String> checkStatChangeSuccessLines = readLines("battle/server_event_check_stat_change_success.s");
+        List<String> checkStatChangeSuccessLines = readLines("battle/serverevent/check_stat_change_success.s");
         battleOvl.writeCodeForceInline(checkStatChangeSuccessLines, "ServerEvent_CheckStatChangeSuccess", false);
 
-        List<String> statStageChangeAppliedLines = readLines("battle/server_event_stat_stage_change_applied.s");
+        List<String> statStageChangeAppliedLines = readLines("battle/serverevent/stat_stage_change_applied.s");
         battleOvl.writeCodeForceInline(statStageChangeAppliedLines, "ServerEvent_StatStageChangeApplied", false);
 
-        List<String> statStageChangeFailedLines = readLines("battle/server_event_stat_stage_change_failed.s");
+        List<String> statStageChangeFailedLines = readLines("battle/serverevent/stat_stage_change_failed.s");
         battleOvl.writeCodeForceInline(statStageChangeFailedLines, "ServerEvent_StatStageChangeFailed", false);
 
-        List<String> statStageChangeCoreLines = readLines("battle/server_control_stat_stage_change_core.s");
+        List<String> statStageChangeCoreLines = readLines("battle/servercontrol/stat_stage_change_core.s");
         battleOvl.writeCodeForceInline(statStageChangeCoreLines, "ServerControl_StatStageChangeCore", false);
 
         List<String> handlerChangeStatStageLines = readLines("battle/handler_change_stat_stage.s");
         battleOvl.writeCodeForceInline(handlerChangeStatStageLines, "Handler_ChangeStatStage", false);
 
-        List<String> moveStatStageChangeEffectCommonLines = readLines("battle/server_control_move_stat_stage_change_effect_common.s");
+        List<String> moveStatStageChangeEffectCommonLines = readLines("battle/servercontrol/move_stat_stage_change_effect_common.s");
         battleOvl.writeCodeForceInline(moveStatStageChangeEffectCommonLines, "ServerControl_MoveStatStageChangeEffectCommon", false);
     }
 
@@ -860,7 +879,7 @@ public class ParagonLiteHandler {
 //        int isShinyAddress = globalAddressMap.getRomAddress(arm9, "IsShiny");
 //        arm9.writeHalfword(isShinyAddress, 0x2001);
 //        arm9.writeHalfword(isShinyAddress + 0x02, 0x4770);
-        
+
         int shinyRate;
         switch (mode) {
             case ParagonLite -> shinyRate = 32;
@@ -868,7 +887,7 @@ public class ParagonLiteHandler {
             default -> shinyRate = 4096;
         }
         armParser.addGlobalValue("SHINY_RATE", shinyRate);
-        
+
         // Increases shiny odds
         List<String> lines = readLines("shiny.s");
         arm9.writeCodeForceInline(lines, "IsShiny", true);
@@ -893,11 +912,11 @@ public class ParagonLiteHandler {
 
         System.out.println("Set Ghost Escape");
     }
-    
+
     public void setCheckNoEffect() {
         // Updates Dark to be immune to Prankster-boosted moves and Grass to be immune to Powder moves
         // Adds Spiky Shield check
-        List<String> lines = readLines("battle/server_control_check_no_effect.s");
+        List<String> lines = readLines("battle/servercontrol/check_no_effect.s");
         battleOvl.writeCodeForceInline(lines, "ServerControl_CheckNoEffect", false);
 
         System.out.println("Set Check No Effect");
@@ -1002,10 +1021,10 @@ public class ParagonLiteHandler {
         writeWord(data, statusId * 12 + 8, 1); // max level
     }
 
-    public void setBattlePokeCreate() {
+    public void setBattlePokeCreate() {        
         int pokeCreateRomAddress = globalAddressMap.getRomAddress(battleOvl, "Poke_Create");
         battleOvl.writeByte(pokeCreateRomAddress + 0x0A, 0x01FC >> 2);
-        
+
         setBattlePokeCreate_Replace("Poke_GetTurnFlag", 0x28);
         setBattlePokeCreate_Replace("Poke_SetTurnFlag", 0x20);
         setBattlePokeCreate_Replace("Poke_TurnCheck", 0x30);
@@ -1014,49 +1033,49 @@ public class ParagonLiteHandler {
         setBattlePokeCreate_Replace("Poke_ClearForSwitchOut", 0x88, 0x0A);
         setBattlePokeCreate_Replace("Poke_TransformSet", 0xFC, 0xA4);
     }
-    
+
     public void setMaxSpeedFix() {
         // There's a bug where the max effective speed stat is intended to be 10000, but it's only stored at a maximum of 8191, leaving room for overflows
         // We fix this by instead setting the limit to just be 8191 instead of 10000.
         int calculateSpeedRomAddress = globalAddressMap.getRomAddress(battleOvl, "ServerEvent_CalculateSpeed");
         battleOvl.writeWord(calculateSpeedRomAddress + 0xBC, 0x01FFF, false);
     }
-    
+
     public void setDynamicTurnOrder() {
         // This sets the default action order data to include the Quash flag
-        List<String> generateActionOrderLines = readLines("battle/server_flow_generate_action_order.s");
+        List<String> generateActionOrderLines = readLines("battle/serverflow/generate_action_order.s");
         battleOvl.writeCodeForceInline(generateActionOrderLines, "ServerFlow_GenerateActionOrder", true);
-        
+
         // Used by Quash; sets the Quash flag to 0 (default is 1)
-        List<String> sendToLastLines = readLines("battle/action_order_tool_send_to_last.s");
+        List<String> sendToLastLines = readLines("battle/serverflow/action_order_tool_send_to_last.s");
         battleOvl.writeCodeForceInline(sendToLastLines, "ActionOrderTool_SendToLast", true);
-        
+
         // Used by Round, Pledge Moves, After You, etc. to force the next move despite turn order by setting the interrupt flag to 1
-        List<String> interruptLines = readLines("battle/action_order_tool_interrupt.s");
+        List<String> interruptLines = readLines("battle/serverflow/action_order_tool_interrupt.s");
         battleOvl.writeCodeForceInline(interruptLines, "ActionOrderTool_Interrupt", true);
-        
+
         // Normally, the game only updates and sorts the next actions if the last action was a Rotate while the current action is not.
         // We can instead force it to update and sort after every action. This only updates the move priority and recalculates speed.
         // However, we still need to ensure that the special priority is only updated in the aforementioned case and that we're only doing
         // this new update and sort if it's the "Fight" action type. This prevents resorting during phases outside the main move-using phase.
-        List<String> actOrderProcMainLines = readLines("battle/server_flow_act_order_proc_main.s");
+        List<String> actOrderProcMainLines = readLines("battle/serverflow/act_order_proc_main.s");
         battleOvl.writeCodeForceInline(actOrderProcMainLines, "ServerFlow_ActOrderProcMain", true);
-        
+
         // We add a new boolean parameter representing whether we should also update the special priority (Quick Claw, Custap Berry, Stall) or not.
-        List<String> updateActionPriorityLines = readLines("battle/server_flow_update_action_priority.s");
+        List<String> updateActionPriorityLines = readLines("battle/serverflow/update_action_priority.s");
         battleOvl.writeCodeForceInline(updateActionPriorityLines, "ServerFlow_UpdateActionPriority", true);
     }
-    
+
     private void setBattlePokeCreate_Replace(String label, int wordOffset) {
         setBattlePokeCreate_Replace(label, wordOffset, -1);
     }
-    
+
     private void setBattlePokeCreate_Replace(String label, int wordOffset, int clearOffset) {
         int turnFlagOffset = 0x01F8;
-        
+
         int romAddress = globalAddressMap.getRomAddress(battleOvl, label);
         battleOvl.writeWord(romAddress + wordOffset, turnFlagOffset, false);
-        
+
         if (clearOffset > -1) {
             battleOvl.writeByte(romAddress + clearOffset, 4);
         }
@@ -1816,6 +1835,15 @@ public class ParagonLiteHandler {
         // #163 Turbo Blaze (Fire-type attacks are always effective)
 //        setTurboblaze();
 
+        int listAddress = getAbilityListAddress();
+        int listCount = getAbilityListCount();
+        for (int i = 0; i < listCount; ++i) {
+            if (battleOvl.readWord(listAddress + i * 8) == 0) {
+                int dataAddress = globalAddressMap.getRomAddress(battleOvl, "Inst_AbilityEffectListCountCmp");
+                battleOvl.writeByte(dataAddress, i);
+                break;
+            }
+        }
 
         Utils.printProgressFinished(startTime, totalChanges);
 
@@ -2282,7 +2310,10 @@ public class ParagonLiteHandler {
         }
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onApplySTAB, Abilities.adaptability));
+        if (mode == Mode.ParagonLite)
+            setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onApplySTAB, "specialized.s"));
+        else
+            setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onApplySTAB, Abilities.adaptability));
     }
 
     private void addInsectivore() {
@@ -3668,7 +3699,7 @@ public class ParagonLiteHandler {
         // #592 Steam Eruption
         moves.get(Moves.steamEruption).name = "Steam Eruption";
         // TODO: Anim
-        
+
         // #594 Water Shuriken
         moves.get(Moves.waterShuriken).name = "Water Shuriken";
         setMoveAnimations(Moves.waterShuriken, 763);
@@ -4113,6 +4144,16 @@ public class ParagonLiteHandler {
         // + #544 Gear Grind
         setMoveEventHandlers(Moves.gearGrind, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
 
+        int listAddress = getMoveListAddress();
+        int listCount = getMoveListCount();
+        for (int i = 0; i < listCount; ++i) {
+            if (battleOvl.readWord(listAddress + i * 8) == 0) {
+                int dataAddress = globalAddressMap.getRomAddress(battleOvl, "Data_MoveEffectListCount");
+                battleOvl.writeWord(dataAddress, i, false);
+                break;
+            }
+        }
+        
         System.out.println("Set moves");
     }
 
@@ -4486,20 +4527,20 @@ public class ParagonLiteHandler {
             setDampRock();
         }
 
-        if (mode == Mode.ParagonLite) {            
+        if (mode == Mode.ParagonLite) {
             // #298 Flame Plate - #313 Iron Plate
             for (int i = Items.flamePlate; i <= Items.ironPlate; ++i) {
                 setPlate(i);
             }
         }
-        
+
         // #321 Protector
         if (mode == Mode.ParagonLite)
             setProtector();
 
         // #581 Big Nugget
         setBigNugget();
-        
+
         /* NEW */
 
         // #113 Weakness Policy
@@ -4516,7 +4557,7 @@ public class ParagonLiteHandler {
 
         // #125 Fairy Gem
         addFairyGem();
-        
+
         // #217 Quick Claw
         addQuickClaw();
 
@@ -4531,6 +4572,19 @@ public class ParagonLiteHandler {
 
         // #525 Loaded Dice
         addLoadedDice();
+
+        // #527 Fairy Feather
+        addFairyFeather();
+
+        int listAddress = getItemListAddress();
+        int listCount = getItemListCount();
+        for (int i = 0; i < listCount; ++i) {
+            if (battleOvl.readWord(listAddress + i * 8) == 0) {
+                int dataAddress = globalAddressMap.getRomAddress(battleOvl, "Inst_ItemEffectListCountCmp");
+                battleOvl.writeByte(dataAddress, i);
+                break;
+            }
+        }
 
         System.out.println("Set items");
     }
@@ -4586,11 +4640,11 @@ public class ParagonLiteHandler {
                 new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "damp_rock.s"),
                 new ItemEventHandler(Gen5BattleEventType.onCheckActivation, "damp_rock.s"));
     }
-    
+
     void setPlate(int number) {
         Type type = Gen5Constants.plateToType.get(number);
         itemDescriptions.set(number, String.format("An item to be held by a Pokémon.\\xFFFEThis mysterious tablet changes\\xFFFEthe holder's type to %s.", type.camelCase()));
-        
+
         setItemEventHandlers(number,
                 new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "common_type_change_item.s"),
                 new ItemEventHandler(Gen5BattleEventType.onCheckActivation, "common_type_change_item.s"),
@@ -4710,14 +4764,14 @@ public class ParagonLiteHandler {
                 new ItemEventHandler(Gen5BattleEventType.onGetMovePower, "fairy_gem_damage_boost.s"),
                 new ItemEventHandler(Gen5BattleEventType.onDamageProcessingEnd, Items.fireGem));
     }
-    
+
     void addQuickClaw() {
         int number = Items.quickClaw;
-        
+
         switch (mode) {
             case ParagonLite -> {
                 // Description
-                itemDescriptions.set(number, "An item to be held by a Pokémon. A light, sharp claw that slightly boosts the user's speed.");
+                itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEA light, sharp claw that slightly\\xFFFEboosts the user's speed.");
 
                 // Data
                 setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onCalcSpeed, "quick_claw.s"));
@@ -4752,57 +4806,76 @@ public class ParagonLiteHandler {
     }
 
     void addClearAmulet() {
-        int index = ParagonLiteItems.clearAmulet;
+        int number = ParagonLiteItems.clearAmulet;
 
-        setItemName(index, "Clear Amulet", "Clear Amulets");
-        itemDescriptions.set(index, "An item to be held by a Pokémon.\\xFFFEThis amulet prevents other Pokémon\\xFFFEfrom lowering the holder's stats.");
+        setItemName(number, "Clear Amulet", "Clear Amulets");
+        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis amulet prevents other Pokémon\\xFFFEfrom lowering the holder's stats.");
 
-        setItemPocket(index, Item.Pocket.ITEMS);
-        setItemPrice(index, 100);
-        setItemBattleEffect(index, 147);
-        setItemFlingPower(index, 30);
-        setItemNaturalGiftType(index, null);
-        setItemType(index, Item.ItemType.HELD);
+        setItemPocket(number, Item.Pocket.ITEMS);
+        setItemPrice(number, 100);
+        setItemBattleEffect(number, 147);
+        setItemFlingPower(number, 30);
+        setItemNaturalGiftType(number, null);
+        setItemType(number, Item.ItemType.HELD);
 
-        setItemSprite(index, "clear_amulet");
+        setItemSprite(number, "clear_amulet");
 
-        setItemEventHandlers(index, new ItemEventHandler(0x5B, "clear_amulet_5B"), new ItemEventHandler(0x5C, "clear_amulet_5C"));
+        setItemEventHandlers(number, new ItemEventHandler(0x5B, "clear_amulet_5B"), new ItemEventHandler(0x5C, "clear_amulet_5C"));
     }
 
     void addCovertCloak() {
-        int index = ParagonLiteItems.covertCloak;
+        int number = ParagonLiteItems.covertCloak;
 
-        setItemName(index, "Covert Cloak", "Covert Cloaks");
-        itemDescriptions.set(index, "An item to be held by a Pokémon. This\\xFFFEcloak conceals the holder, protecting\\xFFFEit from the additional effects of moves.");
+        setItemName(number, "Covert Cloak", "Covert Cloaks");
+        itemDescriptions.set(number, "An item to be held by a Pokémon. This\\xFFFEcloak conceals the holder, protecting\\xFFFEit from the additional effects of moves.");
 
-        setItemPocket(index, Item.Pocket.ITEMS);
-        setItemPrice(index, 100);
-        setItemBattleEffect(index, 147);
-        setItemFlingPower(index, 30);
-        setItemNaturalGiftType(index, null);
-        setItemType(index, Item.ItemType.HELD);
+        setItemPocket(number, Item.Pocket.ITEMS);
+        setItemPrice(number, 100);
+        setItemBattleEffect(number, 147);
+        setItemFlingPower(number, 30);
+        setItemNaturalGiftType(number, null);
+        setItemType(number, Item.ItemType.HELD);
 
-        setItemSprite(index, "covert_cloak");
+        setItemSprite(number, "covert_cloak");
 
-        cloneItemEventHandlersFromAbility(index, Abilities.shieldDust);
+        cloneItemEventHandlersFromAbility(number, Abilities.shieldDust);
     }
 
     void addLoadedDice() {
-        int index = ParagonLiteItems.loadedDice;
+        int number = ParagonLiteItems.loadedDice;
 
-        setItemName(index, "Loaded Dice", "Loaded Dice");
-        itemDescriptions.set(index, "An item to be held by a Pokémon.\\xFFFEIt always rolls a good number, ensuring\\xFFFEthat multistrike moves hit more times.");
+        setItemName(number, "Loaded Dice", "Loaded Dice");
+        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEIt always rolls a good number, ensuring\\xFFFEthat multistrike moves hit more times.");
 
-        setItemPocket(index, Item.Pocket.ITEMS);
-        setItemPrice(index, 100);
-        setItemBattleEffect(index, 147);
-        setItemFlingPower(index, 30);
-        setItemNaturalGiftType(index, null);
-        setItemType(index, Item.ItemType.HELD);
+        setItemPocket(number, Item.Pocket.ITEMS);
+        setItemPrice(number, 100);
+        setItemBattleEffect(number, 147);
+        setItemFlingPower(number, 30);
+        setItemNaturalGiftType(number, null);
+        setItemType(number, Item.ItemType.HELD);
 
-        setItemSprite(index, "loaded_dice");
+        setItemSprite(number, "loaded_dice");
 
-        setItemEventHandlers(index, new ItemEventHandler(Gen5BattleEventType.onGetHitCount, "loaded_dice"));
+        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onGetHitCount, "loaded_dice"));
+    }
+
+    void addFairyFeather() {
+        int number = ParagonLiteItems.fairyFeather;
+
+        setItemName(number, "Fairy Feather", "Fairy Feathers");
+        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis feather, which gleams faintly when hit by\\xFFFElight, boosts the power of the holder's Fairy-type moves.");
+
+        setItemPocket(number, Item.Pocket.ITEMS);
+        setItemPrice(number, getItemPrice(Items.charcoal));
+        setItemBattleEffect(number, 147); // TODO
+        setItemValueVar(number, 20); // 1.2x
+        setItemFlingPower(number, 10);
+        setItemNaturalGiftType(number, null);
+        setItemType(number, Item.ItemType.HELD);
+
+        setItemSprite(number, "fairy_feather");
+
+        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onGetMovePower, "pixie_plate.s"));
     }
 
     private void setItemName(int itemNumber, String name, String pluralName) {
@@ -4822,10 +4895,16 @@ public class ParagonLiteHandler {
 
     // 0x00
     private void setItemPrice(int itemNumber, int price) {
-        if (price % 10 != 0) throw new RuntimeException("Price must be a multiple of 10");
+        if (price % 10 != 0)
+            throw new RuntimeException("Price must be a multiple of 10");
 
         byte[] data = itemDataNarc.files.get(itemNumber);
         writeHalf(data, 0x00, price / 10);
+    }
+
+    private int getItemPrice(int itemNumber) {
+        byte[] data = itemDataNarc.files.get(itemNumber);
+        return readHalf(data, 0x00) * 10;
     }
 
     // 0x02
@@ -4843,6 +4922,11 @@ public class ParagonLiteHandler {
     // 0x06
     private void setItemFlingPower(int itemNumber, int power) {
         setItemFlingData(itemNumber, power, 0);
+    }
+
+    private int getItemFlingPower(int itemNumber) {
+        byte[] data = itemDataNarc.files.get(itemNumber);
+        return data[0x06];
     }
 
     // 0x05, 0x06
@@ -4895,38 +4979,40 @@ public class ParagonLiteHandler {
 
 //        battleOvl.writeHalfword(0x021A9BB4, 0x2801);
 
-        disableRandomness();
+//        disableRandomness();
 
         List<Trainer> trainers = romHandler.getTrainers();
+//        romHandler.setTrainers(trainers, true, true);
 
         for (Trainer tr : trainers) {
             if (tr.pokemon.isEmpty())
                 continue;
 
-            tr.setPokemonHaveCustomMoves(true);
-            tr.setPokemonHaveItems(true);
+//            tr.setPokemonHaveCustomMoves(true);
+//            tr.setPokemonHaveItems(true);
 
             TrainerPokemon poke1 = tr.pokemon.get(0);
-//            poke1.pokemon = romHandler.getPokemon().get(Species.crobat);
-//            pokes[poke1.pokemon.number].ability1 = Abilities.earlyBird;
-//            poke1.level = 20;
-//            poke1.abilitySlot = 1;
-//            poke1.moves = new int[]{Moves.skyDrop, Moves.rockClimb, Moves.psychoShift, Moves.rockSmash};
-//            poke1.heldItem = Items.sitrusBerry;
-//            poke1.IVs = 0;
+            poke1.pokemon = romHandler.getPokemon().get(Species.crobat);
+            pokes[poke1.pokemon.number].ability1 = Abilities.intimidate;
+            poke1.level = 20;
+            poke1.abilitySlot = 1;
+            poke1.moves = new int[]{Moves.tackle, 0, 0, 0};
+            poke1.heldItem = Items.sitrusBerry;
+            poke1.IVs = 0;
 
             if (tr.pokemon.size() < 2)
-                tr.pokemon.add(tr.pokemon.get(0).copy());
+                tr.pokemon.add(poke1.copy());
+            TrainerPokemon poke2 = tr.pokemon.get(1);
+            poke2.pokemon = romHandler.getPokemon().get(Species.slowpoke);
+            pokes[poke2.pokemon.number].ability1 = Abilities.intimidate;
+            poke2.level = 20;
+            poke2.abilitySlot = 1;
+            poke2.moves = new int[]{Moves.tackle, 0, 0, 0};
+            poke2.IVs = 0;
+            poke2.heldItem = Items.sitrusBerry;
+            
 //            if (tr.pokemon.size() < 3)
-//                tr.pokemon.add(tr.pokemon.get(0).copy());
-//            TrainerPokemon poke2 = tr.pokemon.get(1);
-//            poke2.pokemon = romHandler.getPokemon().get(Species.slowpoke);
-//            pokes[poke2.pokemon.number].ability1 = ParagonLiteAbilities.colossal;
-//            poke2.level = 20;
-//            poke2.abilitySlot = 1;
-//            poke2.moves = new int[]{Moves.psyshock, Moves.liquidation, Moves.xScissor, Moves.aquaRing};
-//            poke2.IVs = 0;
-//            poke2.heldItem = Items.sitrusBerry;
+//                tr.pokemon.add(poke1.copy());
         }
 
         romHandler.setTrainers(trainers, true, true);
@@ -4935,7 +5021,7 @@ public class ParagonLiteHandler {
 //        for (Trainer tr : trainers) {
 //            tr.aiFlags = (1 << 14);
 //        }
-//        romHandler.setTrainers(trainers, false, false);
+        romHandler.setTrainers(trainers, false, false);
     }
 
     private void researchGetEffectVals(int listCount, int listAddress) {
@@ -5793,6 +5879,10 @@ public class ParagonLiteHandler {
     private static void writeHalf(byte[] data, int offset, int value) {
         data[offset] = (byte) (value & 0xFF);
         data[offset + 1] = (byte) ((value >> 8) & 0xFF);
+    }
+
+    private static int readHalf(byte[] data, int offset) {
+        return data[offset] | (data[offset + 1] << 8);
     }
 
     private static void writeWord(byte[] data, int offset, int value) {

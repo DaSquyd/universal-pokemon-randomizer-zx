@@ -1,4 +1,4 @@
     push    {r3, lr}
-    mov     r3, #17 ; Fairy-type
-    bl      Battle::CommonPlateTypeBoost
+    mov     r3, #TYPE_Fairy
+    bl      Battle::CommonTypeBoostItem
     pop     {r3, pc}

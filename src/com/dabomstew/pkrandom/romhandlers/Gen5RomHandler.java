@@ -1514,6 +1514,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public List<Trainer> getTrainers() {
         boolean setOriginalDoubleTrainers = originalDoubleTrainers.isEmpty();
 
+        int partyFlagsOffset = 0x00;
+        int trainerClassOffset = 0x01;
+        int battleTypeOffset = 0x02;
+        int pokeCountOffset = 0x03;
+        int itemsOffset = 0x04;
+        int aiFlagsOffset = 0x0C;
+        int isHealerFlagOffset = 0x10;
+
+        int channelsOffset = 0x14;
+
         List<Trainer> allTrainers = new ArrayList<>();
         try {
             NARCArchive trainers = this.readNARC(romEntry.getFile("TrainerData"));
@@ -1540,33 +1550,33 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
                 byte[] trpoke = trpokes.files.get(i);
                 Trainer tr = new Trainer();
-                tr.partyFlags = trainer[0x00] & 0xFF;
+                tr.partyFlags = trainer[partyFlagsOffset] & 0xFF;
                 tr.index = i;
-                tr.trainerclass = trainer[0x01] & 0xFF;
-                tr.battleType = Trainer.BattleType.values()[trainer[0x02]];
+                tr.trainerclass = trainer[trainerClassOffset] & 0xFF;
+                tr.battleType = Trainer.BattleType.values()[trainer[battleTypeOffset]];
 
                 // TODO
                 int pokeCount;
                 if (plMode) {
-                    int channels = readUnsignedWord(trainer, 0x14);
+                    int channels = readUnsignedWord(trainer, channelsOffset);
                     tr.partyChannels[0] = (byte) (channels & 0x07);
                     tr.partyChannels[1] = (byte) ((channels >> 3) & 0x07);
                     tr.partyChannels[2] = (byte) ((channels >> 6) & 0x07);
                     tr.partyChannels[3] = (byte) ((channels >> 9) & 0x03);
                     tr.partyChannels[4] = (byte) ((channels >> 11) & 0x03);
                     tr.partyChannels[5] = (byte) ((channels >> 13) & 0x01);
-                    pokeCount = trainer[0x03] & 0xFF;
+                    pokeCount = trainer[pokeCountOffset] & 0xFF;
                 } else {
-                    tr.partyChannels[0] = (byte) (trainer[0x03] & 0xFF); // default to storing all Pokémon in Channel A
+                    tr.partyChannels[0] = (byte) (trainer[pokeCountOffset] & 0xFF); // default to storing all Pokémon in Channel A
                     pokeCount = tr.partyChannels[0];
                 }
 
                 for (int j = 0; j < 4; ++j)
-                    tr.items[j] = readUnsignedWord(trainer, 0x04 + j * 2);
+                    tr.items[j] = readUnsignedWord(trainer, itemsOffset + j * 2);
 
-                tr.aiFlags = readLong(trainer, 0x0C);
+                tr.aiFlags = readLong(trainer, aiFlagsOffset);
 
-                tr.isHealer = trainer[0x10] != 0;
+                tr.isHealer = trainer[isHealerFlagOffset] != 0;
 
                 tr.rewardMoneyScale = trainer[0x11];
                 tr.rewardItem = trainer.length >= 20 ? readUnsignedWord(trainer, 0x12) : 0;
@@ -1834,128 +1844,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             this.writeNARC(romEntry.getFile("TrainerData"), trainers);
             this.writeNARC(romEntry.getFile("TrainerPokemon"), trpokes);
-
-//
-//            if (doubleBattleMode) {
-//
-//                NARCArchive trainerTextBoxes = readNARC(romEntry.getFile("TrainerTextBoxes"));
-//                byte[] data = trainerTextBoxes.files.get(0);
-//                for (int i = 0; i < data.length; i += 4) {
-//                    int trainerIndex = readUnsignedWord(data, i);
-//                    if (originalDoubleTrainers.contains(trainerIndex)) {
-//                        int textBoxIndex = readUnsignedWord(data, i + 2);
-//                        if (textBoxIndex == 3) {
-//                            writeWord(data, i + 2, 0);
-//                        } else if (textBoxIndex == 5) {
-//                            writeWord(data, i + 2, 2);
-//                        } else if (textBoxIndex == 6) {
-//                            writeWord(data, i + 2, 0x18);
-//                        }
-//                    }
-//                }
-//
-//                trainerTextBoxes.files.set(0, data);
-//                writeNARC(romEntry.getFile("TrainerTextBoxes"), trainerTextBoxes);
-//
-//
-//                try {
-//                    byte[] fieldOverlay = readOverlay(romEntry.getInt("FieldOvlNumber"));
-//                    String trainerOverworldTextBoxPrefix = romEntry.getString("TrainerOverworldTextBoxPrefix");
-//                    int offset = find(fieldOverlay, trainerOverworldTextBoxPrefix);
-//                    if (offset > 0) {
-//                        offset += trainerOverworldTextBoxPrefix.length() / 2; // because it was a prefix
-//                        // Overwrite text box values for trainer 1 in a doubles pair to use the same as a single trainer
-//                        fieldOverlay[offset - 2] = 0;
-//                        fieldOverlay[offset] = 2;
-//                        fieldOverlay[offset + 2] = 0x18;
-//                    } else {
-//                        throw new RandomizationException("Double Battle Mode not supported for this game");
-//                    }
-//
-//                    String doubleBattleLimitPrefix = romEntry.getString("DoubleBattleLimitPrefix");
-//                    offset = find(fieldOverlay, doubleBattleLimitPrefix);
-//                    if (offset > 0) {
-//                        offset += trainerOverworldTextBoxPrefix.length() / 2; // because it was a prefix
-//                        // No limit for doubles trainers, i.e. they will spot you even if you have a single Pokemon
-//                        writeWord(fieldOverlay, offset, 0x46C0);           // nop
-//                        writeWord(fieldOverlay, offset + 2, 0x46C0);  // nop
-//                    } else {
-//                        throw new RandomizationException("Double Battle Mode not supported for this game");
-//                    }
-//
-//                    String doubleBattleGetPointerPrefix = romEntry.getString("DoubleBattleGetPointerPrefix");
-//                    int beqToSingleTrainer = romEntry.getInt("BeqToSingleTrainerNumber");
-//                    offset = find(fieldOverlay, doubleBattleGetPointerPrefix);
-//                    if (offset > 0) {
-//                        offset += trainerOverworldTextBoxPrefix.length() / 2; // because it was a prefix
-//                        // Move some instructions up
-//                        writeWord(fieldOverlay, offset + 0x10, readUnsignedWord(fieldOverlay, offset + 0xE));
-//                        writeWord(fieldOverlay, offset + 0xE, readUnsignedWord(fieldOverlay, offset + 0xC));
-//                        writeWord(fieldOverlay, offset + 0xC, readUnsignedWord(fieldOverlay, offset + 0xA));
-//                        // Add a beq and cmp to go to the "single trainer" case if a certain pointer is 0
-//                        writeWord(fieldOverlay, offset + 0xA, beqToSingleTrainer);
-//                        writeWord(fieldOverlay, offset + 8, 0x2800);
-//                    } else {
-//                        throw new RandomizationException("Double Battle Mode not supported for this game");
-//                    }
-//
-//                    writeOverlay(romEntry.getInt("FieldOvlNumber"), fieldOverlay);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                String textBoxChoicePrefix = romEntry.getString("TextBoxChoicePrefix");
-//                int offset = find(arm9, textBoxChoicePrefix);
-//
-//                if (offset > 0) {
-//                    // Change a branch destination in order to only check the relevant trainer instead of checking
-//                    // every trainer in the game (will result in incorrect text boxes when being spotted by doubles
-//                    // pairs, but this is better than the game freezing for half a second and getting a blank text box)
-//                    offset += textBoxChoicePrefix.length() / 2;
-//                    arm9[offset - 4] = 2;
-//                } else {
-//                    throw new RandomizationException("Double Battle Mode not supported for this game");
-//                }
-//
-//            }
-//
-//            // Deal with PWT
-//            if (romEntry.romType == Gen5Constants.Type_BW2 && !romEntry.getFile("DriftveilPokemon").isEmpty()) {
-//                NARCArchive driftveil = this.readNARC(romEntry.getFile("DriftveilPokemon"));
-//                int currentFile = 1;
-//                for (int trno = 0; trno < 17; trno++) {
-//                    Trainer tr = allTrainers.next();
-//                    Iterator<TrainerPokemon> tpks = tr.pokemon.iterator();
-//                    int pokemonNum = 6;
-//                    if (trno < 2) {
-//                        pokemonNum = 3;
-//                    }
-//                    for (int poke = 0; poke < pokemonNum; poke++) {
-//                        byte[] pkmndata = driftveil.files.get(currentFile);
-//                        TrainerPokemon tp = tpks.next();
-//                        // pokemon and held item
-//                        writeWord(pkmndata, 0, tp.pokemon.number);
-//                        writeWord(pkmndata, 12, tp.heldItem);
-//                        // handle moves
-//                        if (tp.resetMoves) {
-//                            int[] pokeMoves = RomFunctions.getMovesAtLevel(tp.pokemon.number, movesets, tp.level);
-//                            for (int m = 0; m < 4; m++) {
-//                                writeWord(pkmndata, 2 + m * 2, pokeMoves[m]);
-//                            }
-//                        } else {
-//                            writeWord(pkmndata, 2, tp.moves[0]);
-//                            writeWord(pkmndata, 4, tp.moves[1]);
-//                            writeWord(pkmndata, 6, tp.moves[2]);
-//                            writeWord(pkmndata, 8, tp.moves[3]);
-//                        }
-//                        currentFile++;
-//                    }
-//                }
-//                this.writeNARC(romEntry.getFile("DriftveilPokemon"), driftveil);
-//            }
-//        } catch (IOException ex) {
-//            throw new RandomizerIOException(ex);
-//        }
 
             if (doubleBattleMode) {
 
@@ -5543,6 +5431,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setBoxPreview();
         paragonLite.fixChallengeModeLevelBug();
         paragonLite.setGetEffectiveWeather();
+        paragonLite.setWeatherPowerMod();
+        paragonLite.setMonoTypeSTAB();
         paragonLite.setCalcDamageOffensiveValue();
         paragonLite.setCalcDamageDefensiveValue();
         paragonLite.setCalcDamage();

@@ -277,7 +277,7 @@ Battle	SetMultiStrikeData	Code		thumb	0x021C7200	0x021C71E0	0x021AAD38	0x021AACF
 Battle	ServerEvent_GetMovePower	Code		thumb	0x021C72AC	0x021C728C	0x021AADE4	0x021AADA4
 Battle	ServerEvent_GetOffensiveValue	Code		thumb	0x021C7394	0x021C7374	0x021AAECC	0x021AAE8C
 Battle	ServerEvent_GetDefensiveValue	Code		thumb	0x021C7494	0x021C7474	0x021AAFCC	0x021AAF8C
-Battle	ServerEvent_SameTypeAttackBonus	Code		thumb	0x021C760C	0x021C75EC	0x021AB144	0x021AB104
+Battle	ServerEvent_STAB	Code		thumb	0x021C760C	0x021C75EC	0x021AB144	0x021AB104
 Battle	ServerEvent_CheckStatChangeSuccess	Code		thumb			0x021AB308	0x021AB2C8
 Battle	ServerEvent_StatStageChangeFailed	Code		thumb			0x021AB378	0x021AB338
 Battle	ServerEvent_StatStageChangeApplied	Code		thumb			0x021AB3B4	0x021AB374
@@ -336,6 +336,16 @@ Battle	IsPokeTrapped	Code		thumb	0x021CF9D4	0x021CF9B4	0x021B4BFC	0x021B4BBC
 Battle	DoesPokeHaveShadowTag	Code		thumb	0x021CFAE4	0x021CFAC4	0x021B4D0C	0x021B4CCC
 Battle	IsPokeGrounded	Code		thumb	0x021CFAFC	0x021CFADC	0x021B4D24	0x021B4CE4
 Battle	IsPokeSteelType	Code		thumb	0x021CFBAC	0x021CFB8C	0x021B4DD4	0x021B4D94
+Battle	SwitchAI_Main	Code		thumb			0x021B4E38	0x021B4DF8
+Battle	SwitchAI_DetermineOpponent	Code		thumb			0x021B4F98	0x021B4F58
+Battle	SwitchAI_PerishSong	Code		thumb			0x021B5010	0x021B4FD0
+Battle	SwitchAI_WonderGuard	Code		thumb			0x021B504C	0x021B500C
+Battle	SwitchAI_NoEffectiveMoves	Code		thumb			0x021B50DC	0x021B509C
+Battle	SwitchAI_ChoiceLock	Code		thumb			0x021B51EC	0x021B51AC
+Battle	SwitchAI_TypeAbsorbAbility	Code		thumb			0x021B5344	0x021B5304
+Battle	SwitchAI_AsleepWithNaturalCure	Code		thumb			0x021B549C	0x021B545C
+Battle	SwitchAI_EffectiveMove	Code		thumb			0x021B5554	0x021B5514
+Battle	SwitchAI_CheckForTypeAbsorbAbility	Code		thumb			0x021B5760	0x021B5720
 Battle	DoesPokeHaveSuperEffectiveMove	Code		thumb	0x021D0664	0x021D0644	0x021B58C0	0x021B5880
 Battle	Inst_Unknown2ListCountCmp1	Inst	2		0x021D1B9A	0x021D1B7A	0x021B6F66	0x021B6F26
 Battle	Inst_Unknown2ListCountCmp2	Inst	2		0x021D1B9E	0x021D1B7E	0x021B6F6A	0x021B6F2A
@@ -343,6 +353,7 @@ Battle	Data_Unknown2ListAddress	Data	4	*	0x021D1BEC	0x021D1BCC	0x021B6FB8	0x021B
 Battle	Poke_Create	Code		thumb	0x021D4DA4	0x021D4D84	0x021BA5C4	0x021BA584
 Battle	GetPokeId	Code		thumb	0x021D5460	0x021D5440	0x021BAC80	0x021BAC40
 Battle	HasMove	Code		thumb	0x021D5770	0x021D5750	0x021BAF90	0x021BAF50
+Battle	GetPokeType	Code		thumb	0x021D581C	0x021D57FC	0x021BB03C	0x021BAFFC
 Battle	PokeHasType	Code		thumb	0x021D5834	0x021D5814	0x021BB054	0x021BB014
 Battle	GetRawPokeStat	Code		thumb	0x021D58C8	0x021D58A8	0x021BB0E8	0x021BB0A8
 Battle	GetPokeStat	Code		thumb	0x021D59D4	0x021D59B4	0x021BB1F4	0x021BB1B4
@@ -417,8 +428,9 @@ Battle	EventVar_MulValue	Code		thumb	0x021D7724	0x021D7704	0x021BCF58	0x021BCF18
 Battle	EventVar_GetValue	Code		thumb	0x021D777C	0x021D775C	0x021BCFB0	0x021BCF70
 Battle	Random	Code		thumb	0x021D78CC	0x021D78AC	0x021BD100	0x021BD0C0
 Battle	RollCriticalHit	Code		thumb	0x021D7950	0x021D7930	0x021BD184	0x021BD144
-Battle	GetEffectivenessForAttack	Code		thumb	0x021D796C	0x021D794C	0x021BD1A0	0x021BD160
-Battle	GetEffectivenessMult	Code		thumb	0x021D7A08	0x021D79E8	0x021BD23C	0x021BD1FC
+Battle	GetMoveEffectiveness	Code		thumb	0x021D796C	0x021D794C	0x021BD1A0	0x021BD160
+Battle	GetMoveEffectivenessVsPoke	Code		thumb	0x021D79BC	0x021D799C	0x021BD1F0	0x021BD1B0
+Battle	MultiplyEffectiveness	Code		thumb	0x021D7A08	0x021D79E8	0x021BD23C	0x021BD1FC
 Battle	CalcBaseDamage	Code		thumb	0x021D7A64	0x021D7A44	0x021BD298	0x021BD258
 Battle	ServerEvent_GetEffectivenessMod	Code		thumb	0x021D7A8C	0x021D7A6C	0x021BD2C0	0x021BD280
 Battle	GetEffectivenessType	Code		thumb	0x021D7AF4	0x021D7AD4	0x021BD328	0x021BD2E8
@@ -468,7 +480,7 @@ Battle	Data_ItemEffectListAddress	Data	4	*	0x021DCF3C	0x021DCF1C	0x021C2784	0x02
 Battle	Data_ItemEffectListAddress4	Data	4	*	0x021DCF40	0x021DCF20	0x021C2788	0x021C2748
 Battle	PushRecall	Code		thumb	0x021DD064	0x021DD044	0x021C28AC	0x021C286C
 Battle	CommonBerrySuperEffectiveCheck	Code		thumb	0x021DDCF8	0x021DDCD8	0x021C3540	0x021C3500
-Battle	CommonPlateTypeBoost	Code		thumb	0x021DF95C	0x021DF93C	0x021C51A4	0x021C5164
+Battle	CommonTypeBoostItem	Code		thumb	0x021DF95C	0x021DF93C	0x021C51A4	0x021C5164
 Battle	CommonGemWork	Code		thumb	0x021E01F4	0x021E01D4	0x021C5A3C	0x021C59FC
 Battle	CommonGemDamageBoost	Code		thumb	0x021E02A4	0x021E0284	0x021C5AEC	0x021C5AAC
 Battle	MoveEvent_AddItem	Code		thumb	0x021E02FC	0x021E02DC	0x021C5B44	0x021C5B04
@@ -516,6 +528,7 @@ Battle	Data_Unknown1ListAddress4	Data	4	*	0x021EEF3C	0x021EEF1C	0x021D4FF8	0x021
 Battle	Imprison_HasSameMove	Code		thumb	0x021EFC3C	0x021EFC1C	0x021D5D88	0x021D5D48
 Battle	IsFieldEffectActive	Code		thumb	0x021EFD04	0x021EFCE4	0x021D5E50	0x021D5E10
 Battle	Data_ServerCommandFunctionList	Data	744	4*	0x021F00FC	0x021F00DC	0x021D71A0	0x021D7160
+Battle	Data_EffectivenessMultipliers	Data	5		0x021F0447	0x021F0427	0x021D74EB	0x021D74AB
 Battle	Data_TypeEffectivenessTable	Data	292		0x021F049C	0x021F047C	0x021D7540	0x021D7500
 Battle	Data_AbilityEffectList	Data	1264	4*	0x021F0E94	0x021F0E74	0x021D7F38	0x021D7EF8
 Battle	Data_ItemEffectList	Data	1376	4*	0x021F1EC4	0x021F1EA4	0x021D8F68	0x021D8F28

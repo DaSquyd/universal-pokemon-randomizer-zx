@@ -203,8 +203,7 @@ public class GlobalConstants {
             Moves.sandAttack, Moves.minimize, Moves.flash, Moves.sketch, Moves.pursuit, Moves.assist, Moves.darkVoid, Moves.allySwitch,
             Moves.returnTheMoveNotTheKeyword, Moves.frustration,
             
-            // TODO: Remove
-            Moves.waterPledge, Moves.firePledge, Moves.grassPledge
+            Moves.meditate // TODO
     ));
 
     public static final List<Integer> tmBannedMoves = Arrays.asList(

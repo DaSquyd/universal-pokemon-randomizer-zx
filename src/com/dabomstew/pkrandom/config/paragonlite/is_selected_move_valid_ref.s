@@ -32,13 +32,13 @@ CheckChoiceItem:
     beq     CheckEncore
     
     mov     r0, r6
-    mov     r1, #27 ; Choice Item Lock
+    mov     r1, #MC_ChoiceLock
     bl      Battle::CheckCondition
     cmp     r0, #0
     beq     CheckEncore
     
     mov     r0, r6
-    mov     r1, #27 ; Choice Item Check
+    mov     r1, #MC_ChoiceLock
     bl      Battle::GetConditionData
     bl      Battle::ConditionPtr_GetMove
     str     r0, [sp, #0]

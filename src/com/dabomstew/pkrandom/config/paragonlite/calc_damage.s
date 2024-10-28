@@ -198,7 +198,7 @@ STAB:
     
     ldr     r1, [sp, #SP_ATTACKING_MON]
     mov     r0, r5
-    bl      Battle::ServerEvent_SameTypeAttackBonus
+    bl      Battle::ServerEvent_STAB
     mov     r1, r0
     mov     r0, r7
     bl      Battle::FixedRound
