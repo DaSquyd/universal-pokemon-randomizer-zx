@@ -5,11 +5,11 @@
     mov     r0, #2
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
-    bne     End
+    bne     Return
     
     mov     r0, #53 ; stat
-    ldr     r1, =3686 ; 0.9x
+    ldr     r1, =(4096 * 0.75)
     bl      Battle::EventVar_MulValue
 
-End:
+Return:
     pop     {r4, pc}

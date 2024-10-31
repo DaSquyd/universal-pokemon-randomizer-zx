@@ -1694,7 +1694,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     public boolean isLowerVersion() {
         return romEntry.romType == Gen5Constants.Type_BW;
     }
-    
+
     public boolean isUpperVersion() {
         return romEntry.romType == Gen5Constants.Type_BW2;
     }
@@ -3435,7 +3435,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public boolean[] getTMsAvailableInMainGame() {
+    public boolean[] getTMsHMsAvailableInMainGame() {
         boolean[] available = new boolean[101];
         if (isUpperVersion()) {
             available[0] = true;
@@ -3581,7 +3581,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             available[92] = true;
             available[93] = true;
         }
-        
+
         // HMs
         available[95] = true;
         available[96] = true;
@@ -4558,12 +4558,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private int tmFromIndex(int index) {
-        if (index >= Gen5Constants.tmBlockOneOffset
-                && index < Gen5Constants.tmBlockOneOffset + Gen5Constants.tmBlockOneCount) {
-            return index - (Gen5Constants.tmBlockOneOffset - 1);
-        } else {
-            return (index + Gen5Constants.tmBlockOneCount) - (Gen5Constants.tmBlockTwoOffset - 1);
+        if (index >= Gen5Constants.tmBlockOneOffset && index < Gen5Constants.tmBlockOneOffset + Gen5Constants.tmBlockOneCount) {
+            return index - Gen5Constants.tmBlockOneOffset + 1;
         }
+        
+        if (index >= Gen5Constants.tmBlockTwoOffset && index < Gen5Constants.tmBlockTwoOffset + Gen5Constants.tmBlockTwoCount) {
+            return index - Gen5Constants.tmBlockTwoOffset + Gen5Constants.tmBlockOneCount + 1;
+        }
+        
+        return -1;
     }
 
     private int indexFromTM(int tm) {
@@ -4572,6 +4575,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } else {
             return tm + (Gen5Constants.tmBlockTwoOffset - 1 - Gen5Constants.tmBlockOneCount);
         }
+    }
+    
+    private int hmFromIndex(int index) {
+        if (index >= Gen5Constants.hmOffset && index < Gen5Constants.hmOffset + Gen5Constants.hmCount)
+            return index - Gen5Constants.hmOffset + 1;
+        
+        return -1;
     }
 
     @Override
@@ -5124,13 +5134,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             frequencyBoostCount = 8; // bigger to account for larger item pool.
             items.addAll(Gen5Constants.generalPurposeItems);
         }
-        
+
         // TODO: Make settings have ParagonLite vs Redux
         Map<Type, List<Integer>> typeBoostingItems = Gen5Constants.typeBoostingItemsNoPlates;
 
         boolean customTypeEffectiveness = (settings.getCurrentMiscTweaks() & MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue()) == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
         boolean addFairy = (settings.getCurrentMiscTweaks() & MiscTweak.CUSTOM_ADD_FAIRY.getValue()) == MiscTweak.CUSTOM_ADD_FAIRY.getValue();
-        
+
         Map<Type, Effectiveness> byType = Effectiveness.against(tp.pokemon.primaryType, tp.pokemon.secondaryType, 5, effectivenessUpdated, customTypeEffectiveness, addFairy);
         assert byType != null;
 
@@ -5144,7 +5154,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             if (byType.get(type) == Effectiveness.QUADRUPLE)
                 ++totalQuadrupleEffectiveness;
         }
-        
+
         boolean hasStatusMoves = false;
         for (int moveIdx : pokeMoves) {
             Move move = moves.get(moveIdx);
@@ -5180,7 +5190,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             if (!consumableOnly && (move.effect == MoveEffect.HIT_2_TO_5_TIMES || move.effect == MoveEffect.TRIPLE_KICK))
                 items.add(ParagonLiteItems.loadedDice);
-            
+
             if (!consumableOnly && totalQuadrupleEffectiveness > 0 && move.isGoodDamaging(generationOfPokemon())) {
                 int plateItem = Gen5Constants.typeToPlate.get(move.type);
                 for (int i = 0; i < frequencyBoostCount; i++) {
@@ -5232,7 +5242,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 items.add(Items.eviolite);
             }
         }
-        
+
         if (totalDoubleEffectiveness >= 3)
             items.add(ParagonLiteItems.weaknessPolicy);
         if (totalDoubleEffectiveness >= 4)
@@ -5266,7 +5276,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         weatherItems.put(Weather.Rain, Items.dampRock);
         weatherItems.put(Weather.Hail, Items.icyRock);
         weatherItems.put(Weather.Sand, Items.smoothRock);
-        for (Map.Entry<Weather, Integer> weatherItem : weatherItems.entrySet()) {            
+        for (Map.Entry<Weather, Integer> weatherItem : weatherItems.entrySet()) {
             int weatherRockFrequency = (int) Math.round(weatherFrequencies.getOrDefault(weatherItem.getKey(), 0.0) * frequencyBoostCount);
             for (int j = 0; j < weatherRockFrequency; ++j) {
                 items.add(weatherItem.getValue());
@@ -5292,6 +5302,220 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     public void replaceArm9(byte[] newArm9) {
         arm9 = newArm9;
+    }
+
+    @Override
+    public void setItemSort() {
+        int ovlNumber = romEntry.getInt("BagOvlNumber");
+        int ovlAddress = getOverlayAddress(ovlNumber);
+        String itemDataFilename = romEntry.getFile("ItemData");
+
+        List<Integer> tmMoves = getTMMoves();
+        List<Integer> hmMoves = getHMMoves();
+
+        byte[] overlay;
+        NARCArchive itemData;
+        try {
+            overlay = readOverlay(ovlNumber);
+            itemData = readNARC(itemDataFilename);
+
+            ItemSortComparator comparator = new ItemSortComparator(itemData, tmMoves, hmMoves);
+
+            setItemSortByName(ovlAddress, overlay, itemData, comparator);
+            
+            if (isUpperVersion())
+                setItemFreeSpaceSort(ovlAddress, overlay, itemData, comparator);
+            
+            setItemSortByType(itemData, comparator);
+
+            writeOverlay(ovlNumber, overlay);
+            writeNARC(itemDataFilename, itemData);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private class ItemSortComparator implements Comparator<Integer> {
+        NARCArchive itemData;
+        List<Integer> tmMoves;
+        List<Integer> hmMoves;
+        public boolean pushTMsHMs;
+
+        ItemSortComparator(NARCArchive itemData, List<Integer> tmMoves, List<Integer> hmMoves) {
+            this.itemData = itemData;
+            this.tmMoves = tmMoves;
+            this.hmMoves = hmMoves;
+            this.pushTMsHMs = false;
+        }
+
+        @Override
+        public int compare(Integer itemA, Integer itemB) {
+            if (itemA == 0 || itemB == 0)
+                return Integer.compare(itemA, itemB);
+            
+            byte[] dataA = itemData.files.get(itemA);
+            byte[] dataB = itemData.files.get(itemB);
+
+            int itemAfieldPocketId = (FileFunctions.read2ByteInt(dataA, 0x08) >> 7) & 0x0F;
+            int itemBFieldPocketId = (FileFunctions.read2ByteInt(dataB, 0x08) >> 7) & 0x0F;
+            
+            Item.FieldPocket itemAFieldPocket = Item.FieldPocket.values()[itemAfieldPocketId];
+            Item.FieldPocket itemBFieldPocket = Item.FieldPocket.values()[itemBFieldPocketId];
+            
+            // Push TMs and HMs to the back of the list
+            if (pushTMsHMs) {
+                if (itemAFieldPocket == Item.FieldPocket.TMS_AND_HMS && itemBFieldPocket != Item.FieldPocket.TMS_AND_HMS)
+                    return 1;
+
+                if (itemAFieldPocket != Item.FieldPocket.TMS_AND_HMS && itemBFieldPocket == Item.FieldPocket.TMS_AND_HMS)
+                    return -1;
+            }
+
+            String itemASortName = getItemSortName(itemA, itemAFieldPocket);
+            String itemBSortName = getItemSortName(itemB, itemBFieldPocket);
+
+            int order = String.CASE_INSENSITIVE_ORDER.compare(itemASortName, itemBSortName);
+            if (order != 0)
+                return order;
+
+            return Integer.compare(itemA, itemB);
+        }
+
+        String getItemSortName(int itemNumber, Item.FieldPocket pocket) {
+            if (Objects.requireNonNull(pocket) == Item.FieldPocket.TMS_AND_HMS) {
+                int moveNumber;
+                
+                int tmNumber = tmFromIndex(itemNumber);
+                int hmNumber = hmFromIndex(itemNumber);
+                if (tmNumber > 0)
+                    moveNumber = tmMoves.get(tmNumber - 1);
+                else if (hmNumber > 0)
+                    moveNumber = hmMoves.get(hmNumber - 1);
+                else
+                    throw new RuntimeException();
+                
+                Move move = moves.get(moveNumber);
+                return move.name;
+            }
+            return itemNames.get(itemNumber);
+        }
+    }
+
+    private void setItemSortByName(int ovlAddress, byte[] overlay, NARCArchive itemData, ItemSortComparator comparator) {
+        int listRefOffset = find(overlay, Gen5Constants.sortByNameRefPrefix);
+        if (listRefOffset == -1)
+            throw new RuntimeException();
+
+        listRefOffset += 0x14;
+
+        setItemSortHelper(ovlAddress, overlay, itemData, comparator, listRefOffset, true);
+    }
+
+    private void setItemFreeSpaceSort(int ovlAddress, byte[] overlay, NARCArchive itemData, ItemSortComparator comparator) {
+        int listRefOffset = find(overlay, Gen5Constants.sortAllRefPrefix);
+        if (listRefOffset == -1)
+            throw new RuntimeException();
+
+        listRefOffset += 0x0C;
+
+        setItemSortHelper(ovlAddress, overlay, itemData, comparator, listRefOffset, false);
+    }
+
+    private void setItemSortHelper(int ovlAddress, byte[] overlay, NARCArchive itemData, ItemSortComparator comparator, int listRefOffset, boolean pushTMsHMs) {
+        int listOffset = FileFunctions.readFullInt(overlay, listRefOffset) - ovlAddress;
+
+        int itemCount = itemData.files.size();
+        int elementSize = 2;
+
+        Integer[] items = new Integer[itemCount];
+        for (int i = 0; i < itemCount; ++i) {
+            items[i] = i;
+        }
+
+        comparator.pushTMsHMs = pushTMsHMs;
+        Arrays.sort(items, comparator);
+
+        for (int i = 0; i < items.length; ++i) {
+            int itemNumber = items[i];
+            FileFunctions.write2ByteInt(overlay, listOffset + (itemNumber * elementSize), i);
+        }
+    }
+
+    private void setItemSortByType(NARCArchive itemData, ItemSortComparator comparator) {
+        int numItems = itemData.files.size();
+
+        // Field Pocket > Item Type > Sort Index
+
+        Map<Item.ItemType, List<Integer>> map = Map.of(Item.ItemType.HELD, new ArrayList<>(), Item.ItemType.MISC, new ArrayList<>());
+
+        for (int i = 0; i < numItems; ++i) {
+            // Only sort items in the Items pocket
+            Item.FieldPocket fieldPocket = getItemFieldPocket(itemData, i);
+            if (fieldPocket != Item.FieldPocket.ITEMS)
+                continue;
+
+            // Only sort held and misc items
+            Item.ItemType itemType = getItemType(itemData, i);
+            if (itemType != Item.ItemType.HELD && itemType != Item.ItemType.MISC)
+                continue;
+
+            // Don't add any items that lack a sort index
+            if (getItemSortIndex(itemData, i) < 0)
+                continue;
+
+            List<Integer> list = map.get(itemType);
+            list.add(i);
+        }
+
+        for (Map.Entry<Item.ItemType, List<Integer>> entry : map.entrySet()) {
+            List<Integer> list = entry.getValue();
+
+            list.sort(comparator);
+
+            int sortIndex = 0;
+            for (int i : list) {
+                if (getItemSortIndex(itemData, i) < 0)
+                    continue;
+
+                setItemSortIndex(itemData, i, sortIndex++);
+            }
+        }
+    }
+
+    private Item.FieldPocket getItemFieldPocket(NARCArchive itemData, int itemNumber) {
+        byte[] data = itemData.files.get(itemNumber);
+
+        int pocketId = (FileFunctions.read2ByteInt(data, 0x08) >> 7) & 0x0F;
+        if (pocketId >= Item.FieldPocket.values().length)
+            throw new RuntimeException();
+            
+        return Item.FieldPocket.values()[pocketId];
+    }
+
+    private Item.ItemType getItemType(NARCArchive itemData, int itemNumber) {
+        byte[] data = itemData.files.get(itemNumber);
+
+        int itemTypeId = data[0x0D] & 0xFF;
+        if (itemTypeId >= Item.ItemType.values().length)
+            throw new RuntimeException();
+            
+        return Item.ItemType.values()[itemTypeId];
+    }
+
+    private int getItemSortIndex(NARCArchive itemData, int itemNumber) {
+        byte[] data = itemData.files.get(itemNumber);
+        int sortIndex = data[0x0F] & 0xFF;
+        if (sortIndex == 0xFF)
+            return -1;
+        return sortIndex;
+    }
+    
+    private void setItemSortIndex(NARCArchive itemData, int itemNumber, int sortIndex) {
+        if (sortIndex < -1 || sortIndex > 0xFF)
+            throw new RuntimeException();
+        
+        byte[] data = itemData.files.get(itemNumber);
+        data[0x0F] = (byte) sortIndex;
     }
 
     private void applyParagonLite(Settings settings) {

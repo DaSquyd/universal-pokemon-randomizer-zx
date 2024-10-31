@@ -101,10 +101,13 @@ public class Gen5Constants {
     public static final String tmDataPrefix = "87038803";
 
     public static final int tmCount = 95, hmCount = 6, tmBlockOneCount = 92, tmBlockOneOffset = Items.tm01,
-            tmBlockTwoOffset = Items.tm93, hmOffset = Items.hm01;
+            tmBlockTwoCount = 3, tmBlockTwoOffset = Items.tm93, hmOffset = Items.hm01;
 
     public static final String bw1ItemPalettesPrefix = "E903EA03020003000400050006000700",
             bw2ItemPalettesPrefix = "FD03FE03020003000400050006000700";
+    
+    public static final String sortByNameRefPrefix = "450C00004C050000";
+    public static final String sortAllRefPrefix = "0D020000E81D0000";
 
     public static final int bw2MoveTutorCount = 60, bw2MoveTutorBytesPerEntry = 12;
 

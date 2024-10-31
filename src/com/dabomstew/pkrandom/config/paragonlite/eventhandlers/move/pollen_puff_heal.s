@@ -3,7 +3,7 @@
     mov     r5, r2
     mov     r6, r3
     
-    mov     r0, #0x03
+    mov     r0, #VAR_AttackingPoke
     bl      Battle::EventVar_GetValue
     cmp     r5, r0
     bne     Return
@@ -12,7 +12,7 @@
     cmp     r0, #0 ; Mode: 0 = Damage, 1 = Heal
     beq     Return
     
-    mov     r0, #0x04
+    mov     r0, #VAR_DefendingPoke
     bl      Battle::EventVar_GetValue
     mov     r6, r0
     
@@ -21,31 +21,31 @@
     bl      Battle::GetPoke
     mov     r7, r0
     bl      Battle::IsPokeFullHP
-    cmp     r0, #0
+    cmp     r0, #FALSE
     bne     DisplayFullHPMessage
     
 Heal:
     mov     r0, r4
-    mov     r1, #0x05
+    mov     r1, #HE_RecoverHP
     mov     r2, r5
     bl      Battle::Handler_PushWork
     mov     r5, r0
     
-    strb    r6, [r5, #0x06]
+    strb    r6, [r5, #HandlerParam_RecoverHP.pokeId]
     
     mov     r0, r7
     mov     r1, #2 ; 1/2
     bl      Battle::DivideMaxHPZeroCheck
-    strh    r0, [r5, #0x04]
+    strh    r0, [r5, #HandlerParam_RecoverHP.amount]
     
     mov     r0, r5
-    add     r0, #8
-    mov     r1, #2 ; file 0x12
+    add     r0, #HandlerParam_RecoverHP.exStr
+    mov     r1, #2
     ldr     r2, =387 ; "[poke]'s HP was restored."
     bl      Battle::Handler_StrSetup
     
     mov     r0, r5
-    add     r0, #8
+    add     r0, #HandlerParam_RecoverHP.exStr
     mov     r1, r6
     bl      Battle::Handler_AddArg
     
@@ -54,17 +54,17 @@ Heal:
 
 DisplayFullHPMessage:
     mov     r0, r4
-    mov     r1, #0x04
+    mov     r1, #HE_Message
     mov     r2, r5
     bl      Battle::Handler_PushWork
     mov     r5, r0
     
-    add     r0, r5, #4
-    mov     r1, #2 ; file 0x12
+    add     r0, r5, #HandlerParam_Message.exStr
+    mov     r1, #2
     ldr     r2, =893 ; "[poke]'s HP is full!"
     bl      Battle::Handler_StrSetup
     
-    add     r0, r5, #4
+    add     r0, r5, #HandlerParam_Message.exStr
     mov     r1, r6
     bl      Battle::Handler_AddArg
 

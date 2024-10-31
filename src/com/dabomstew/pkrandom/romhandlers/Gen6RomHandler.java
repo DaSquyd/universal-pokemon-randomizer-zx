@@ -3143,7 +3143,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public boolean[] getTMsAvailableInMainGame() {
+    public boolean[] getTMsHMsAvailableInMainGame() {
         return new boolean[0];
     }
 

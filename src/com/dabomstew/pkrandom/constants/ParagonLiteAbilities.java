@@ -51,29 +51,87 @@ public class ParagonLiteAbilities {
     public static final int MAX = superconductor;
     
     public static Set<Integer> allowedAbilities = Set.of(
+//            Abilities.aromaVeil, // 165
+//            Abilities.flowerVeil, // 166
+//            Abilities.cheekPouch, // 167
             Abilities.protean, // 168
             Abilities.furCoat, // 169
+            Abilities.magician, // 170
             Abilities.bulletproof, // 171
             Abilities.competitive, // 172
             Abilities.strongJaw, // 173
             Abilities.refrigerate, // 174
-            Abilities.galeWings, // 175 
+//            Abilities.sweetVeil, // 175
+            
+            Abilities.galeWings, // 177
             Abilities.megaLauncher, // 178
+//            Abilities.grassPelt, // 179
+//            Abilities.symbiosis, // 180
             Abilities.toughClaws, // 181
             Abilities.pixilate, // 182
             Abilities.gooey, // 183
             Abilities.aerilate, // 184
+//            Abilities.parentalBond, // 185
+//            Abilities.darkAura, // 186
+//            Abilities.fairyAura, // 187
+//            Abilities.auraBreak, // 188
+            
             Abilities.stamina, // 192
+//            Abilities.wimpOut, // 193
+//            Abilities.emergencyExit, // 194
+//            Abilities.waterCompaction, // 195
+//            Abilities.merciless, // 196
+//            Abilities.shieldsDown, // 197
+//            Abilities.stakeout, // 198
+//            Abilities.waterBubble, // 199
             Abilities.steelworker, // 200
+//            Abilities.berserk, // 201
             Abilities.slushRush, // 202
+//            Abilities.longReach, // 203
+//            Abilities.liquidVoice, // 204
             Abilities.triage, // 205
             Abilities.galvanize, // 206
+//            Abilities.surgeSurfer, // 207
+            
+//            Abilities.corrosion, // 212
+//            Abilities.comatose, // 213
+//            Abilities.queenlyMajesty, // 214
+//            Abilities.innardsOut, // 215
+//            Abilities.dancer, // 216
+//            Abilities.battery, // 217
             Abilities.fluffy, // 218
+//            Abilities.dazzling, // 219
+//            Abilities.soulHeart, // 220
+//            Abilities.tanglingHair, // 221
+//            Abilities.receiver, // 222
+//            Abilities.powerOfAlchemy, // 223
+//            Abilities.beastBoost, // 224
+            
+//            Abilities.electricSurge, // 226
+//            Abilities.psychicSurge, // 227
+//            Abilities.mistySurge, // 228
+//            Abilities.grassySurge, // 229
+//            Abilities.fullMetalBody, // 230
+//            Abilities.shadowShield, // 231
+//            Abilities.prismArmor, // 232
+//            Abilities.neuroforce, // 233
+//            Abilities.intrepidSword, // 234
+//            Abilities.dauntlessShield, // 235
+//            Abilities.libero, // 236
+            
 //            Abilities.cottonDown, // 238
+//            Abilities.quickDraw, // 259
+            Abilities.transistor, // 262
+            Abilities.dragonsMaw, // 263
+//            Abilities.thermalExchange, // 270
             Abilities.windRider, // 274
+            Abilities.rockyPayload, // 276
 //            Abilities.windPower, // 277
+//            Abilities.goodAsGold, // 283
+//            Abilities.cudChew, // 291
             Abilities.sharpness, // 292
             Abilities.supremeOverlord, // 293
+//            Abilities.toxicDebris, // 295
             
             heavyWing, // 500
             specialized, // 501

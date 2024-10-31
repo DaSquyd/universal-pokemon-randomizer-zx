@@ -28,7 +28,7 @@
     mov     r2, #1
     bl      Battle::IsStatChangeValid
     cmp     r0, #0
-    bne     PushRecall
+    bne     PushRun
     
     mov     r0, r7
     mov     r1, #3 ; sp. atk
@@ -37,11 +37,11 @@
     cmp     r0, #0
     beq     End
     
-PushRecall:
+PushRun:
     mov     r0, r6
     mov     r1, r5
     mov     r2, r4
-    bl      Battle::PushRecall
+    bl      Battle::ItemEvent_PushRun
     
 End:
     pop     {r4-r7, pc}

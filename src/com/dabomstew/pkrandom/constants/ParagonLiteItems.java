@@ -26,7 +26,7 @@ package com.dabomstew.pkrandom.constants;
 import java.util.Set;
 
 public class ParagonLiteItems {
-    // 55 new
+    // 57 new
     public static final int /*0639*/ weaknessPolicy = 113;
     public static final int /*0640*/ assaultVest = 114;
     public static final int /*0644*/ pixiePlate = 115;

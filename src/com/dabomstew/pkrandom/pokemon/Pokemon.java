@@ -229,9 +229,9 @@ public class Pokemon implements Comparable<Pokemon> {
     public int bstForPowerLevels() {
         // Take into account Shedinja's purposefully nerfed HP
         if (number == Species.shedinja) {
-            return (attack + defense + spatk + spdef + speed) * 6 / 5;
+            return (attack + spatk + speed) * 6 / 3;
         } else {
-            return hp + attack + defense + spatk + spdef + speed;
+            return bst();
         }
     }
 
@@ -240,6 +240,30 @@ public class Pokemon implements Comparable<Pokemon> {
     }
     public double getDefenseSpecialDefenseRatio() {
         return Math.sqrt((double)defense / ((double)defense + (double)spdef));
+    }
+    
+    public double getPhysicalBulk() {
+        return getBulkInternal(defense);
+    }
+    
+    public double getSpecialBulk() {
+        return getBulkInternal(spdef);
+    }
+    
+    private double getBulkInternal(double defensiveStat) {
+        double hpAvgIVBonus = (60.0 + 75.0) / 2.0;
+        double spdAvgIVBonus = (5.0 + 20.0) / 2.0;
+
+        double sqrStatBulk = (hp + hpAvgIVBonus) * (defensiveStat + spdAvgIVBonus);
+
+        double a = 1.0;
+        double b = hpAvgIVBonus + spdAvgIVBonus;
+        double c = (hpAvgIVBonus * spdAvgIVBonus) - sqrStatBulk;
+        return quadraticFormula(a, b, c);
+    }
+    
+    private double quadraticFormula(double a, double b, double c) {
+        return (-b + Math.sqrt(b*b - 4.0 * a * c)) / (2.0 * a);
     }
 
     public int getBaseNumber() {

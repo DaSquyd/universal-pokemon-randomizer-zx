@@ -16,8 +16,8 @@
 CheckTailwind:
     mov     r0, #0x12
     bl      Battle::EventVar_GetValue
-    mov     r1, #183
-    lsl     r1, #1 ; 366 Tailwind
+    mov     r1, #(366 >> 1) ; Tailwind
+    lsl     r1, #1
     cmp     r0, r1
     bne     End
     

@@ -1767,7 +1767,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public boolean[] getTMsAvailableInMainGame() {
+    public boolean[] getTMsHMsAvailableInMainGame() {
         return new boolean[0];
     }
 

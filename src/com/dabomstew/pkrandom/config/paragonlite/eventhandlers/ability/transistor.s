@@ -8,7 +8,7 @@
     
     mov     r0, #VAR_MoveType
     bl      Battle::EventVar_GetValue
-    cmp     r0, #TYPE_Steel
+    cmp     r0, #TYPE_Electric
     bne     Return
     
     mov     r0, #VAR_Ratio

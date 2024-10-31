@@ -111,7 +111,7 @@ public class Gen5BattleEventType {
     public static final int onSwitchIn = 0x55;
     public static final int onSwitchInPrevious = 0x56;
     public static final int onPostLastSwitchIn = 0x57;
-    public static final int onCheckActivation = 0x58;
+    public static final int onRotateIn = 0x58;
     public static final int onGetStatStageChangeValue = 0x59;
     public static final int onStatStageChange = 0x5A;
     public static final int onStatStageChangeLastCheck = 0x5B;

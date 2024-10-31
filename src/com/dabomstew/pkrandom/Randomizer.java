@@ -676,6 +676,8 @@ public class Randomizer {
         if ((settings.getCurrentMiscTweaks() & MiscTweak.PARAGON_LITE.getValue()) == 0)
             romHandler.randomizeIntroPokemon();
 
+        romHandler.setItemSort();
+
         // Record check value?
         romHandler.writeCheckValueToROM(checkValue);
 

@@ -78,7 +78,7 @@ CheckIgnoreImmune:
     add     r1, sp, #ARG_0
     ldrb    r1, [r1]
     mov     r0, r6
-    bl      Battle::GetMoveEffectiveness
+    bl      Battle::GetEffectiveness
     cmp     r0, #EFF_Zero
     bne     Return
     

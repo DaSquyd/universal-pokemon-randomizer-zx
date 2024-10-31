@@ -8,7 +8,8 @@
     bne     End
     
     mov     r0, #53 ; stat
-    ldr     r1, =4915 ; 1.2x
+    mov     r1, (0x1800 >> 10)
+    lsl     r1, #10
     bl      Battle::EventVar_MulValue
 
 End:

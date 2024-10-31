@@ -2737,7 +2737,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
     }
 
     @Override
-    public boolean[] getTMsAvailableInMainGame() {
+    public boolean[] getTMsHMsAvailableInMainGame() {
         return new boolean[0];
     }
 

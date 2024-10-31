@@ -3938,7 +3938,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public boolean[] getTMsAvailableInMainGame() {
+    public boolean[] getTMsHMsAvailableInMainGame() {
         return new boolean[0];
     }
 

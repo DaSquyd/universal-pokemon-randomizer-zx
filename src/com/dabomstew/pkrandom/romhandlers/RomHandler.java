@@ -31,7 +31,6 @@ import java.util.*;
 
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.Settings;
-import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.pokemon.*;
 
 public interface RomHandler {
@@ -423,7 +422,7 @@ public interface RomHandler {
 
     void fullHMCompatibility();
 
-    boolean[] getTMsAvailableInMainGame();
+    boolean[] getTMsHMsAvailableInMainGame();
 
     // ===========
     // Move Tutors
@@ -655,6 +654,8 @@ public interface RomHandler {
     int generationOfPokemon();
 
     void writeCheckValueToROM(int value);
+    
+    void setItemSort();
 
     // ===========
     // code tweaks
