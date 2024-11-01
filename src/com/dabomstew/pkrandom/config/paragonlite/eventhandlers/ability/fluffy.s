@@ -1,4 +1,4 @@
-    push    {r4-r6, lr}
+    push    {r4-r7, lr}
     mov     r5, r1
     mov     r4, r2
     
@@ -9,6 +9,7 @@
     
     mov     r6, #4
     lsl     r6, #10
+    mov     r7, r6
     
 CheckFire:
     mov     r0, #VAR_MoveType
@@ -16,12 +17,7 @@ CheckFire:
     cmp     r0, #TYPE_Fire
     bne     CheckContact
     
-#if PARAGONLITE
-    lsr     r0, r6, #1
-    add     r6, r0 ; x1.5
-#else
     lsl     r6, #1 ; x2.0
-#endif
     
 CheckContact:
     mov     r0, #VAR_MoveId
@@ -34,9 +30,7 @@ CheckContact:
     lsr     r6, #1 ; x0.5
     
 ApplyModifier:
-    mov     r0, #4
-    lsl     r0, #10 ; 4096
-    cmp     r0, r6
+    cmp     r6, r7
     beq     Return
 
     mov     r0, #VAR_Ratio
@@ -44,4 +38,4 @@ ApplyModifier:
     bl      Battle::EventVar_MulValue
     
 Return:
-    pop     {r4-r6, pc}
+    pop     {r4-r7, pc}
