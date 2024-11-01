@@ -638,6 +638,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             move.isCustomWindMove = (flags & 0x80000) != 0;
             move.isCustomBallBombMove = (flags & 0x100000) != 0;
             move.isCustomPulseMove = (flags & 0x200000) != 0;
+            move.isCustomDanceMove = (flags & 0x400000) != 0;
         }
     }
 
