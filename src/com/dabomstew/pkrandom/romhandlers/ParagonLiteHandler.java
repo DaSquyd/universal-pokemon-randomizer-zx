@@ -3633,6 +3633,24 @@ public class ParagonLiteHandler {
         }) {
             moves.get(moveIndex).isCustomPulseMove = true;
         }
+        
+        // Dance Moves
+        for (int moveIndex : new int[]{
+                Moves.swordsDance, // 014
+                Moves.petalDance, // 080
+                Moves.featherDance, // 297
+                Moves.teeterDance, // 298
+                Moves.dragonDance, // 349
+                Moves.lunarDance, // 461
+                Moves.quiverDance, // 483
+                Moves.fieryDance, // 552
+                Moves.revelationDance, // 686
+                Moves.clangorousSoul, // 775
+                Moves.victoryDance, // 837
+                Moves.aquaStep, // 872
+        }) {
+            moves.get(moveIndex).isCustomDanceMove = true;
+        }
 
 
         int[] newMoves;
