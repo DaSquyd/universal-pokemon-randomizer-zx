@@ -44,9 +44,10 @@ public class ParagonLiteAbilities {
     public static final int sunSoaked = 511;
     public static final int colossal = 512;
     public static final int finalThread = 513;
-    public static final int homeGrown = 514;
+    public static final int homegrown = 514;
     public static final int ravenousTorque = 515;
     public static final int superconductor = 516;
+    public static final int somaticReflex = 517;
 
     public static final int MAX = superconductor;
     
@@ -150,5 +151,6 @@ public class ParagonLiteAbilities {
 //            homeGrown, // 514
 //            ravenousTorque, // 515
 //            superconductor, // 516
+//            somaticReflex
     );
 }
