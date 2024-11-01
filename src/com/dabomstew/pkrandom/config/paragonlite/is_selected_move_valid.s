@@ -75,13 +75,13 @@ NoStatusMove_ReturnTrue:
 ; Is the user holding Choice Band/Specs/Scarf and is already locked into a move?
 CheckChoiceItem:
     bl      Battle::CanPokeUseHeldItem
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     CheckEncore
     
     mov     r0, r6
     mov     r1, #MC_ChoiceLock
     bl      Battle::CheckCondition
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     CheckEncore
     
     mov     r0, r6
@@ -121,7 +121,7 @@ CheckChoiceItem:
     
 ChoiceItemReturnTrue:
     add     sp, #20
-    mov     r0, #1
+    mov     r0, #TRUE
     pop     {r4-r7, pc}
     
 
