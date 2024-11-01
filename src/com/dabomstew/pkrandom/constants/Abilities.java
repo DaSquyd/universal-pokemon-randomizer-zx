@@ -291,7 +291,7 @@ public class Abilities {
     public static final int grimNeigh = 265;
     public static final int asOneChillingNeigh = 266;
     public static final int asOneGrimNeigh = 267;
-    public static final int lingeringAura = 268;
+    public static final int lingeringAroma = 268;
     public static final int seedSower = 269;
     public static final int thermalExchange = 270;
     public static final int angerShell = 271;
