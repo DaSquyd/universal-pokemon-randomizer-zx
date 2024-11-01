@@ -163,6 +163,7 @@ public class Move {
     public boolean isCustomWindMove = false; // 30 (0x80000)
     public boolean isCustomBallBombMove = false; // 30 (0x100000)
     public boolean isCustomPulseMove = false; // 30 (0x200000)
+    public boolean isCustomDanceMove = false; // 30 (0x400000)
 
     public Move() {
         // Initialize all statStageChanges to something sensible so that we don't need to have
@@ -322,6 +323,11 @@ public class Move {
         return isRecoilMove() ? -recoil : 0;
     }
 
+    public boolean isBoostedBySheerForce() {
+        // TODO: Add in explicit moves
+        return qualities == MoveQualities.DAMAGE_TARGET_STATUS || qualities == MoveQualities.DAMAGE_TARGET_STAT_CHANGE || flinchPercentChance > 0;
+    }
+    
     public boolean isAbsorbMove() {
         return qualities == MoveQualities.DRAIN_HEALTH && recoil > 0;
     }
