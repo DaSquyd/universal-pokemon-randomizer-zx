@@ -241,20 +241,28 @@ public class Pokemon implements Comparable<Pokemon> {
     public double getDefenseSpecialDefenseRatio() {
         return Math.sqrt((double)defense / ((double)defense + (double)spdef));
     }
-    
+
     public double getPhysicalBulk() {
-        return getBulkInternal(defense);
+        return getPhysicalBulk(1.0);
     }
     
+    public double getPhysicalBulk(double multiplier) {
+        return getBulk(defense, multiplier);
+    }
+
     public double getSpecialBulk() {
-        return getBulkInternal(spdef);
+        return getSpecialBulk(1.0);
     }
     
-    private double getBulkInternal(double defensiveStat) {
+    public double getSpecialBulk(double multiplier) {
+        return getBulk(spdef, multiplier);
+    }
+    
+    public double getBulk(double defensiveStat, double multiplier) {
         double hpAvgIVBonus = (60.0 + 75.0) / 2.0;
         double spdAvgIVBonus = (5.0 + 20.0) / 2.0;
 
-        double sqrStatBulk = (hp + hpAvgIVBonus) * (defensiveStat + spdAvgIVBonus);
+        double sqrStatBulk = (hp + hpAvgIVBonus) * (defensiveStat + spdAvgIVBonus) * multiplier;
 
         double a = 1.0;
         double b = hpAvgIVBonus + spdAvgIVBonus;
