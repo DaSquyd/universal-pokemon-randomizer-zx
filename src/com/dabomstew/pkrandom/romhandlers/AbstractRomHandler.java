@@ -1071,14 +1071,17 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void setIrrelevantAbilitiesForPoke(Pokemon pk, Settings settings, HashSet<Integer> irrelevantAbilities, boolean isParagonLite) {
         boolean lowAtk = pk.attack <= 85;
+        boolean mediumAtk = pk.attack > 85 && pk.attack <= 110;
         boolean highAtk = pk.attack > 110;
 
         boolean lowSpA = pk.spatk <= 85;
         boolean highSpA = pk.spatk > 110;
 
+        boolean lowSpeed = pk.speed <= 85;
+        boolean mediumSpeed = (pk.speed > 85) && (pk.speed <= 110);
         boolean highSpeed = pk.speed > 110;
-        boolean mediumSpeed = (pk.speed >= 85) && (pk.speed <= 110);
-        boolean lowSpeed = pk.speed < 85;
+
+        boolean mediumHP = (pk.hp > 85) && (pk.hp <= 110);
 
         double physicalBulk = pk.getPhysicalBulk();
         boolean lowPhysBulk = physicalBulk <= 85;
@@ -1086,10 +1089,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean highPhysBulk = physicalBulk > 110;
 
         double specialBulk = pk.getSpecialBulk();
+        boolean lowSpecBulk = specialBulk <= 85;
         boolean highSpecBulk = specialBulk > 110;
 
         double bulk = Math.min(physicalBulk, specialBulk);
         boolean lowBulk = bulk <= 85;
+        boolean highBulk = bulk > 110;
 
         boolean higherOrEqualAttack = pk.attack >= pk.spatk; // minAttack >= maxSpAtk;
         boolean higherOrEqualSpAtk = pk.spatk >= pk.attack; // minSpAtk >= maxAttack;
@@ -1117,36 +1122,44 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         boolean isBug = pk.primaryType == Type.BUG || pk.secondaryType == Type.BUG;
         boolean resistsBug = against.get(Type.BUG).ordinal() < Effectiveness.NEUTRAL.ordinal();
-        boolean weakToBug = against.get(Type.BUG).ordinal() > Effectiveness.NEUTRAL.ordinal();
+        boolean weakToBug = pk.hp == 1 || against.get(Type.BUG).ordinal() > Effectiveness.NEUTRAL.ordinal();
 
-        boolean weakToGhost = against.get(Type.GHOST).ordinal() > Effectiveness.NEUTRAL.ordinal();
+        boolean resistsGhost = against.get(Type.GHOST).ordinal() < Effectiveness.NEUTRAL.ordinal();
+        boolean weakToGhost = pk.hp == 1 || against.get(Type.GHOST).ordinal() > Effectiveness.NEUTRAL.ordinal();
 
         boolean isSteel = pk.primaryType == Type.STEEL || pk.secondaryType == Type.STEEL;
+        boolean weakToSteel = pk.hp == 1 || against.get(Type.STEEL).ordinal() > Effectiveness.NEUTRAL.ordinal();
 
         boolean isFire = pk.primaryType == Type.FIRE || pk.secondaryType == Type.FIRE;
         boolean resistsFire = against.get(Type.FIRE).ordinal() < Effectiveness.NEUTRAL.ordinal();
-        boolean weakToFire = against.get(Type.FIRE).ordinal() < Effectiveness.NEUTRAL.ordinal();
+        boolean weakToFire = pk.hp == 1 || against.get(Type.FIRE).ordinal() < Effectiveness.NEUTRAL.ordinal();
 
         boolean isWater = pk.primaryType == Type.WATER || pk.secondaryType == Type.WATER;
         boolean resistsWater = against.get(Type.WATER).ordinal() < Effectiveness.NEUTRAL.ordinal();
-        boolean weakToWater = against.get(Type.WATER).ordinal() > Effectiveness.NEUTRAL.ordinal();
+        boolean weakToWater = pk.hp == 1 || against.get(Type.WATER).ordinal() > Effectiveness.NEUTRAL.ordinal();
 
         boolean isGrass = pk.primaryType == Type.GRASS || pk.secondaryType == Type.GRASS;
         boolean resistsGrass = against.get(Type.GRASS).ordinal() > Effectiveness.NEUTRAL.ordinal();
+        boolean weakToGrass = pk.hp == 1 || against.get(Type.GRASS).ordinal() > Effectiveness.NEUTRAL.ordinal();
 
         boolean isElectric = pk.primaryType == Type.ELECTRIC || pk.secondaryType == Type.ELECTRIC;
         boolean resistsElectric = against.get(Type.ELECTRIC).ordinal() < Effectiveness.NEUTRAL.ordinal();
+        boolean weakToElectric = against.get(Type.ELECTRIC).ordinal() > Effectiveness.NEUTRAL.ordinal();
 
         boolean resistsPsychic = against.get(Type.PSYCHIC).ordinal() < Effectiveness.NEUTRAL.ordinal();
+        boolean weakToPsychic = against.get(Type.ELECTRIC).ordinal() > Effectiveness.NEUTRAL.ordinal();
 
         boolean isIce = pk.primaryType == Type.ICE || pk.secondaryType == Type.ICE;
         boolean resistsIce = against.get(Type.ICE).ordinal() < Effectiveness.NEUTRAL.ordinal();
 
+        boolean isDragon = pk.primaryType == Type.DRAGON || pk.secondaryType == Type.DRAGON;
+
         boolean isDark = pk.primaryType == Type.DARK || pk.secondaryType == Type.DARK;
         boolean resistsDark = against.get(Type.DARK).ordinal() < Effectiveness.NEUTRAL.ordinal();
-        boolean weakToDark = against.get(Type.DARK).ordinal() > Effectiveness.NEUTRAL.ordinal();
+        boolean weakToDark = pk.hp == 1 || against.get(Type.DARK).ordinal() > Effectiveness.NEUTRAL.ordinal();
 
         boolean isFairy = pk.primaryType == Type.FAIRY || pk.secondaryType == Type.FAIRY;
+        boolean weakToFairy = pk.hp == 1 || against.get(Type.FAIRY).ordinal() > Effectiveness.NEUTRAL.ordinal();
 
         int weaknesses = 0;
         for (Effectiveness e : against.values()) {
@@ -1168,14 +1181,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean[] tmhmsAvailable = this.getTMsHMsAvailableInMainGame();
 
         Map<Type, Set<Integer>> typeGoodDamageMovesLearnt = new HashMap<>();
-        Map<Type, Set<Integer>> typeGoodDamageMovesTMHM = new HashMap<>();
-        Map<Type, Set<Integer>> typeGoodDamageMovesTutor = new HashMap<>();
         Map<Type, Set<Integer>> typeGoodDamageMovesAll = new HashMap<>();
         for (Type t : Type.values()) {
             if (typeInGame(t)) {
                 typeGoodDamageMovesLearnt.put(t, new HashSet<>());
-                typeGoodDamageMovesTMHM.put(t, new HashSet<>());
-                typeGoodDamageMovesTutor.put(t, new HashSet<>());
                 typeGoodDamageMovesAll.put(t, new HashSet<>());
             }
         }
@@ -1186,6 +1195,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         int technicianMovesFromLevel = 0;
         Set<Integer> multiStrikeMoves = new HashSet<>();
         int multiStrikeMovesFromLevel = 0;
+        Set<Integer> sheerForceMoves = new HashSet<>();
+        int sheerForceMovesFromLevel = 0;
+        Set<Integer> contactMoves = new HashSet<>();
+        int contactMovesFromLevel = 0;
+        Set<Integer> stabContactMoves = new HashSet<>();
+        int stabContactMovesFromLevel = 0;
         Set<Integer> punchMoves = new HashSet<>();
         int punchMovesFromLevel = 0;
         Set<Integer> soundMoves = new HashSet<>();
@@ -1196,22 +1211,48 @@ public abstract class AbstractRomHandler implements RomHandler {
         int biteMovesFromLevel = 0;
         Set<Integer> sliceMoves = new HashSet<>();
         int sliceMovesFromLevel = 0;
+        Set<Integer> triageSupportMoves = new HashSet<>();
+        int triageSupportMovesFromLevel = 0;
+        Set<Integer> triageDamageMoves = new HashSet<>();
+        int triageDamageMovesFromLevel = 0;
         Set<Integer> windMoves = new HashSet<>();
         int windMovesFromLevel = 0;
         Set<Integer> ballBombPulseMoves = new HashSet<>();
         int ballBombPulseMovesFromLevel = 0;
+        Set<Integer> danceMoves = new HashSet<>();
+        int danceMovesFromLevel = 0;
         Set<Integer> offensiveSunMoves = new HashSet<>();
         Set<Integer> supportSunMoves = new HashSet<>();
         Set<Integer> rainMoves = new HashSet<>();
 
         for (MoveLearnt ml : movesLearnt) {
             Move m = moves.get(ml.move);
-            
+
+            switch (m.category) {
+                case PHYSICAL -> {
+                    if (!higherOrEqualAttack)
+                        continue;
+                }
+                case SPECIAL -> {
+                    if (!higherOrEqualSpAtk)
+                        continue;
+                }
+                case STATUS -> {
+                    if (m.isCustomTriageMove) {
+                        triageSupportMoves.add(m.number);
+                        triageSupportMovesFromLevel++;
+                    }
+
+                    continue;
+                }
+            }
+
+
             if (m.isRecoilMove()) {
                 recoilMoves.add(m.number);
                 recoilMovesFromLevel++;
             }
-            
+
             if (m.power > 0 && (m.power == 60 || m.minHits > 1)) {
                 technicianMoves.add(m.number);
                 technicianMovesFromLevel++;
@@ -1225,8 +1266,23 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (!m.isGoodDamaging(generationOfPokemon()))
                 continue;
 
+            if (m.isBoostedBySheerForce()) {
+                sheerForceMoves.add(m.number);
+                sheerForceMovesFromLevel++;
+            }
+
             typeGoodDamageMovesLearnt.get(m.type).add(m.number);
             typeGoodDamageMovesAll.get(m.type).add(m.number);
+
+            if (m.makesContact) {
+                contactMoves.add(m.number);
+                contactMovesFromLevel++;
+
+                if (m.type == pk.primaryType || m.type == pk.secondaryType) {
+                    stabContactMoves.add(m.number);
+                    stabContactMovesFromLevel++;
+                }
+            }
 
             if (m.isPunchMove) {
                 punchMoves.add(m.number);
@@ -1238,7 +1294,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 soundMovesFromLevel++;
             }
 
-            if (m.isCustomKickMove) {
+            if (m.isCustomKickMove && m.effect != MoveEffect.JUMP_KICK) {
                 kickMoves.add(m.number);
                 kickMovesFromLevel++;
             }
@@ -1253,6 +1309,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 sliceMovesFromLevel++;
             }
 
+            if (m.isCustomTriageMove) {
+                triageDamageMoves.add(m.number);
+                triageDamageMovesFromLevel++;
+            }
+
             if (m.isCustomWindMove) {
                 windMoves.add(m.number);
                 windMovesFromLevel++;
@@ -1261,6 +1322,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.isCustomBallBombMove || m.isCustomPulseMove) {
                 ballBombPulseMoves.add(m.number);
                 ballBombPulseMovesFromLevel++;
+            }
+
+            if (m.isCustomDanceMove) {
+                danceMoves.add(m.number);
+                danceMovesFromLevel++;
             }
 
             if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
@@ -1278,10 +1344,27 @@ public abstract class AbstractRomHandler implements RomHandler {
                 continue;
 
             Move m = moves.get(tmhmMoves.get(tmIdx));
-            
+
+            switch (m.category) {
+                case PHYSICAL -> {
+                    if (!higherOrEqualAttack)
+                        continue;
+                }
+                case SPECIAL -> {
+                    if (!higherOrEqualSpAtk)
+                        continue;
+                }
+                case STATUS -> {
+                    if (m.isCustomTriageMove)
+                        triageSupportMoves.add(m.number);
+
+                    continue;
+                }
+            }
+
             if (m.isRecoilMove())
                 recoilMoves.add(m.number);
-            
+
             if (m.power > 0 && (m.power == 60 || m.minHits > 1))
                 technicianMoves.add(m.number);
 
@@ -1291,8 +1374,17 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (!m.isGoodDamaging(generationOfPokemon()))
                 continue;
 
-            typeGoodDamageMovesTMHM.get(m.type).add(m.number);
+            if (m.isBoostedBySheerForce())
+                sheerForceMoves.add(m.number);
+
             typeGoodDamageMovesAll.get(m.type).add(m.number);
+
+            if (m.makesContact) {
+                contactMoves.add(m.number);
+
+                if (m.type == pk.primaryType || m.type == pk.secondaryType)
+                    stabContactMoves.add(m.number);
+            }
 
             if (m.isPunchMove)
                 punchMoves.add(m.number);
@@ -1300,7 +1392,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.isSoundMove)
                 soundMoves.add(m.number);
 
-            if (m.isCustomKickMove)
+            if (m.isCustomKickMove && m.effect != MoveEffect.JUMP_KICK)
                 kickMoves.add(m.number);
 
             if (m.isCustomBiteMove)
@@ -1309,11 +1401,17 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.isCustomSliceMove)
                 sliceMoves.add(m.number);
 
+            if (m.isCustomTriageMove)
+                triageDamageMoves.add(m.number);
+
             if (m.isCustomWindMove)
                 windMoves.add(m.number);
 
             if (m.isCustomBallBombMove || m.isCustomPulseMove)
                 ballBombPulseMoves.add(m.number);
+
+            if (m.isCustomDanceMove)
+                danceMoves.add(m.number);
 
             if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
                 offensiveSunMoves.add(m.number);
@@ -1330,10 +1428,28 @@ public abstract class AbstractRomHandler implements RomHandler {
                 continue;
 
             Move m = moves.get(tutorMoves.get(tutorMoveIdx));
-            
+
+            switch (m.category) {
+                case PHYSICAL -> {
+                    if (!higherOrEqualAttack)
+                        continue;
+                }
+                case SPECIAL -> {
+                    if (!higherOrEqualSpAtk)
+                        continue;
+                }
+                case STATUS -> {
+                    if (m.isCustomTriageMove) {
+                        triageSupportMoves.add(m.number);
+                    }
+
+                    continue;
+                }
+            }
+
             if (m.isRecoilMove())
                 recoilMoves.add(m.number);
-            
+
             if (m.power > 0 && (m.power == 60 || m.minHits > 1))
                 technicianMoves.add(m.number);
 
@@ -1343,8 +1459,17 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (!m.isGoodDamaging(generationOfPokemon()))
                 continue;
 
-            typeGoodDamageMovesTutor.get(m.type).add(m.number);
+            if (m.isBoostedBySheerForce())
+                sheerForceMoves.add(m.number);
+
             typeGoodDamageMovesAll.get(m.type).add(m.number);
+
+            if (m.makesContact) {
+                contactMoves.add(m.number);
+
+                if (m.type == pk.primaryType || m.type == pk.secondaryType)
+                    stabContactMoves.add(m.number);
+            }
 
             if (m.isPunchMove)
                 punchMoves.add(m.number);
@@ -1352,7 +1477,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.isSoundMove)
                 soundMoves.add(m.number);
 
-            if (m.isCustomKickMove)
+            if (m.isCustomKickMove && m.effect != MoveEffect.JUMP_KICK)
                 kickMoves.add(m.number);
 
             if (m.isCustomBiteMove)
@@ -1361,11 +1486,17 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.isCustomSliceMove)
                 sliceMoves.add(m.number);
 
+            if (m.isCustomTriageMove)
+                triageDamageMoves.add(m.number);
+
             if (m.isCustomWindMove)
                 windMoves.add(m.number);
 
             if (m.isCustomBallBombMove || m.isCustomPulseMove)
                 ballBombPulseMoves.add(m.number);
+
+            if (m.isCustomDanceMove)
+                danceMoves.add(m.number);
 
             if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
                 offensiveSunMoves.add(m.number);
@@ -1377,6 +1508,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 rainMoves.add(m.number);
         }
 
+        boolean hasNormalMoves = !typeGoodDamageMovesLearnt.get(Type.NORMAL).isEmpty() && typeGoodDamageMovesAll.get(Type.NORMAL).size() >= 2;
+
 
         // TODO: Remake abil learn
 
@@ -1385,7 +1518,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.stench);
 
         // #002 Drizzle
-        if (isFire || weakToWater)
+        if (isFire || weakToWater || isTypeBoostAbilityIrrelevant(pk, Type.WATER, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
             irrelevantAbilities.add(Abilities.drizzle);
 
         // #003 Speed Boost
@@ -1402,7 +1535,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // #006 Damp
         if (isParagonLite) {
-            if ((isWater && (!lowAtk || !lowSpA)) || rainMoves.size() < 2)
+            if ((isWater && (!lowAtk || !lowSpA))
+                    || (isTypeBoostAbilityIrrelevant(pk, Type.WATER, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll)
+                    && rainMoves.size() < 2))
                 irrelevantAbilities.add(Abilities.damp);
         } else {
             irrelevantAbilities.add(Abilities.damp);
@@ -1434,9 +1569,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // #015 Insomnia
 
         // #016 Color Change (monotype Normals only)
-        if (lowBulk)
-            irrelevantAbilities.add(Abilities.colorChange);
-        if (pk.primaryType != Type.NORMAL || pk.secondaryType != null)
+        if (lowBulk || pk.primaryType != Type.NORMAL || pk.secondaryType != null)
             irrelevantAbilities.add(Abilities.colorChange);
 
         // #017 Immunity
@@ -1524,95 +1657,96 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (isParagonLite)
             if (pk.hp == 1 || (resistsGround && resistsWater))
                 irrelevantAbilities.add(Abilities.magmaArmor);
-        
+
         // #041 Water Veil
         // TODO: Rework
-        
+
         // #042 Magnet Pull
         irrelevantAbilities.add(Abilities.magnetPull);
-        
+
         // #043 Soundproof
-        
+
         // #044 Rain Dish
         if (lowBulk || weakToWater || (isFire && !isWater))
             irrelevantAbilities.add(Abilities.rainDish);
-        
+
         // #045 Sand Stream
 
         // #046 Pressure
         irrelevantAbilities.add(Abilities.pressure);
-        
+
         // #047 Thick Fat
         if (pk.hp == 1 || (resistsFire && resistsIce))
             irrelevantAbilities.add(Abilities.thickFat);
-        
+
         // #048 Early Bird
         // TODO: Make this work
         irrelevantAbilities.add(Abilities.earlyBird);
-        
+
         // #049 Flame Body
         if (lowPhysBulk)
             irrelevantAbilities.add(Abilities.flameBody);
-        
+
         // #050 Run Away
         irrelevantAbilities.add(Abilities.runAway);
-        
+
         // #051 Keen Eye
         // TODO: Rework
-        
+
         // #052 Hyper Cutter
         // TODO: Rework
         if (!higherOrEqualAttack)
             irrelevantAbilities.add(Abilities.hyperCutter);
-        
+
         // #053 Pickup
         irrelevantAbilities.add(Abilities.pickup);
-        
+
         // #054 Truant
         // TODO: Rework (1/2 HP every loafing turn)
         irrelevantAbilities.add(Abilities.truant);
-        
+
         // #055 Hustle
-        
+
         // #056 Cute Charm
         if (lowPhysBulk)
             irrelevantAbilities.add(Abilities.cuteCharm);
-        
+
         // #057 Plus
         if (!isParagonLite)
             irrelevantAbilities.add(Abilities.plus);
-            
+
         // #058 Minus
         if (!isParagonLite)
             irrelevantAbilities.add(Abilities.minus);
-        
+
         // #059 Forecast
-        irrelevantAbilities.add(Abilities.forecast);
-        
+        if (pk.getBaseNumber() != Species.castform)
+            irrelevantAbilities.add(Abilities.forecast);
+
         // #060 Sticky Hold
         irrelevantAbilities.add(Abilities.stickyHold);
-        
+
         // #061 Shed Skin
         if (pk.hp == 1)
             irrelevantAbilities.add(Abilities.shedSkin);
-        
+
         // #062 Guts
         if (pk.hp == 1 || !higherOrEqualAttack)
             irrelevantAbilities.add(Abilities.guts);
-        
+
         // #063 Marvel Scale
         if (pk.hp == 1 || !mediumPhysBulk)
             irrelevantAbilities.add(Abilities.marvelScale);
-        
+
         // #064 Liquid Ooze
         // TODO: Rework
         if (pk.hp == 1)
             irrelevantAbilities.add(Abilities.liquidOoze);
-        
+
         // #065 Overgrow
         if (pk.hp == 1 || !isGrass || typeGoodDamageMovesLearnt.get(Type.GRASS).isEmpty())
             irrelevantAbilities.add(Abilities.overgrow);
-        
+
         // #066 Blaze
         if (pk.hp == 1 || !isFire || typeGoodDamageMovesLearnt.get(Type.FIRE).isEmpty())
             irrelevantAbilities.add(Abilities.blaze);
@@ -1620,409 +1754,959 @@ public abstract class AbstractRomHandler implements RomHandler {
         // #067 Torrent
         if (pk.hp == 1 || !isWater || typeGoodDamageMovesLearnt.get(Type.WATER).isEmpty())
             irrelevantAbilities.add(Abilities.torrent);
-        
+
         // #068 Swarm
         if (pk.hp == 1 || !isBug || typeGoodDamageMovesLearnt.get(Type.BUG).isEmpty())
             irrelevantAbilities.add(Abilities.swarm);
-        
+
         // #069 Rock Head
         if (recoilMovesFromLevel == 0 || recoilMoves.size() < 2)
             irrelevantAbilities.add(Abilities.rockHead);
-        
+
         // #070 Drought
-        if (weakToFire || isWater)
+        if (isWater || weakToFire || isTypeBoostAbilityIrrelevant(pk, Type.WATER, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
             irrelevantAbilities.add(Abilities.drought);
-        
+
         // #071 Arena Trap
         irrelevantAbilities.add(Abilities.arenaTrap);
-        
+
         // #072 Vital Spirit
         if (isParagonLite)
             if (lowBulk || highSpecBulk)
                 irrelevantAbilities.add(Abilities.vitalSpirit);
-        
+
         // #073 White Smoke
-        
+
         // #074 Pure Power
         double purePowerBoostedStat = ((isParagonLite ? pk.attack : pk.spatk) + 12.5) * 1.5 - 12.5;
         double purePowerOtherStat = isParagonLite ? pk.attack : pk.spatk;
         if (isParagonLite && (purePowerBoostedStat > 130 || pk.bst() - purePowerOtherStat + purePowerBoostedStat > 650 || purePowerBoostedStat < purePowerOtherStat))
             irrelevantAbilities.add(Abilities.purePower);
-        
+
         // #075 Shell Armor
         if (pk.hp == 1)
             irrelevantAbilities.add(Abilities.shellArmor);
-        
+
         // #076 Air Lock
-        
+
         // #077 Tangled Feet
         if (pk.hp == 1 || highSpeed)
             irrelevantAbilities.add(Abilities.tangledFeet);
-        
+
         // #078 Motor Drive
         if (resistsElectric && !mediumSpeed)
             irrelevantAbilities.add(Abilities.motorDrive);
-        
+
         // #079 Rivalry
         // TODO: Rework to be type-based
         if (pk.genderRatio == 255)
             irrelevantAbilities.add(Abilities.rivalry);
-        
+
         // #080 Steadfast
         if (pk.hp == 1 || highSpeed)
             irrelevantAbilities.add(Abilities.steadfast);
-        
+
         // #081 Snow Cloak
         // TODO: Rework
         irrelevantAbilities.add(Abilities.snowCloak);
-        
+
         // #082 Gluttony
         if (lowBulk)
             irrelevantAbilities.add(Abilities.gluttony);
-        
+
         // #083 Anger Point
         if (pk.hp == 1 || !higherOrEqualAttack)
             irrelevantAbilities.add(Abilities.angerPoint);
-        
+
         // #084 Unburden
         if (pk.hp == 1 || !mediumSpeed)
             irrelevantAbilities.add(Abilities.unburden);
-        
+
         // #085 Heatproof
         if (resistsFire)
             irrelevantAbilities.add(Abilities.heatproof);
-        
+
         // #086 Simple
-        
+
         // #087 Dry Skin
         if (pk.hp == 1 || resistsWater || weakToFire)
             irrelevantAbilities.add(Abilities.drySkin);
-        
+
         // #088 Download
         if (highAtk || highSpA)
             irrelevantAbilities.add(Abilities.download);
-        
+
         // #089 Iron Fist
         if (!higherOrEqualAttack || (punchMovesFromLevel == 0 || punchMoves.size() < 2))
             irrelevantAbilities.add(Abilities.ironFist);
-        
+
         // #090 Poison Heal
         if (isPoison || isSteel)
             irrelevantAbilities.add(Abilities.poisonHeal);
-        
+
         // #091 Adaptability
         if (!isParagonLite)
             if (pk.secondaryType != null)
                 irrelevantAbilities.add(Abilities.adaptability);
-        
+
         // #092 Skill Link
         if (multiStrikeMoves.size() < 2 || multiStrikeMovesFromLevel == 0)
             irrelevantAbilities.add(Abilities.skillLink);
-        
+
         // #093 Hydration
         if (!resistsWater || isFire)
             irrelevantAbilities.add(Abilities.hydration);
-        
+
         // #094 Solar Power
         if (pk.hp == 1 || !resistsFire || !higherOrEqualSpAtk)
             irrelevantAbilities.add(Abilities.solarPower);
-        
+
         // #095 Quick Feet
         if (pk.hp == 1 || !mediumSpeed)
             irrelevantAbilities.add(Abilities.quickFeet);
-        
+
         // #096 Normalize
         irrelevantAbilities.add(Abilities.normalize);
-        
+
         // #097 Sniper
-        
+
         // #098 Magic Guard
-        if (pk.attack > 100 || pk.spatk > 100 || pk.bst() >= 550)
+        if (highAtk || highSpA || pk.bst() >= 550)
             irrelevantAbilities.add(Abilities.magicGuard);
-        
+
         // #099 No Guard
         if (highSpeed)
             irrelevantAbilities.add(Abilities.noGuard);
-        
+
         // #100 Stall
         // TODO: Rework - Increased chance of secondary effect?
         irrelevantAbilities.add(Abilities.stall); // 100
-        
-        
-        
-        
-        
-        
 
-
-        if (!settings.isDoubleBattleMode()) {
-            irrelevantAbilities.add(Abilities.healer); // 131
-            irrelevantAbilities.add(Abilities.friendGuard); // 132
-            irrelevantAbilities.add(Abilities.telepathy); // 140
-            irrelevantAbilities.add(Abilities.symbiosis); // 180
-        }
-
-        // No in-battle effect
-        irrelevantAbilities.add(Abilities.illuminate); // 035
-        irrelevantAbilities.add(Abilities.honeyGather); // 118
-
-        // Useless in deathless random
-        irrelevantAbilities.add(Abilities.aftermath); // 106
-
-        // Bad
-        irrelevantAbilities.add(Abilities.klutz); // 103
-        irrelevantAbilities.add(Abilities.slowStart); // 112
-        irrelevantAbilities.add(Abilities.defeatist); // 129
-        irrelevantAbilities.add(Abilities.weakArmor); // 133
-        if (generationOfPokemon() < 6)
-            irrelevantAbilities.add(Abilities.infiltrator); // 151
-
-        // Too niche
-//            irrelevantAbilities.add(Abilities.damp); // 006
-        irrelevantAbilities.add(Abilities.badDreams); // 123
-        irrelevantAbilities.add(Abilities.pickpocket); // 124
-        if (generationOfPokemon() >= 6) {
-            irrelevantAbilities.add(Abilities.magician); // 170
-            irrelevantAbilities.add(Abilities.auraBreak); // 170
-        }
-
-        // Weather
-        irrelevantAbilities.add(Abilities.sandVeil); // 008
-        irrelevantAbilities.add(Abilities.snowCloak); // 081
-        if (generationOfPokemon() >= 6) {
-            irrelevantAbilities.add(Abilities.primordialSea); // 189
-            irrelevantAbilities.add(Abilities.desolateLand); // 190
-            irrelevantAbilities.add(Abilities.deltaStream); // 191
-        }
-
-        // Overpowered or too volatile
-        irrelevantAbilities.add(Abilities.moody); // 141
-        if (generationOfPokemon() >= 6) {
-            irrelevantAbilities.add(Abilities.parentalBond); // 141
-        }
-
-        // Forme-changing
-        irrelevantAbilities.add(Abilities.multitype); // 121
-        irrelevantAbilities.add(Abilities.flowerGift); // 122
-        irrelevantAbilities.add(Abilities.zenMode); // 161
-        if (generationOfPokemon() >= 6) {
-            irrelevantAbilities.add(Abilities.stanceChange); // 176
-        }
-
-        if (weaknesses < 2) {
-            irrelevantAbilities.add(Abilities.solidRock); // 116
-            irrelevantAbilities.add(Abilities.filter); // 111
-        }
-
-        if (pk.hp == 1) {
-            irrelevantAbilities.add(Abilities.filter); // 111
-            irrelevantAbilities.add(Abilities.solidRock); // 116
-            irrelevantAbilities.add(Abilities.cursedBody); // 130
-            irrelevantAbilities.add(Abilities.multiscale); // 136
-            irrelevantAbilities.add(Abilities.toxicBoost); // 137
-            irrelevantAbilities.add(Abilities.harvest); // 139
-            irrelevantAbilities.add(Abilities.regenerator); // 144
-            irrelevantAbilities.add(Abilities.rattled); // 155
-            irrelevantAbilities.add(Abilities.furCoat); // 169
-            irrelevantAbilities.add(Abilities.gooey); // 183
-            irrelevantAbilities.add(Abilities.stamina); // 192
-            irrelevantAbilities.add(Abilities.wimpOut); // 193
-            irrelevantAbilities.add(Abilities.emergencyExit); // 194
-            irrelevantAbilities.add(Abilities.waterCompaction); // 195
-            irrelevantAbilities.add(Abilities.innardsOut); // 215
-            irrelevantAbilities.add(Abilities.fluffy); // 218
-            irrelevantAbilities.add(Abilities.shadowShield); // 231
-            irrelevantAbilities.add(Abilities.prismArmor); // 232
-            irrelevantAbilities.add(Abilities.cottonDown); // 238
-            irrelevantAbilities.add(Abilities.mirrorArmor); // 240
-            irrelevantAbilities.add(Abilities.steamEngine); // 243
-            irrelevantAbilities.add(Abilities.sandSpit); // 245
-            irrelevantAbilities.add(Abilities.iceScales); // 246
-            irrelevantAbilities.add(Abilities.perishBody); // 253
-            irrelevantAbilities.add(Abilities.seedSower); // 269
-            irrelevantAbilities.add(Abilities.thermalExchange); // 270
-            irrelevantAbilities.add(Abilities.angerShell); // 271
-            irrelevantAbilities.add(Abilities.electromorphosis); // 280
-            irrelevantAbilities.add(Abilities.toxicDebris); // 295
-
-            if (isParagonLite) {
-                irrelevantAbilities.add(ParagonLiteAbilities.colossal);
-            }
-        }
-
-        if (!(pk.primaryType == Type.NORMAL && pk.secondaryType == null)) {
-            irrelevantAbilities.add(Abilities.colorChange);
-            irrelevantAbilities.add(Abilities.imposter);
-        }
-
-        if (isElectric || isGround)
-            irrelevantAbilities.add(Abilities.limber);
-
-        // Avoid Flying-type STAB Gale Wings in Gen VI
-        // Otherwise, avoid giving it to non-Flying-types 
-        if ((generationOfPokemon() == 6) == isFlying)
-            irrelevantAbilities.add(Abilities.galeWings);
-
-        // Protean and Libero are OP until Gen IX nerf
-        if (generationOfPokemon() >= 6 && generationOfPokemon() < 9) {
-            irrelevantAbilities.add(Abilities.protean);
-            irrelevantAbilities.add(Abilities.libero);
-        }
-
-        if (generationOfPokemon() == 5 && (highAtk || highSpA)) {
-            irrelevantAbilities.add(Abilities.protean);
-        }
-
-        // Abilities that activate on contact
-        if (lowPhysBulk) {
-            irrelevantAbilities.add(Abilities.mummy);
-            irrelevantAbilities.add(Abilities.ironBarbs);
-        }
-
-        if (!isGrass)
-            if (generationOfPokemon() >= 6) {
-                irrelevantAbilities.add(Abilities.flowerVeil); // 166
-            }
-
-        if (isFlying || isGround)
-            if (generationOfPokemon() >= 6) {
-                irrelevantAbilities.add(Abilities.grassPelt);
-            }
-
-        if (isRock || isGround || isSteel || isIce)
-            irrelevantAbilities.add(Abilities.overcoat);
-
-        if (isFire)
-            irrelevantAbilities.add(Abilities.waterVeil);
-
-        // only benefits physical attackers
-        if (!higherOrEqualAttack) {
-            irrelevantAbilities.add(Abilities.defiant);
-            irrelevantAbilities.add(Abilities.poisonTouch);
-            irrelevantAbilities.add(Abilities.moxie);
-            irrelevantAbilities.add(Abilities.strongJaw);
-            irrelevantAbilities.add(Abilities.toughClaws);
-            irrelevantAbilities.add(Abilities.sharpness);
-        }
-
-        // only benefits special attackers
-        if (!higherOrEqualSpAtk) {
-            irrelevantAbilities.add(Abilities.competitive);
-            irrelevantAbilities.add(Abilities.megaLauncher);
-        }
-
-        if (!(isNormal || isFighting))
-            irrelevantAbilities.add(Abilities.scrappy);
-
-        if (resistsWater && !higherOrEqualSpAtk)
-            irrelevantAbilities.add(Abilities.stormDrain);
-
-        if (lowBulk || !higherOrEqualAttack)
-            irrelevantAbilities.add(Abilities.reckless);
-
-        if (!lowAtk || !lowSpA)
-            irrelevantAbilities.add(Abilities.contrary);
-
-        if (isPoison || isSteel || !higherOrEqualAttack)
-            irrelevantAbilities.add(Abilities.toxicBoost);
-
-        if (isFire || !higherOrEqualSpAtk)
-            irrelevantAbilities.add(Abilities.flareBoost);
-
-        if (!highPhysBulk)
-            irrelevantAbilities.add(Abilities.bigPecks);
-
-        if (!lowSpeed)
-            irrelevantAbilities.add(Abilities.analytic);
-
-        if (pk.hp < 85 || pk.hp > 100)
-            irrelevantAbilities.add(Abilities.imposter);
-
-        if (!higherOrEqualAttack && !isParagonLite)
-            irrelevantAbilities.add(Abilities.justified);
-
-        if (weakToBug || weakToGhost || weakToDark || !mediumSpeed)
-            irrelevantAbilities.add(Abilities.rattled);
-
-        if (resistsGrass && !higherOrEqualAttack)
-            irrelevantAbilities.add(Abilities.sapSipper);
-
-        if (highSpeed) {
-            irrelevantAbilities.add(Abilities.lightMetal);
-            irrelevantAbilities.add(Abilities.prankster);
-        }
-
-        setTypeChangeAbilityIrrelevant(pk, Abilities.refrigerate, Type.ICE, isCustomTypeEffectiveness, against, higherOrEqualAttack, irrelevantAbilities);
-        setTypeChangeAbilityIrrelevant(pk, Abilities.pixilate, Type.FAIRY, isCustomTypeEffectiveness, against, higherOrEqualAttack, irrelevantAbilities);
-        setTypeChangeAbilityIrrelevant(pk, Abilities.aerilate, Type.FLYING, isCustomTypeEffectiveness, against, higherOrEqualAttack, irrelevantAbilities);
-        setTypeChangeAbilityIrrelevant(pk, Abilities.galvanize, Type.ELECTRIC, isCustomTypeEffectiveness, against, higherOrEqualAttack, irrelevantAbilities);
-
-        if (lowSpeed || highSpeed)
-            irrelevantAbilities.add(Abilities.slushRush);
-
-        if (highSpeed)
-            irrelevantAbilities.add(Abilities.triage);
-
+        // #101 Technician
         if (technicianMovesFromLevel == 0 || technicianMoves.size() < 2)
             irrelevantAbilities.add(Abilities.technician);
 
+        // #102 Leaf Guard
+        if (isParagonLite) {
+            if (pk.hp == 1 || weakToFire || isWater || highBulk)
+                irrelevantAbilities.add(Abilities.leafGuard);
+        } else {
+            irrelevantAbilities.add(Abilities.leafGuard);
+        }
+
+        // #103 Klutz
+        // TODO: Make Klutz force activate item on the target
+        irrelevantAbilities.add(Abilities.klutz);
+
+        // #104 Mold Breaker
+        // #105 Super Luck
+
+        // #106 Aftermath
+        irrelevantAbilities.add(Abilities.aftermath);
+
+        // #107 Anticipation
+        // #108 Forewarn
+        // #109 Unaware
+        // #110 Tinted Lens
+
+        // #111 Filter
+        if (pk.hp == 1 || weaknesses < 3)
+            irrelevantAbilities.add(Abilities.filter);
+
+        // #112 Slow Start
+        irrelevantAbilities.add(Abilities.slowStart);
+
+        // #113 Scrappy
+        if (!isNormal && !isFighting)
+            irrelevantAbilities.add(Abilities.scrappy);
+
+        // #114 Storm Drain
+        if (resistsWater && !higherOrEqualSpAtk)
+            irrelevantAbilities.add(Abilities.stormDrain);
+
+        // #115 Ice Body
+        if (isParagonLite)
+            if (resistsIce)
+                irrelevantAbilities.add(Abilities.iceBody);
+
+        // #116 Solid Rock
+        if (pk.hp == 1 || weaknesses < 3)
+            irrelevantAbilities.add(Abilities.solidRock);
+
+        // #117 Snow Warning
+
+        // #118 Honey Gather
+        irrelevantAbilities.add(Abilities.honeyGather);
+
+        // #119 Frisk/X-ray Vision
+
+        // #120 Reckless
+        if (pk.hp == 1 || recoilMovesFromLevel == 0 || recoilMoves.size() < 2)
+            irrelevantAbilities.add(Abilities.reckless);
+
+        // #121 Multitype
+        irrelevantAbilities.add(Abilities.multitype);
+
+        // #122 Flower Gift
+        if (pk.getBaseNumber() != Species.cherrim)
+            irrelevantAbilities.add(Abilities.flowerGift);
+
+        // #123 Bad Dreams
+        irrelevantAbilities.add(Abilities.badDreams);
+
+        // #124 Pickpocket
+        // TODO: Rework
+        irrelevantAbilities.add(Abilities.pickpocket);
+
+        // #125 Sheer Force
+        if (highAtk || highSpA || pk.bst() >= 550 || sheerForceMovesFromLevel == 0 || sheerForceMoves.size() < 2)
+            irrelevantAbilities.add(Abilities.sheerForce);
+
+        // #126 Contrary
+        if (!lowAtk || !lowSpA)
+            irrelevantAbilities.add(Abilities.contrary);
+
+        // #127 Unnerve
+
+        // #128 Defiant
+        if (!higherOrEqualAttack)
+            irrelevantAbilities.add(Abilities.defiant);
+
+        // #129 Defeatist
+        irrelevantAbilities.add(Abilities.defeatist);
+
+        // #130 Cursed Body
+        if (pk.hp == 1)
+            irrelevantAbilities.add(Abilities.cursedBody);
+
+        // #131 Healer
+        if (!settings.isDoubleBattleMode())
+            irrelevantAbilities.add(Abilities.healer);
+
+        // #132 Friend Guard
+        if (!settings.isDoubleBattleMode())
+            irrelevantAbilities.add(Abilities.friendGuard);
+
+        // #133 Weak Armor
+        // TODO: Buff it somehow?
+        irrelevantAbilities.add(Abilities.weakArmor);
+
+        // #134 Heavy Metal
+        if (isParagonLite) {
+            if (pk.hp == 1 || highPhysBulk || (lowSpecBulk && highSpeed))
+                irrelevantAbilities.add(Abilities.heavyMetal);
+        } else {
+            irrelevantAbilities.add(Abilities.heavyMetal);
+        }
+
+        // #135 Light Metal
+        if (isParagonLite) {
+            if (!highPhysBulk || highSpeed)
+                irrelevantAbilities.add(Abilities.lightMetal);
+        } else {
+            irrelevantAbilities.add(Abilities.lightMetal);
+        }
+
+        // #136 Multiscale
+        if (pk.hp == 1)
+            irrelevantAbilities.add(Abilities.multiscale);
+
+        // #137 Toxic Boost
+        if (pk.hp == 1 || isPoison || isSteel || !higherOrEqualAttack)
+            irrelevantAbilities.add(Abilities.toxicBoost);
+
+        // #138 Flare Boost
+        if (pk.hp == 1 || isFire || !higherOrEqualSpAtk)
+            irrelevantAbilities.add(Abilities.flareBoost);
+
+        // #139 Harvest
+        if (pk.hp == 1)
+            irrelevantAbilities.add(Abilities.harvest);
+
+        // #140 Telepathy
+        if (!settings.isDoubleBattleMode())
+            irrelevantAbilities.add(Abilities.telepathy);
+
+        // #141 Moody
+        irrelevantAbilities.add(Abilities.moody);
+
+        // #142 Overcoat
+        if (isRock || isGround || isSteel || isIce)
+            irrelevantAbilities.add(Abilities.overcoat);
+
+        // #143 Poison Touch
+        if (stabContactMovesFromLevel == 0 || contactMoves.size() < 2)
+            irrelevantAbilities.add(Abilities.poisonTouch);
+
+        // #144 Regenerator
+        if (lowBulk)
+            irrelevantAbilities.add(Abilities.regenerator);
+
+        // #145 Big Pecks
+        // TODO: Make this better
+        irrelevantAbilities.add(Abilities.bigPecks);
+
+        // #146 Sand Rush
+        if (!mediumSpeed)
+            irrelevantAbilities.add(Abilities.sandRush);
+
+        // #147 Wonder Skin
+
+        // #148 Analytic
+        if (!lowSpeed)
+            irrelevantAbilities.add(Abilities.analytic);
+
+        // #149 Illusion
+
+        // #150 Imposter
+        if (!mediumHP || pk.primaryType != Type.NORMAL || pk.secondaryType != null)
+            irrelevantAbilities.add(Abilities.imposter);
+
+        // #151 Infiltrator
+
+        // #152 Mummy
+        if (lowPhysBulk)
+            irrelevantAbilities.add(Abilities.mummy);
+
+        // #153 Moxie
+        if (!higherOrEqualAttack)
+            irrelevantAbilities.add(Abilities.moxie);
+
+        // #154 Justified
+        if (isParagonLite) {
+            if (resistsDark && !higherOrEqualAttack)
+                irrelevantAbilities.add(Abilities.justified);
+        } else {
+            if (pk.hp == 1 || !resistsDark || !higherOrEqualAttack)
+                irrelevantAbilities.add(Abilities.justified);
+        }
+
+        // #155 Rattled
+        if (pk.hp == 1 || !(resistsBug || resistsGhost || resistsDark) || !mediumSpeed)
+            irrelevantAbilities.add(Abilities.rattled);
+
+        // #156 Magic Bounce
+
+        // #157 Sap Sipper/Herbivore
+        if (resistsGrass && !higherOrEqualAttack)
+            irrelevantAbilities.add(Abilities.sapSipper);
+
+        // #158 Prankster
+        if (highSpeed)
+            irrelevantAbilities.add(Abilities.prankster);
+
+        // #159 Sand Force
+        if (isTypeBoostAbilityIrrelevant(pk, Type.GROUND, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll)
+                && isTypeBoostAbilityIrrelevant(pk, Type.ROCK, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll)
+                && isTypeBoostAbilityIrrelevant(pk, Type.STEEL, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.sandForce);
+
+        // #160 Iron Barbs
+        if (lowPhysBulk)
+            irrelevantAbilities.add(Abilities.ironBarbs);
+
+        // #161 Zen Mode
+        if (pk.getBaseNumber() != Species.darmanitan)
+            irrelevantAbilities.add(Abilities.zenMode);
+
+        // #162 Victory Star
+
+        // #163 Turboblaze
+        // #164 Teravolt
+        // TODO: Update these
+
+        // #165 Aroma Veil
+        if (!settings.isDoubleBattleMode())
+            irrelevantAbilities.add(Abilities.aromaVeil);
+
+        // #166 Flower Veil
+        if (!settings.isDoubleBattleMode())
+            irrelevantAbilities.add(Abilities.flowerVeil);
+
+        // #167 Cheek Pouch
+        if (pk.hp == 1)
+            irrelevantAbilities.add(Abilities.cheekPouch);
+
+        // #168 Protean
+        if (highAtk || highSpA)
+            irrelevantAbilities.add(Abilities.protean);
+
+        // #169 Fur Coat
+        if (pk.hp == 1 || highPhysBulk)
+            irrelevantAbilities.add(Abilities.furCoat);
+
+        // #170 Magician
+        // #171 Bulletproof
+
+        // #172 Competitive
+        if (!higherOrEqualSpAtk)
+            irrelevantAbilities.add(Abilities.competitive);
+
+        // #173 Strong Jaw
         if (biteMovesFromLevel == 0 || biteMoves.size() < 2)
             irrelevantAbilities.add(Abilities.strongJaw);
 
-        if (sliceMovesFromLevel == 0 || sliceMoves.size() < 2)
-            irrelevantAbilities.add(Abilities.sharpness);
+        // #174 Refrigerate
+        if (isNormal || isTypeBoostAbilityIrrelevant(pk, Type.NORMAL, Type.ICE, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.refrigerate);
 
+        // #175 Sweet Veil
+        if (!settings.isDoubleBattleMode())
+            irrelevantAbilities.add(Abilities.sweetVeil);
+
+        // #176 Stance Change
+        if (pk.getBaseNumber() != Species.aegislash)
+            irrelevantAbilities.add(Abilities.stanceChange);
+
+        // #177 Gale Wings
+        if (highSpeed || typeGoodDamageMovesLearnt.get(Type.FLYING).isEmpty() || typeGoodDamageMovesAll.get(Type.FLYING).size() < 2)
+            irrelevantAbilities.add(Abilities.galeWings);
+
+        // #178 Mega Launcher
         if (ballBombPulseMovesFromLevel == 0 || ballBombPulseMoves.size() < 2)
             irrelevantAbilities.add(Abilities.megaLauncher);
 
-        if (isParagonLite) {
-            if ((isWater && (!lowAtk || !lowSpA)) || rainMoves.size() < 2)
-                irrelevantAbilities.add(Abilities.damp);
+        // #179 Grass Pelt
+        if (weakToGrass || highPhysBulk)
+            irrelevantAbilities.add(Abilities.grassPelt);
 
-            if (!higherOrEqualAttack && resistsDark)
-                irrelevantAbilities.add(Abilities.justified);
+        // #180 Symbiosis
+        if (!settings.isDoubleBattleMode())
+            irrelevantAbilities.add(Abilities.symbiosis);
 
-            if (isFlying)
-                irrelevantAbilities.add(ParagonLiteAbilities.heavyWing);
+        // #181 Tough Claws
+        if (contactMovesFromLevel == 0 || contactMoves.size() < 2)
+            irrelevantAbilities.add(Abilities.toughClaws);
 
-            if (resistsBug)
-                irrelevantAbilities.add(ParagonLiteAbilities.insectivore);
+        // #182 Pixilate
+        if (isNormal || isTypeBoostAbilityIrrelevant(pk, Type.NORMAL, Type.FAIRY, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.pixilate);
 
-            if (!higherOrEqualSpAtk)
-                irrelevantAbilities.add(ParagonLiteAbilities.prestige);
+        // #183 Gooey
+        if (lowPhysBulk)
+            irrelevantAbilities.add(Abilities.gooey);
 
-            if (!higherOrEqualAttack || kickMovesFromLevel == 0 || kickMoves.size() < 2)
-                irrelevantAbilities.add(ParagonLiteAbilities.luckyFoot);
+        // #184 Aerilate
+        if (isNormal || isTypeBoostAbilityIrrelevant(pk, Type.NORMAL, Type.FLYING, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.aerilate);
 
-            if (resistsPsychic)
-                irrelevantAbilities.add(ParagonLiteAbilities.assimilate);
+        // #185 Parental Bond
+        if (highAtk || highSpA)
+            irrelevantAbilities.add(Abilities.parentalBond);
 
-            if (!higherOrEqualSpAtk || soundMovesFromLevel == 0 || soundMoves.size() < 2)
-                irrelevantAbilities.add(ParagonLiteAbilities.cacophony);
+        // #186 Dark Aura
+        if (weakToDark
+                || (!settings.isDoubleBattleMode() && isTypeBoostAbilityIrrelevant(pk, Type.DARK, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll)))
+            irrelevantAbilities.add(Abilities.darkAura);
 
-            if (windMovesFromLevel == 0 || windMoves.size() < 2)
-                irrelevantAbilities.add(ParagonLiteAbilities.windWhipper);
+        // #187 Fairy Aura
+        if (weakToFairy
+                || (!settings.isDoubleBattleMode() && isTypeBoostAbilityIrrelevant(pk, Type.FAIRY, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll)))
+            irrelevantAbilities.add(Abilities.fairyAura);
 
-            if (resistsWater && resistsGround)
-                irrelevantAbilities.add(ParagonLiteAbilities.glazeware);
+        // #188 Aura Break
+        irrelevantAbilities.add(Abilities.auraBreak);
 
-            if ((isFire && (!lowAtk || !lowSpA)) || ((highAtk || highSpA) && isGrass && !offensiveSunMoves.isEmpty()) || offensiveSunMoves.size() < (supportSunMoves.isEmpty() ? 2 : 1))
-                irrelevantAbilities.add(ParagonLiteAbilities.sunSoaked);
+        // #189 Primordial Sea
+        irrelevantAbilities.add(Abilities.primordialSea);
+
+        // #190 Desolaate Land
+        irrelevantAbilities.add(Abilities.desolateLand);
+
+        // #191 Delta Stream
+        irrelevantAbilities.add(Abilities.deltaStream);
+
+        // #192 Stamina
+        if (lowBulk || highPhysBulk)
+            irrelevantAbilities.add(Abilities.stamina);
+
+        // #193 Wimp Out
+        if (pk.hp == 1 || (!lowPhysBulk && !lowSpecBulk))
+            irrelevantAbilities.add(Abilities.wimpOut);
+
+        // #194 Emergency Exit
+        if (pk.hp == 1 || !lowBulk)
+            irrelevantAbilities.add(Abilities.emergencyExit);
+
+        // #195 Water Compaction
+        if (weakToWater || highPhysBulk || lowBulk)
+            irrelevantAbilities.add(Abilities.waterCompaction);
+
+        // #196 Merciless
+        // #197 Shields Down
+
+        // #198 Stakeout
+        irrelevantAbilities.add(Abilities.stakeout);
+
+        // #199 Water Bubble
+        if (resistsFire && isTypeBoostAbilityIrrelevant(pk, Type.WATER, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.waterBubble);
+
+        // #200 Steelworker
+        if (isSteel || isTypeBoostAbilityIrrelevant(pk, Type.STEEL, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.steelworker);
+
+        // #201 Berserk
+        if (pk.hp == 1 || !higherOrEqualSpAtk)
+            irrelevantAbilities.add(Abilities.berserk);
+
+        // #202 Slush Rush
+        if (!highSpeed)
+            irrelevantAbilities.add(Abilities.slushRush);
+
+        // #203 Long Reach
+        if (stabContactMovesFromLevel == 0 || stabContactMoves.size() < 2)
+            irrelevantAbilities.add(Abilities.longReach);
+
+        // #204 Liquid Voice
+        if (soundMovesFromLevel == 0 || soundMoves.size() < 2 || isTypeBoostAbilityIrrelevant(pk, null, Type.WATER, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.liquidVoice);
+
+        // #205 Triage
+        if (highSpeed) {
+            irrelevantAbilities.add(Abilities.triage);
+        } else if (triageSupportMovesFromLevel == 0 && triageDamageMovesFromLevel == 0) {
+            irrelevantAbilities.add(Abilities.triage);
+        } else if (triageDamageMoves.isEmpty()) {
+            if (triageSupportMoves.isEmpty()) {
+                irrelevantAbilities.add(Abilities.triage);
+            } else if (pk.hp == 1 && (!settings.isDoubleBattleMode() || !isParagonLite)) {
+                irrelevantAbilities.add(Abilities.triage);
+            }
         }
+
+        // #206 Galvanize
+        isTypeBoostAbilityIrrelevant(pk, Type.NORMAL, Type.ELECTRIC, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll);
+
+        // #207 Surge Surfer
+        if (weakToElectric || isTypeBoostAbilityIrrelevant(pk, Type.ELECTRIC, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.surgeSurfer);
+
+        // #208 Schooling
+        if (pk.getBaseNumber() != Species.wishiwashi)
+            irrelevantAbilities.add(Abilities.schooling);
+
+        // #209 Disguise
+        if (pk.getBaseNumber() != Species.mimikyu)
+            irrelevantAbilities.add(Abilities.disguise);
+
+        // #210 Battle Bond
+        if ((lowAtk && lowSpA) || highAtk || highSpA || pk.bst() >= 550)
+            irrelevantAbilities.add(Abilities.battleBond);
+
+        // #211 Power Construct
+
+        // #212 Corrosion
+        if (isParagonLite)
+            if (weakToSteel && isTypeBoostAbilityIrrelevant(pk, Type.POISON, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+                irrelevantAbilities.add(Abilities.corrosion);
+
+        // #213 Comatose
+
+        // #214 Queenly Majesty
+        if (!settings.isDoubleBattleMode() && lowSpeed)
+            irrelevantAbilities.add(Abilities.queenlyMajesty);
+
+        // #215 Innards Out
+        irrelevantAbilities.add(Abilities.innardsOut);
+
+        // #216 Dancer
+        if ((lowAtk && lowSpA) || highAtk || highSpA || pk.bst() >= 550)
+            irrelevantAbilities.add(Abilities.dancer);
+
+        // #217 Battery
+
+        // #218 Fluffy
+        if (weakToFire || highPhysBulk)
+            irrelevantAbilities.add(Abilities.fluffy);
+
+        // #219 Dazzling
+        if (!settings.isDoubleBattleMode() && lowSpeed)
+            irrelevantAbilities.add(Abilities.dazzling);
+
+        // #220 Soul-Heart
+        if (!higherOrEqualSpAtk || highSpA)
+            irrelevantAbilities.add(Abilities.soulHeart);
+
+        // #221 Tangling Hair
+        if (lowPhysBulk)
+            irrelevantAbilities.add(Abilities.tanglingHair);
+
+        // #222 Receiver
+        // #223 Power of Alchemy
+
+        // #224 Beast Boost
+        if ((lowAtk && lowSpA) || highAtk || highSpA || pk.bst() >= 550)
+            irrelevantAbilities.add(Abilities.beastBoost);
+
+        // #225 RKS System
+
+        // #226 Electric Surge
+        if (weakToElectric || isTypeBoostAbilityIrrelevant(pk, Type.ELECTRIC, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.electricSurge);
+
+        // #227 Psychic Surge
+        if (weakToPsychic || isTypeBoostAbilityIrrelevant(pk, Type.PSYCHIC, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.electricSurge);
+
+        // #228 Misty Surge
+        if (isDragon)
+            irrelevantAbilities.add(Abilities.mistySurge);
+
+        // #229 Grassy Surge
+        if (weakToGrass || isTypeBoostAbilityIrrelevant(pk, Type.GRASS, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.grassySurge);
+
+        // #230 Full Metal Body
+
+        // #231 Shadow Shield
+        if (pk.hp == 1)
+            irrelevantAbilities.add(Abilities.shadowShield);
+
+        // #232 Prism Armor
+        if (pk.hp == 1 || weaknesses < 3)
+            irrelevantAbilities.add(Abilities.prismArmor);
+
+        // #233 Neuroforce
+        if ((lowAtk && lowSpA) || highAtk || highSpA || pk.bst() >= 550)
+            irrelevantAbilities.add(Abilities.neuroforce);
+
+        // #234 Intrepid Sword
+        if (hugePowerAtk > 130 || pk.bst() - pk.attack + hugePowerAtk > 650 || hugePowerAtk < pk.spatk)
+            irrelevantAbilities.add(Abilities.intrepidSword);
+
+        // #235 Dauntless Shield
+        double dauntlessShieldDef = pk.getPhysicalBulk(1.5);
+        if (highPhysBulk || pk.bst() - pk.hp - pk.defense + 2 * dauntlessShieldDef > 650)
+            irrelevantAbilities.add(Abilities.dauntlessShield);
+
+        // #236 Libero
+        if (highAtk || highSpA)
+            irrelevantAbilities.add(Abilities.protean);
+
+        // #237 Ball Fetch
+        irrelevantAbilities.add(Abilities.ballFetch);
+
+        // #238 Cotton Down
+        if (lowPhysBulk || highSpeed)
+            irrelevantAbilities.add(Abilities.cottonDown);
+
+        // #239 Propeller Tail
+
+        // #240 Mirror Armor
+        if (pk.hp == 1)
+            irrelevantAbilities.add(Abilities.cottonDown);
+
+        // #241 Gulp Missile
+        if (pk.getBaseNumber() != Species.cramorant)
+            irrelevantAbilities.add(Abilities.gulpMissile);
+
+        // #242 Stalwart
+
+        // #243 Steam Engine
+        if (highSpeed || (weakToFire && weakToWater))
+            irrelevantAbilities.add(Abilities.steamEngine);
+
+        // #244 Punk Rock
+        if (soundMovesFromLevel == 0 || soundMoves.size() < 2)
+            irrelevantAbilities.add(Abilities.punkRock);
+
+        // #245 Sand Spit
+        if (lowBulk)
+            irrelevantAbilities.add(Abilities.sandSpit);
+
+        // #246 Ice Scales
+        double iceScalesSpD = pk.getSpecialBulk(2.0);
+        if (highSpecBulk || pk.bst() - pk.hp - pk.spdef + 2 * iceScalesSpD > 650)
+            irrelevantAbilities.add(Abilities.iceScales);
+
+        // #247 Ripen
+        if (pk.hp == 1)
+            irrelevantAbilities.add(Abilities.ripen);
+
+        // #248 Ice Face
+        if (pk.getBaseNumber() != Species.eiscue)
+            irrelevantAbilities.add(Abilities.iceFace);
+
+        // #249 Power Spot
+        // #250 Mimicry
+        // #251 Screen Cleaner
+
+        // #252 Steely Spirit
+        if (!settings.isDoubleBattleMode())
+            if (isSteel || isTypeBoostAbilityIrrelevant(pk, Type.STEEL, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+                irrelevantAbilities.add(Abilities.steelworker);
+
+        // #253 Perish Body
+        irrelevantAbilities.add(Abilities.perishBody);
+
+        // #254 Wandering Spirit
+        if (lowBulk)
+            irrelevantAbilities.add(Abilities.wanderingSpirit);
+
+        // #255 Gorilla Tactics
+        if (hugePowerAtk > 130 || pk.bst() - pk.attack + hugePowerAtk > 650 || hugePowerAtk < pk.spatk)
+            irrelevantAbilities.add(Abilities.gorillaTactics);
+
+        // #256 Neutralizing Gas
+        irrelevantAbilities.add(Abilities.neutralizingGas);
+
+        // #257 Pastel Veil
+
+        // #258 Hunger Switch
+        if (pk.getBaseNumber() != Species.morpeko)
+            irrelevantAbilities.add(Abilities.hungerSwitch);
+
+        // #259 Quick Draw
+        if (highSpeed || (lowAtk && lowSpA))
+            irrelevantAbilities.add(Abilities.quickDraw);
+
+        // #260 Unseen Fist
+        irrelevantAbilities.add(Abilities.unseenFist);
+
+        // #261 Curious Medicine
+
+        // #262 Transistor
+        if (isElectric || isTypeBoostAbilityIrrelevant(pk, Type.ELECTRIC, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.transistor);
+
+        // #263 Dragon's Maw
+        if (isDragon)
+            irrelevantAbilities.add(Abilities.dragonsMaw);
+
+        // #264 Chilling Neigh
+        if (!higherOrEqualAttack)
+            irrelevantAbilities.add(Abilities.chillingNeigh);
+
+        // #265 Grim Neigh
+        if (!higherOrEqualSpAtk)
+            irrelevantAbilities.add(Abilities.grimNeigh);
+
+        // #266 As One (Chilling Neigh)
+        irrelevantAbilities.add(Abilities.asOneChillingNeigh);
+
+        // #267 As One (Grim Neigh)
+        irrelevantAbilities.add(Abilities.asOneGrimNeigh);
+
+        // #268 Lingering Aroma
+        if (lowBulk)
+            irrelevantAbilities.add(Abilities.lingeringAroma);
+
+        // #269 Seed Sower
+        if (lowBulk || weakToGrass || isTypeBoostAbilityIrrelevant(pk, Type.GRASS, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.seedSower);
+
+        // #270 Thermal Exchange
+        if (weakToFire || !higherOrEqualAttack)
+            irrelevantAbilities.add(Abilities.thermalExchange);
+
+        // #271 Anger Shell
+        if (lowBulk || (!highPhysBulk && !highSpecBulk) || ((highAtk || highSpA) && highSpeed))
+            irrelevantAbilities.add(Abilities.angerShell);
+
+        // #272 Purifying Salt
+
+        // #273 Well-Baked Body
+        if (resistsFire && highPhysBulk)
+            irrelevantAbilities.add(Abilities.wellBakedBody);
+
+        // #274 Wind Rider
+
+        // #275 Guard Dog
+        if (!higherOrEqualAttack)
+            irrelevantAbilities.add(Abilities.guardDog);
+        
+        // #276 Rocky Payload
+        if (isRock || isTypeBoostAbilityIrrelevant(pk, Type.ROCK, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.rockyPayload);
+        
+        // #277 Wind Power
+        if (isTypeBoostAbilityIrrelevant(pk, Type.ELECTRIC, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.windPower);
+        
+        // #278 Zero to Hero
+        if (pk.getBaseNumber() != Species.palafin)
+            irrelevantAbilities.add(Abilities.zeroToHero);
+        
+        // #279 Commander
+        irrelevantAbilities.add(Abilities.commander);
+        
+        // #280 Electromorphosis
+        if (lowBulk || isTypeBoostAbilityIrrelevant(pk, Type.ELECTRIC, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(Abilities.electromorphosis);
+        
+        // #281 Protosynthesis
+        if (isWater || weakToFire || (lowAtk && lowSpA) || highAtk || highSpA || pk.bst() >= 550)
+            irrelevantAbilities.add(Abilities.protosynthesis);
+        
+        // #282 Quark Drive
+        if (weakToElectric || (lowAtk && lowSpA) || highAtk || highSpA || pk.bst() >= 550)
+            irrelevantAbilities.add(Abilities.protosynthesis);
+        
+        // #283 Good as Gold
+        // #284 Vessel of Ruin
+        // #285 Sword of Ruin
+        // #286 Tablets of Ruin
+        // #287 Beads of Ruin
+        
+        // #288 Orichalcum Pulse
+        irrelevantAbilities.add(Abilities.OrichalcumPulse);
+        
+        // #289 Hadron Engine
+        irrelevantAbilities.add(Abilities.HadronEngine);
+        
+        // #290 Opportunist
+        
+        // #291 Cud Chew
+        if (lowBulk)
+            irrelevantAbilities.add(Abilities.cudChew);
+        
+        // #292 Sharpness
+        if (sliceMovesFromLevel == 0 || sliceMoves.size() < 2)
+            irrelevantAbilities.add(Abilities.sharpness);
+        
+        // #293 Supreme Overlord
+        irrelevantAbilities.add(Abilities.supremeOverlord);
+        
+        // #294 Costar
+        
+        // #295 Toxic Debris
+        if (lowPhysBulk)
+            irrelevantAbilities.add(Abilities.toxicDebris);
+        
+        // #296 Armor Tail
+        if (!settings.isDoubleBattleMode() && lowSpeed)
+            irrelevantAbilities.add(Abilities.dazzling);
+        
+        // #297 Earth Eater
+        if (resistsGround)
+            irrelevantAbilities.add(Abilities.earthEater);
+        
+        // #298 Mycelium Might
+        irrelevantAbilities.add(Abilities.myceliumMight);
+        
+        // #299 Hospitality
+        
+        // #300 Mind's Eye
+        if (!isNormal && !isFighting)
+            irrelevantAbilities.add(Abilities.mindsEye);
+        
+        // #301 Embody Aspect (Teal)
+        irrelevantAbilities.add(Abilities.embodyAspectTeal);
+        
+        // #302 Embody Aspect (Hearthflame)
+        irrelevantAbilities.add(Abilities.embodyAspectHeathflame);
+
+        // #303 Embody Aspect (Wellsprint)
+        irrelevantAbilities.add(Abilities.embodyAspectWellspring);
+
+        // #304 Embody Aspect (Cornerstone)
+        irrelevantAbilities.add(Abilities.embodyAspectCornerstone);
+        
+        // #305 Toxic Chain
+        irrelevantAbilities.add(Abilities.toxicChain);
+        
+        // #306 Supersweet Syrup
+        
+        // #307 Tera Shift
+        irrelevantAbilities.add(Abilities.teraShift);
+        
+        // #308 Tera Shell
+        irrelevantAbilities.add(Abilities.teraShell);
+        
+        // #309 Teraform Zero
+        irrelevantAbilities.add(Abilities.teraformZero);
+        
+        // #310 Poison Puppeteer
+        irrelevantAbilities.add(Abilities.poisonPuppeteer);
+        
+        
+        // #500 Heavy Wing
+        if (isFlying || isTypeBoostAbilityIrrelevant(pk, Type.FLYING, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(ParagonLiteAbilities.heavyWing);
+        
+        // #501 Specialized
+        
+        // #502 Insectivore
+        if (resistsBug)
+            irrelevantAbilities.add(ParagonLiteAbilities.insectivore);
+        
+        // #503 Prestige
+        if (!higherOrEqualSpAtk)
+            irrelevantAbilities.add(ParagonLiteAbilities.prestige);
+        
+        // #504 Lucky Foot
+        if (kickMovesFromLevel == 0 || kickMoves.size() < 2)
+            irrelevantAbilities.add(ParagonLiteAbilities.luckyFoot);
+        
+        // #505 Assimilate
+        if (resistsPsychic && !higherOrEqualSpAtk)
+            irrelevantAbilities.add(ParagonLiteAbilities.assimilate);
+        
+        // #506 Stone Home
+        
+        // #507 Cacophony
+        if (soundMovesFromLevel == 0 || soundMoves.size() < 2)
+            irrelevantAbilities.add(ParagonLiteAbilities.cacophony);
+        
+        // #508 Rip Tide
+        if (!settings.isDoubleBattleMode() && !mediumSpeed)
+            irrelevantAbilities.add(ParagonLiteAbilities.ripTide);
+        
+        // #509 Wind Whipper
+        if (windMovesFromLevel == 0 || windMoves.size() < 2)
+            irrelevantAbilities.add(ParagonLiteAbilities.windWhipper);
+        
+        // #510 Glazeware
+        if (resistsGround & resistsWater)
+            irrelevantAbilities.add(ParagonLiteAbilities.glazeware);
+        
+        // #511 Sun-Soaked
+        if ((isFire && (!lowAtk || !lowSpA))
+                || (isTypeBoostAbilityIrrelevant(pk, Type.FIRE, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll)
+                && offensiveSunMoves.size() < (supportSunMoves.isEmpty() ? 2 : 1))) {
+            irrelevantAbilities.add(ParagonLiteAbilities.sunSoaked);
+        }
+        
+        // #512 Colossal
+        if (pk.hp == 1 || highBulk)
+            irrelevantAbilities.add(ParagonLiteAbilities.colossal);
+        
+        // #513 Final Thread
+        irrelevantAbilities.add(ParagonLiteAbilities.finalThread);
+        
+        // #514 Homegrown
+        if (pk.hp == 1)
+            irrelevantAbilities.add(ParagonLiteAbilities.homegrown);
+        
+        // #515 Ravenous Torque
+        if (highSpeed || biteMovesFromLevel == 0)
+            irrelevantAbilities.add(ParagonLiteAbilities.ravenousTorque);
+        
+        // #516 Superconductor
+        if (pk.hp == 1 || isIce || !higherOrEqualSpAtk)
+            irrelevantAbilities.add(ParagonLiteAbilities.superconductor);
+        
+        // #516 Somatic Reflex
+        if (highSpeed || !settings.isDoubleBattleMode())
+            irrelevantAbilities.add(ParagonLiteAbilities.somaticReflex);
     }
 
-    private void setTypeChangeAbilityIrrelevant(Pokemon pk, int ability, Type type, boolean isCustomTypeEffectiveness, Map<Type, Effectiveness> against,
-                                                boolean higherOrEqualAttack, HashSet<Integer> irrelevantAbilities) {
-        if (!higherOrEqualAttack || pk.primaryType == Type.NORMAL || pk.secondaryType == Type.NORMAL) {
-            irrelevantAbilities.add(ability);
-            return;
-        }
+    private boolean isTypeBoostAbilityIrrelevant(Pokemon pk, Type type, boolean isCustomTypeEffectiveness, Map<Type, Effectiveness> against,
+                                                 Map<Type, Set<Integer>> goodTypeDamagingLearnt, Map<Type, Set<Integer>> goodTypeDamagingAll) {
+        return isTypeBoostAbilityIrrelevant(pk, type, type, isCustomTypeEffectiveness, against, goodTypeDamagingLearnt, goodTypeDamagingAll);
+    }
 
-        if (irrelevantAbilities.contains(ability) || pk.primaryType == type || pk.secondaryType == type)
-            return;
+    private boolean isTypeBoostAbilityIrrelevant(Pokemon pk, Type learnType, Type attackType, boolean isCustomTypeEffectiveness, Map<Type, Effectiveness> against,
+                                                 Map<Type, Set<Integer>> goodTypeDamagingLearnt, Map<Type, Set<Integer>> goodTypeDamagingAll) {
+        if (learnType != null && (goodTypeDamagingLearnt.get(learnType).isEmpty() || goodTypeDamagingAll.get(learnType).size() < 2))
+            return true;
+
+        if (pk.primaryType == Type.NORMAL || pk.secondaryType == Type.NORMAL)
+            return true;
 
         boolean shouldInclude = false;
-        List<Type> superEffectiveTypes = Effectiveness.superEffective(type, generationOfPokemon(), true, isCustomTypeEffectiveness, typeInGame(Type.FAIRY));
+        List<Type> superEffectiveTypes = Effectiveness.superEffective(attackType, generationOfPokemon(), true, isCustomTypeEffectiveness, typeInGame(Type.FAIRY));
         for (Type superEffectiveType : superEffectiveTypes) {
             if (against.get(superEffectiveType) == Effectiveness.DOUBLE || against.get(superEffectiveType) == Effectiveness.QUADRUPLE)
                 continue;
@@ -2041,8 +2725,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                 break;
             }
         }
-        if (!shouldInclude)
-            irrelevantAbilities.add(ability);
+
+        return !shouldInclude;
     }
 
     @Override
@@ -4015,10 +4699,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                 double atkSpatkRatio = (double) pk.attack / (double) pk.spatk;
                 switch (getAbilityForTrainerPokemon(tp)) {
                     case Abilities.hugePower:
-                    case Abilities.purePower:
-                        atkSpatkRatio *= 2;
+                        atkSpatkRatio *= 1.5;
                         break;
-                    case Abilities.hustle:
+                    case Abilities.purePower:
+                        atkSpatkRatio /= 1.5;
+                        break;
+//                    case Abilities.hustle:
                     case Abilities.gorillaTactics:
                         atkSpatkRatio *= 1.5;
                         break;
@@ -4026,7 +4712,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                         atkSpatkRatio *= 1.1;
                         break;
                     case Abilities.soulHeart:
-                        atkSpatkRatio *= 0.9;
+                    case ParagonLiteAbilities.prestige:
+                        atkSpatkRatio /= 1.1;
                         break;
                 }
 
