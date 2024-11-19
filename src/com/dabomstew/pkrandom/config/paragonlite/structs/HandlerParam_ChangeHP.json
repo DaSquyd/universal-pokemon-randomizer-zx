@@ -1,0 +1,25 @@
+{
+  "header": 0,
+  "pokeCount": 4,
+  "fEffectDisable": 5,
+  "fItemReactionDisable": 6,
+  "pokeId": 7,
+  "pokeIds": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "amount": 16,
+  "amounts": [
+    16,
+    20,
+    24,
+    28,
+    32,
+    36
+  ],
+  "damageCause": 40
+}
