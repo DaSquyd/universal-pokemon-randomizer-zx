@@ -1,0 +1,12 @@
+{
+  "weather": 0,
+  "weatherTurns": 2,
+  "terrain": 4,
+  "terrainTurns": 6,
+  "eventItems": 8,
+  "conditionData": 40,
+  "turnCount": 72,
+  "dependPokeId": 104,
+  "dependPokeCount": 296,
+  "effectEnableFlags": 328
+}
