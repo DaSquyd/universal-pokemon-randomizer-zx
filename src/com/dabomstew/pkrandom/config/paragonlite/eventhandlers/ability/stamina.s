@@ -1,15 +1,16 @@
     push    {r3-r7, lr}
-    mov     r0, #4
     mov     r5, r1
     mov     r4, r2
+    
+    mov     r0, #VAR_DefendingPoke
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
-    bne     End
+    bne     Return
     
-    mov     r0, #0x46
+    mov     r0, #VAR_SubstituteFlag
     bl      Battle::EventVar_GetValue
-    cmp     r0, #0
-    bne     End
+    cmp     r0, #FALSE
+    bne     Return
     
     mov     r0, r5
     mov     r1, r4
@@ -21,12 +22,12 @@
     mov     r6, #0
     bl      Battle::IsStatChangeValid
     cmp     r0, #0
-    beq     End
+    beq     Return
     
     mov     r0, r7
     bl      Battle::IsPokeFainted
     cmp     r0, #0
-    bne     End
+    bne     Return
     
 ; Apply boost
     mov     r0, r5
@@ -56,5 +57,5 @@
     mov     r2, r4
     bl      Battle::Handler_PushRun
 
-End:
+Return:
     pop     {r3-r7, pc}

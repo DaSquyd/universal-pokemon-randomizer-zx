@@ -1,7 +1,7 @@
-    push    {r3, r4, lr}
-    add     sp, #-4
-    mov     r3, #3 ; Sandstorm
+    push    {r3-r4, lr}
+    sub     sp, #4
+    mov     r3, #WEATHER_Sand
     str     r4, [sp]
     bl      Battle::CommonWeatherGuard
     add     sp, #4
-    pop     {r3, r4, pc}
+    pop     {r3-r4, pc}

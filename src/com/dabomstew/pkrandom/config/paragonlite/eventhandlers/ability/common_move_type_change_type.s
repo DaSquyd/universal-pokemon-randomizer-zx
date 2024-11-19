@@ -2,22 +2,18 @@
     mov     r4, r0
     mov     r5, r1
     
-    mov     r0, #VAR_AttackingPoke
+    mov     r0, #VAR_PokeId
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
     bne     Return
     
-    ; Ensure that we've successfully changed to the right move type
     mov     r0, #VAR_MoveType
     bl      Battle::EventVar_GetValue
-    cmp     r5, r0
+    cmp     r0, #TYPE_Normal
     bne     Return
     
     mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
-    bl      ARM9::GetMoveType ; base (unmodified) move type
-    cmp     r0, #TYPE_Normal
-    bne     Return
     
     cmp     r0, #165 ; struggle
     beq     Return
@@ -42,9 +38,9 @@
     cmp     r0, r1
     beq     Return
     
-    mov     r0, #VAR_MovePower
-    ldr     r1, =(0x1000 * 1.2)
-    bl      Battle::EventVar_MulValue
+    mov     r0, #VAR_MoveType
+    mov     r1, r5
+    bl      Battle::EventVar_RewriteValue
     
 Return:
     pop     {r4-r5, pc}

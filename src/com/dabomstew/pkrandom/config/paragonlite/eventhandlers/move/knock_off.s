@@ -25,7 +25,7 @@
     mov     r0, r5
     mov     r1, r6
     bl      Battle::GetPoke
-    bl      Battle::GetPokeHeldItem
+    bl      Battle::Poke_GetHeldItem
     cmp     r0, #0
     beq     Return
     

@@ -26,7 +26,7 @@ LoopStart:
     beq     EndLoop
     
     mov     r0, r5
-    mov     r1, #14
+    mov     r1, #HE_ChangeStatStage
     mov     r2, r6
     bl      Battle::Handler_PushWork
     

@@ -14,8 +14,8 @@
     bne     Return
     
     mov     r0, #VAR_Ratio ; stat
-    mov     r1, #6
-    lsl     r1, #10 ; 6144 (1.5x)
+    mov     r1, #((0x1000 * 1.5) >> 10)
+    lsl     r1, #10
     bl      Battle::EventVar_MulValue
     
 Return:
