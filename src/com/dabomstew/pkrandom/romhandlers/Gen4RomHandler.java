@@ -2265,7 +2265,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
         // happens. This is very unlikely to happen in practice, even with very
         // restrictive settings, so it should be okay that we're breaking logic here.
         while (trophyGardenEncounters.encounters.stream().distinct().count() == 1) {
-            trophyGardenEncounters.encounters.get(0).pokemon = randomPokemon();
+            trophyGardenEncounters.encounters.get(0).pokemon = randomPlayerPokemon();
         }
         writeExtraEncountersDPPt(trophyGardenData, 0, trophyGardenEncounters.encounters);
 
@@ -4800,14 +4800,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     public void randomizeIntroPokemon() {
         try {
             if (romEntry.romType == Gen4Constants.Type_DP || romEntry.romType == Gen4Constants.Type_Plat) {
-                Pokemon introPokemon = randomPokemon();
+                Pokemon introPokemon = randomPlayerPokemon();
                 while (introPokemon.genderRatio == 0xFE) {
                     // This is a female-only Pokemon. Gen 4 has an annoying quirk where female-only Pokemon *need*
                     // to pass a special parameter into the function that loads Pokemon sprites; the game will
                     // softlock on native hardware otherwise. The way the compiler has optimized the intro Pokemon
                     // code makes it very hard to modify, so passing in this special parameter is difficult. Rather
                     // than attempt to patch this code, just reroll until it isn't female-only.
-                    introPokemon = randomPokemon();
+                    introPokemon = randomPlayerPokemon();
                 }
                 byte[] introOverlay = readOverlay(romEntry.getInt("IntroOvlNumber"));
                 for (String prefix : Gen4Constants.dpptIntroPrefixes) {
@@ -5890,7 +5890,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     @Override
     public BufferedImage getMascotImage() {
         try {
-            Pokemon pk = randomPokemon();
+            Pokemon pk = randomPlayerPokemon();
             NARCArchive pokespritesNARC = this.readNARC(romEntry.getFile("PokemonGraphics"));
             int spriteIndex = pk.number * 6 + 2 + random.nextInt(2);
             int palIndex = pk.number * 6 + 4;

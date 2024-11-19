@@ -54,7 +54,7 @@ public class Gen7Constants {
 
     public static final int evolutionMethodCount = 42;
 
-    private static List<Integer> speciesWithAlolanForms = Arrays.asList(
+    public static List<Integer> speciesWithAlolanForms = Arrays.asList(
             Species.rattata, Species.raticate, Species.raichu, Species.sandshrew, Species.sandslash, Species.vulpix,
             Species.ninetales, Species.diglett, Species.dugtrio, Species.meowth, Species.persian, Species.geodude,
             Species.graveler, Species.golem, Species.grimer, Species.muk, Species.exeggutor, Species.marowak

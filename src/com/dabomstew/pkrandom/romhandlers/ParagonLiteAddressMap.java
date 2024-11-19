@@ -29,6 +29,10 @@ public class ParagonLiteAddressMap {
             return address;
         }
 
+        public int getRomAddress() {
+            return overlay.ramToRomAddress(address);
+        }
+        
         public void addReference(ReferenceAddressInterface addressData) {
             incomingReferences.add(addressData);
         }
@@ -252,12 +256,12 @@ public class ParagonLiteAddressMap {
         codeAddress.address = newAddress;
     }
 
-    public void relocateDataAddress(ParagonLiteOverlay overlay, String label, int newAddress, int newSize, String refPattern) {
+    public DataAddress relocateDataAddress(ParagonLiteOverlay overlay, String label, int newAddress, int newSize, String refPattern) {
         int oldAddress = getRamAddress(overlay, label);
-        relocateDataAddress(overlay, oldAddress, newAddress, newSize, refPattern);
+        return relocateDataAddress(overlay, oldAddress, newAddress, newSize, refPattern);
     }
 
-    public void relocateDataAddress(ParagonLiteOverlay overlay, int oldAddress, int newAddress, int newSize, String refPattern) {
+    public DataAddress relocateDataAddress(ParagonLiteOverlay overlay, int oldAddress, int newAddress, int newSize, String refPattern) {
         LabeledAddressInterface labeledAddress = addressMap.get(overlay).get(oldAddress);
         if (!(labeledAddress instanceof DataAddress dataAddress))
             throw new RuntimeException();
@@ -267,7 +271,7 @@ public class ParagonLiteAddressMap {
         int oldSize = dataAddress.size;
 
         if (dataAddress.incomingReferences.isEmpty())
-            return;
+            return null;
 
         ArmParser armParser = new ArmParser(this);
         int oldStartingOffset = oldAddress - overlay.address;
@@ -281,6 +285,8 @@ public class ParagonLiteAddressMap {
 
         dataAddress.address = newAddress;
         dataAddress.size = newSize;
+        
+        return dataAddress;
     }
 
     private void relocateAddressInternal(AddressBase addressBase, int newAddress, Map<Integer, Set<Integer>> oldOutgoingReferences, Map<Integer, Set<Integer>> newOutgoingReferences) {
@@ -493,7 +499,6 @@ public class ParagonLiteAddressMap {
     }
 
     public void addAllReferences() {
-
         System.out.println("adding references...");
         for (Map.Entry<ParagonLiteOverlay, TreeMap<Integer, LabeledAddressInterface>> overlayEntry : addressMap.entrySet()) {
             ParagonLiteOverlay overlay = overlayEntry.getKey();
@@ -662,7 +667,7 @@ public class ParagonLiteAddressMap {
 
                 String label = addressDataEntry.getKey();
                 int address = addressBase.address;
-                expression = expression.replace(String.format("%s::%s", namespace, label), String.valueOf(address));
+                expression = expression.replaceAll(String.format("%s::%s(?=[^A-Za-z0-9_.]|$)", namespace, label), String.valueOf(address));
             }
         }
 

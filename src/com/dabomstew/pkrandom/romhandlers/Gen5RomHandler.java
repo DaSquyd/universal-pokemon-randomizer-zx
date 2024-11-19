@@ -568,7 +568,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             if (moveData == null)
                 continue;
 
-            move.name = moveNames.get(moveNames.size() > i ? i : 0);
+            if (i == 0 || moveNames.size() > i)
+                move.name = moveNames.get(i);
+            else
+                move.name = String.format("#%03d", i);
+            
             move.description = moveDescriptions.get(moveDescriptions.size() > i ? i : 0);
             move.number = i;
             move.internalId = i;
@@ -758,7 +762,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         List<String> moveDescriptions = getStrings(false, romEntry.getInt("MoveDescriptionsTextOffset"));
         List<String> moveUsages = getStrings(false, romEntry.getInt("MoveUsagesTextOffset"));
 
-        moveNames.addAll(Collections.nCopies(moves.size() - moveNames.size(), moveNames.get(0)));
+        List<String> newMoveNames = Arrays.asList(new String[Moves.MAX - Moves.fusionBolt]);
+        for (int i = 0; i < newMoveNames.size(); ++i)
+            newMoveNames.set(i, String.format("#%03d", moveNames.size() + i));
+        moveNames.addAll(newMoveNames);
+
         moveDescriptions.addAll(Collections.nCopies(moves.size() - moveDescriptions.size(), moveDescriptions.get(0)));
         while (moveUsages.size() < moves.size() * 3) {
             for (int i = 0; i < 3; i++)
@@ -771,7 +779,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             if (move.name.length() > 15)
                 throw new RuntimeException(String.format("Move name '%s' was too long!", move.name));
 
-            if (!move.name.equals(moveNames.get(0))) {
+            if (i > 0 && move.name.equals(moveNames.get(0))) {
+                String indexedName = String.format("#%03d", i);
+                move.name = indexedName;
+                moveNames.set(i, indexedName);
+            } else {
                 moveNames.set(i, move.name);
                 moveDescriptions.set(i, sortText(move.description, 3, 233, false));
 
@@ -4278,7 +4290,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public void randomizeIntroPokemon() {
         try {
-            int introPokemon = randomPokemon().number;
+            int introPokemon = randomPlayerPokemon().number;
             byte[] introGraphicOverlay = readOverlay(romEntry.getInt("IntroGraphicOvlNumber"));
             int offset = find(introGraphicOverlay, Gen5Constants.introGraphicPrefix);
             if (offset > 0) {
@@ -4562,11 +4574,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (index >= Gen5Constants.tmBlockOneOffset && index < Gen5Constants.tmBlockOneOffset + Gen5Constants.tmBlockOneCount) {
             return index - Gen5Constants.tmBlockOneOffset + 1;
         }
-        
+
         if (index >= Gen5Constants.tmBlockTwoOffset && index < Gen5Constants.tmBlockTwoOffset + Gen5Constants.tmBlockTwoCount) {
             return index - Gen5Constants.tmBlockTwoOffset + Gen5Constants.tmBlockOneCount + 1;
         }
-        
+
         return -1;
     }
 
@@ -4577,11 +4589,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             return tm + (Gen5Constants.tmBlockTwoOffset - 1 - Gen5Constants.tmBlockOneCount);
         }
     }
-    
+
     private int hmFromIndex(int index) {
         if (index >= Gen5Constants.hmOffset && index < Gen5Constants.hmOffset + Gen5Constants.hmCount)
             return index - Gen5Constants.hmOffset + 1;
-        
+
         return -1;
     }
 
@@ -5070,7 +5082,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     @Override
     public BufferedImage getMascotImage() {
         try {
-            Pokemon pk = randomPokemonInclFormes();
+            Pokemon pk = randomPlayerPokemonInclFormes();
             NARCArchive pokespritesNARC = this.readNARC(romEntry.getFile("PokemonGraphics"));
 
             // First prepare the palette, it's the easy bit
@@ -5323,10 +5335,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             ItemSortComparator comparator = new ItemSortComparator(itemData, tmMoves, hmMoves);
 
             setItemSortByName(ovlAddress, overlay, itemData, comparator);
-            
+
             if (isUpperVersion())
                 setItemFreeSpaceSort(ovlAddress, overlay, itemData, comparator);
-            
+
             setItemSortByType(itemData, comparator);
 
             writeOverlay(ovlNumber, overlay);
@@ -5353,16 +5365,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         public int compare(Integer itemA, Integer itemB) {
             if (itemA == 0 || itemB == 0)
                 return Integer.compare(itemA, itemB);
-            
+
             byte[] dataA = itemData.files.get(itemA);
             byte[] dataB = itemData.files.get(itemB);
 
             int itemAfieldPocketId = (FileFunctions.read2ByteInt(dataA, 0x08) >> 7) & 0x0F;
             int itemBFieldPocketId = (FileFunctions.read2ByteInt(dataB, 0x08) >> 7) & 0x0F;
-            
+
             Item.FieldPocket itemAFieldPocket = Item.FieldPocket.values()[itemAfieldPocketId];
             Item.FieldPocket itemBFieldPocket = Item.FieldPocket.values()[itemBFieldPocketId];
-            
+
             // Push TMs and HMs to the back of the list
             if (pushTMsHMs) {
                 if (itemAFieldPocket == Item.FieldPocket.TMS_AND_HMS && itemBFieldPocket != Item.FieldPocket.TMS_AND_HMS)
@@ -5385,7 +5397,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         String getItemSortName(int itemNumber, Item.FieldPocket pocket) {
             if (Objects.requireNonNull(pocket) == Item.FieldPocket.TMS_AND_HMS) {
                 int moveNumber;
-                
+
                 int tmNumber = tmFromIndex(itemNumber);
                 int hmNumber = hmFromIndex(itemNumber);
                 if (tmNumber > 0)
@@ -5394,7 +5406,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     moveNumber = hmMoves.get(hmNumber - 1);
                 else
                     throw new RuntimeException();
-                
+
                 Move move = moves.get(moveNumber);
                 return move.name;
             }
@@ -5489,7 +5501,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int pocketId = (FileFunctions.read2ByteInt(data, 0x08) >> 7) & 0x0F;
         if (pocketId >= Item.FieldPocket.values().length)
             throw new RuntimeException();
-            
+
         return Item.FieldPocket.values()[pocketId];
     }
 
@@ -5499,7 +5511,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int itemTypeId = data[0x0D] & 0xFF;
         if (itemTypeId >= Item.ItemType.values().length)
             throw new RuntimeException();
-            
+
         return Item.ItemType.values()[itemTypeId];
     }
 
@@ -5510,11 +5522,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             return -1;
         return sortIndex;
     }
-    
+
     private void setItemSortIndex(NARCArchive itemData, int itemNumber, int sortIndex) {
         if (sortIndex < -1 || sortIndex > 0xFF)
             throw new RuntimeException();
-        
+
         byte[] data = itemData.files.get(itemNumber);
         data[0x0F] = (byte) sortIndex;
     }
@@ -5657,6 +5669,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.fixChallengeModeLevelBug();
         paragonLite.setGetEffectiveWeather();
         paragonLite.setWeatherPowerMod();
+//        paragonLite.setTerrains();
         paragonLite.setMonoTypeSTAB();
         paragonLite.setCalcDamageOffensiveValue();
         paragonLite.setCalcDamageDefensiveValue();

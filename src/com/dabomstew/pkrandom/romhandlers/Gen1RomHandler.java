@@ -2173,7 +2173,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     private void randomizeCatchingTutorial() {
         if (romEntry.getValue("CatchingTutorialMonOffset") != 0) {
-            rom[romEntry.getValue("CatchingTutorialMonOffset")] = (byte) pokeNumToRBYTable[this.randomPokemon().number];
+            rom[romEntry.getValue("CatchingTutorialMonOffset")] = (byte) pokeNumToRBYTable[this.randomPlayerPokemon().number];
         }
     }
 
@@ -2242,7 +2242,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     public void randomizeIntroPokemon() {
         // First off, intro Pokemon
         // 160 add yellow intro random
-        int introPokemon = pokeNumToRBYTable[this.randomPokemon().number];
+        int introPokemon = pokeNumToRBYTable[this.randomPlayerPokemon().number];
         rom[romEntry.getValue("IntroPokemonOffset")] = (byte) introPokemon;
         rom[romEntry.getValue("IntroCryOffset")] = (byte) introPokemon;
 
@@ -2867,7 +2867,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public BufferedImage getMascotImage() {
-        Pokemon mascot = randomPokemon();
+        Pokemon mascot = randomPlayerPokemon();
         int idx = pokeNumToRBYTable[mascot.number];
         int fsBank;
         // define (by index number) the bank that a pokemon's image is in

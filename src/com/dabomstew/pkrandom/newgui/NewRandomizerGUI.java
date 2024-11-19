@@ -100,6 +100,13 @@ public class NewRandomizerGUI {
     private JComboBox<String> spComboBox3;
     private JCheckBox spRandomizeStarterHeldItemsCheckBox;
     private JCheckBox spBanBadItemsCheckBox;
+    private JCheckBox spGen1CheckBox;
+    private JCheckBox spGen2CheckBox;
+    private JCheckBox spGen3CheckBox;
+    private JCheckBox spGen4CheckBox;
+    private JCheckBox spGen5CheckBox;
+    private JCheckBox spGen6CheckBox;
+    private JCheckBox spGen7CheckBox;
     private JRadioButton stpUnchangedRadioButton;
     private JRadioButton stpSwapLegendariesSwapStandardsRadioButton;
     private JRadioButton stpRandomCompletelyRadioButton;
@@ -167,6 +174,13 @@ public class NewRandomizerGUI {
     private JCheckBox wpPercentageLevelModifierCheckBox;
     private JSlider wpPercentageLevelModifierSlider;
     private JSlider wpSetMinimumCatchRateSlider;
+    private JCheckBox wpGen1CheckBox;
+    private JCheckBox wpGen2CheckBox;
+    private JCheckBox wpGen3CheckBox;
+    private JCheckBox wpGen4CheckBox;
+    private JCheckBox wpGen5CheckBox;
+    private JCheckBox wpGen6CheckBox;
+    private JCheckBox wpGen7CheckBox;
     private JRadioButton tmUnchangedRadioButton;
     private JRadioButton tmRandomRadioButton;
     private JCheckBox tmFullHMCompatibilityCheckBox;
@@ -252,6 +266,13 @@ public class NewRandomizerGUI {
     private JSpinner tpImportantTrainersSpinner;
     private JSpinner tpRegularTrainersSpinner;
     private JLabel tpAdditionalPokemonForLabel;
+    private JCheckBox tpGen1CheckBox;
+    private JCheckBox tpGen2CheckBox;
+    private JCheckBox tpGen3CheckBox;
+    private JCheckBox tpGen4CheckBox;
+    private JCheckBox tpGen5CheckBox;
+    private JCheckBox tpGen6CheckBox;
+    private JCheckBox tpGen7CheckBox;
     private JCheckBox peAllowAltFormesCheckBox;
     private JCheckBox miscSOSBattlesCheckBox;
     private JCheckBox tpRandomShinyTrainerPokemonCheckBox;
@@ -456,6 +477,13 @@ public class NewRandomizerGUI {
         spRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spRandomTwoEvosRadioButton.addActionListener(e -> enableOrDisableSubControls());
         spRandomFullyEvolvedRadioButton.addActionListener(e -> enableOrDisableSubControls());
+        spGen1CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        spGen2CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        spGen3CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        spGen4CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        spGen5CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        spGen6CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        spGen7CheckBox.addActionListener(e -> enableOrDisableSubControls());
         stpUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpSwapLegendariesSwapStandardsRadioButton.addActionListener(e -> enableOrDisableSubControls());
         stpRandomCompletelyRadioButton.addActionListener(e -> enableOrDisableSubControls());
@@ -480,6 +508,13 @@ public class NewRandomizerGUI {
         tpForceFullyEvolvedAtCheckBox.addActionListener(e -> enableOrDisableSubControls());
         tpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
         tpEliteFourUniquePokemonCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpGen1CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpGen2CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpGen3CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpGen4CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpGen5CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpGen6CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        tpGen7CheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         wpArea1To1RadioButton.addActionListener(e -> enableOrDisableSubControls());
@@ -487,6 +522,13 @@ public class NewRandomizerGUI {
         wpSetMinimumCatchRateCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpRandomizeHeldItemsCheckBox.addActionListener(e -> enableOrDisableSubControls());
         wpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        wpGen1CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        wpGen2CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        wpGen3CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        wpGen4CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        wpGen5CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        wpGen6CheckBox.addActionListener(e -> enableOrDisableSubControls());
+        wpGen7CheckBox.addActionListener(e -> enableOrDisableSubControls());
         tmUnchangedRadioButton.addActionListener(e -> enableOrDisableSubControls());
         tmRandomRadioButton.addActionListener(e -> enableOrDisableSubControls());
         tmForceGoodDamagingCheckBox.addActionListener(e -> enableOrDisableSubControls());
@@ -1237,9 +1279,7 @@ public class NewRandomizerGUI {
                 performRandomization(fh.getAbsolutePath(), seed, pld.getCustomNames(), outputType == SaveType.DIRECTORY);
             }
         }
-
     }
-
 
     private enum SaveType {
         FILE, DIRECTORY, INVALID
@@ -1548,6 +1588,14 @@ public class NewRandomizerGUI {
         spComboBox2.setSelectedIndex(customStarters[1] - 1);
         spComboBox3.setSelectedIndex(customStarters[2] - 1);
 
+        spGen1CheckBox.setSelected((settings.getStarterAllowedGenerations() & 0x01) != 0);
+        spGen2CheckBox.setSelected((settings.getStarterAllowedGenerations() & 0x02) != 0);
+        spGen3CheckBox.setSelected((settings.getStarterAllowedGenerations() & 0x04) != 0);
+        spGen4CheckBox.setSelected((settings.getStarterAllowedGenerations() & 0x08) != 0);
+        spGen5CheckBox.setSelected((settings.getStarterAllowedGenerations() & 0x10) != 0);
+        spGen6CheckBox.setSelected((settings.getStarterAllowedGenerations() & 0x20) != 0);
+        spGen7CheckBox.setSelected((settings.getStarterAllowedGenerations() & 0x40) != 0);
+
         peUnchangedRadioButton.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.UNCHANGED);
         peRandomRadioButton.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM);
         peRandomEveryLevelRadioButton.setSelected(settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM_EVERY_LEVEL);
@@ -1612,6 +1660,14 @@ public class NewRandomizerGUI {
 
         tpRandomShinyTrainerPokemonCheckBox.setSelected(settings.isShinyChance());
         tpBetterMovesetsCheckBox.setSelected(settings.isBetterTrainerMovesets());
+        
+        tpGen1CheckBox.setSelected((settings.getFoeAllowedGenerations() & 0x01) != 0);
+        tpGen2CheckBox.setSelected((settings.getFoeAllowedGenerations() & 0x02) != 0);
+        tpGen3CheckBox.setSelected((settings.getFoeAllowedGenerations() & 0x04) != 0);
+        tpGen4CheckBox.setSelected((settings.getFoeAllowedGenerations() & 0x08) != 0);
+        tpGen5CheckBox.setSelected((settings.getFoeAllowedGenerations() & 0x10) != 0);
+        tpGen6CheckBox.setSelected((settings.getFoeAllowedGenerations() & 0x20) != 0);
+        tpGen7CheckBox.setSelected((settings.getFoeAllowedGenerations() & 0x40) != 0);
 
         totpUnchangedRadioButton.setSelected(settings.getTotemPokemonMod() == Settings.TotemPokemonMod.UNCHANGED);
         totpRandomRadioButton.setSelected(settings.getTotemPokemonMod() == Settings.TotemPokemonMod.RANDOM);
@@ -1649,6 +1705,13 @@ public class NewRandomizerGUI {
         wpPercentageLevelModifierCheckBox.setSelected(settings.isWildLevelsModified());
         wpPercentageLevelModifierSlider.setValue(settings.getWildLevelModifier());
         wpAllowAltFormesCheckBox.setSelected(settings.isAllowWildAltFormes());
+        wpGen1CheckBox.setSelected((settings.getWildAllowedGenerations() & 0x01) != 0);
+        wpGen2CheckBox.setSelected((settings.getWildAllowedGenerations() & 0x02) != 0);
+        wpGen3CheckBox.setSelected((settings.getWildAllowedGenerations() & 0x04) != 0);
+        wpGen4CheckBox.setSelected((settings.getWildAllowedGenerations() & 0x08) != 0);
+        wpGen5CheckBox.setSelected((settings.getWildAllowedGenerations() & 0x10) != 0);
+        wpGen6CheckBox.setSelected((settings.getWildAllowedGenerations() & 0x20) != 0);
+        wpGen7CheckBox.setSelected((settings.getWildAllowedGenerations() & 0x40) != 0);
 
         stpUnchangedRadioButton.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED);
         stpSwapLegendariesSwapStandardsRadioButton.setSelected(settings.getStaticPokemonMod() == Settings.StaticPokemonMod.RANDOM_MATCHING);
@@ -1797,6 +1860,11 @@ public class NewRandomizerGUI {
         int[] customStarters = new int[]{spComboBox1.getSelectedIndex() + 1,
                 spComboBox2.getSelectedIndex() + 1, spComboBox3.getSelectedIndex() + 1};
         settings.setCustomStarters(customStarters);
+        
+        settings.setStarterAllowedGenerations(spGen1CheckBox.isSelected() && spGen1CheckBox.isVisible(), spGen2CheckBox.isSelected() && spGen2CheckBox.isVisible(),
+                spGen3CheckBox.isSelected() && spGen3CheckBox.isVisible(), spGen4CheckBox.isSelected() && spGen4CheckBox.isVisible(),
+                spGen5CheckBox.isSelected() && spGen5CheckBox.isVisible(), spGen6CheckBox.isSelected() && spGen6CheckBox.isVisible(),
+                spGen7CheckBox.isSelected() && spGen7CheckBox.isVisible());
 
         settings.setEvolutionsMod(peUnchangedRadioButton.isSelected(), peRandomRadioButton.isSelected(), peRandomEveryLevelRadioButton.isSelected());
         settings.setEvosSimilarStrength(peSimilarStrengthCheckBox.isSelected());
@@ -1857,6 +1925,10 @@ public class NewRandomizerGUI {
         settings.setConsumableItemsOnlyForTrainers(tpConsumableItemsOnlyCheckBox.isVisible() && tpConsumableItemsOnlyCheckBox.isSelected());
         settings.setSensibleItemsOnlyForTrainers(tpSensibleItemsCheckBox.isVisible() && tpSensibleItemsCheckBox.isSelected());
         settings.setHighestLevelGetsItemsForTrainers(tpHighestLevelGetsItemCheckBox.isVisible() && tpHighestLevelGetsItemCheckBox.isSelected());
+        settings.setFoeAllowedGenerations(tpGen1CheckBox.isSelected() && tpGen1CheckBox.isVisible(), tpGen2CheckBox.isSelected() && tpGen2CheckBox.isVisible(),
+                tpGen3CheckBox.isSelected() && tpGen3CheckBox.isVisible(), tpGen4CheckBox.isSelected() && tpGen4CheckBox.isVisible(),
+                tpGen5CheckBox.isSelected() && tpGen5CheckBox.isVisible(), tpGen6CheckBox.isSelected() && tpGen6CheckBox.isVisible(),
+                tpGen7CheckBox.isSelected() && tpGen7CheckBox.isVisible());
 
         settings.setTotemPokemonMod(totpUnchangedRadioButton.isSelected(), totpRandomRadioButton.isSelected(), totpRandomSimilarStrengthRadioButton.isSelected());
         settings.setAllyPokemonMod(totpAllyUnchangedRadioButton.isSelected(), totpAllyRandomRadioButton.isSelected(), totpAllyRandomSimilarStrengthRadioButton.isSelected());
@@ -1880,6 +1952,10 @@ public class NewRandomizerGUI {
         settings.setWildLevelsModified(wpPercentageLevelModifierCheckBox.isSelected());
         settings.setWildLevelModifier(wpPercentageLevelModifierSlider.getValue());
         settings.setAllowWildAltFormes(wpAllowAltFormesCheckBox.isSelected() && wpAllowAltFormesCheckBox.isVisible());
+        settings.setWildAllowedGenerations(wpGen1CheckBox.isSelected() && wpGen1CheckBox.isVisible(), wpGen2CheckBox.isSelected() && wpGen2CheckBox.isVisible(),
+                wpGen3CheckBox.isSelected() && wpGen3CheckBox.isVisible(), wpGen4CheckBox.isSelected() && wpGen4CheckBox.isVisible(),
+                wpGen5CheckBox.isSelected() && wpGen5CheckBox.isVisible(), wpGen6CheckBox.isSelected() && wpGen6CheckBox.isVisible(),
+                wpGen7CheckBox.isSelected() && wpGen7CheckBox.isVisible());
 
         settings.setStaticPokemonMod(stpUnchangedRadioButton.isSelected(), stpSwapLegendariesSwapStandardsRadioButton.isSelected(),
                 stpRandomCompletelyRadioButton.isSelected(), stpRandomSimilarStrengthRadioButton.isSelected());
@@ -2238,6 +2314,27 @@ public class NewRandomizerGUI {
         spAllowAltFormesCheckBox.setVisible(true);
         spAllowAltFormesCheckBox.setEnabled(false);
         spAllowAltFormesCheckBox.setSelected(false);
+        spGen1CheckBox.setVisible(true);
+        spGen1CheckBox.setEnabled(false);
+        spGen1CheckBox.setSelected(false);
+        spGen2CheckBox.setVisible(true);
+        spGen2CheckBox.setEnabled(false);
+        spGen2CheckBox.setSelected(false);
+        spGen3CheckBox.setVisible(true);
+        spGen3CheckBox.setEnabled(false);
+        spGen3CheckBox.setSelected(false);
+        spGen4CheckBox.setVisible(true);
+        spGen4CheckBox.setEnabled(false);
+        spGen4CheckBox.setSelected(false);
+        spGen5CheckBox.setVisible(true);
+        spGen5CheckBox.setEnabled(false);
+        spGen5CheckBox.setSelected(false);
+        spGen6CheckBox.setVisible(true);
+        spGen6CheckBox.setEnabled(false);
+        spGen6CheckBox.setSelected(false);
+        spGen7CheckBox.setVisible(true);
+        spGen7CheckBox.setEnabled(false);
+        spGen7CheckBox.setSelected(false);
         stpUnchangedRadioButton.setVisible(true);
         stpUnchangedRadioButton.setEnabled(false);
         stpUnchangedRadioButton.setSelected(false);
@@ -2506,6 +2603,27 @@ public class NewRandomizerGUI {
         totpAllowAltFormesCheckBox.setVisible(true);
         totpAllowAltFormesCheckBox.setEnabled(false);
         totpAllowAltFormesCheckBox.setSelected(false);
+        tpGen1CheckBox.setVisible(true);
+        tpGen1CheckBox.setEnabled(false);
+        tpGen1CheckBox.setSelected(false);
+        tpGen2CheckBox.setVisible(true);
+        tpGen2CheckBox.setEnabled(false);
+        tpGen2CheckBox.setSelected(false);
+        tpGen3CheckBox.setVisible(true);
+        tpGen3CheckBox.setEnabled(false);
+        tpGen3CheckBox.setSelected(false);
+        tpGen4CheckBox.setVisible(true);
+        tpGen4CheckBox.setEnabled(false);
+        tpGen4CheckBox.setSelected(false);
+        tpGen5CheckBox.setVisible(true);
+        tpGen5CheckBox.setEnabled(false);
+        tpGen5CheckBox.setSelected(false);
+        tpGen6CheckBox.setVisible(true);
+        tpGen6CheckBox.setEnabled(false);
+        tpGen6CheckBox.setSelected(false);
+        tpGen7CheckBox.setVisible(true);
+        tpGen7CheckBox.setEnabled(false);
+        tpGen7CheckBox.setSelected(false);
         wpUnchangedRadioButton.setVisible(true);
         wpUnchangedRadioButton.setEnabled(false);
         wpUnchangedRadioButton.setSelected(false);
@@ -2560,6 +2678,27 @@ public class NewRandomizerGUI {
         wpAllowAltFormesCheckBox.setVisible(true);
         wpAllowAltFormesCheckBox.setEnabled(false);
         wpAllowAltFormesCheckBox.setSelected(false);
+        wpGen1CheckBox.setVisible(true);
+        wpGen1CheckBox.setEnabled(false);
+        wpGen1CheckBox.setSelected(false);
+        wpGen2CheckBox.setVisible(true);
+        wpGen2CheckBox.setEnabled(false);
+        wpGen2CheckBox.setSelected(false);
+        wpGen3CheckBox.setVisible(true);
+        wpGen3CheckBox.setEnabled(false);
+        wpGen3CheckBox.setSelected(false);
+        wpGen4CheckBox.setVisible(true);
+        wpGen4CheckBox.setEnabled(false);
+        wpGen4CheckBox.setSelected(false);
+        wpGen5CheckBox.setVisible(true);
+        wpGen5CheckBox.setEnabled(false);
+        wpGen5CheckBox.setSelected(false);
+        wpGen6CheckBox.setVisible(true);
+        wpGen6CheckBox.setEnabled(false);
+        wpGen6CheckBox.setSelected(false);
+        wpGen7CheckBox.setVisible(true);
+        wpGen7CheckBox.setEnabled(false);
+        wpGen7CheckBox.setSelected(false);
         tmUnchangedRadioButton.setVisible(true);
         tmUnchangedRadioButton.setEnabled(false);
         tmUnchangedRadioButton.setSelected(false);
@@ -2849,6 +2988,21 @@ public class NewRandomizerGUI {
             spRandomizeStarterHeldItemsCheckBox.setVisible(supportsStarterHeldItems);
             spBanBadItemsCheckBox.setEnabled(false);
             spBanBadItemsCheckBox.setVisible(supportsStarterHeldItems);
+            
+            spGen1CheckBox.setVisible(romHandler.generationOfPokemon() >= 1);
+            spGen1CheckBox.setEnabled(false);
+            spGen2CheckBox.setVisible(romHandler.generationOfPokemon() >= 2);
+            spGen2CheckBox.setEnabled(false);
+            spGen3CheckBox.setVisible(romHandler.generationOfPokemon() >= 3);
+            spGen3CheckBox.setEnabled(false);
+            spGen4CheckBox.setVisible(romHandler.generationOfPokemon() >= 4);
+            spGen4CheckBox.setEnabled(false);
+            spGen5CheckBox.setVisible(romHandler.generationOfPokemon() >= 5);
+            spGen5CheckBox.setEnabled(false);
+            spGen6CheckBox.setVisible(romHandler.generationOfPokemon() >= 6);
+            spGen6CheckBox.setEnabled(false);
+            spGen7CheckBox.setVisible(romHandler.generationOfPokemon() >= 7);
+            spGen7CheckBox.setEnabled(false);
 
             stpUnchangedRadioButton.setEnabled(true);
             stpUnchangedRadioButton.setSelected(true);
@@ -2958,6 +3112,21 @@ public class NewRandomizerGUI {
             tpRandomShinyTrainerPokemonCheckBox.setVisible(pokemonGeneration >= 7);
             tpBetterMovesetsCheckBox.setVisible(pokemonGeneration >= 3);
             tpBetterMovesetsCheckBox.setEnabled(pokemonGeneration >= 3);
+            
+            tpGen1CheckBox.setVisible(romHandler.generationOfPokemon() >= 1);
+            tpGen1CheckBox.setEnabled(false);
+            tpGen2CheckBox.setVisible(romHandler.generationOfPokemon() >= 2);
+            tpGen2CheckBox.setEnabled(false);
+            tpGen3CheckBox.setVisible(romHandler.generationOfPokemon() >= 3);
+            tpGen3CheckBox.setEnabled(false);
+            tpGen4CheckBox.setVisible(romHandler.generationOfPokemon() >= 4);
+            tpGen4CheckBox.setEnabled(false);
+            tpGen5CheckBox.setVisible(romHandler.generationOfPokemon() >= 5);
+            tpGen5CheckBox.setEnabled(false);
+            tpGen6CheckBox.setVisible(romHandler.generationOfPokemon() >= 6);
+            tpGen6CheckBox.setEnabled(false);
+            tpGen7CheckBox.setVisible(romHandler.generationOfPokemon() >= 7);
+            tpGen7CheckBox.setEnabled(false);
 
             totpPanel.setVisible(pokemonGeneration == 7);
             if (totpPanel.isVisible()) {
@@ -2998,6 +3167,21 @@ public class NewRandomizerGUI {
             wpBalanceShakingGrassPokemonCheckBox.setVisible(pokemonGeneration == 5);
             wpPercentageLevelModifierCheckBox.setEnabled(true);
             wpAllowAltFormesCheckBox.setVisible(romHandler.hasWildAltFormes());
+            
+            wpGen1CheckBox.setVisible(romHandler.generationOfPokemon() >= 1);
+            wpGen1CheckBox.setEnabled(false);
+            wpGen2CheckBox.setVisible(romHandler.generationOfPokemon() >= 2);
+            wpGen2CheckBox.setEnabled(false);
+            wpGen3CheckBox.setVisible(romHandler.generationOfPokemon() >= 3);
+            wpGen3CheckBox.setEnabled(false);
+            wpGen4CheckBox.setVisible(romHandler.generationOfPokemon() >= 4);
+            wpGen4CheckBox.setEnabled(false);
+            wpGen5CheckBox.setVisible(romHandler.generationOfPokemon() >= 5);
+            wpGen5CheckBox.setEnabled(false);
+            wpGen6CheckBox.setVisible(romHandler.generationOfPokemon() >= 6);
+            wpGen6CheckBox.setEnabled(false);
+            wpGen7CheckBox.setVisible(romHandler.generationOfPokemon() >= 7);
+            wpGen7CheckBox.setEnabled(false);
 
             tmUnchangedRadioButton.setEnabled(true);
             tmUnchangedRadioButton.setSelected(true);
@@ -3314,6 +3498,42 @@ public class NewRandomizerGUI {
         } else {
             spAllowAltFormesCheckBox.setEnabled(true);
         }
+        
+        if (spUnchangedRadioButton.isSelected() || spCustomRadioButton.isSelected()) {
+            spGen1CheckBox.setEnabled(false);
+            spGen1CheckBox.setSelected(false);
+            spGen2CheckBox.setEnabled(false);
+            spGen2CheckBox.setSelected(false);
+            spGen3CheckBox.setEnabled(false);
+            spGen3CheckBox.setSelected(false);
+            spGen4CheckBox.setEnabled(false);
+            spGen4CheckBox.setSelected(false);
+            spGen5CheckBox.setEnabled(false);
+            spGen5CheckBox.setSelected(false);
+            spGen6CheckBox.setEnabled(false);
+            spGen6CheckBox.setSelected(false);
+            spGen7CheckBox.setEnabled(false);
+            spGen7CheckBox.setSelected(false);
+        } else {
+            
+            boolean noneSelected = !spGen1CheckBox.isSelected() && !spGen2CheckBox.isSelected() && !spGen3CheckBox.isSelected() && !spGen4CheckBox.isSelected()
+                    && !spGen5CheckBox.isSelected() && !spGen6CheckBox.isSelected() && !spGen7CheckBox.isSelected();
+            
+            spGen1CheckBox.setEnabled(spGen1CheckBox.isVisible());
+            spGen1CheckBox.setSelected((noneSelected || spGen1CheckBox.isSelected()) && spGen1CheckBox.isVisible());
+            spGen2CheckBox.setEnabled(spGen2CheckBox.isVisible());
+            spGen2CheckBox.setSelected((noneSelected || spGen2CheckBox.isSelected()) && spGen2CheckBox.isVisible());
+            spGen3CheckBox.setEnabled(spGen3CheckBox.isVisible());
+            spGen3CheckBox.setSelected((noneSelected || spGen3CheckBox.isSelected()) && spGen3CheckBox.isVisible());
+            spGen4CheckBox.setEnabled(spGen4CheckBox.isVisible());
+            spGen4CheckBox.setSelected((noneSelected || spGen4CheckBox.isSelected()) && spGen4CheckBox.isVisible());
+            spGen5CheckBox.setEnabled(spGen5CheckBox.isVisible());
+            spGen5CheckBox.setSelected((noneSelected || spGen5CheckBox.isSelected()) && spGen5CheckBox.isVisible());
+            spGen6CheckBox.setEnabled(spGen6CheckBox.isVisible());
+            spGen6CheckBox.setSelected((noneSelected || spGen6CheckBox.isSelected()) && spGen6CheckBox.isVisible());
+            spGen7CheckBox.setEnabled(spGen7CheckBox.isVisible());
+            spGen7CheckBox.setSelected((noneSelected || spGen7CheckBox.isSelected()) && spGen7CheckBox.isVisible());
+        }
 
         if (spRandomizeStarterHeldItemsCheckBox.isSelected()) {
             spBanBadItemsCheckBox.setEnabled(true);
@@ -3463,6 +3683,20 @@ public class NewRandomizerGUI {
             tpHighestLevelGetsItemCheckBox.setSelected(false);
             tpEliteFourUniquePokemonCheckBox.setEnabled(false);
             tpEliteFourUniquePokemonCheckBox.setSelected(false);
+            tpGen1CheckBox.setEnabled(false);
+            tpGen1CheckBox.setSelected(false);
+            tpGen2CheckBox.setEnabled(false);
+            tpGen2CheckBox.setSelected(false);
+            tpGen3CheckBox.setEnabled(false);
+            tpGen3CheckBox.setSelected(false);
+            tpGen4CheckBox.setEnabled(false);
+            tpGen4CheckBox.setSelected(false);
+            tpGen5CheckBox.setEnabled(false);
+            tpGen5CheckBox.setSelected(false);
+            tpGen6CheckBox.setEnabled(false);
+            tpGen6CheckBox.setSelected(false);
+            tpGen7CheckBox.setEnabled(false);
+            tpGen7CheckBox.setSelected(false);
         } else {
             tpSimilarStrengthCheckBox.setEnabled(true);
             tpDontUseLegendariesCheckBox.setEnabled(true);
@@ -3484,6 +3718,24 @@ public class NewRandomizerGUI {
             tpImportantTrainersItemsCheckBox.setEnabled(tpImportantTrainersItemsCheckBox.isVisible());
             tpRegularTrainersItemsCheckBox.setEnabled(tpRegularTrainersItemsCheckBox.isVisible());
             tpEliteFourUniquePokemonCheckBox.setEnabled(tpEliteFourUniquePokemonCheckBox.isVisible());
+
+            boolean noneSelected = !tpGen1CheckBox.isSelected() && !tpGen2CheckBox.isSelected() && !tpGen3CheckBox.isSelected() && !tpGen4CheckBox.isSelected()
+                    && !tpGen5CheckBox.isSelected() && !tpGen6CheckBox.isSelected() && !tpGen7CheckBox.isSelected();
+
+            tpGen1CheckBox.setEnabled(tpGen1CheckBox.isVisible());
+            tpGen1CheckBox.setSelected((noneSelected || tpGen1CheckBox.isSelected()) && tpGen1CheckBox.isVisible());
+            tpGen2CheckBox.setEnabled(tpGen2CheckBox.isVisible());
+            tpGen2CheckBox.setSelected((noneSelected || tpGen2CheckBox.isSelected()) && tpGen2CheckBox.isVisible());
+            tpGen3CheckBox.setEnabled(tpGen3CheckBox.isVisible());
+            tpGen3CheckBox.setSelected((noneSelected || tpGen3CheckBox.isSelected()) && tpGen3CheckBox.isVisible());
+            tpGen4CheckBox.setEnabled(tpGen4CheckBox.isVisible());
+            tpGen4CheckBox.setSelected((noneSelected || tpGen4CheckBox.isSelected()) && tpGen4CheckBox.isVisible());
+            tpGen5CheckBox.setEnabled(tpGen5CheckBox.isVisible());
+            tpGen5CheckBox.setSelected((noneSelected || tpGen5CheckBox.isSelected()) && tpGen5CheckBox.isVisible());
+            tpGen6CheckBox.setEnabled(tpGen6CheckBox.isVisible());
+            tpGen6CheckBox.setSelected((noneSelected || tpGen6CheckBox.isSelected()) && tpGen6CheckBox.isVisible());
+            tpGen7CheckBox.setEnabled(tpGen7CheckBox.isVisible());
+            tpGen7CheckBox.setSelected((noneSelected || tpGen7CheckBox.isSelected()) && tpGen7CheckBox.isVisible());
         }
 
         if (tpForceFullyEvolvedAtCheckBox.isSelected()) {
@@ -3604,10 +3856,42 @@ public class NewRandomizerGUI {
             wpDontUseLegendariesCheckBox.setSelected(false);
             wpAllowAltFormesCheckBox.setEnabled(false);
             wpAllowAltFormesCheckBox.setSelected(false);
+            wpGen1CheckBox.setEnabled(false);
+            wpGen1CheckBox.setSelected(false);
+            wpGen2CheckBox.setEnabled(false);
+            wpGen2CheckBox.setSelected(false);
+            wpGen3CheckBox.setEnabled(false);
+            wpGen3CheckBox.setSelected(false);
+            wpGen4CheckBox.setEnabled(false);
+            wpGen4CheckBox.setSelected(false);
+            wpGen5CheckBox.setEnabled(false);
+            wpGen5CheckBox.setSelected(false);
+            wpGen6CheckBox.setEnabled(false);
+            wpGen6CheckBox.setSelected(false);
+            wpGen7CheckBox.setEnabled(false);
+            wpGen7CheckBox.setSelected(false);
         } else {
             wpUseTimeBasedEncountersCheckBox.setEnabled(true);
             wpDontUseLegendariesCheckBox.setEnabled(true);
             wpAllowAltFormesCheckBox.setEnabled(true);
+
+            boolean noneSelected = !wpGen1CheckBox.isSelected() && !wpGen2CheckBox.isSelected() && !wpGen3CheckBox.isSelected() && !wpGen4CheckBox.isSelected()
+                    && !wpGen5CheckBox.isSelected() && !wpGen6CheckBox.isSelected() && !wpGen7CheckBox.isSelected();
+
+            wpGen1CheckBox.setEnabled(wpGen1CheckBox.isVisible());
+            wpGen1CheckBox.setSelected((noneSelected || wpGen1CheckBox.isSelected()) && wpGen1CheckBox.isVisible());
+            wpGen2CheckBox.setEnabled(wpGen2CheckBox.isVisible());
+            wpGen2CheckBox.setSelected((noneSelected || wpGen2CheckBox.isSelected()) && wpGen2CheckBox.isVisible());
+            wpGen3CheckBox.setEnabled(wpGen3CheckBox.isVisible());
+            wpGen3CheckBox.setSelected((noneSelected || wpGen3CheckBox.isSelected()) && wpGen3CheckBox.isVisible());
+            wpGen4CheckBox.setEnabled(wpGen4CheckBox.isVisible());
+            wpGen4CheckBox.setSelected((noneSelected || wpGen4CheckBox.isSelected()) && wpGen4CheckBox.isVisible());
+            wpGen5CheckBox.setEnabled(wpGen5CheckBox.isVisible());
+            wpGen5CheckBox.setSelected((noneSelected || wpGen5CheckBox.isSelected()) && wpGen5CheckBox.isVisible());
+            wpGen6CheckBox.setEnabled(wpGen6CheckBox.isVisible());
+            wpGen6CheckBox.setSelected((noneSelected || wpGen6CheckBox.isSelected()) && wpGen6CheckBox.isVisible());
+            wpGen7CheckBox.setEnabled(wpGen7CheckBox.isVisible());
+            wpGen7CheckBox.setSelected((noneSelected || wpGen7CheckBox.isSelected()) && wpGen7CheckBox.isVisible());
         }
 
         if (wpRandomizeHeldItemsCheckBox.isSelected()

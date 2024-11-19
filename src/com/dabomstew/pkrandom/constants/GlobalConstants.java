@@ -229,4 +229,28 @@ public class GlobalConstants {
 
     // Eevee has 8 potential evolutions
     public static final int LARGEST_NUMBER_OF_SPLIT_EVOS = 8;
+    
+    public static final List<Integer> genStartNumbers = Arrays.asList(
+            Species.bulbasaur,
+            Species.chikorita,
+            Species.treecko,
+            Species.turtwig,
+            Species.victini,
+            Species.chespin,
+            Species.rowlet,
+            Species.grookey,
+            Species.wyrdeer
+    );
+    
+    public static final List<Integer> genEndNumbers = Arrays.asList(
+            Species.mew,
+            Species.celebi,
+            Species.deoxys,
+            Species.arceus,
+            Species.genesect,
+            Species.volcanion,
+            Species.melmetal,
+            Species.calyrex,
+            Species.pecharunt
+    );
 }

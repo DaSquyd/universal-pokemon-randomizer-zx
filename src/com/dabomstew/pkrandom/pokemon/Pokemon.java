@@ -25,13 +25,12 @@ package com.dabomstew.pkrandom.pokemon;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
+import com.dabomstew.pkrandom.constants.Gen7Constants;
+import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.constants.Species;
+import org.openjdk.nashorn.internal.objects.Global;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Pokemon implements Comparable<Pokemon> {
 
@@ -389,4 +388,17 @@ public class Pokemon implements Comparable<Pokemon> {
         return realCosmeticFormNumbers.isEmpty() ? num : realCosmeticFormNumbers.get(num);
     }
 
+    public int getGeneration() {
+        if (Gen7Constants.speciesWithAlolanForms.contains(number) && Objects.equals(formeSuffix, "-A"))
+            return 7;
+        
+        int baseNumber = getBaseNumber();
+
+        for (int i = 0; i < GlobalConstants.genStartNumbers.size(); ++i) {
+            if (baseNumber >= GlobalConstants.genStartNumbers.get(i) && baseNumber <= GlobalConstants.genEndNumbers.get(i))
+                return i + 1;
+        }
+        
+        return -1;
+    }
 }

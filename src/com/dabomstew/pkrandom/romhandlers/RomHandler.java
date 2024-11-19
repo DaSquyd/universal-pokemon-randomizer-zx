@@ -156,19 +156,15 @@ public interface RomHandler {
     // ====================================
     // Methods for selecting random Pokemon
     // ====================================
+    
+    Pokemon randomPlayerPokemon();
+    Pokemon randomFoePokemon();
 
-    // Give a random Pokemon who's in this game
-    Pokemon randomPokemon();
+    Pokemon randomPlayerPokemonInclFormes();
+    Pokemon randomFoePokemonInclFormes();
 
-    Pokemon randomPokemonInclFormes();
-
-    // Give a random non-legendary Pokemon who's in this game
-    // Business rules for who's legendary are in Pokemon class
-    Pokemon randomNonLegendaryPokemon();
-
-    // Give a random legendary Pokemon who's in this game
-    // Business rules for who's legendary are in Pokemon class
-    Pokemon randomLegendaryPokemon();
+    Pokemon randomNonLegendaryPlayerPokemon();
+    Pokemon randomNonLegendaryFoePokemon();
 
     // Give a random Pokemon who has 2 evolution stages
     // Should make a good starter Pokemon

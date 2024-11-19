@@ -220,6 +220,9 @@ public class Settings {
     private boolean wildLevelsModified;
     private int wildLevelModifier = 0;
     private boolean allowWildAltFormes;
+    private int starterAllowedGenerations;
+    private int foeAllowedGenerations;
+    private int wildAllowedGenerations;
 
     public enum StaticPokemonMod {
         UNCHANGED, RANDOM_MATCHING, COMPLETELY_RANDOM, SIMILAR_STRENGTH
@@ -608,6 +611,15 @@ public class Settings {
         } catch (IOException e) {
             e.printStackTrace(); // better than nothing
         }
+        
+        // 56-57: starter allowed generations
+        write2ByteInt(out, starterAllowedGenerations);
+        
+        // 58-59: foe allowed generations
+        write2ByteInt(out, foeAllowedGenerations);
+        
+        // 60-61: wild allowed generations
+        write2ByteInt(out, wildAllowedGenerations);
 
         try {
             byte[] romName = this.romName.getBytes("US-ASCII");
@@ -823,7 +835,7 @@ public class Settings {
         settings.setCurrentRestrictions(restrictions);
 
         long codeTweaksLow = ((long) FileFunctions.readFullIntBigEndian(data, 32)) & 0xFFFFFFFFL;
-        long codeTweaksHigh = ((long)FileFunctions.readFullIntBigEndian(data, 52)) & 0xFFFFFFFFL;
+        long codeTweaksHigh = ((long) FileFunctions.readFullIntBigEndian(data, 52)) & 0xFFFFFFFFL;
         long codeTweaks = codeTweaksLow | (codeTweaksHigh << 32);
         settings.setCurrentMiscTweaks(codeTweaks);
 
@@ -903,6 +915,10 @@ public class Settings {
         settings.setNoMetronome(restoreState(data[51], 4));
         settings.setNoMagnitude(restoreState(data[51], 5));
         settings.setNoOHKOMoves(restoreState(data[51], 6));
+        
+        settings.setStarterAllowedGenerations(FileFunctions.read2ByteInt(data, 56));
+        settings.setFoeAllowedGenerations(FileFunctions.read2ByteInt(data, 58));
+        settings.setWildAllowedGenerations(FileFunctions.read2ByteInt(data, 60));
 
         int romNameLength = data[LENGTH_OF_SETTINGS_DATA] & 0xFF;
         String romName = new String(data, LENGTH_OF_SETTINGS_DATA + 1, romNameLength, "US-ASCII");
@@ -1967,6 +1983,54 @@ public class Settings {
 
     public void setAllowWildAltFormes(boolean allowWildAltFormes) {
         this.allowWildAltFormes = allowWildAltFormes;
+    }
+
+    public int getStarterAllowedGenerations() {
+        return starterAllowedGenerations;
+    }
+
+    public void setStarterAllowedGenerations(int starterAllowedGenerations) {
+        this.starterAllowedGenerations = starterAllowedGenerations;
+    }
+
+    public void setStarterAllowedGenerations(boolean... starterAllowedGenerations) {
+        this.starterAllowedGenerations = 0;
+        for (int i = 0; i < starterAllowedGenerations.length; i++) {
+            if (starterAllowedGenerations[i])
+                this.starterAllowedGenerations |= 1 << i;
+        }
+    }
+
+    public int getFoeAllowedGenerations() {
+        return foeAllowedGenerations;
+    }
+
+    public void setFoeAllowedGenerations(int foeAllowedGenerations) {
+        this.foeAllowedGenerations = foeAllowedGenerations;
+    }
+
+    public void setFoeAllowedGenerations(boolean... foeAllowedGenerations) {
+        this.foeAllowedGenerations = 0;
+        for (int i = 0; i < foeAllowedGenerations.length; i++) {
+            if (foeAllowedGenerations[i])
+                this.foeAllowedGenerations |= 1 << i;
+        }
+    }
+    
+    public int getWildAllowedGenerations() { 
+        return wildAllowedGenerations;
+    }
+    
+    public void setWildAllowedGenerations(int wildAllowedGenerations) {
+        this.wildAllowedGenerations = wildAllowedGenerations;
+    }
+    
+    public void setWildAllowedGenerations(boolean... wildAllowedGenerations) {
+        this.wildAllowedGenerations = 0;
+        for (int i = 0; i < wildAllowedGenerations.length; i++) {
+            if (wildAllowedGenerations[i])
+                this.wildAllowedGenerations |= 1 << i;
+        }
     }
 
     public StaticPokemonMod getStaticPokemonMod() {
