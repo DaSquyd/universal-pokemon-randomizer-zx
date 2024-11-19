@@ -591,16 +591,16 @@ public class ParagonLiteOverlay {
         globalAddressMap.registerDataAddress(this, label, ramAddress, bytes.length, refPattern);
     }
 
-    public void replaceData(byte[] bytes, String label) {
-        replaceData(bytes, label, null);
+    public ParagonLiteAddressMap.DataAddress replaceData(byte[] bytes, String label) {
+        return replaceData(bytes, label, null);
     }
 
-    public void replaceData(byte[] bytes, String label, String refPattern) {
+    public ParagonLiteAddressMap.DataAddress replaceData(byte[] bytes, String label, String refPattern) {
         int romAddress = allocateRom(bytes.length);
         int ramAddress = romToRamAddress(romAddress);
         writeBytes(romAddress, bytes);
 
-        globalAddressMap.relocateDataAddress(this, label, ramAddress, bytes.length, refPattern);
+        return globalAddressMap.relocateDataAddress(this, label, ramAddress, bytes.length, refPattern);
     }
 
     public int newData(byte[] bytes, String label, String refPattern) {
