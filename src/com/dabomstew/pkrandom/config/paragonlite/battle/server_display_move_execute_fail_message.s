@@ -164,7 +164,7 @@ NoStatusMoves:
     str     r0, [sp, #ARG_03] ; terminator
     
     ldr     r0, [sp, #POKE]
-    bl      Battle::GetPokeHeldItem
+    bl      Battle::Poke_GetHeldItem
     str     r0, [sp, #ARG_02] ; itemId
     
     ldr     r2, =BTLTXT_Common_StatusMovePreventItem_StatusMoveAttempted

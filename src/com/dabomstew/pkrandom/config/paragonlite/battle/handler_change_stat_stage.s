@@ -23,7 +23,7 @@
     lsl     r1, r1, #24
     ldr     r0, [r5, #ServerFlow.pokeCon]
     lsr     r1, r1, #24
-    bl      Battle::GetPokeParam
+    bl      Battle::PokeCon_GetPoke
     str     r0, [sp, #VAR_BATTLE_MON]
     mov     r0, #0
     str     r0, [sp, #VAR_EFFECTIVE]
@@ -44,7 +44,7 @@ Label_0x021ACDFC:
     beq     Label_0x021ACE34
     ldrb    r1, [r7, #HandlerParam_ChangeStatStage.pokeIds[0]]
     ldr     r0, [r5, #ServerFlow.pokeCon]
-    bl      Battle::GetPokeParam
+    bl      Battle::PokeCon_GetPoke
     mov     r7, r0
     bl      Battle::IsPokeFainted
     cmp     r0, #0
@@ -98,7 +98,7 @@ Label_0x021ACE62:
     beq     Label_0x021ACECC
     ldrb    r1, [r7, #HandlerParam_ChangeStatStage.pokeIds[0]]
     ldr     r0, [r5, #ServerFlow.pokeCon]
-    bl      Battle::GetPokeParam
+    bl      Battle::PokeCon_GetPoke
     mov     r7, r0
     bl      Battle::IsPokeFainted
     cmp     r0, #0

@@ -75,7 +75,7 @@ PostModifyStat:
     beq     CheckUseRawStat
     
     ldr     r0, [r7, #0x08]
-    bl      Battle::GetPokeParam
+    bl      Battle::PokeCon_GetPoke
     mov     r6, r0
     
 CheckUseRawStat:

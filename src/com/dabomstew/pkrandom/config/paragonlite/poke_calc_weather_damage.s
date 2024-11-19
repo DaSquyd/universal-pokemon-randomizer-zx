@@ -1,65 +1,63 @@
     push    {r4, lr}
     mov     r4, r0
     
-    cmp     r1, #3 ; hail
+    cmp     r1, #WEATHER_Hail
     beq     HailFighting
     
-    cmp     r1, #4 ; sandstorm
-    bne     ReturnFalse
+    cmp     r1, #WEATHER_Sand
+    bne     ReturnZero
     
 SandstormGround:
-    mov     r1, #4 ; Ground-type
+    mov     r1, #TYPE_Ground
     bl      Battle::PokeHasType
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     SandstormRock
-    b       ReturnFalse
+    b       ReturnZero
     
 SandstormRock:
     mov     r0, r4
-    mov     r1, #5 ; Rock-type
+    mov     r1, #TYPE_Rock
     bl      Battle::PokeHasType
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     SandstormSteel
-    b       ReturnFalse
+    b       ReturnZero
     
 SandstormSteel:
     mov     r0, r4
-    mov     r1, #8 ; Steel-type
+    mov     r1, #TYPE_Steel
     bl      Battle::PokeHasType
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     ReturnTrue
-    b       ReturnFalse
+    b       ReturnZero
     
 HailFighting:
-    mov     r1, #1 ; Fighting-type
+    mov     r1, #TYPE_Fighting
     bl      Battle::PokeHasType
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     HailIce
-    b       ReturnFalse
+    b       ReturnZero
     
 HailIce:
     mov     r0, r4
-    mov     r1, #14 ; Ice-type
+    mov     r1, #TYPE_Ice
     bl      Battle::PokeHasType
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     ReturnTrue
     
-ReturnFalse:
+ReturnZero:
     mov     r0, #0
     pop     {r4, pc}
     
 ReturnTrue:
     mov     r0, r4
-    mov     r1, #0xE ; Total HP
+    mov     r1, #BPV_MaxHP
     bl      Battle::GetPokeStat
-    asr     r1, r0, #3
-    lsr     r1, #28
-    add     r1, r0
-    lsl     r0, r1, #12
-    lsr     r0, #16
-    bne     Ignore
+    lsr     r0, #4
+    bne     Return ; max between 1/16 HP and 1
+    
     mov     r0, #1
-Ignore:
+    
+Return:
     pop     {r4, pc}
     
     

@@ -62,7 +62,7 @@ CheckChoiceItem:
     bl      Battle::DisplayMessage
     
     mov     r0, r6
-    bl      Battle::GetPokeHeldItem
+    bl      Battle::Poke_GetHeldItem
     
     mov     r1, r0
     mov     r0, r4
@@ -281,7 +281,7 @@ HealBlockReturnTrue:
 CheckImprison:
     ldr     r0, [r7, #52]
     mov     r1, #3 ; Imprison
-    bl      Battle::IsFieldEffectActive
+    bl      Battle::Field_CheckEffectCore
     cmp     r0, #0
     beq     CheckGravity
     
@@ -289,7 +289,7 @@ CheckImprison:
     ldr     r1, [r7, #4]
     mov     r2, r6
     mov     r3, r5
-    bl      Battle::Imprison_HasSameMove
+    bl      Battle::Field_CheckImprisonCore
     cmp     r0, #0
     beq     CheckGravity
     
@@ -323,7 +323,7 @@ CheckGravity:
     ldr     r0, [r7, #52]
     mov     r1, #2 ; Gravity
     mov     r7, #2
-    bl      Battle::IsFieldEffectActive
+    bl      Battle::Field_CheckEffectCore
     cmp     r0, #0
     beq     ReturnFalse
     

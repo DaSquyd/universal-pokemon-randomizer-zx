@@ -76,7 +76,7 @@ LoopStart:
     add     r1, sp, #VAR_18
     ldrb    r1, [r1, r7]
     ldr     r0, [r5, #0x04]
-    bl      Battle::GetPokeParam
+    bl      Battle::PokeCon_GetPoke
     mov     r1, #ABILITY_STAT
     str     r0, [sp, #POKE]
     bl      Battle::GetPokeStat

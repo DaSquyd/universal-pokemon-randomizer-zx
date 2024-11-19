@@ -63,14 +63,14 @@ ProcessActionOrder:
     str     r0, [sp, #0x04]
     ldr     r0, [r5, #0x08]
     mov     r1, #0
-    bl      Battle::GetPokeParam
+    bl      Battle::PokeCon_GetPoke
     
     mov     r0, r5
     bl      Battle::ServerControl_CheckMatchup
     mov     r6, r0
     ldr     r0, [r5, #0x08]
     mov     r1, #0
-    bl      Battle::GetPokeParam
+    bl      Battle::PokeCon_GetPoke
     cmp     r6, #0
     beq     Label_0x0219FAA8
     mov     r0, #4
@@ -100,7 +100,7 @@ Label_0x0219FABE:
     beq     Label_0x0219FADA
     ldr     r0, [r5, #0x08]
     mov     r1, #0
-    bl      Battle::GetPokeParam
+    bl      Battle::PokeCon_GetPoke
     mov     r0, #3
     str     r0, [r5, #0x14]
     add     sp, #0x14

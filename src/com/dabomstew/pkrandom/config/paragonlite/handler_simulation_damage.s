@@ -37,12 +37,12 @@
     
     ldr     r0, [r5, #ServerFlow.pokeCon] ; r0 := serverFlow->pokeCon
     mov     r1, r6 ; r1 := attackingMonId
-    bl      Battle::GetPokeParam
+    bl      Battle::PokeCon_GetPoke
     str     r0, [sp, #ATTACKING_MON_PARAM]
     
     ldr     r0, [r5, #ServerFlow.pokeCon] ; r0 := serverFlow->pokeCon
     mov     r1, r7
-    bl      Battle::GetPokeParam
+    bl      Battle::PokeCon_GetPoke
     
     ldr     r1, =0x0774
     str     r0, [sp, #DEFENDING_MON_PARAM]
