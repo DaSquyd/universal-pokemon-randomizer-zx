@@ -944,4 +944,6 @@ public class Moves {
     public static final int psychicNoise = 917;
     public static final int upperHand = 918;
     public static final int malignantChain = 919;
+    
+    public static final int MAX = malignantChain;
 }

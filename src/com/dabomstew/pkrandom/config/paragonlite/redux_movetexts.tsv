@@ -1,0 +1,1024 @@
+--	
+Pound	The target is physically pounded with\xFFFEa long tail or a foreleg, etc.
+Karate Chop	The target is attacked with a sharp chop.\xFFFECritical hits land more easily.
+Double Slap	The target is slapped repeatedly, back\xFFFEand forth, two to five times in a row.
+Comet Punch	Striking opponents over and over makes\xFFFEthe user's fists harder.\xFFFEHitting a target raises the Attack stat.
+Mega Punch	The user stabs the target with a sharp\xFFFEhorn.\xFFFEThis attack never misses. 
+Pay Day	Numerous coins are hurled at the\xFFFEtarget to inflict damage.\xFFFEMoney is earned after the battle.
+Fire Punch	The target is punched with a fiery fist.\xFFFEIt may also leave the target with a burn.
+Ice Punch	The target is punched with an icy fist.\xFFFEIt may also give the target frostbite.
+Thunder Punch	The target is punched with an electrified\xFFFEfist. It may also leave the target\xFFFEwith paralysis.
+Scratch	Hard, pointed, and sharp claws rake\xFFFEthe target to inflict damage.
+Vise Grip	The target trapped by a squeezing pinch\xFFFEfrom both sides. The tight hold traps \xFFFEthe foe for 2-5 turns.
+Guillotine	A vicious, tearing attack with big pincers.\xFFFEThe target will faint instantly\xFFFEif this attack hits.
+Razor Wind	The user shears the target with blade-like\xFFFEwinds. It also lowers the target's Defense\xFFFEstat. Critical hits land more easily.
+Swords Dance	A frenetic dance to uplift the fighting\xFFFEspirit. It sharply raises the user's\xFFFEAttack stat.
+Cut	The target is cut with a scythe or a claw.\xFFFECritical hits land more easily.\xFFFEIt can also be used to cut down thin trees.
+Gust	A gust of wind is whipped up by wings and\xFFFElaunched at the target to inflict damage.
+Wing Attack	The target is struck with large, imposing\xFFFEwings spread wide to inflict damage.\xFFFEThis may cause the target to flinch.
+Whirlwind	The target is blown away and switched.\xFFFEIn the wild, a battle against a single\xFFFEPokémon ends.
+Fly	The user soars, then strikes its target\xFFFEon the second turn. It can also be\xFFFEused for flying to any familiar town.
+Bind	Things such as long bodies or tentacles\xFFFEare used to bind and squeeze\xFFFEthe target for four to five turns.
+Slam	The target is slammed with a long tail,\xFFFEvines, etc., to inflict damage.
+Vine Whip	The target is struck with slender,\xFFFEwhiplike vines to inflict damage.
+Stomp	The target is stomped with a big foot.\xFFFEIt may also make the target flinch.
+Double Kick	The target is quickly kicked twice in\xFFFEsuccession using both feet.
+Mega Kick	The target is attacked by a kick launched\xFFFEwith muscle-packed power.
+Jump Kick	The user jumps up high, then strikes\xFFFEwith a kick. If the kick misses, the\xFFFEuser hurts itself.
+Rolling Kick	The user lashes out with a quick, spinning\xFFFEkick. The rapid action boosts the user's\xFFFESpeed stat.
+Sand Attack	Sand is hurled in the target's face,\xFFFEreducing its accuracy.
+Headbutt	The user sticks out its head and attacks\xFFFEby charging straight into the target.\xFFFEIt may also make the target flinch.
+Horn Attack	The target is jabbed with a sharply\xFFFEpointed horn to inflict damage.
+Fury Attack	The target is jabbed repeatedly with a\xFFFEhorn or beak two to five times in a row.
+Horn Drill	The user stabs the target with a horn\xFFFEthat rotates like a drill.\xFFFEIf it hits, the target faints instantly.
+Tackle	A physical attack in which the user\xFFFEcharges and slams into the target\xFFFEwith its whole body.
+Body Slam	The user drops onto the target\xFFFEwith its full body weight. It may also\xFFFEleave the target with paralysis.
+Wrap	A long body or vines are used to wrap and\xFFFEsqueeze the target for four to five turns.
+Take Down	A reckless, full-body charge attack for\xFFFEslamming into the target.\xFFFEIt also damages the user a little.
+Thrash	The user rampages and attacks for two\xFFFEto three turns. It then becomes\xFFFEconfused, however.
+Double-Edge	A reckless, life-risking tackle.\xFFFEIt also damages the user by a fairly large\xFFFEamount, however.
+Tail Whip	The user wags its tail cutely, making\xFFFEopposing Pokémon less wary and\xFFFElowering their Defense stat.
+Poison Sting	The user stabs the target\xFFFEwith a poisonous stinger.\xFFFEThis may also poison the target.
+Twineedle	The user damages the target twice in\xFFFEsuccession by jabbing it with two spikes.\xFFFEIt may also poison the target.
+Pin Missile	Sharp spikes are shot at the target\xFFFEin rapid succession.\xFFFEThey hit two to five times in a row.
+Leer	The user gains an intimidating leer with\xFFFEsharp eyes. The opposing team's\xFFFEDefense stats are reduced.
+Bite	The target is bitten\xFFFEwith viciously sharp fangs.\xFFFEIt may make the target flinch.
+Growl	The user growls in an endearing way,\xFFFEmaking the opposing team less wary.\xFFFEThe foes' Attack stats are lowered.
+Roar	The target is scared off and switched.\xFFFEIn the wild, a battle against a single\xFFFEPokémon ends.
+Sing	A soothing lullaby is sung in a calming\xFFFEvoice that makes the target feel drowsy.
+Supersonic	The user generates odd sound waves from\xFFFEits body. It may confuse the target.
+Sonic Boom	The target is hit with a destructive shock\xFFFEwave that always inflicts 20 HP damage.
+Disable	For four turns, this move prevents the\xFFFEtarget from using the move it last used.
+Acid	The opposing team is attacked with a spray\xFFFEof harsh acid. The acid may also lower\xFFFEthe targets' Sp. Def stats.
+Ember	The target is attacked with small flames.\xFFFEIt may also leave the target with a burn.
+Flamethrower	The target is scorched with an intense\xFFFEblast of fire. It may also leave the target\xFFFEwith a burn.
+Mist	The user cloaks its body with a white mist\xFFFEthat prevents any of its stats from being\xFFFEcut for five turns.
+Water Gun	The target is blasted with a\xFFFEforceful shot of water.
+Hydro Pump	The target is blasted by a huge volume\xFFFEof water launched under great pressure.
+Surf	It swamps the area around the user\xFFFEwith a giant wave.\xFFFEIt can also be used for crossing water.
+Ice Beam	The target is struck with an icy-cold\xFFFEbeam of energy.\xFFFEIt may also give the target frostbite.
+Blizzard	A howling blizzard is summoned to strike\xFFFEthe opposing team. It may also give them\xFFFEfrostbite.
+Psybeam	The target is attacked with a peculiar ray.\xFFFEIt may also cause confusion.
+Bubble Beam	A spray of bubbles is forcefully ejected\xFFFEat the opposing team. It may also lower\xFFFEtheir Speed stats.
+Aurora Beam	The target is hit with a rainbow-colored\xFFFEbeam. This may also lower the target's\xFFFEAttack stat.
+Hyper Beam	The target is attacked with a powerful\xFFFEbeam. The user must rest on the next\xFFFEturn to regain its energy.
+Peck	The target is jabbed with a sharply\xFFFEpointed beak or horn.
+Drill Peck	A corkscrewing attack with the\xFFFEsharp beak acting as a drill.\xFFFECritcal hits land more easily.
+Submission	The user grabs the target and recklessly\xFFFEdives for the ground. It also hurts the\xFFFEuser slightly.
+Low Kick	A powerful low kick that makes the target\xFFFEfall over. It inflicts greater damage on\xFFFEheavier targets.
+Counter	A retaliation move that counters any\xFFFEphysical attack, inflicting double the\xFFFEdamage taken.
+Seismic Toss	The target is thrown using the power of\xFFFEgravity. It inflicts damage equal to\xFFFEthe user's level.
+Strength	The target is slugged with a strong punch.\xFFFEThis move can also move heavy boulders.\xFFFEIt may also raise the user's Attack stat.
+Absorb	A nutrient-draining attack. The user's\xFFFEHP is restored by half the damage taken\xFFFEby the target.
+Mega Drain	A nutrient-draining attack. The user's\xFFFEHP is restored by half the damage taken\xFFFEby the target.
+Leech Seed	A seed is planted on the target. It steals\xFFFEsome HP from the target every turn.
+Growth	The user's body grows all at once,\xFFFEraising the Attack and Sp. Atk stats.
+Razor Leaf	Sharp-edged leaves are launched\xFFFEto slash at the opposing team.\xFFFECritical hits land more easily.
+Solar Beam	A two-turn attack. The user gathers\xFFFElight, then blasts a bundled beam on the\xFFFEsecond turn.
+Poison Powder	The user scatters a cloud of poisonous\xFFFEdust on the target. It may poison\xFFFEthe target.
+Stun Spore	The user scatters a cloud of paralyzing\xFFFEpowder. It may leave the target\xFFFEwith paralysis.
+Sleep Powder	The user scatters a big cloud\xFFFEof lethargic dust around the target.\xFFFEThis makes the target drowsy.
+Petal Dance	The user attacks the target by scattering\xFFFEpetals for two to three turns.\xFFFEThe user then becomes confused.
+String Shot	The targets are bound with silk blown\xFFFEfrom the user's mouth. This silk reduces\xFFFEthe targets' Speed stat.
+Dragon Rage	This attack hits the target with a shock\xFFFEwave of pure rage. This attack always\xFFFEinflicts 40 HP damage.
+Fire Spin	The target becomes trapped within a\xFFFEfierce vortex of fire that rages for four\xFFFEto five turns.
+Thunder Shock	A jolt of electricity is hurled\xFFFEat the target to inflict damage. It may\xFFFEalso leave the target with paralysis.
+Thunderbolt	A strong electric blast is loosed at the\xFFFEtarget. It may also leave the target\xFFFEwith paralysis.
+Thunder Wave	A weak electric charge is launched at\xFFFEthe target. It causes paralysis if it hits.
+Thunder	A wicked thunderbolt is dropped\xFFFEon the target to inflict damage. It may\xFFFEalso leave the target with paralysis.
+Rock Throw	The user picks up and throws a small\xFFFErock at the target to attack.
+Earthquake	The user sets off an earthquake that\xFFFEstrikes those around it.
+Fissure	The user opens up a fissure in the ground\xFFFEand drops the target in.\xFFFEThe target instantly faints if it hits.
+Dig	The user burrows, then attacks\xFFFEon the second turn.\xFFFEIt can also be used to exit dungeons.
+Toxic	A move that leaves the target\xFFFEbadly poisoned.\xFFFEIts poison damage worsens every turn.
+Confusion	The target is hit by a weak telekinetic\xFFFEforce. It may also leave the\xFFFEtarget confused.
+Psychic	The target is hit by a strong telekinetic\xFFFEforce. It may also reduce the target's\xFFFESp. Def stat.
+Hypnosis	The user employs hypnotic suggestion\xFFFEto make the target fall into a drowsy\xFFFEstupor.
+Meditate	The user meditates to awaken the power\xFFFEdeep within its body and raise its\xFFFEAttack stat.
+Agility	The user relaxes and lightens its body to\xFFFEmove faster. It sharply boosts\xFFFEthe Speed stat.
+Quick Attack	The user lunges at the target at a speed\xFFFEthat makes it almost invisible. It is sure\xFFFEto strike first.
+Rage	As long as this move is in use, the power\xFFFEof rage raises the Attack stat each\xFFFEtime the user is hit in battle.
+Teleport	The user switches places with a party\xFFFEPokémon in waiting, if any.\xFFFEIf a wild Pokémon uses this move, it flees. 
+Night Shade	The user makes the target see a\xFFFEfrightening mirage. It inflicts damage\xFFFEmatching the user's level.
+Mimic	The user copies the target's last move.\xFFFEThe move can be used during battle\xFFFEuntil the Pokémon is switched out.
+Screech	An earsplitting screech harshly reduces\xFFFEthe target's Defense stat.
+Double Team	By moving rapidly, the user makes illusory\xFFFEcopies of itself to raise its evasiveness.
+Recover	Restoring its own cells, the user\xFFFErestores its own HP by half of\xFFFEits max HP.
+Harden	The user stiffens all the muscles in its\xFFFEbody to raise its Defense stat.
+Minimize	The user compresses its body\xFFFEto make itself look smaller,\xFFFEwhich sharply raises its evasiveness.
+Smokescreen	The user releases an obscuring cloud\xFFFEof smoke or ink. It reduces the\xFFFEtarget's accuracy.
+Confuse Ray	The target is exposed to a sinister\xFFFEray that triggers confusion.
+Withdraw	The user withdraws its body into its hard\xFFFEshell, raising its Defense stat.
+Defense Curl	The user curls up to conceal weak spots\xFFFEand raise its Defense stat.
+Barrier	The user throws up a sturdy wall that\xFFFEsharply raises its Defense stat.
+Light Screen	A wondrous wall of light is put up to\xFFFEsuppress damage from special attacks\xFFFEfor five turns.
+Haze	The user creates a haze that eliminates\xFFFEevery stat change among all the Pokémon\xFFFEengaged in battle.
+Reflect	A wondrous wall of light is put up to\xFFFEsuppress damage from physical attacks\xFFFEfor five turns.
+Focus Energy	The user takes a deep breath and focuses.\xFFFEThis guarantees a critical hit the following\xFFFEturn and raises the critical-hit ratio.
+Bide	The user endures attacks for two\xFFFEturns, then strikes back to cause\xFFFEdouble the damage taken.
+Metronome	The user waggles a finger and stimulates\xFFFEits brain into randomly using nearly\xFFFEany move.
+Mirror Move	The user counters the target by mimicking\xFFFEthe target's last move.
+Self-Destruct	The user attacks everything around it\xFFFEby causing an explosion.\xFFFEThe user faints upon using this move.
+Egg Bomb	A large egg is hurled at the target\xFFFEwith maximum force to inflict damage.\xFFFEThis attack does physical damage.
+Lick	The target is licked with a long tongue,\xFFFEcausing damage. It may also leave\xFFFEthe target with paralysis.
+Smog	The target is attacked with a\xFFFEdischarge of filthy gases.\xFFFEIt may also poison the target.
+Sludge	Unsanitary sludge is hurled at the target.\xFFFEIt may also poison the target.
+Bone Club	The user clubs the target with a bone.\xFFFEIt may also make the target flinch.
+Fire Blast	The target is attacked with an intense\xFFFEblast of all-consuming fire.\xFFFEIt may also leave the target with a burn.
+Waterfall	The user charges at the target\xFFFEand may make it flinch.\xFFFEIt can also be used to climb a waterfall.
+Clamp	The target is clamped and squeezed by\xFFFEthe user's very thick and sturdy shell for\xFFFEfour to five turns.
+Swift	Star-shaped rays are shot at the opposing\xFFFEteam. This attack never misses.
+Skull Bash	The user tucks in its head to raise its\xFFFEDefense in the first turn, then\xFFFErams the target on the next turn.
+Spike Cannon	Sharp spikes are shot at the target\xFFFEin rapid succession.\xFFFEThey hit two to five times in a row.
+Constrict	The target is attacked with long, creeping\xFFFEtentacles or vines.\xFFFEIt may also lower the target's Speed stat.
+Amnesia	The user temporarily empties its mind to\xFFFEforget its concerns.\xFFFEIt sharply raises the user's Sp. Def stat.
+Kinesis	The user distracts the target\xFFFEby bending a spoon.\xFFFEIt lowers the target's accuracy.
+Soft-Boiled	The user restores its own HP\xFFFEby up to half of its maximum HP.\xFFFEMay also be used in the field to heal HP.
+High Jump Kick	The target is attacked with a knee kick\xFFFEfrom a jump. If it misses, the user is hurt\xFFFEinstead.
+Glare	The user intimidates the target with the\xFFFEpattern on its belly to cause paralysis.
+Dream Eater	The user eats the dreams of a sleeping\xFFFEtarget. It absorbs half the damage\xFFFEcaused to heal the user's HP.
+Poison Gas	A cloud of poison gas is sprayed\xFFFEin the face of opposing Pokémon.\xFFFEIt may poison those hit.
+Barrage	Round objects are hurled at the target\xFFFEto strike three times in a row.
+Leech Life	The user drains the target's blood.\xFFFEThe user's HP is restored by half the\xFFFEdamage taken by the target.
+Lovely Kiss	With a scary face, the user tries to\xFFFEforce a kiss on the target. If it\xFFFEsucceeds, the target becomes drowsy.
+Sky Attack	A second-turn attack move where\xFFFEcritical hits land more easily.\xFFFEIt may also make the target flinch.
+Transform	The user transforms into a copy of the\xFFFEtarget right down to having\xFFFEthe same move set.
+Bubble	A spray of countless bubbles is jetted at\xFFFEthe opposing team. It may also lower the\xFFFEtargets' Speed stats.
+Dizzy Punch	The target is hit with rhythmically\xFFFElaunched punches that may also\xFFFEleave it confused.
+Spore	The user scatters bursts of spores\xFFFEat the target to induce drowsiness.
+Flash	The user flashes a bright light that cuts\xFFFEthe target's accuracy.\xFFFEIt can also be used to illuminate caves.
+Psywave	The target is attacked with an odd\xFFFEpsychic wave.\xFFFEThe attack varies in intensity.
+Splash	The user just flops and splashes around\xFFFEto no effect at all...
+Acid Armor	The user alters its cellular structure to\xFFFEliquefy itself, sharply raising its\xFFFEDefense stat.
+Crabhammer	The target is hammered with a large pincer.\xFFFEThis attack may also lower the target's\xFFFEDefense stat.
+Explosion	The user explodes to inflict damage on\xFFFEthose around it.\xFFFEThe user faints upon using this move.
+Fury Swipes	The target is raked with sharp claws or\xFFFEscythes for two to five times in\xFFFEquick succession.
+Bonemerang	The user throws the bone it holds. The\xFFFEbone loops to hit the target twice,\xFFFEcoming and going.
+Rest	The user becomes drowsy for two turns.\xFFFEIt fully restores the user's HP and heals\xFFFEany status problem.
+Rock Slide	Large boulders are hurled at the opposing\xFFFEteam to inflict damage. It may also make\xFFFEthe targets flinch.
+Hyper Fang	The user bites hard on the target\xFFFEwith its sharp front fangs.\xFFFEIt may also make the target flinch.
+Sharpen	The user reduces its polygon count to\xFFFEmake itself more jagged, raising the\xFFFEAttack stat.
+Conversion	The user changes its type to become the\xFFFEsame type as one of its moves.
+Tri Attack	The user strikes with a simultaneous\xFFFEthree-beam attack. May leave the target\xFFFEwith a burn, frostbite, or paralysis.
+Super Fang	The user chomps hard on the\xFFFEtarget with its sharp front fangs.\xFFFEIt cuts the target's HP to half.
+Slash	The target is attacked with a slash\xFFFEof claws or blades.\xFFFECritical hits land more easily.
+Substitute	The user makes a copy of itself using\xFFFEsome of its HP.\xFFFEThe copy serves as the user's decoy.
+Struggle	An attack that is used in desperation\xFFFEonly if the user has no PP. It also hurts\xFFFEthe user slightly.
+Sketch	It enables the user to permanently learn\xFFFEthe move last used by the target.\xFFFEOnce used, Sketch disappears.
+Triple Kick	A consecutive three-kick attack that\xFFFEbecomes more powerful with each\xFFFEsuccessive hit.
+Thief	The user attacks and steals the target's\xFFFEheld item simultaneously.\xFFFEIt can't steal if the user holds an item.
+Spider Web	The user ensnares the target with thin,\xFFFEgooey silk so it can't flee from battle.
+Mind Reader	The user senses the target's movements\xFFFEwith its mind to ensure its next\xFFFEattack does not miss the target.
+Nightmare	A sleeping target sees a nightmare\xFFFEthat inflicts some damage every turn.
+Flame Wheel	The user cloaks itself in fire and\xFFFEcharges at the target.\xFFFEIt may also leave the target with a burn.
+Snore	An attack that can be used only if the\xFFFEuser is asleep. The harsh noise may also\xFFFEmake the target flinch.
+Curse	A move that works differently for the\xFFFEGhost type than for all other types.
+Flail	The user flails about aimlessly to attack.\xFFFEIt becomes more powerful the less HP\xFFFEthe user has.
+Conversion 2	The user changes its type to make itself\xFFFEresistant to the type of the attack the\xFFFEopponent used last.
+Aeroblast	A vortex of air is shot at the target to\xFFFEinflict damage.\xFFFECritical hits land more easily.
+Cotton Spore	The user releases cotton-like spores\xFFFEthat cling to the target,\xFFFEharshly reducing its Speed stat.
+Reversal	An all-out attack that becomes more\xFFFEpowerful the less HP the user has.
+Spite	The user unleashes its grudge on the move\xFFFElast used by the target by cutting 4 PP\xFFFEfrom it.
+Powder Snow	The user attacks with a chilling gust\xFFFEof powdery snow.\xFFFEIt may also give the targets frostbite.
+Protect	It enables the user to evade all attacks.\xFFFEIts chance of failing rises if it is used in\xFFFEsuccession.
+Mach Punch	The user throws a punch at blinding\xFFFEspeed. It is certain to strike first.
+Scary Face	The user frightens the target with a scary\xFFFEface to harshly reduce its Speed stat.
+Feint Attack	The user approaches the target\xFFFEdisarmingly, then throws a sucker punch.\xFFFEIt hits without fail.
+Sweet Kiss	The user kisses the target with a sweet,\xFFFEangelic cuteness that causes confusion.
+Belly Drum	The user maximizes its Attack stat in\xFFFEexchange for HP equal to half its max HP.
+Sludge Bomb	Unsanitary sludge is hurled at the target.\xFFFEIt may also poison the target.
+Mud-Slap	The user hurls mud in the target's face to\xFFFEinflict damage and lower its accuracy.
+Octazooka	The user shoots an explosive projectile\xFFFEcomprised of an inky substance. The blast\xFFFEis super-effective against Steel types.
+Spikes	The user lays a trap of spikes at the\xFFFEopposing team's feet. The trap hurts\xFFFEPokémon that switch into battle.
+Zap Cannon	The user fires an electric blast like a\xFFFEcannon to inflict damage and\xFFFEcause paralysis.
+Foresight	Enables a Ghost-type target to be hit by\xFFFENormal- and Fighting-type attacks. It also\xFFFEenables an evasive target to be hit.
+Destiny Bond	When this move is used, if the user faints,\xFFFEthe Pokémon that landed the knockout\xFFFEhit also faints.
+Perish Song	Any Pokémon that hears this song\xFFFEfaints in three turns, unless it switches\xFFFEout of battle.
+Icy Wind	The user attacks with a gust of\xFFFEchilled air. It also reduces the targets'\xFFFESpeed stat.
+Detect	It enables the user to evade all attacks.\xFFFEIts chance of failing rises if it is used\xFFFEin succession.
+Bone Rush	The user strikes the target with a hard\xFFFEbone two to five times in a row.
+Lock-On	The user takes sure aim at the target.\xFFFEIt ensures the next attack does not fail\xFFFEto hit the target.
+Outrage	The user rampages and attacks for two\xFFFEto three turns.\xFFFEIt then becomes confused, however.
+Sandstorm	A five-turn sandstorm is summoned\xFFFEto hurt all combatants except the\xFFFERock, Ground, and Steel types.
+Giga Drain	A nutrient-draining attack. The user's\xFFFEHP is restored by half the damage\xFFFEtaken by the target.
+Endure	The user endures any attack with at least\xFFFE1 HP. Its chance of failing rises if it is\xFFFEused in succession.
+Charm	The user gazes at the target rather\xFFFEcharmingly, making it less wary.\xFFFEThe target's Attack is harshly lowered.
+Rollout	The user continually rolls into the target\xFFFEover five turns. It becomes stronger\xFFFEeach time it hits.
+False Swipe	A restrained attack that prevents the\xFFFEtarget from fainting.\xFFFEThe target is left with at least 1 HP.
+Swagger	The user enrages and confuses the target.\xFFFEHowever, it also sharply raises the\xFFFEtarget's Attack stat.
+Milk Drink	The user restores its own HP\xFFFEby up to half of its maximum HP.\xFFFEMay also be used in the field to heal HP.
+Spark	The user throws an electrically charged\xFFFEtackle at the target. It may also leave\xFFFEthe target with paralysis.
+Fury Cutter	The target is slashed with scythes or\xFFFEclaws. Its power increases if it hits\xFFFEin succession.
+Steel Wing	The target is hit with wings of steel.\xFFFEThis rasies the user's Defense stat.
+Mean Look	The user pins the target with a dark,\xFFFEarresting look.\xFFFEThe target becomes unable to flee.
+Attract	If it is the opposite gender of the user,\xFFFEthe target becomes infatuated and less\xFFFElikely to attack.
+Sleep Talk	While it is asleep, the user randomly uses\xFFFEone of the moves it knows.
+Heal Bell	The user makes a soothing bell chime\xFFFEto heal the status problems of all the\xFFFEparty Pokémon.
+Return	A full-power attack that grows more\xFFFEpowerful the more the user likes\xFFFEits Trainer.
+Present	The user attacks by giving the target a\xFFFEgift with a hidden trap. It restores\xFFFEHP sometimes, however.
+Frustration	A full-power attack that grows more\xFFFEpowerful the less the user likes\xFFFEits Trainer.
+Safeguard	The user creates a protective field that\xFFFEprevents status problems for five turns.
+Pain Split	The user adds its HP to the target's HP,\xFFFEthen equally shares the combined HP\xFFFEwith the target.
+Sacred Fire	The target is razed with a mystical fire\xFFFEof great intensity. It may also leave the\xFFFEtarget with a burn.
+Magnitude	The user looses a ground-shaking quake\xFFFEaffecting everyone around the user.\xFFFEIts power varies.
+Dynamic Punch	The user punches the target with full,\xFFFEconcentrated power.\xFFFEIt confuses the target if it hits.
+Megahorn	Using its tough and impressive horn,\xFFFEthe user rams into the target\xFFFEwith no letup.
+Dragon Breath	The user exhales a mighty gust that\xFFFEinflicts damage. It may also leave the\xFFFEtarget with paralysis.
+Baton Pass	The user switches places with a party\xFFFEPokémon in waiting, passing along any\xFFFEstat changes.
+Encore	The user compels the target\xFFFEto keep using only the move\xFFFEit last used for three turns.
+Pursuit	An attack move that inflicts double damage\xFFFEif used on a target that is switching out\xFFFEof battle.
+Rapid Spin	A spin attack that can also eliminate\xFFFEsuch moves as Bind, Wrap, Leech Seed,\xFFFEand Spikes.
+Sweet Scent	A sweet scent that lowers the opposing\xFFFEteam's evasiveness. It also lures wild\xFFFEPokémon if used in grass, etc.
+Iron Tail	The target is slammed with a steel-hard\xFFFEtail. It may also lower the target's\xFFFEDefense stat.
+Metal Claw	The target is raked with steel claws.\xFFFEIt may also raise the user's Attack stat.
+Vital Throw	The user attacks last.\xFFFEIn return, this throw move is\xFFFEguaranteed not to miss.
+Morning Sun	The user restores its own HP.\xFFFEThe amount of HP regained varies\xFFFEwith the weather.
+Synthesis	The user restores its own HP.\xFFFEThe amount of HP regained varies\xFFFEwith the weather.
+Moonlight	The user restores its own HP.\xFFFEThe amount of HP regained varies\xFFFEwith the weather.
+Hidden Power	A unique attack that varies in type and\xFFFEintensity depending on the Pokémon\xFFFEusing it.
+Cross Chop	The user delivers a double chop with its\xFFFEforearms crossed.\xFFFECritical hits land more easily.
+Twister	The user whips up a vicious tornado\xFFFEto tear at the opposing team.\xFFFEIt may also make targets flinch.
+Rain Dance	The user summons a heavy rain\xFFFEthat falls for five turns,\xFFFEpowering up Water-type moves.
+Sunny Day	The user intensifies the sun for\xFFFEfive turns, powering up\xFFFEFire-type moves.
+Crunch	The user crunches up the target\xFFFEwith sharp fangs. It may also lower\xFFFEthe target's Defense stat.
+Mirror Coat	A retaliation move that counters any\xFFFEspecial attack, inflicting double the\xFFFEdamage taken.
+Psych Up	The user hypnotizes itself into\xFFFEcopying any stat change made\xFFFEby the target.
+Extreme Speed	The user charges the target at blinding\xFFFEspeed. This attack always goes\xFFFEbefore any other move.
+Ancient Power	The user attacks with a prehistoric power.\xFFFEIt may also raise all the user's stats\xFFFEat once.
+Shadow Ball	The user hurls a shadowy blob at the\xFFFEtarget. It may also lower the target's\xFFFESp. Def stat.
+Future Sight	Two turns after this move is used,\xFFFEa hunk of psychic energy\xFFFEattacks the target.
+Rock Smash	The user attacks with a punch that can\xFFFEshatter a rock. This also lowers the\xFFFEtarget's Defense stat.
+Whirlpool	Traps foes in a violent swirling\xFFFEwhirlpool for four to five turns.
+Beat Up	The user gets all party Pokémon to attack\xFFFEthe target. The more party Pokémon,\xFFFEthe greater the number of attacks.
+Fake Out	An attack that hits first and makes the\xFFFEtarget flinch. It only works the first turn\xFFFEthe user is in battle.
+Uproar	The user attacks in an uproar for\xFFFEthree turns. Over that time,\xFFFEno one can fall asleep.
+Stockpile	The user charges up power and raises\xFFFEboth its Defense and Sp. Def. The move\xFFFEcan be used three times.
+Spit Up	The power stored using the move Stockpile\xFFFEis released at once in an attack. The more\xFFFEpower is stored, the greater the damage.
+Swallow	The power stored using the move Stockpile\xFFFEis absorbed by the user to heal its HP.\xFFFEStoring more power heals more HP.
+Heat Wave	The user attacks by exhaling hot breath\xFFFEon the opposing team. It may also leave\xFFFEtargets with a burn.
+Hail	The user summons a hailstorm lasting five\xFFFEturns. It damages all Pokémon except the\xFFFEIce type.
+Torment	The user torments and enrages the\xFFFEtarget, making it incapable of using\xFFFEthe same move twice in a row.
+Flatter	Flattery is used to confuse the target.\xFFFEHowever, it also raises the target's\xFFFESp. Atk stat.
+Will-O-Wisp	The user shoots a sinister, bluish-white\xFFFEflame at the target to inflict a burn.
+Memento	The user faints when using this move.\xFFFEIn return, it harshly lowers the target's\xFFFEAttack and Sp. Atk.
+Facade	An attack move that doubles its power if\xFFFEthe user is poisoned, burned, or\xFFFEhas paralysis.
+Focus Punch	The user focuses its mind before\xFFFElaunching a punch. It will fail if the user\xFFFEis hit before it is used.
+Smelling Salts	This attack inflicts double damage on a\xFFFEtarget with paralysis. It also cures the\xFFFEtarget's paralysis, however.
+Follow Me	The user draws attention to itself,\xFFFEmaking all targets take aim\xFFFEonly at the user.
+Nature Power	An attack that makes use of nature's\xFFFEpower. Its effects vary depending on the\xFFFEuser's environment.
+Charge	The user boosts the power of the Electric\xFFFEmove it uses on the next turn. It also\xFFFEraises the user's Sp. Def stat.
+Taunt	The target is taunted into a rage that\xFFFEallows it to use only attack moves\xFFFEfor three turns.
+Helping Hand	The user assists an ally by boosting\xFFFEthe power of its attack.
+Trick	The user catches the target off guard\xFFFEand swaps its held item with its own.
+Role Play	The user mimics the target completely,\xFFFEcopying the target's natural Ability.
+Wish	One turn after this move is used,\xFFFEthe target's HP is restored by\xFFFEhalf the user's maximum HP.
+Assist	The user hurriedly and randomly uses a\xFFFEmove among those known by other\xFFFEPokémon in the party.
+Ingrain	The user lays roots that restore\xFFFEits HP on every turn. Because it is\xFFFErooted, it can't switch out.
+Superpower	The user attacks the target with great\xFFFEpower. However, it also lowers the\xFFFEuser's Attack and Defense.
+Magic Coat	A barrier reflects back to the target\xFFFEmoves like Leech Seed and moves\xFFFEthat damage status.
+Recycle	The user recycles a held item that\xFFFEhas been used in battle so it can be\xFFFEused again.
+Revenge	An attack move that inflicts double the\xFFFEdamage if the user has been hurt by the\xFFFEopponent in the same turn.
+Brick Break	The user attacks with a swift chop. It\xFFFEcan also break any barrier such as Light\xFFFEScreen and Reflect.
+Yawn	The user lets loose a huge yawn that\xFFFElulls the target into falling asleep\xFFFEon the next turn.
+Knock Off	The user slaps down the target's\xFFFEheld item, preventing that item\xFFFEfrom being used in the battle.
+Endeavor	An attack move that cuts down the\xFFFEtarget's HP to equal the user's HP.
+Eruption	The user attacks the opposing team with\xFFFEexplosive fury. The lower the user's HP,\xFFFEthe less powerful this attack becomes.
+Skill Swap	The user employs its psychic power to\xFFFEexchange Abilities with the target.
+Imprison	If the opponents know any move also known\xFFFEby the user, the opponents are prevented\xFFFEfrom using it.
+Refresh	The user rests to cure itself of a\xFFFEpoisoning, burn, or paralysis.
+Grudge	If the user faints, the user's grudge\xFFFEfully depletes the PP of the opponent's\xFFFEmove that knocked it out.
+Snatch	The user steals the effects of any\xFFFEhealing or stat-changing move the\xFFFEopponent attempts to use.
+Secret Power	The user attacks the target with a\xFFFEsecret power. Its added effects vary\xFFFEdepending on the user's environment.
+Dive	Diving on the first turn, the user floats\xFFFEup and attacks on the second turn.\xFFFEIt can be used to dive deep in the ocean.
+Arm Thrust	The user looses a flurry of open-palmed\xFFFEarm thrusts that hit two to five times in\xFFFEa row.
+Camouflage	The user's type is changed depending on\xFFFEits environment, such as at water's edge,\xFFFEin grass, or in a cave.
+Tail Glow	The user stares at flashing lights to\xFFFEfocus its mind, drastically raising its\xFFFESp. Atk stat.
+Luster Purge	The user lets loose a damaging burst\xFFFEof light. It may also reduce the target's\xFFFESp. Def stat.
+Mist Ball	A mistlike flurry of down envelops and\xFFFEdamages the target. It may also lower\xFFFEthe target's Sp. Atk.
+Feather Dance	The user covers the target's body with a\xFFFEmass of down that harshly lowers its\xFFFEAttack stat.
+Teeter Dance	The user performs a wobbly dance that\xFFFEconfuses the Pokémon around it.
+Blaze Kick	The user launches a kick that lands a\xFFFEcritical hit more easily.\xFFFEIt may also leave the target with a burn.
+Mud Sport	The user covers itself with mud. It\xFFFEweakens Electric-type moves while the\xFFFEuser is in the battle.
+Ice Ball	The user continually rolls into the target\xFFFEover five turns. It becomes stronger\xFFFEeach time it hits.
+Needle Arm	The user attacks by wildly swinging its\xFFFEthorny arms. Spiked shrapnel from the \xFFFEimpact is scattered across the field.
+Slack Off	The user slacks off, restoring its own HP\xFFFEby up to half of its maximum HP.
+Hyper Voice	The user lets loose a horribly echoing\xFFFEshout with the power to inflict damage.
+Poison Fang	The user bites the target with toxic\xFFFEfangs. It may also leave the target\xFFFEbadly poisoned.
+Crush Claw	The user slashes the target with hard\xFFFEand sharp claws.\xFFFEIt may also lower the target's Defense.
+Blast Burn	The target is razed by a fiery explosion.\xFFFEThe user must rest on the\xFFFEnext turn, however.
+Hydro Cannon	The target is hit with a watery blast.\xFFFEThe user must rest on the\xFFFEnext turn, however.
+Meteor Mash	The target is hit with a hard punch fired\xFFFElike a meteor. It may also raise\xFFFEthe user's Attack.
+Astonish	The user attacks the target while shouting\xFFFEin a startling fashion.\xFFFEIt may also make the target flinch.
+Weather Ball	An attack move that varies in power and\xFFFEtype depending on the weather.
+Aromatherapy	The user releases a soothing scent that\xFFFEheals all status problems affecting\xFFFEthe user's party.
+Fake Tears	The user feigns crying to fluster\xFFFEthe target, harshly lowering its\xFFFESp. Def stat.
+Air Cutter	The user launches razor-like wind to\xFFFEslash the opposing team.\xFFFECritical hits land more easily.
+Overheat	The user attacks the target at full power.\xFFFEThe attack's recoil harshly reduces the\xFFFEuser's Sp. Atk stat.
+Odor Sleuth	Enables a Ghost-type target to be hit with\xFFFENormal- and Fighting-type attacks. It also\xFFFEenables an evasive target to be hit.
+Rock Tomb	Boulders are hurled at the target. It also\xFFFElowers the target's Speed by preventing\xFFFEits movement.
+Silver Wind	The target is attacked with powdery\xFFFEscales blown by wind.\xFFFEIt may also raise all the user's stats.
+Metal Sound	A horrible sound like scraping metal\xFFFEharshly reduces the target's\xFFFESp. Def stat.
+Grass Whistle	The user plays a pleasant melody that\xFFFElulls into a drowsy state.
+Tickle	The user tickles the target into laughing,\xFFFEreducing its Attack and Defense stats.
+Cosmic Power	The user absorbs a mystical power from\xFFFEspace to raise its Defense and\xFFFESp. Def stats.
+Water Spout	The user spouts water to damage the\xFFFEopposing team. The lower the user's HP,\xFFFEthe less powerful it becomes.
+Signal Beam	The user attacks with a sinister beam of\xFFFElight. It may also confuse the target.
+Shadow Punch	The user throws a punch from the shadows.\xFFFEThe punch lands without fail.
+Extrasensory	The user attacks with an odd,\xFFFEunseeable power.\xFFFEIt may also make the target flinch.
+Sky Uppercut	The user attacks the target with an\xFFFEuppercut thrown skyward with force.\xFFFEFlying types are hit super-effectively.
+Sand Tomb	The user traps the target inside a harshly\xFFFEraging sandstorm for four to five turns.
+Sheer Cold	The target is attacked with a blast of\xFFFEabsolute-zero cold.\xFFFEThe target instantly faints if it hits.
+Muddy Water	The user attacks by shooting muddy water\xFFFEat the opposing team.\xFFFEIt may also lower the targets' accuracy.
+Bullet Seed	The user forcefully shoots seeds at the\xFFFEtarget. Two to five seeds are shot in\xFFFErapid succession.
+Aerial Ace	The user confounds the target with speed,\xFFFEthen slashes.\xFFFEThe attack lands without fail.
+Icicle Spear	The user launches sharp icicles at the\xFFFEtarget. It strikes two to five times in\xFFFEa row.
+Iron Defense	The user hardens its body's surface\xFFFElike iron, sharply raising its\xFFFEDefense stat.
+Block	The user blocks the target's way with arms\xFFFEspread wide to prevent escape.
+Howl	The user howls loudly to raise its spirit,\xFFFEboosting its Attack stat. This also raises\xFFFEthe Attack stat of allies.
+Dragon Claw	The user slashes the target with huge,\xFFFEsharp claws.\xFFFECritical hits land more easily.
+Frenzy Plant	The user slams the target with\xFFFEan enormous tree.\xFFFEThe user can't move on the next turn.
+Bulk Up	The user tenses its muscles to bulk up\xFFFEits body, boosting both its Attack and\xFFFEDefense stats.
+Bounce	The user bounces up high, then drops on\xFFFEthe target on the second turn. It may\xFFFEalso leave the target with paralysis.
+Mud Shot	The user attacks by hurling a blob of mud\xFFFEat the target.\xFFFEIt also reduces the target's Speed.
+Poison Tail	The user hits the target with its tail.\xFFFEIt may also poison the target.\xFFFECritical hits land more easily.
+Covet	The user endearingly approaches\xFFFEthe target, then steals the target's\xFFFEheld item.
+Volt Tackle	The user electrifies itself, then charges.\xFFFEIt causes considerable damage to the user\xFFFEand may leave the target with paralysis.
+Magical Leaf	The user scatters curious leaves\xFFFEthat chase the target.\xFFFEThis attack will not miss.
+Water Sport	The user soaks itself with water. The move\xFFFEweakens Fire-type moves while the user\xFFFEis in the battle.
+Calm Mind	The user quietly focuses its mind and\xFFFEcalms its spirit to raise its Sp. Atk and\xFFFESp. Def stats.
+Leaf Blade	The user handles a sharp leaf like a\xFFFEsword and attacks by cutting its target.\xFFFECritical hits land more easily.
+Dragon Dance	The user vigorously performs a mystic,\xFFFEpowerful dance that boosts its Attack and\xFFFESpeed stats.
+Rock Blast	The user hurls hard rocks at the target.\xFFFETwo to five rocks are launched in quick\xFFFEsuccession.
+Shock Wave	The user strikes the target with a quick\xFFFEjolt of electricity.\xFFFEThis attack cannot be evaded.
+Water Pulse	The user attacks the target with\xFFFEa pulsing blast of water.\xFFFEIt may also confuse the target.
+Doom Desire	Two turns after this move is used, the\xFFFEuser blasts the target with a\xFFFEconcentrated bundle of light.
+Psycho Boost	The user attacks the target at full power.\xFFFEThe attack's recoil harshly reduces the\xFFFEuser's Sp. Atk stat.
+Roost	The user lands and rests its body.\xFFFEIt restores the user's HP by up to\xFFFEhalf of its max HP.
+Gravity	Gravity is intensified for five turns,\xFFFEmaking moves involving flying unusable\xFFFEand negating Levitate.
+Miracle Eye	Enables a Dark-type target to be hit by\xFFFEPsychic-type attacks. It also enables\xFFFEan evasive target to be hit.
+Wake-Up Slap	This attack inflicts big damage on a\xFFFEsleeping target. It also wakes the target\xFFFEup, however.
+Hammer Arm	The user swings and hits with its strong\xFFFEand heavy fist.\xFFFEIt lowers the user's Speed, however.
+Gyro Ball	The user tackles the target with a\xFFFEhigh-speed spin. The slower the\xFFFEuser, the greater the damage.
+Healing Wish	The user faints. In return, the Pokémon\xFFFEtaking its place will have its HP restored\xFFFEand status cured.
+Brine	If the target's HP is down to about half,\xFFFEthis attack will hit with double\xFFFEthe power.
+Natural Gift	The user draws power to attack by using\xFFFEits held Berry.\xFFFEThe Berry determines its type and power.
+Feint	An attack that hits a target using\xFFFEProtect or Detect. It also lifts\xFFFEthe effects of those moves.
+Pluck	The user pecks the target. If the target\xFFFEis holding a Berry, the user eats it and\xFFFEgains its effect.
+Tailwind	The user whips up a turbulent whirlwind\xFFFEthat ups the Speed of all party Pokémon\xFFFEfor four turns.
+Acupressure	The user applies pressure to stress\xFFFEpoints, sharply boosting one of\xFFFEits stats.
+Metal Burst	The user retaliates with much greater\xFFFEpower against the target\xFFFEthat last inflicted damage on it.
+U-turn	After making its attack, the user\xFFFErushes back to switch places with\xFFFEa party Pokémon in waiting.
+Close Combat	The user fights the target up close\xFFFEwithout guarding itself. It also cuts\xFFFEthe user's Defense, Sp. Def and Evasion.
+Payback	If the user moves after the target,\xFFFEthis attack's power will be doubled.
+Assurance	If the target has already taken some\xFFFEdamage in the same turn, this attack's\xFFFEpower is doubled.
+Embargo	It prevents the target from using its held\xFFFEitem. Its Trainer is also prevented from\xFFFEusing items on it.
+Fling	The user flings its held item at the target\xFFFEto attack. Its power and effects depend\xFFFEon the item.
+Psycho Shift	Using its psychic power of suggestion,\xFFFEthe user transfers its status problems\xFFFEto the target.
+Trump Card	The fewer PP this move has, the greater\xFFFEits attack power.
+Heal Block	For five turns, the user prevents the\xFFFEopposing team from using any moves,\xFFFEAbilities, or held items that recover HP.
+Wring Out	The user powerfully wrings the target.\xFFFEThe more HP the target has, the greater\xFFFEthis attack's power.
+Power Trick	The user employs its psychic power to\xFFFEswitch its Attack with its Defense stat.
+Gastro Acid	The user hurls up its stomach acids on\xFFFEthe target. The fluid eliminates the effect\xFFFEof the target's Ability.
+Lucky Chant	The user chants an incantation toward\xFFFEthe sky, preventing opposing Pokémon\xFFFEfrom landing critical hits.
+Me First	The user tries to cut ahead of the target\xFFFEto steal and use the target's intended\xFFFEmove with greater power.
+Copycat	The user mimics the move used immediately\xFFFEbefore it. The move fails if no other move\xFFFEhas been used yet.
+Power Swap	The user employs its psychic power to\xFFFEswitch changes to its Attack and\xFFFESp. Atk with the target.
+Guard Swap	The user employs its psychic power to\xFFFEswitch changes to its Defense and\xFFFESp. Def with the target.
+Punishment	This attack's power increases\xFFFEthe more the target has powered\xFFFEup with stat changes.
+Last Resort	This move can be used only after the user\xFFFEhas used all the other moves it knows\xFFFEin the battle.
+Worry Seed	A seed that causes worry is planted on\xFFFEthe target. It prevents sleep by making\xFFFEits Ability Insomnia.
+Sucker Punch	This move enables the user to attack\xFFFEfirst. It fails if the target is not\xFFFEreadying an attack, however.
+Toxic Spikes	The user lays a trap of poison spikes at\xFFFEthe opponent's feet. They poison\xFFFEopponents that switch into battle.
+Heart Swap	The user employs its psychic power to\xFFFEswitch stat changes with the target.
+Aqua Ring	The user envelops itself in a veil made\xFFFEof water. It regains some HP on\xFFFEevery turn.
+Magnet Rise	The user levitates using electrically\xFFFEgenerated magnetism for five turns.
+Flare Blitz	The user cloaks itself in fire and charges\xFFFEat the target. The user sustains serious\xFFFEdamage and may leave the target burned.
+Force Palm	The target is attacked with a shock wave.\xFFFEIt may also leave the target\xFFFEwith paralysis.
+Aura Sphere	The user looses a blast of aura power\xFFFEfrom deep within its body at the target.\xFFFEThis attack never misses.
+Rock Polish	The user polishes its body to reduce drag.\xFFFEIt can sharply raise the Speed stat.
+Poison Jab	The target is stabbed with a tentacle or\xFFFEarm steeped in poison. It may also\xFFFEpoison the target.
+Dark Pulse	The user releases a horrible aura.\xFFFEThis attack never misses and\xFFFEmay also make the target flinch.
+Night Slash	The user slashes the target\xFFFEthe instant an opportunity arises.\xFFFECritical hits land more easily.
+Aqua Tail	The user attacks by swinging its tail as if\xFFFEit were a vicious wave in a raging storm.
+Seed Bomb	The user slams a barrage of hard-shelled\xFFFEseeds down on the target from above.
+Air Slash	The user attacks with a blade of air that\xFFFEslices even the sky. It may also make the\xFFFEtarget flinch.
+X-Scissor	The user slashes at the target by\xFFFEcrossing its scythes or claws.\xFFFECritical hits land more easily.
+Bug Buzz	The user vibrates its wings to generate a\xFFFEdamaging sound wave. It may also lower\xFFFEthe target's Sp. Def stat.
+Dragon Pulse	The target is attacked with a shock wave\xFFFEgenerated by the user's gaping mouth.\xFFFEThis attack never misses.
+Dragon Rush	The user tackles the target while\xFFFEexhibiting overwhelming menace.\xFFFEIt may also make the target flinch.
+Power Gem	The user attacks with a ray of light that\xFFFEsparkles as if it were made of gemstones. \xFFFEThis may lower the target's Sp. Def stat.
+Drain Punch	An energy-draining punch. The user's\xFFFEHP is restored by half the damage taken\xFFFEby the target.
+Vacuum Wave	The user whirls its fists to send a wave\xFFFEof pure vacuum at the target. This move\xFFFEalways goes first.
+Focus Blast	The user heightens its mental focus and\xFFFEunleashes its power.\xFFFEIt may also lower the target's Sp. Def.
+Energy Ball	The user draws power from nature and\xFFFEfires it at the target.\xFFFEIt may also lower the target's Sp. Def.
+Brave Bird	The user tucks in its wings and charges\xFFFEfrom a low altitude.\xFFFEThe user also takes serious damage.
+Earth Power	The user makes the ground under\xFFFEthe target erupt with power.\xFFFEIt may also lower the target's Sp. Def.
+Switcheroo	The user trades held items with the target\xFFFEfaster than the eye can follow.
+Giga Impact	The user charges at the target using\xFFFEevery bit of its power.\xFFFEThe user must rest on the next turn.
+Nasty Plot	The user stimulates its brain by thinking\xFFFEbad thoughts.\xFFFEIt sharply raises the user's Sp. Atk.
+Bullet Punch	The user strikes the target\xFFFEwith tough punches as fast as bullets.\xFFFEThis move always goes first.
+Avalanche	An attack move that inflicts double the\xFFFEdamage if the user has been hurt by the\xFFFEtarget in the same turn.
+Ice Shard	The user flash freezes chunks of\xFFFEice and hurls them at the target.\xFFFEThis move always goes first.
+Shadow Claw	The user slashes with a sharp claw made\xFFFEfrom shadows.\xFFFECritical hits land more easily.
+Thunder Fang	The user bites with electrified fangs.\xFFFEIt may also make the target flinch or\xFFFEleave it with paralysis.
+Ice Fang	The user bites with cold-infused fangs.\xFFFEIt may also make the target flinch or\xFFFEleave it with frostbite.
+Fire Fang	The user bites with flame-cloaked fangs.\xFFFEIt may also make the target flinch or leave\xFFFEit burned.
+Shadow Sneak	The user extends its shadow and attacks\xFFFEthe target from behind.\xFFFEThis move always goes first.
+Mud Bomb	The user launches a hard-packed\xFFFEmud ball to attack.\xFFFEIt may also lower the target's accuracy.
+Psycho Cut	The user tears at the target with blades\xFFFEformed by psychic power.\xFFFECritical hits land more easily.
+Zen Headbutt	The user focuses its willpower to its head\xFFFEand attacks the target.\xFFFEIt may also make the target flinch.
+Mirror Shot	The user looses a flash of energy at\xFFFEthe target from its polished body.\xFFFEIt may also lower the target's accuracy.
+Flash Cannon	The user gathers all its light energy and\xFFFEreleases it at once. It may also lower the\xFFFEtarget's Sp. Def stat.
+Rock Climb	The user attacks the target by smashing\xFFFEinto it with incredible force.\xFFFEIt may also confuse the target.
+Defog	A strong wind blows away the target's\xFFFEobstacles such as Reflect or Light Screen.\xFFFEIt also lowers the target's evasiveness.
+Trick Room	The user creates a bizarre area in which\xFFFEslower Pokémon get to move first for\xFFFEfive turns.
+Draco Meteor	Comets are summoned down from the sky\xFFFEonto the target. The attack's recoil\xFFFEharshly reduces the user's Sp. Atk stat.
+Discharge	A flare of electricity is loosed to strike\xFFFEthe area around the user.\xFFFEIt may also cause paralysis.
+Lava Plume	An inferno of scarlet flames torches\xFFFEeverything around the user. It may\xFFFEleave targets with a burn.
+Leaf Storm	The user whips up a storm of leaves around\xFFFEthe target. The attack's recoil harshly\xFFFEreduces the user's Sp. Atk stat.
+Power Whip	The user violently whirls its vines or\xFFFEtentacles to harshly lash the target.
+Rock Wrecker	The user launches a huge boulder at the\xFFFEtarget to attack. It must rest on the\xFFFEnext turn, however.
+Cross Poison	A slashing attack with a poisonous blade\xFFFEthat may also leave the target poisoned.\xFFFECritical hits land more easily.
+Gunk Shot	The user shoots filthy garbage\xFFFEat the target to attack.\xFFFEIt may also poison the target.
+Iron Head	The user slams the target\xFFFEwith its steel-hard head.\xFFFEIt may also make the target flinch.
+Magnet Bomb	The user launches steel bombs that\xFFFEstick to the target. This attack will not \xFFFEmiss and deals physical damage.
+Stone Edge	The user stabs the foe with\xFFFEsharpened stones from below.\xFFFEIt has a high critical-hit ratio.
+Captivate	If it is the opposite gender of the user,\xFFFEthe target is charmed into harshly\xFFFElowering its Sp. Atk stat.
+Stealth Rock	The user lays a trap of levitating stones\xFFFEaround the opponent's team. The trap\xFFFEhurts opponents that switch into battle.
+Grass Knot	The user snares the target with grass and\xFFFEtrips it. The heavier the target,\xFFFEthe greater the damage.
+Chatter	The user attacks using a sound wave\xFFFEbased on words it has learned.\xFFFEIt may also confuse the target.
+Judgment	The user releases countless shots of\xFFFElight at the target. Its type varies with\xFFFEthe kind of Plate the user is holding.
+Bug Bite	The user bites the target. If the target\xFFFEis holding a Berry, the user eats it and\xFFFEgains its effect.
+Charge Beam	The user attacks with an electric\xFFFEcharge. The user may use any remaining\xFFFEelectricity to raise its Sp. Atk stat.
+Wood Hammer	The user slams its rugged body into the\xFFFEtarget to attack. The user also sustains\xFFFEserious damage.
+Aqua Jet	The user lunges at the target at a speed\xFFFEthat makes it almost invisible. It is sure\xFFFEto strike first.
+Attack Order	The user calls out its underlings to\xFFFEpummel the target.\xFFFECritical hits land more easily.
+Defend Order	The user calls out its underlings to\xFFFEshield its body, raising its Defense\xFFFEand Sp. Def stats.
+Heal Order	The user calls out its underlings to\xFFFEheal it. The user regains up to half of its\xFFFEmax HP.
+Head Smash	The user attacks the target with a\xFFFEhazardous, full-power headbutt.\xFFFEThe user also takes terrible damage.
+Double Hit	The user slams the target with a long tail,\xFFFEvines, or tentacle.\xFFFEThe target is hit twice in a row.
+Roar of Time	The user blasts the target with power\xFFFEthat distorts even time.\xFFFEThe user must rest on the next turn.
+Spacial Rend	The user tears the target along with the\xFFFEspace around it.\xFFFECritical hits land more easily.
+Lunar Dance	The user faints. In return, the Pokémon\xFFFEtaking its place will have its status and\xFFFEHP fully restored.
+Crush Grip	The target is crushed with great force.\xFFFEThe attack is more powerful the more\xFFFEHP the target has left.
+Magma Storm	The target becomes trapped\xFFFEwithin a maelstrom of fire that rages\xFFFEfor four to five turns.
+Dark Void	Opposing Pokémon are dragged into\xFFFEa world of total darkness that makes\xFFFEthem drowsy.
+Seed Flare	The user emits a shock wave from\xFFFEits body to attack its target. It may\xFFFEharshly lower the target's Sp. Def.
+Ominous Wind	The user blasts the target with a gust of\xFFFErepulsive wind. It may also raise all the\xFFFEuser's stats at once.
+Shadow Force	The user disappears, then strikes the\xFFFEtarget on the second turn.\xFFFEIt hits even if the target protects itself.
+Hone Claws	The user sharpens its claws to\xFFFEboost its Attack stat and accuracy.
+Wide Guard	The user and its allies are protected from\xFFFEwide-ranging attacks for one turn. If used\xFFFEin succession, its chance of failing rises.
+Guard Split	The user employs its psychic power to\xFFFEaverage its Defense and Sp. Def stats\xFFFEwith those of its target's.
+Power Split	The user employs its psychic power to\xFFFEaverage its Attack and Sp. Atk stats\xFFFEwith those of the target's.
+Wonder Room	The user creates a bizarre area in which\xFFFEPokémon's Defense and Sp. Def\xFFFEstats are swapped for five turns.
+Psyshock	The user materializes an odd\xFFFEpsychic wave to attack the target.\xFFFEThis attack does physical damage.
+Venoshock	The user drenches the target in a special\xFFFEpoisonous liquid. It may poison the target.\xFFFEPower doubles if the target is poisoned.
+Autotomize	The user sheds part of its body\xFFFEto make itself lighter and drastically\xFFFEraise its Speed stat.
+Rage Powder	The user scatters a cloud of irritating\xFFFEpowder to draw attention to itself.\xFFFEOpponents aim only at the user.
+Telekinesis	The user makes the target float with its\xFFFEpsychic power. The target is easier to\xFFFEhit for three turns.
+Magic Room	The user creates a bizarre area\xFFFEin which Pokémon's held items\xFFFElose their effects for five turns.
+Smack Down	The user throws a stone or projectile to\xFFFEattack an opponent. A flying Pokémon will\xFFFEfall to the ground when hit.
+Storm Throw	The user strikes the target with a fierce\xFFFEblow. This attack always results in a\xFFFEcritical hit.
+Flame Burst	The user attacks the target with a\xFFFEbursting flame. The bursting flame damages\xFFFEPokémon next to the target as well.
+Sludge Wave	It swamps the area around the user with a\xFFFEgiant sludge wave.\xFFFEIt may also poison those hit.
+Quiver Dance	The user lightly performs a beautiful,\xFFFEmystic dance. It boosts the user's\xFFFESp. Atk, Sp. Def, and Speed stats.
+Heavy Slam	The user slams into the target with its\xFFFEheavy body. The more the user outweighs\xFFFEthe target, the greater its damage.
+Synchronoise	Using an odd shock wave, the user\xFFFEinflicts damage on any Pokémon of the same\xFFFEtype in the area around it.
+Electro Ball	The user hurls an electric orb\xFFFEat the target. The faster the user is\xFFFEthan the target, the greater the damage.
+Soak	The user shoots a torrent of water\xFFFEat the target and changes\xFFFEthe target's type to Water.
+Flame Charge	The user cloaks itself with flame and\xFFFEattacks. Building up more power,\xFFFEit raises the user's Speed stat.
+Coil	The user coils up and concentrates.\xFFFEThis raises its Attack and Defense stats\xFFFEas well as its accuracy.
+Low Sweep	The user attacks the target's legs\xFFFEswiftly, reducing the target's\xFFFESpeed stat.
+Acid Spray	The user spits fluid that works to melt\xFFFEthe target. This harshly reduces\xFFFEthe target's Sp. Def stat.
+Foul Play	The user turns the target's power\xFFFEagainst it. The higher the target's\xFFFEAttack stat, the greater the damage.
+Simple Beam	The user's mysterious psychic wave\xFFFEchanges the target's Ability to Simple.
+Entrainment	The user dances with an odd rhythm that\xFFFEcompels the target to mimic it, making the\xFFFEtarget's Ability the same as the user's.
+After You	The user helps the target and makes it\xFFFEuse its move right after the user.
+Round	The user attacks the target with a song.\xFFFEOthers can join in the Round and make\xFFFEthe attack do greater damage.
+Echoed Voice	The user attacks the target with an\xFFFEechoing voice. If this move is used\xFFFEevery turn, it does greater damage.
+Chip Away	Looking for an opening, the user strikes\xFFFEcontinually. The target's stat changes\xFFFEdon't affect this attack's damage.
+Clear Smog	The user attacks by throwing a clump of\xFFFEspecial mud. All status changes are\xFFFEreturned to normal.
+Stored Power	The user attacks the target with stored\xFFFEpower. The more the user's stats are\xFFFEraised, the greater the damage.
+Quick Guard	The user protects itself and its allies\xFFFEfrom priority moves. If used in\xFFFEsuccession, its chance of failing rises.
+Ally Switch	The user teleports using a strange power\xFFFEand switches its place with one of\xFFFEits allies.
+Scald	The user shoots boiling hot water at\xFFFEits target. It may also leave the target\xFFFEwith a burn.
+Shell Smash	The user breaks its shell, lowering its\xFFFEDefense and Sp. Def stats but sharply\xFFFEraising Attack, Sp. Atk, and Speed stats.
+Heal Pulse	The user emits a healing pulse which\xFFFErestores the target's HP by up to\xFFFEhalf of its max HP.
+Hex	This relentless attack does massive\xFFFEdamage to a target affected\xFFFEby status problems.
+Sky Drop	The user takes the target into the sky,\xFFFEthen drops it during the next turn.\xFFFEThe target cannot attack while in the sky.
+Shift Gear	The user rotates its gears, raising its\xFFFEAttack and sharply raising its Speed.
+Circle Throw	The target is thrown and switched.\xFFFEIn the wild, a battle against a single\xFFFEPokémon ends.
+Incinerate	The user attacks the target with fire.\xFFFEIf the target is holding a Berry, the\xFFFEBerry becomes burnt up and unusable.
+Quash	The user suppresses the target and\xFFFEmakes its move go last.
+Acrobatics	The user nimbly strikes the target.\xFFFEIf the user is not holding an item,\xFFFEthis attack inflicts massive damage.
+Reflect Type	The user reflects the target's type,\xFFFEmaking it the same type as the target.
+Retaliate	The user gets revenge for a fainted ally.\xFFFEIf an ally fainted in the previous turn,\xFFFEthis attack's damage increases.
+Final Gambit	The user risks everything to attack its\xFFFEtarget. The user faints but does damage\xFFFEequal to the user's HP.
+Bestow	The user passes its held item to the\xFFFEtarget when the target isn't holding\xFFFEan item.
+Inferno	The user attacks by engulfing the target\xFFFEin an intense fire. It leaves the target\xFFFEwith a burn.
+Water Pledge	A column of water strikes the target. When\xFFFEcombined with its fire equivalent, the\xFFFEdamage increases and a rainbow appears.
+Fire Pledge	A column of fire hits opposing Pokémon.\xFFFEWhen used with its Grass equivalent, its\xFFFEdamage increases into a vast sea of fire.
+Grass Pledge	A column of grass hits opposing Pokémon.\xFFFEWhen used with its water equivalent, its\xFFFEdamage increases into a vast swamp.
+Volt Switch	After making its attack, the user\xFFFErushes back to switch places with\xFFFEa party Pokémon in waiting.
+Struggle Bug	While resisting, the user attacks the\xFFFEopposing Pokémon. The targets'\xFFFESp. Atk stat is reduced.
+Bulldoze	The user stomps down on the ground\xFFFEand attacks everything in the area. Hit\xFFFEPokémon's Speed stat is reduced.
+Frost Breath	The user blows a cold breath on the\xFFFEtarget. This attack always results in\xFFFEa critical hit.
+Dragon Tail	The target is knocked away and switched.\xFFFEIn the wild, a battle against a single\xFFFEPokémon ends.
+Work Up	The user is roused, and its Attack\xFFFEand Sp. Atk stats increase.
+Electroweb	The user captures and attacks opposing\xFFFEPokémon by using an electric net. It\xFFFEreduces the targets' Speed stat.
+Wild Charge	The user shrouds itself in electricity\xFFFEand smashes into its target.
+Drill Run	The user crashes into its target while\xFFFErotating its body like a drill.\xFFFECritical hits land more easily.
+Dual Chop	The user attacks its target by hitting\xFFFEit with brutal strikes.\xFFFEThe target is hit twice in a row.
+Heart Stamp	The user unleashes a vicious blow after\xFFFEits cute act makes the target less wary.\xFFFEIt may also make the target flinch.
+Horn Leech	The user drains the target's energy with\xFFFEits horns. The user's HP is restored\xFFFEby half the damage taken by the target.
+Sacred Sword	The user attacks by slicing with its long\xFFFEhorns. The target's stat changes\xFFFEdon't affect this attack's damage.
+Razor Shell	The user cuts its target with sharp\xFFFEshells. This attack may also lower the\xFFFEtarget's Defense stat.
+Heat Crash	The user slams its target with its flame-\xFFFEcovered body. The more the user outweighs\xFFFEthe target, the greater the damage.
+Leaf Tornado	The user attacks its target by\xFFFEencircling it in sharp leaves. This attack\xFFFEmay also lower the target's accuracy.
+Steamroller	The user crushes its targets by rolling\xFFFEover them with its rolled-up body.\xFFFEThis attack may make the target flinch.
+Cotton Guard	The user protects itself by wrapping\xFFFEits body in soft cotton, drastically\xFFFEraising the user's Defense stat.
+Night Daze	The user lets loose a pitch-black shock\xFFFEwave at its target. It may also lower the\xFFFEtarget's accuracy.
+Psystrike	The user materializes an odd\xFFFEpsychic wave to attack the target.\xFFFEThis attack does physical damage.
+Tail Slap	The user attacks by striking the target\xFFFEwith its hard tail. It hits the target two\xFFFEto five times in a row.
+Hurricane	The user attacks by wrapping its opponent\xFFFEin a fierce wind that flies up into the sky.\xFFFEIt may also confuse the target.
+Head Charge	The user charges its head into its\xFFFEtarget, using its powerful guard hair.\xFFFEIt also damages the user a little.
+Gear Grind	The user attacks by throwing\xFFFEtwo steel gears at its target.
+Searing Shot	An inferno of scarlet flames torches\xFFFEeverything around the user. It may\xFFFEleave targets with a burn.
+Techno Blast	The user fires a beam of light at\xFFFEits target. The type changes depending\xFFFEon the Drive the user holds.
+Relic Song	The user sings an ancient song and attacks\xFFFEby appealing to the hearts of those\xFFFElistening. It may also induce sleep.
+Secret Sword	The user cuts with its long horn. The odd\xFFFEpower contained in the horn does physical\xFFFEdamage to the target.
+Glaciate	The user attacks by blowing freezing cold\xFFFEair at opposing Pokémon. This attack\xFFFEreduces the targets' Speed stat.
+Bolt Strike	The user charges its target, surrounding\xFFFEitself with a great amount of electricity.\xFFFEIt may leave the target with paralysis.
+Blue Flare	The user attacks by engulfing the target\xFFFEin an intense, yet beautiful, blue flame.\xFFFEIt may leave the target with a burn.
+Fiery Dance	Cloaked in flames, the user dances\xFFFEand flaps its wings. It may also\xFFFEraise the user's Sp. Atk stat.
+Freeze Shock	On the second turn, the user hits the\xFFFEtarget with electrically charged ice.\xFFFEIt may leave the target with paralysis.
+Ice Burn	On the second turn, an ultracold,\xFFFEfreezing wind surrounds the target.\xFFFEThis may leave the target with a burn.
+Snarl	The user yells as if it is ranting about\xFFFEsomething, making the targets' Sp. Atk\xFFFEstat decrease.
+Icicle Crash	The user attacks by harshly dropping\xFFFEan icicle onto the target.\xFFFEIt may also make the target flinch.
+V-create	With a hot flame on its forehead, the user\xFFFEhurls itself at its target. It lowers the\xFFFEuser's Defense, Sp. Def, and Speed stats.
+Fusion Flare	The user brings down a giant flame.\xFFFEThis attack does greater damage when\xFFFEinfluenced by an enormous thunderbolt.
+Fusion Bolt	The user throws down a giant thunderbolt.\xFFFEThis attack does greater damage\xFFFEwhen influenced by an enormous flame.
+Flying Press	The user dives down onto the target from\xFFFEthe sky. This move is Fighting and Flying\xFFFEtype simultaneously.
+	
+Belch	The user lets out a damaging belch at the\xFFFEtarget. The user must eat a held Berry to\xFFFEuse this move. 
+	
+Sticky Web	The user weaves a sticky net around the \xFFFEopposing team, which lowers their Speed \xFFFEstats upon switching into battle. 
+Fell Stinger	When a target is knocked out by this move, \xFFFEthe user's Attack is boosted drastically.
+	
+	
+	
+	
+Parabolic Charge	The user attacks everything around it. \xFFFEThe user's HP is restored by half the \xFFFEdamage taken by those hit. 
+	
+Petal Blizzard	The user stirs up a violent petal blizzard\xFFFEand damages everything around it. 
+Freeze-Dry	The user rapidly cools the target. This\xFFFEmay also leave the target with frostbite.\xFFFEIt is super effective on Water types.
+Disarming Voice	Letting out a charming cry, the user does \xFFFEemotional damage to opposing Pokémon. \xFFFEThis attack never misses. 
+	
+	
+Draining Kiss	The user steals HP with a kiss. \xFFFEThe user's HP is restored by over half \xFFFEthe damage taken by the target. 
+	
+	
+Grassy Terrain	Grassy Terrain covers the ground for five\xFFFEturns. Grounded Pokémon heal a little HP\xFFFEeach turn and Grass moves are boosted.
+Misty Terrain	Misty Terrain covers the ground for five\xFFFEturns. Grounded Pokémon are guarded\xFFFEfrom status conditions and Dragon moves.
+	
+Play Rough	The user plays rough with the target and\xFFFEattacks it. It may also lower the target's\xFFFEAttack stat.
+Fairy Wind	The user stirs up a fairy wind and strikes \xFFFEthe target with it. 
+Moonblast	Borrowing the power of the moon, \xFFFEthe user attacks the target. This may \xFFFEalso lower the target's Sp. Atk stat.
+Boomburst	The user attacks everything around it with\xFFFEthe destructive power of a terrible,\xFFFEexplosive sound.
+	
+	
+	
+	
+Diamond Storm	The user whips up a storm of diamonds \xFFFEto damage opposing Pokémon. This may \xFFFEsharply boost the user's Defense stat.
+Steam Eruption	The user immerses the target in\xFFFEsuperheated steam. This may also\xFFFEleave the target with a burn. 
+	
+Water Shuriken	The user strikes the target with throwing \xFFFEstars, two to five times in a row. \xFFFEThis move always goes first.
+Mystical Fire	The user attacks by breathing a special,\xFFFEhot fire. This also lowers the target's\xFFFESp. Atk stat.
+Spiky Shield	In addition to protecting the user from\xFFFEattacks, this move also damages any\xFFFEattacker that makes direct contact.
+	
+Eerie Impulse	The user generates an eerie impulse.\xFFFEExposure harshly lowers the target's \xFFFESp. Atk stat.
+	
+	
+	
+	
+	
+Electric Terrain	Electric Terrain covers the ground for five\xFFFEturns. Grounded Pokémon cannot fall\xFFFEasleep and Electric moves are boosted.
+Dazzling Gleam	The user emits a powerful flash of light to \xFFFEinflict damage on the target. 
+	
+	
+	
+Nuzzle	The user attacks by nuzzling its\xFFFEelectrified cheeks against the target.\xFFFEThis also leaves the target with paralysis.
+	
+Infestation	The target is infested and attacked for\xFFFEfour to five turns.\xFFFEThe target can't flee during this time.
+Power-Up Punch	Striking opponents over and over makes\xFFFEthe user's fists harder.\xFFFEHitting a target raises the Attack stat.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+First Impression	Although this move has great power, \xFFFEit works only on the first turn each \xFFFEtime the user enters battle. 
+	
+Spirit Shackle	The user attacks while simultaneously \xFFFEstitching the target's shadow to the \xFFFEground to prevent the target from fleeing.\xFFFE
+Darkest Lariat	The user swings both arms and hits the \xFFFEtarget. The target's stat changes don't \xFFFEaffect the damage inflicted by this move.\xFFFE
+Sparkling Aria	The user sings, emitting many bubbles.\xFFFEAny Pokémon suffering from a burn will be \xFFFEcured by the touch of these bubbles. 
+Ice Hammer	The user swings and hits with its strong, \xFFFEheavy fist. It lowers the user's Speed, \xFFFEhowever. 
+	
+High Horsepower	The user fiercely attacks the target using\xFFFEits entire body.
+Strength Sap	The user restores its own HP by the same\xFFFEamount as the target's Attack stat.\xFFFEIt then lowers the target's Attack stat.
+Solar Blade	The user gathers light on the first turn,\xFFFEthen fills a blade with the light's energy\xFFFEand attacks on the next turn. 
+Leafage	The user attacks by pelting the target\xFFFEwith leaves.
+	
+	
+	
+	
+Throat Chop	The user attacks the target's throat. The\xFFFEresultant suffering prevents the target\xFFFEfrom using sound moves for two turns.
+Pollen Puff	The user attacks with explosive pollen. \xFFFEIf an ally is targeted, it restores their \xFFFEHP instead. \xFFFE
+	
+Psychic Terrain	Psychic Terrain covers the ground for five\xFFFEturns. Grounded Pokémon are guarded from\xFFFEpriority and Psychic moves are boosted.
+Lunge	The user makes a lunge at the target,\xFFFEattacking with full force.\xFFFEThis also lowers the target's Attack stat.
+Fire Lash	The user strikes the target with a burning\xFFFElash. This also lowers the target's\xFFFEDefense stat.
+Power Trip	The user boasts its strength and attacks\xFFFEthe target. The more the user's stats are\xFFFEraised, the greater the move's power.
+	
+	
+Smart Strike	The user stabs the target with a sharp\xFFFEhorn.\xFFFEThis attack never misses. 
+	
+Revelation Dance	The user attacks the target by dancing\xFFFEwith all its might. This move becomes\xFFFEthe same type as the user's type. 
+	
+Trop Kick	The user lands an intense kick of tropical\xFFFEorigins on the target.\xFFFEThis also lowers the target's Attack stat.
+	
+	
+	
+	
+Brutal Swing	The user swings its body around violently\xFFFEto inflict damage on everything in its\xFFFEvicinity.
+Aurora Veil	This move reduces damage from physical \xFFFEand special moves for five turns. \xFFFEThis can be used only in a hailstorm.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+Fleur Cannon	The user unleashes a strong beam. \xFFFEThe recoil from this move harshly \xFFFElowers the user's Sp. Atk stat. 
+Psychic Fangs	The user bites the target with its psychic\xFFFEcapabilities. It can also break any barrier\xFFFEsuch as Light Screen and Reflect.
+	
+Shadow Bone	The user attacks by beating the target\xFFFEwith a bone that contains a spirit. This\xFFFEmay also lower the target's Defense stat.
+Accelerock	The user smashes into the target at high\xFFFEspeed.\xFFFEThis move always goes first.
+Liquidation	The user slams into the target using a\xFFFEfull-force blast of water. This may also\xFFFElower the target's Defense stat.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+Jaw Lock	A fierce bite traps the user and the\xFFFEtarget. The effect goes away if either of\xFFFEthe Pokémon leaves the field.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+Body Press	The user slams its body into the target. \xFFFEThe higher the user's Defense, \xFFFEthe more damage it can inflict.
+	
+	
+	
+	
+	
+	
+	
+Breaking Swipe	The user swings its tough tail wildly\xFFFEand attacks opposing Pokémon.\xFFFEThis also lowers their Attack stats.
+	
+Overdrive	The user attacks opposing Pokémon \xFFFEby amplifying sound, causing a huge \xFFFEecho and strong vibration.
+	
+	
+Spirit Break	The user attacks the target with so much \xFFFEforce that it breaks the target's spirit. \xFFFEThis lowers the target's Sp. Atk stat. 
+	
+Life Dew	The user scatters mysterious water around\xFFFEand restores the HP of itself and its ally\xFFFEPokémon currently in the battle. 
+	
+	
+Meteor Assault	The user attacks wildly with its leek. \xFFFEThe user can't move on the next turn, \xFFFEas the force of this move makes it stagger.
+	
+Steel Beam	The user fires a beam of steel that it \xFFFEcollected from its entire body. \xFFFEThis also damages the user. 
+Expanding Force	The user strikes with psychic power. When \xFFFEgrounded on Psychic Terrain, this move is\xFFFEstrengthened and hits all opponents.
+	
+Scale Shot	The user attacks by shooting scales two \xFFFEto five times in a row. This move boosts \xFFFEthe user's Speed but lowers Defense. 
+Meteor Beam	The user manipulates gravity and directs \xFFFEmeteors into the target. This effort\xFFFEharshly lowers the user's Sp. Atk.
+	
+Misty Explosion	The user attacks everything around it and\xFFFEfaints upon using this move. This move's\xFFFEpower is boosted on Misty Terrain. 
+Grassy Glide	Gliding on the ground, the user attacks\xFFFEthe target. This move always goes first\xFFFEon Grassy Terrain. 
+Rising Voltage	The user attacks with electricity rising\xFFFEfrom the ground. This move's power is\xFFFEdoubled if the foe is on Electric Terrain.
+	
+Skitter Smack	The user skitters behind the target to\xFFFEattack. This also lowers the target's\xFFFESp. Atk stat.
+Burning Jealousy	The user attacks with focused jealousy.\xFFFEThis burns all opposing Pokémon that have\xFFFEhad their stats boosted during that turn.
+	
+Poltergeist	The user attacks by controlling the\xFFFEtarget's item. This move fails if the target\xFFFEisn't holding an item. 
+Corrosive Gas	The user surrounds everything around it\xFFFEwith highly acidic gas and melts away\xFFFEitems held by other Pokémon. 
+	
+Flip Turn	After making its attack, the user rushes \xFFFEback to switch places with a party \xFFFEPokémon in waiting. 
+Triple Axel	A consecutive three-kick attack that \xFFFEbecomes more powerful with each \xFFFEsuccessful hit. 
+Dual Wingbeat	The user slams the target with its wings.\xFFFEThe target is hit twice in a row.
+Scorching Sands	The user throws scorching sand at the\xFFFEtarget to attack.\xFFFEThis may also leave the target with a burn.
+Jungle Healing	The user becomes one with the jungle,\xFFFErestoring HP and curing status conditions\xFFFEfor itself and its ally Pokémon.
+Wicked Blow	The user, having mastered the Dark style, \xFFFEstrikes the target with a fierce blow. \xFFFEThis move always lands a critical hit.
+Surging Strikes	The user, having mastered the Water style,\xFFFEfluidly strikes the target three times.\xFFFEThis move always lands a critical hit.
+	
+	
+	
+	
+	
+	
+	
+	
+Dire Claw	The user lashes out at the target with \xFFFEruinous claws. This may also leave the \xFFFEtarget poisoned, paralyzed, or drowsy.
+Psyshield Bash	Cloaking itself in psychic energy, the user \xFFFEslams into the target. This raises the \xFFFEuser's Defense and Sp. Def stats. 
+	
+Stone Axe	The user strikes with a rock-hard axe. \xFFFEStone splinters left behind by this attack \xFFFEfloat around the target.
+	
+	
+Raging Fury	The user rampages and spews flames at\xFFFEthe target for two to three turns.\xFFFEIt then becomes confused, however.
+Wave Crash	The user shrouds itself in water and\xFFFEslams into the target with its whole body.\xFFFEThis also damages the user quite a lot.
+	
+	
+Victory Dance	The user performs an intense dance to \xFFFEusher in victory, boosting its Attack, \xFFFEDefense, and Speed stats. 
+Headlong Rush	The user smashes into the target in a\xFFFEfull-body tackle. This also cuts the\xFFFEuser's Defense, Sp. Def, and Evasion.
+Barb Barrage	The user launches toxic barbs to inflict \xFFFEdamage, which may poison the target.\xFFFEPower doubles if the target is poisoned. 
+Esper Wing	The user slashes at the target with\xFFFEaura-enriched wings.\xFFFEThis move always goes first.
+Bitter Malice	Spine-chilling resentment may leave the\xFFFEtarget with frostbite. Power doubles if\xFFFEthe target has a status condition.
+	
+Triple Arrows	The user kicks, then fires three arrows. \xFFFEThis  lowers the target’s Defense and\xFFFEimproves the user's critical hit rate.
+Infernal Parade	The user attacks with myriad fireballs.\xFFFEThis may also burn the target. Its power\xFFFEdoubles if there's a status condition.
+Ceaseless Edge	The user slashes its shell blade at the \xFFFEtarget. Shell splinters left behind by this \xFFFEattack remain scattered as Spikes.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+Lumina Crash	The user attacks by unleashing a peculiar \xFFFElight that even affects the mind. \xFFFEThis harshly lowers the target's Sp. Def.
+	
+Jet Punch	The user summons a torrent around its fist\xFFFEand punches at blinding speed. \xFFFEThis move always goes first.
+	
+Spin Out	The user spins by straining its legs,\xFFFEinflicting damage on the target and\xFFFEharshly lowering the user's Speed stat. 
+	
+Ice Spinner	The user covers its feet in thin ice and \xFFFEtwirls around, slamming into the target. \xFFFEThis also clears some effects on the user.
+Glaive Rush	The user attacks with a reckless charge.\xFFFEFollowing the charge, attacks on the user\xFFFEcannot miss and deal double damage.
+	
+Salt Cure	The user salt cures the target, inflicting\xFFFEdamage every turn. Steel and Water types\xFFFEare more strongly affected by this move.
+	
+Mortal Spin	The user performs a spin attack to \xFFFEclear hazards. This also poisons \xFFFEopposing Pokémon. 
+	
+	
+Kowtow Cleave	The user slashes at the target after \xFFFEkowtowing to make the target let down \xFFFEits guard. This attack never misses.\xFFFE
+Flower Trick	The user suprises the target with \xFFFEan explosive bouquet. This attack never \xFFFEmisses and always lands a critical hit.
+Torch Song	The user blows out raging flames as if\xFFFEsinging a song, scorching the target.\xFFFEThis also boosts the user's Sp. Atk stat. 
+Aqua Step	The user toys with the target and attacks \xFFFEit using light and fluid dance steps. \xFFFEThis also boosts the user's Speed stat.
+	
+Make It Rain	The user attacks with a storm of coins. \xFFFEThis harshly lowers the user's Sp. Atk\xFFFEstat. Money is earned after the battle.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+Pounce	The user attacks by pouncing on the\xFFFEtarget. This also lowers the target's\xFFFESpeed stat. 
+Trailblaze	The user attacks suddenly as if leaping \xFFFEout from tall grass. The user's nimble \xFFFEfootwork boosts its Speed stat. 
+	
+	
+	
+Rage Fist	The user converts its rage into energy\xFFFEto attack. The more times the user has\xFFFEbeen hit, the greater the move's power.
+Armor Cannon	The user shoots its own armor out as \xFFFEblazing projectiles. This also lowers the \xFFFEuser’s Defense, Sp. Def and Evasion.
+Bitter Blade	The user focuses its bitter feelings into \xFFFEa slashing attack. HP is restored by half \xFFFEthe damage taken by the target. \xFFFE
+	
+	
+	
+Aqua Cutter	The user expels pressurized water to cut\xFFFEthe target, like a blade. This move has a \xFFFEheightened chance of landing a critical hit.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+Electro Shot	The first turn boosts the user's Sp. Atk.\xFFFEOn the second a high-voltage shot is fired.\xFFFEThe shot will be fired immediately in rain.
+	
+	
+	
+Thunderclap	This move enables the user to attack first\xFFFEwith a jolt of electricity. This move fails if\xFFFEthe target is not readying an attack.
+	
+	
+Hard Press	The target is crushed to inflict damage. \xFFFEThe more HP the target has left, \xFFFEthe greater the move's power.\xFFFE
+	
+Alluring Voice	The user attacks the target using its \xFFFEangelic voice. This confuses the target\xFFFEif its stats were boosted during the turn.
+	
+Supercell Slam	The user electrifies its body and drops\xFFFEonto the target. If this move misses, \xFFFEthe user takes damage instead.
+Psychic Noise	The user attacks with unpleasant \xFFFEsound waves. For two turns, \xFFFEthe target cannot recover HP. 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+Secret Blast	The type and category change to match the\xFFFEuser's type and its strongest stat.\xFFFEPower changes based on the user's level.
