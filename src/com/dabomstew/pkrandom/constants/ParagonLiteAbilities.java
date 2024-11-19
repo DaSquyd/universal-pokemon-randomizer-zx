@@ -48,8 +48,15 @@ public class ParagonLiteAbilities {
     public static final int ravenousTorque = 515;
     public static final int superconductor = 516;
     public static final int somaticReflex = 517;
+    public static final int incendiate = 518;
+    public static final int liquidate = 519;
+    public static final int florilate = 520;
+    public static final int contaminate = 521;
+    public static final int volcanicFury = 522;
+    public static final int pastoralAroma = 523;
+    public static final int healSpore = 524;
 
-    public static final int MAX = superconductor;
+    public static final int MAX = healSpore;
     
     public static Set<Integer> allowedAbilities = Set.of(
 //            Abilities.aromaVeil, // 165
@@ -57,7 +64,7 @@ public class ParagonLiteAbilities {
 //            Abilities.cheekPouch, // 167
             Abilities.protean, // 168
             Abilities.furCoat, // 169
-            Abilities.magician, // 170
+//            Abilities.magician, // 170
             Abilities.bulletproof, // 171
             Abilities.competitive, // 172
             Abilities.strongJaw, // 173
@@ -89,7 +96,7 @@ public class ParagonLiteAbilities {
 //            Abilities.berserk, // 201
             Abilities.slushRush, // 202
 //            Abilities.longReach, // 203
-//            Abilities.liquidVoice, // 204
+            Abilities.liquidVoice, // 204
             Abilities.triage, // 205
             Abilities.galvanize, // 206
 //            Abilities.surgeSurfer, // 207
@@ -146,11 +153,18 @@ public class ParagonLiteAbilities {
             windWhipper, // 509
             glazeware, // 510
             sunSoaked, // 511
-            colossal // 512
+            colossal, // 512
 //            finalThread, // 513
 //            homeGrown, // 514
 //            ravenousTorque, // 515
 //            superconductor, // 516
-//            somaticReflex
+//            somaticReflex, // 517
+            incendiate, // 518
+            liquidate, // 519
+            florilate, // 520
+            contaminate, // 521
+//            volcanicFury, // 522
+//            pastoralAroma, // 523
+            healSpore // 524
     );
 }
