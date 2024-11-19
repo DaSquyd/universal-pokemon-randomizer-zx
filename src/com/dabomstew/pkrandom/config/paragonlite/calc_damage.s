@@ -163,12 +163,12 @@ Debug:
 ;    cmp     r0, #0
 ;    bne     STAB
     
-    ; TODO: B2W2 only
+#if HAS_POKESTAR_STUDIOS
     mov     r0, r5
-    bl      Battle::ServerFlow_IsCompetitorScenarioMode
-    cmp     r0, #0
+    bl      Battle::ServerFlow_IsNotPokestarStudios
+    cmp     r0, #FALSE
     beq     STAB
-    ; TODO: ~B2W2 only
+#endif
     
     ldr     r0, [sp, #ARG_IS_DEBUG_MODE]
     cmp     r0, #0
