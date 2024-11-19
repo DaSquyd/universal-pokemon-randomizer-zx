@@ -90,7 +90,6 @@ public class BitmapFile {
     }
     
     public static byte[] writePaletteFileFromColors(int[] colors) {
-
         byte[] bytes = new byte[552];
 
         // NCLR Header
@@ -178,7 +177,7 @@ public class BitmapFile {
             int tileStartRow = (tile / tilesPerRow) * tileWidth;
             int tileStartCol = (tile % tilesPerRow) * tileWidth;
 
-            for (int tilePixel = 0; tilePixel < 64; ++tilePixel) {
+            for (int tilePixel = 0; tilePixel < tileSize; ++tilePixel) {
                 int row = tileStartRow + tilePixel / tileWidth;
                 int col = tileStartCol + tilePixel % tileWidth;
 
