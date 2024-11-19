@@ -25,7 +25,8 @@ package com.dabomstew.pkrandom.constants;
 
 import java.util.Set;
 
-public class ParagonLiteMoves {
+public class 
+ParagonLiteMoves {
     public static final int secretBlast = 1023;
     
     public static Set<Integer> allowedMoves = Set.of(
@@ -34,7 +35,7 @@ public class ParagonLiteMoves {
             Moves.stickyWeb, // 564
             Moves.fellStinger, // 565
             Moves.parabolicCharge, // 570
-//            Moves.petalBlizzard, // 572
+            Moves.petalBlizzard, // 572
             Moves.freezeDry, // 573
             Moves.disarmingVoice, // 574
             Moves.drainingKiss, // 577
@@ -59,19 +60,21 @@ public class ParagonLiteMoves {
             Moves.iceHammer, // 665
             Moves.highHorsepower, // 667
 //            Moves.strengthSap, // 668
-//            Moves.solarBlade, // 669
-//            Moves.leafage, // 670
+            Moves.solarBlade, // 669
+            Moves.leafage, // 670
 //            Moves.throatChop, // 675
             Moves.pollenPuff, // 676
             Moves.lunge, // 679
             Moves.fireLash, // 680
-//            Moves.powerTrip, // 681
+            Moves.powerTrip, // 681
             Moves.smartStrike, // 684
+//            Moves.revelationDance, // 686
+            Moves.tropKick, // 688
             Moves.brutalSwing, // 693
 //            Moves.auroraVeil, // 694
             Moves.fleurCannon, // 705
             Moves.psychicFangs, // 706
-//            Moves.shadowBone, // 708
+            Moves.shadowBone, // 708
             Moves.accelerock, // 709
             Moves.liquidation, // 710
 //            Moves.jawLock, // 746
@@ -81,10 +84,10 @@ public class ParagonLiteMoves {
             Moves.spiritBreak, // 789
 //            Moves.lifeDew, // 791
             Moves.meteorAssault, // 794
-//            Moves.steelBeam, // 794
-//            Moves.scaleShot, // 796
+            Moves.steelBeam, // 794
+            Moves.scaleShot, // 796
             Moves.meteorBeam, // 800
-//            Moves.skitterSmack, // 806
+            Moves.skitterSmack, // 806
 //            Moves.burningJealousy, // 807
 //            Moves.poltergeist, // 809
 //            Moves.corrosiveGas, // 810
@@ -92,6 +95,7 @@ public class ParagonLiteMoves {
             Moves.tripleAxel, // 813
             Moves.dualWingbeat, // 814
             Moves.scorchingSands, // 815
+//            Moves.jungleHealing, // 816
             Moves.wickedBlow, // 817
             Moves.surgingStrikes, // 818
             Moves.direClaw, // 827
@@ -119,7 +123,7 @@ public class ParagonLiteMoves {
 //            Moves.torchSong, // 871
 //            Moves.aquaStep, // 872
             Moves.makeItRain, // 874
-//            Moves.pounce, // 884
+            Moves.pounce, // 884
             Moves.trailblaze, // 885
 //            Moves.rageFist, // 889
             Moves.armorCannon, // 890
