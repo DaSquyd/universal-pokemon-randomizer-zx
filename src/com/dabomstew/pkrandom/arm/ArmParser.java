@@ -79,6 +79,7 @@ public class ArmParser {
     private void setStructs() {
         String[] structNames = new String[]{
                 "ActionOrderWork",
+                "BattleField",
                 "BattleParty",
                 "Box2Main",
                 "BoxPoke",
@@ -91,9 +92,12 @@ public class ArmParser {
                 "BtlvMcss",
                 "BtlvMcssData",
                 "HandlerParam_AddSideStatus",
+                "HandlerParam_ChangeHP",
                 "HandlerParam_ChangeStatStage",
+                "HandlerParam_ChangeTerrain",
                 "HandlerParam_ChangeType",
                 "HandlerParam_ChangeWeather",
+                "HandlerParam_ConsumeItem",
                 "HandlerParam_ForceUseItem",
                 "HandlerParam_Message",
                 "HandlerParam_RecoverHP",
@@ -135,6 +139,10 @@ public class ArmParser {
 
     public void addGlobalValue(String name, int value) {
         engineManager.put(name, value);
+    }
+
+    public void addGlobalValue(String name, boolean value) {
+        engineManager.put(name, value ? 1 : 0);
     }
 
     public void addStruct(String structName) {
