@@ -372,7 +372,81 @@ public enum MoveEffect {
     POWDER(377),
     BURST(378),
     FREEZE_DRY(379),
-    DISARMING_VOICE(380);
+    DISARMING_VOICE(380),
+    SHORE_UP(381),
+    FIRST_IMPRESSION(382),
+    BANEFUL_BUNKER(383),
+    DMG_NO_ESCAPE(384), // Spirit Shackle, Anchor Shot
+    SPARKLING_ARIA(385),
+    FLORAL_HEALING(386),
+    STRENGTH_SAP(387),
+    SPOTLIGHT(388),
+    TOXIC_THREAD(389),
+    LASER_FOCUS(390),
+    GEAR_UP(391),
+    THROAT_CHOP(392),
+    POLLEN_PUFF(393),
+    PSYCHIC_TERRAIN(394),
+    DMG_TRGT_ATK_MINUS_1_ALWAYS(395), // Lunge, Trop Kick
+    DMG_TRGT_DEF_MINUS_1_ALWAYS(396), // Fire Lash
+    BURN_UP(397),
+    SPEED_SWAP(398),
+    PURIFY(399),
+    REVELATION_DANCE(400),
+    CORE_ENFORCER(401),
+    INSTRUCT(402),
+    BEAK_BLAST(403),
+    CLANGING_SCALES(404),
+    BRUTAL_SWING(405),
+    AURORA_VEIL(406),
+    SHELL_TRAP(407),
+    STOMPING_TANTRUM(408),
+    SPECTRAL_THIEF(409),
+    DMG_IGNORE_ABILITY(410),
+    TEARFUL_LOOK(411),
+    GUARDIAN_OF_ALOLA(412),
+    EXTREME_EVOBOOST(413),
+    GENESIS_SUPERNOVA(414),
+    
+    // Needs research
+    EXPANDING_FORCE(425),
+    GRASSY_GLIDE(426),
+    RISING_VOLTAGE(427),
+    REMOVES_ITEM(428),
+    DMG_USER_DEF_PLUS_2(429),
+    DOUBLE_ON_STATUS_BURN(430),
+    
+    BODY_PRESS(437),
+    STEEL_BEAM(438),
+    SCALE_SHOT(439),
+    TRIPLE_AXEL(440),
+    HITS_THREE_TIMES_CRIT(441),
+    DIRE_CLAW(442),
+    DMG_USER_DEF_SPD_PLUS_1(443),
+    DMG_STEALTH_ROCK(444),
+    DMG_SPIKES(445),
+    USER_ATK_DEF_SPE_PLUS_1(446),
+    DOUBLE_ON_POISON(447),
+    TRIPLE_ARROWS(447),
+    DMG_USER_SPE_MINUS_2(448),
+    ICE_SPINNER(449),
+    GLAIVE_RUSH(450),
+    SALT_CURE(451),
+    ELECTRO_SHOT(452),
+    ALLURING_VOICE(453),
+    
+    TRGT_SPE_MINUS_3(456),
+    HOWL(457),
+    OCTAZOOKA(458),
+    RAGE_FIST(459),
+    MORTAL_SPIN(460),
+    
+    BURNING_JEALOUSY(462),
+    POLTERGEIST(463),
+    LIFE_DEW(464);
+    
+        
+    
 
     final int gen4;
     final int gen5;
@@ -391,16 +465,12 @@ public enum MoveEffect {
     }
 
     public int getIndex(int generation) {
-        switch (generation) {
-            case 4:
-                return gen4;
-            case 5:
-                return gen5;
-            case 6:
-                return gen6;
-            default:
-                return -1;
-        }
+        return switch (generation) {
+            case 4 -> gen4;
+            case 5 -> gen5;
+            case 6 -> gen6;
+            default -> -1;
+        };
     }
 
     public static MoveEffect fromIndex(int generation, int index) {

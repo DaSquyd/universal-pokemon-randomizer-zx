@@ -44,7 +44,7 @@ ParagonLiteMoves {
             Moves.moonblast, // 585
             Moves.boomburst, // 586
             Moves.diamondStorm, // 591
-//            Moves.steamEruption, // 592
+            Moves.steamEruption, // 592
             Moves.waterShuriken, // 594
             Moves.mysticalFire, // 595
 //            Moves.spikyShield, // 596
@@ -53,7 +53,7 @@ ParagonLiteMoves {
             Moves.nuzzle, // 609
 //            Moves.infestation, // 611
             Moves.powerUpPunch, // 612
-            Moves.firstImpression, // 660
+//            Moves.firstImpression, // 660 TODO: Wait until QSpec fixes this
 //            Moves.spiritShackle, // 662
             Moves.darkestLariat, // 663
 //            Moves.sparklingAria, // 664
@@ -64,7 +64,7 @@ ParagonLiteMoves {
             Moves.leafage, // 670
 //            Moves.throatChop, // 675
             Moves.pollenPuff, // 676
-            Moves.lunge, // 679
+//            Moves.lunge, // 679 TODO: Wait until QSpec fixes this
             Moves.fireLash, // 680
             Moves.powerTrip, // 681
             Moves.smartStrike, // 684
@@ -89,7 +89,7 @@ ParagonLiteMoves {
             Moves.meteorBeam, // 800
             Moves.skitterSmack, // 806
 //            Moves.burningJealousy, // 807
-//            Moves.poltergeist, // 809
+            Moves.poltergeist, // 809
 //            Moves.corrosiveGas, // 810
             Moves.flipTurn, // 812
             Moves.tripleAxel, // 813

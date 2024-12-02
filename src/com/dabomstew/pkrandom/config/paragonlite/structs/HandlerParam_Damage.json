@@ -1,0 +1,10 @@
+{
+  "header": 0,
+  "damage": 4,
+  "pokeId": 6,
+  "flags": 7,
+  "effectNumber": 8,
+  "posFrom": 10,
+  "posTo": 11,
+  "exStr": 12
+}

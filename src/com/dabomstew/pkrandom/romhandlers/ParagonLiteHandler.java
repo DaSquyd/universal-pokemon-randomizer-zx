@@ -59,7 +59,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.Redux;
+    public static Mode mode = Mode.ParagonLite;
 
     Gen5RomHandler romHandler;
 
@@ -818,11 +818,15 @@ public class ParagonLiteHandler {
         // 1/16 -> 1/8 without Binding Band
         // 1/8  -> 1/6 with Binding Band
 
-        int runTrappedFuncAddress = globalAddressMap.getRamAddress(battleServerOvl, "RunTrapped");
-
-        // TODO: Trap damage => 1/8 (1/6 with Binding Band)
-        battleServerOvl.writeByte(runTrappedFuncAddress + 0x8E, 6);
-        battleServerOvl.writeByte(runTrappedFuncAddress + 0x94, 8);
+//        int conditionHandlerBindFuncAddress = globalAddressMap.getRamAddress(battleServerOvl, "Condition_HandlerBind");
+//
+//        battleServerOvl.writeByte(conditionHandlerBindFuncAddress + 0x8E, 6);
+//        battleServerOvl.writeByte(conditionHandlerBindFuncAddress + 0x94, 8);
+        
+        // TODO: finish this
+        List<String> conditionHandlerBindLines = readLines("battleserver/condition_handler_bind.s");
+        battleServerOvl.writeCodeForceInline(conditionHandlerBindLines, "Condition_HandlerBind", true);
+        
         System.out.println("Set Trapped damage");
     }
 
@@ -3674,6 +3678,9 @@ public class ParagonLiteHandler {
     }
 
     private void setXrayVision() {
+        if (mode != Mode.ParagonLite)
+            return;
+        
         int number = ParagonLiteAbilities.xrayVision;
 
         // Name
@@ -3886,12 +3893,7 @@ public class ParagonLiteHandler {
 //        arm9.writeByte(0x021AC538, 0x24);
 //        arm9.writeByte(0x021ADB32, 0x24);
 //        arm9.writeByte(0x021ADB56, 0x24);
-//        arm9.writeByte(0x021ADB7A, 0x24);
-
-        // Name Updates
-        moves.get(Moves.viseGrip).name = "Vise Grip"; // 011
-        moves.get(Moves.feintAttack).name = "Feint Attack"; // 185
-        moves.get(Moves.smellingSalts).name = "Smelling Salts"; // 265
+//        arm9.writeByte(0x021ADB7A, 0x24)
 
         switch (mode) {
             case ParagonLite -> loadMovesFromFile();
@@ -4165,7 +4167,7 @@ public class ParagonLiteHandler {
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
 
-        int totalMoves = 918;
+        int totalMoves = Moves.MAX;
         int moveDataSize = 36;
         arm9.replaceData(new byte[moveDataSize * totalMoves], "Data_MoveCache");
 
@@ -4183,271 +4185,217 @@ public class ParagonLiteHandler {
         relocateMoveListRamAddress(newMoves.length - movesToClear.length);
 
 
-        // HACK: Charge Beam has to be modified like this so we can get Electro Shot to work... idk
-        setMoveAnimations(Moves.chargeBeam, 750);
+        // #013 Razor Wind
+        if (mode == Mode.Redux)
+            setMoveAnimations(Moves.razorWind);
 
         // + #562 Belch
-        moves.get(Moves.belch).name = "Belch";
         setMoveEventHandlers(Moves.belch, new MoveEventHandler(Gen5BattleEventType.onMoveExecuteCheck2, "belch.s"));
         
         // TODO #564 Sticky Web
-        moves.get(Moves.stickyWeb).name = "Sticky Web";
         setMoveEventHandlers(Moves.stickyWeb, new MoveEventHandler(Gen5BattleEventType.onUncategorizedMoveNoTarget, "sticky_web.s"));
         setMoveAnimations(Moves.stickyWeb, 770);
 
         // + #565 Fell Stinger
-        moves.get(Moves.fellStinger).name = "Fell Stinger";
         setMoveEventHandlers(Moves.fellStinger, new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "fell_stinger.s"));
         setMoveAnimations(Moves.fellStinger);
 
         // #570 Parabolic Charge
-        moves.get(Moves.parabolicCharge).name = "ParabolicCharge";
         setMoveAnimations(Moves.parabolicCharge);
         
         // #572 Petal Blizzard
-        moves.get(Moves.petalBlizzard).name = "Petal Blizzard";
         setMoveAnimations(Moves.petalBlizzard, 786);
 
         // + #573 Freeze-Dry
-        moves.get(Moves.freezeDry).name = "Freeze-Dry";
         setMoveEventHandlers(Moves.freezeDry, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "freeze-dry.s"));
         setMoveAnimations(Moves.freezeDry);
 
         // #574 Disarming Voice
-        moves.get(Moves.disarmingVoice).name = "Disarming Voice";
         setMoveAnimations(Moves.disarmingVoice, 743);
 
         // #577 Draining Kiss
-        moves.get(Moves.drainingKiss).name = "Draining Kiss";
         setMoveAnimations(Moves.drainingKiss, 744);
 
         // #583 Play Rough
-        moves.get(Moves.playRough).name = "Play Rough";
         setMoveAnimations(Moves.playRough, 740);
 
         // #584 Fairy Wind
-        moves.get(Moves.fairyWind).name = "Fairy Wind";
         setMoveAnimations(Moves.fairyWind);
 
         // #585 Moonblast
-        moves.get(Moves.moonblast).name = "Moonblast";
         setMoveAnimations(Moves.moonblast, 741, 742);
 
         // #586 Boomburst
-        moves.get(Moves.boomburst).name = "Boomburst";
         setMoveAnimations(Moves.boomburst, 752);
 
         // + #591 Diamond Storm
-        moves.get(Moves.diamondStorm).name = "Diamond Storm";
         setMoveEventHandlers(Moves.diamondStorm, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEnd, "diamond_storm.s"));
         setMoveAnimations(Moves.diamondStorm);
 
         // #592 Steam Eruption
-        moves.get(Moves.steamEruption).name = "Steam Eruption";
         setMoveAnimations(Moves.steamEruption);
 
         // #594 Water Shuriken
-        moves.get(Moves.waterShuriken).name = "Water Shuriken";
         setMoveAnimations(Moves.waterShuriken, 763);
         
         // #595 Mystical Fire
-        moves.get(Moves.mysticalFire).name = "Mystical Fire";
         setMoveAnimations(Moves.mysticalFire);
 
         // TODO: + #596 Spiky Shield
-        moves.get(Moves.spikyShield).name = "Spiky Shield";
         cloneMoveEventHandlers(Moves.spikyShield, Moves.protect);
         setMoveAnimations(Moves.spikyShield, 772);
 
         // #598 Eerie Impulse
-        moves.get(Moves.eerieImpulse).name = "Eerie Impulse";
         setMoveAnimations(Moves.eerieImpulse);
 
         // #605 Dazzling Gleam
-        moves.get(Moves.dazzlingGleam).name = "Dazzling Gleam";
         setMoveAnimations(Moves.dazzlingGleam, 745);
 
         // #609 Nuzzle
-        moves.get(Moves.nuzzle).name = "Nuzzle";
         setMoveAnimations(Moves.nuzzle);
 
         // TODO: + #611 Infestation
-        moves.get(Moves.infestation).name = "Infestation";
         setMoveAnimations(Moves.infestation, 747);
         setMoveAuxiliaryAnimation(Moves.infestation, "trap", auxiliaryAnimationScriptIndices);
 
         // #612 Power-Up Punch
-        moves.get(Moves.powerUpPunch).name = "Power-Up Punch";
         setMoveAnimations(Moves.powerUpPunch);
 
         // + #660 First Impression
-        moves.get(Moves.firstImpression).name = "FirstImpression";
         cloneMoveEventHandlers(Moves.firstImpression, Moves.fakeOut);
         setMoveAnimations(Moves.firstImpression, 760);
 
         // + #663 Darkest Lariat
-        moves.get(Moves.darkestLariat).name = "Darkest Lariat";
         cloneMoveEventHandlers(Moves.darkestLariat, Moves.chipAway);
         setMoveAnimations(Moves.darkestLariat);
 
         // TODO: + #664 Sparkling Aria
-        moves.get(Moves.sparklingAria).name = "Sparkling Aria";
         setMoveAnimations(Moves.sparklingAria, 773);
 
         // #665 Ice Hammer
-        moves.get(Moves.iceHammer).name = "Ice Hammer";
         setMoveAnimations(Moves.iceHammer);
 
         // #667 High Horsepower
-        moves.get(Moves.highHorsepower).name = "High Horsepower";
         setMoveAnimations(Moves.highHorsepower, 739);
 
         // TODO: #668 Strength Sap
-        moves.get(Moves.strengthSap).name = "Strength Sap";
         setMoveAnimations(Moves.strengthSap);
 
         // + #669 Solar Blade
-        moves.get(Moves.solarBlade).name = "Solar Blade";
         cloneMoveEventHandlers(Moves.solarBlade, Moves.solarBeam);
         setMoveAnimations(Moves.solarBlade, 781);
         
         // #670 Leafage
-        moves.get(Moves.leafage).name = "Leafage";
         setMoveAnimations(Moves.leafage, 780);
         
         // #675 Throat Chop
-        moves.get(Moves.throatChop).name = "Throat Chop";
         setMoveAnimations(Moves.throatChop, 787);
 
         // + #676 Pollen Puff
-        moves.get(Moves.pollenPuff).name = "Pollen Puff";
         setMoveEventHandlers(Moves.pollenPuff,
                 new MoveEventHandler(Gen5BattleEventType.onCheckDamageToRecover, "pollen_puff_set_mode.s"),
                 new MoveEventHandler(Gen5BattleEventType.onApplyDamageToRecover, "pollen_puff_heal.s"));
         setMoveAnimations(Moves.pollenPuff, 769);
 
         // #679 Lunge
-        moves.get(Moves.lunge).name = "Lunge";
-        setMoveAnimations(Moves.lunge, 753);
+        setMoveAnimations(Moves.lunge, 799);
 
         // #680 Fire Lash
-        moves.get(Moves.fireLash).name = "Fire Lash";
         setMoveAnimations(Moves.fireLash);
 
         // + #681 Power Trip
-        moves.get(Moves.powerTrip).name = "Power Trip";
         cloneMoveEventHandlers(Moves.powerTrip, Moves.storedPower);
         setMoveAnimations(Moves.powerTrip);
 
         // #684 Smart Strike
-        moves.get(Moves.smartStrike).name = "Smart Strike";
         setMoveAnimations(Moves.smartStrike, 751);
         
         // + #686 Revelation Dance
-        moves.get(Moves.revelationDance).name = "RevelationDance";
         setMoveEventHandlers(Moves.revelationDance, new MoveEventHandler(Gen5BattleEventType.onGetMoveParam, "revelation_dance.s"));
         // TODO: Animation
 
         // #688 Trop Kick
-        moves.get(Moves.tropKick).name = "Trop Kick";
         setMoveAnimations(Moves.tropKick, 784);
 
         // #693 Brutal Swing
-        moves.get(Moves.brutalSwing).name = "Brutal Swing";
         setMoveAnimations(Moves.brutalSwing, 774);
 
         // TODO: +#694 Aurora Veil
-        moves.get(Moves.auroraVeil).name = "Aurora Veil";
         setMoveAnimations(Moves.auroraVeil, 767);
 
         // #705 Fleur Cannon
-        moves.get(Moves.fleurCannon).name = "Fleur Cannon";
         setMoveAnimations(Moves.fleurCannon, 761);
 
         // #706 Psychic Fangs
-        moves.get(Moves.psychicFangs).name = "Psychic Fangs";
         cloneMoveEventHandlers(Moves.psychicFangs, Moves.brickBreak);
-        setMoveAnimations(Moves.psychicFangs, 748, 782);
+        setMoveAnimations(Moves.psychicFangs, 748, 798);
         
         // #708 Shadow Bone
-        moves.get(Moves.shadowBone).name = "Shadow Bone";
         setMoveAnimations(Moves.shadowBone, 789);
 
         // #709 Accelerock
-        moves.get(Moves.accelerock).name = "Accelerock";
         setMoveAnimations(Moves.accelerock);
 
         // #710 Liquidation
-        moves.get(Moves.liquidation).name = "Liquidation";
         setMoveAnimations(Moves.liquidation, 785);
 
-        // #746 Jaw Lock
-        moves.get(Moves.jawLock).name = "Jaw Lock";
+        // TODO: +#746 Jaw Lock
         setMoveAnimations(Moves.jawLock, 788);
         
-        // + #776 Body Press
-        moves.get(Moves.bodyPress).name = "Body Press";
+        // + #776 Body Pres
         setMoveEventHandlers(Moves.bodyPress, new MoveEventHandler(Gen5BattleEventType.onGetAttackingStat, "body_press.s"));
         setMoveAnimations(Moves.bodyPress, 771);
 
         // #784 Breaking Swipe
-        moves.get(Moves.breakingSwipe).name = "Breaking Swipe";
         setMoveAnimations(Moves.breakingSwipe, 755);
 
         // #786 Overdrive
-        moves.get(Moves.overdrive).name = "Overdrive";
         setMoveAnimations(Moves.overdrive);
 
         // #789 Spirit Break
-        moves.get(Moves.spiritBreak).name = "Spirit Break";
         setMoveAnimations(Moves.spiritBreak);
         
-        // #791 Life Dew
-        moves.get(Moves.lifeDew).name = "Life Dew";
+        // TODO: +#791 Life Dew
         setMoveAnimations(Moves.lifeDew);
 
         // #794 Meteor Assault
-        moves.get(Moves.meteorAssault).name = "Meteor Assault";
         setMoveAnimations(Moves.meteorAssault);
 
         // + #796 Steel Beam
-        moves.get(Moves.steelBeam).name = "Steel Beam";
         setMoveEventHandlers(Moves.steelBeam, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEnd, "steel_beam.s"));
         setMoveAnimations(Moves.steelBeam, 762);
 
         // + #799 Scale Shot
-        moves.get(Moves.scaleShot).name = "Scale Shot";
         setMoveEventHandlers(Moves.scaleShot, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEnd, "scale_shot.s"));
         setMoveAnimations(Moves.scaleShot, 758);
 
         // + #800 Meteor Beam
-        moves.get(Moves.meteorBeam).name = "Meteor Beam";
         if (mode == Mode.Redux) {
             setMoveAnimations(Moves.meteorBeam, "redux");
         } else {
-//            setMoveEventHandlers(Moves.meteorBeam, new MoveEventHandler(Gen5BattleEventType.onChargeUpStartDone, "meteor_beam.s"));
-//            setMoveAnimations(Moves.meteorBeam);
+            setMoveEventHandlers(Moves.meteorBeam, new MoveEventHandler(Gen5BattleEventType.onChargeUpStartDone, "meteor_beam.s"));
+            setMoveAnimations(Moves.meteorBeam);
         }
         
         // #806 Skitter Smack
-        moves.get(Moves.skitterSmack).name = "Skitter Smack";
         setMoveAnimations(Moves.skitterSmack, 783);
         
         // #807 Burning Jealousy
-        moves.get(Moves.burningJealousy).name = "BurningJealousy";
         setMoveAnimations(Moves.burningJealousy, 782);
 
         // + #809 Poltergeist
-        moves.get(Moves.poltergeist).name = "Poltergeist";
-        setMoveEventHandlers(Moves.poltergeist, new MoveEventHandler(Gen5BattleEventType.onNoEffectCheck, "poltergeist.s"));
+        setMoveEventHandlers(Moves.poltergeist,
+                new MoveEventHandler(Gen5BattleEventType.onNoEffectCheck, "poltergeist_check.s"),
+                new MoveEventHandler(Gen5BattleEventType.onDamageProcessingStart, "poltergeist_message.s"));
+        
+        // #810 Corrosive Gas
+        setMoveAnimations(Moves.corrosiveGas);
         
         // + #812 Flip Turn
-        moves.get(Moves.flipTurn).name = "Flip Turn";
         cloneMoveEventHandlers(Moves.flipTurn, Moves.uTurn);
         setMoveAnimations(Moves.flipTurn, 759);
 
         // + #813 Triple Axel
-        moves.get(Moves.tripleAxel).name = "Triple Axel";
         switch (mode) {
             // No longer changes damage
             case ParagonLite -> setMoveEventHandlers(Moves.tripleAxel, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
@@ -4459,149 +4407,115 @@ public class ParagonLiteHandler {
         setMoveAnimations(Moves.tripleAxel, 754);
 
         // + #814 Dual Wingbeat
-        moves.get(Moves.dualWingbeat).name = "Dual Wingbeat";
         setMoveEventHandlers(Moves.dualWingbeat, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
         setMoveAnimations(Moves.dualWingbeat, 746);
 
         // #815 Scorching Sands
-        moves.get(Moves.scorchingSands).name = "Scorching Sands";
         setMoveAnimations(Moves.scorchingSands);
         
         // #816 Jungle Healing
-        moves.get(Moves.jungleHealing).name = "Jungle Healing";
         setMoveAnimations(Moves.jungleHealing);
 
         // #817 Wicked Blow
-        moves.get(Moves.wickedBlow).name = "Wicked Blow";
         setMoveAnimations(Moves.wickedBlow);
 
         // + #818 Surging Strikes
-        moves.get(Moves.surgingStrikes).name = "Surging Strikes";
         if (mode == Mode.ParagonLite)
             setMoveEventHandlers(Moves.surgingStrikes, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
         setMoveAnimations(Moves.surgingStrikes, 766);
 
         // + #827 Dire Claw
-        moves.get(Moves.direClaw).name = "Dire Claw";
         setMoveEventHandlers(Moves.direClaw, new MoveEventHandler(Gen5BattleEventType.onAddCondition, "dire_claw.s"));
         setMoveAnimations(Moves.direClaw);
 
         // #828 Psyshield Bash
-        moves.get(Moves.psyshieldBash).name = "Psyshield Bash";
         setMoveAnimations(Moves.psyshieldBash);
 
         // TODO: + #830 Stone Axe
-        moves.get(Moves.stoneAxe).name = "Stone Axe";
         setMoveAnimations(Moves.stoneAxe);
 
         // #833 Raging Fury
-        moves.get(Moves.ragingFury).name = "Raging Fury";
         cloneMoveEventHandlers(Moves.ragingFury, Moves.thrash);
         setMoveAnimations(Moves.ragingFury);
 
         // #834 Wave Crash
-        moves.get(Moves.waveCrash).name = "Wave Crash";
         setMoveAnimations(Moves.waveCrash);
         
         // #837 Victory Dance
-        moves.get(Moves.victoryDance).name = "Victory Dance";
         setMoveAnimations(Moves.victoryDance);
 
         // #838 Headlong Rush
-        moves.get(Moves.headlongRush).name = "Headlong Rush";
         setMoveAnimations(Moves.headlongRush);
 
         // + #839 Barb Barrage
-        moves.get(Moves.barbBarrage).name = "Barb Barrage";
         setMoveEventHandlers(Moves.barbBarrage, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "barb_barrage.s"));
         setMoveAnimations(Moves.barbBarrage, 757);
 
         // #840 Esper Wing
-        moves.get(Moves.esperWing).name = "Esper Wing";
         setMoveAnimations(Moves.esperWing, 749);
 
         // + #841 Bitter Malice
-        moves.get(Moves.bitterMalice).name = "Bitter Malice";
         cloneMoveEventHandlers(Moves.bitterMalice, Moves.hex);
         setMoveAnimations(Moves.bitterMalice);
 
         // + #844 Infernal Parade
-        moves.get(Moves.infernalParade).name = "Infernal Parade";
         cloneMoveEventHandlers(Moves.infernalParade, Moves.hex);
         setMoveAnimations(Moves.infernalParade);
 
         // TODO: + #845 Ceaseless Edge
-        moves.get(Moves.ceaselessEdge).name = "Ceaseless Edge";
         setMoveAnimations(Moves.ceaselessEdge);
 
         // #855 Lumina Crash
-        moves.get(Moves.luminaCrash).name = "Lumina Crash";
         setMoveAnimations(Moves.luminaCrash);
 
         // #857 Jet Punch
-        moves.get(Moves.jetPunch).name = "Jet Punch";
         setMoveAnimations(Moves.jetPunch);
 
         // #859 Spin Out
-        moves.get(Moves.spinOut).name = "Spin Out";
         setMoveAnimations(Moves.spinOut);
 
         // TODO: + #861 Ice Spinner
-        moves.get(Moves.iceSpinner).name = "Ice Spinner";
         setMoveAnimations(Moves.iceSpinner);
         
         // #862 Glaive Rush
-        moves.get(Moves.glaiveRush).name = "Glaive Rush";
         setMoveAnimations(Moves.glaiveRush, 779);
         
         // #864 Salt Cure
-        moves.get(Moves.saltCure).name = "Salt Cure";
         setMoveAnimations(Moves.saltCure, 778);
-        setMoveAuxiliaryAnimation(Moves.saltCure, "effect", auxiliaryAnimationScriptIndices);
+        setMoveAuxiliaryAnimation(Moves.saltCure, "Effect", auxiliaryAnimationScriptIndices);
 
         // #866 Mortal Spin
-        moves.get(Moves.mortalSpin).name = "Mortal Spin";
         setMoveAnimations(Moves.mortalSpin);
 
         // #869
-        moves.get(Moves.kowtowCleave).name = "Kowtow Cleave";
         setMoveAnimations(Moves.kowtowCleave);
 
         // #870 Flower Trick
-        moves.get(Moves.flowerTrick).name = "Flower Trick";
         setMoveAnimations(Moves.flowerTrick, 768);
 
         // + #874 Make It Rain
-        moves.get(Moves.makeItRain).name = "Make It Rain";
         cloneMoveEventHandlers(Moves.makeItRain, Moves.payDay);
         setMoveAnimations(Moves.makeItRain, 776);
 
         // #884 Pounce
-        moves.get(Moves.pounce).name = "Pounce";
         setMoveAnimations(Moves.pounce, 753);
         
         // #885 Trailblaze
-        moves.get(Moves.trailblaze).name = "Trailblaze";
         setMoveAnimations(Moves.trailblaze, 765);
 
         // TODO: + #889 Rage Fist
-        moves.get(Moves.rageFist).name = "Rage Fist";
         setMoveAnimations(Moves.rageFist);
 
         // #890 Armor Cannon
-        moves.get(Moves.armorCannon).name = "Armor Cannon";
         setMoveAnimations(Moves.armorCannon);
 
         // #891 Bitter Blade
-        moves.get(Moves.bitterBlade).name = "Bitter Blade";
         setMoveAnimations(Moves.bitterBlade);
 
         // #895 Aqua Cutter
-        moves.get(Moves.aquaCutter).name = "Aqua Cutter";
         setMoveAnimations(Moves.aquaCutter, 756);
 
         // + #905 Electro Shot
-        moves.get(Moves.electroShot).name = "Electro Shot";
         switch (mode) {
             case ParagonLite -> setMoveEventHandlers(Moves.electroShot, new MoveEventHandler(Gen5BattleEventType.onCheckChargeUpSkip, "electro_shot_charge_up_skip.s"));
             case Redux -> setMoveEventHandlers(Moves.electroShot,
@@ -4612,29 +4526,24 @@ public class ParagonLiteHandler {
         setMoveEventHandlers(Moves.electroShot,
                 new MoveEventHandler(Gen5BattleEventType.onCheckChargeUpSkip, "electro_shot_charge_up_skip.s"),
                 new MoveEventHandler(Gen5BattleEventType.onChargeUpStart, "electro_shot_charge_up_start.s"));
-        setMoveAnimations(Moves.electroShot, 630);
+        setMoveAnimations(Moves.electroShot, 750);
 
         // #909 Thunderclap
-        moves.get(Moves.thunderclap).name = "Thunderclap";
         cloneMoveEventHandlers(Moves.thunderclap, Moves.suckerPunch);
         setMoveAnimations(Moves.thunderclap, 775);
 
         // + #912 Hard Press
-        moves.get(Moves.hardPress).name = "Hard Press";
         cloneMoveEventHandlers(Moves.hardPress, Moves.wringOut);
         setMoveAnimations(Moves.hardPress, 764);
         
         // #914 Alluring Voice
-        moves.get(Moves.alluringVoice).name = "Alluring Voice";
         setMoveAnimations(Moves.alluringVoice, 777);
 
         // #916 Supercell Slam
-        moves.get(Moves.supercellSlam).name = "Supercell Slam";
         cloneMoveEventHandlers(Moves.supercellSlam, Moves.jumpKick);
         setMoveAnimations(Moves.supercellSlam);
 
         // #917 Psychic Noise
-        moves.get(Moves.psychicNoise).name = "Psychic Noise";
         setMoveAnimations(Moves.psychicNoise);
 
 
@@ -4643,7 +4552,7 @@ public class ParagonLiteHandler {
         /////////////////
 
         // #011 Vise Grip
-        setMoveAuxiliaryAnimation(Moves.viseGrip, "trap", auxiliaryAnimationScriptIndices);
+        setMoveAuxiliaryAnimation(Moves.viseGrip, "Trap", auxiliaryAnimationScriptIndices);
         
         // + #024 Double Kick
         setMoveEventHandlers(Moves.doubleKick, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
@@ -4791,6 +4700,14 @@ public class ParagonLiteHandler {
             while (moveAnimationsNarc.files.size() <= spaFileNumber) {
                 moveAnimationsNarc.files.add(new byte[16]);
             }
+            
+            byte[] existingSpaFile = moveAnimationsNarc.files.get(spaFileNumber);
+            for (byte b : existingSpaFile) {
+                if (b != 0) // Should be all blank
+                    throw new RuntimeException(String.format("Attempted to overwrite existing SPA file #%03d for move #%03d %s",
+                            spaFileNumber, moveNumber, moves.get(moveNumber).name));
+            }
+            
             moveAnimationsNarc.files.set(spaFileNumber, spaFileData);
         }
 
@@ -4810,15 +4727,23 @@ public class ParagonLiteHandler {
     private void setMoveAuxiliaryAnimation(int moveNumber, String mode, Map<String, Integer> auxiliaryAnimationScriptIndices, int... spaFiles) {
         String formattedMoveName = moves.get(moveNumber).name.toLowerCase().replace(' ', '_');
         for (int spaFileNumber : spaFiles) {
-            byte[] spaFileData = readBytes(String.format("moveanims/spa/%03d_%s_%s_%03d.spa", moveNumber, formattedMoveName, mode, spaFileNumber));
+            byte[] spaFileData = readBytes(String.format("moveanims/spa/%03d_%s_%s_%03d.spa", moveNumber, formattedMoveName, mode.toLowerCase(), spaFileNumber));
             while (moveAnimationsNarc.files.size() <= spaFileNumber) {
                 moveAnimationsNarc.files.add(new byte[16]);
             }
+            
+            byte[] existingSpaFile = moveAnimationsNarc.files.get(spaFileNumber);
+            for (byte b : existingSpaFile) {
+                if (b != 0) // Should be all blank
+                    throw new RuntimeException(String.format("Attempted to overwrite existing SPA file #%03d for move #%03d %s",
+                            spaFileNumber, moveNumber, moveNames.get(moveNumber)));
+            }
+            
             moveAnimationsNarc.files.set(spaFileNumber, spaFileData);
         }
-        byte[] script = readBytes(String.format("moveanims/scripts/%03d_%s_%s.bin", moveNumber, formattedMoveName, mode));
+        byte[] script = readBytes(String.format("moveanims/scripts/%03d_%s_%s.bin", moveNumber, formattedMoveName, mode.toLowerCase()));
 
-        String auxiliaryAnimationName = String.format("%s_%s", formattedMoveName, mode);
+        String auxiliaryAnimationName = String.format("%s_%s", formattedMoveName, mode.toLowerCase());
         if (!auxiliaryAnimationScriptIndices.containsKey(auxiliaryAnimationName))
             throw new RuntimeException(String.format("Could not find auxiliary animation with id \"%s\"", auxiliaryAnimationName));
         int auxiliaryAnimationScriptIndex = auxiliaryAnimationScriptIndices.get(auxiliaryAnimationName);
@@ -4826,6 +4751,9 @@ public class ParagonLiteHandler {
         while (battleAnimationScriptsNarc.files.size() <= auxiliaryAnimationScriptIndex)
             battleAnimationScriptsNarc.files.add(getDefaultAnimationScript());
         battleAnimationScriptsNarc.files.set(auxiliaryAnimationScriptIndex, script);
+        
+        formattedMoveName = moves.get(moveNumber).name.replaceAll("[ -]", "");
+        armParser.addGlobalValue(String.format("BTLANM_%s_%s", formattedMoveName, mode), auxiliaryAnimationScriptIndex);
     }
 
     private void setBattleAnimation(int globalScriptNumber, String filename, int... SpaFiles) {
@@ -4837,6 +4765,13 @@ public class ParagonLiteHandler {
             while (moveAnimationsNarc.files.size() <= spaFileNumber) {
                 moveAnimationsNarc.files.add(new byte[16]);
             }
+
+            byte[] existingSpaFile = moveAnimationsNarc.files.get(spaFileNumber);
+            for (byte b : existingSpaFile) {
+                if (b != 0) // Should be all blank
+                    throw new RuntimeException(String.format("Attempted to overwrite existing SPA file #%03d for %s", spaFileNumber, filename));
+            }
+            
             moveAnimationsNarc.files.set(spaFileNumber, spaFileData);
         }
         byte[] script = readBytes(String.format("moveanims/scripts/%s.bin", filename));
@@ -4880,9 +4815,9 @@ public class ParagonLiteHandler {
                 String regex = "[- ]";
                 String moveNameCheck = move.name.replaceAll(regex, "");
                 String nameStrCheck = nameStr.replaceAll(regex, "");
-                if (!moveNameCheck.equalsIgnoreCase(nameStrCheck) && num <= Moves.fusionBolt) {
-                    throw new RuntimeException(String.format("Move names didn't match: %s and %s", move.name, nameStr));
-                }
+//                if (!moveNameCheck.equalsIgnoreCase(nameStrCheck) && num <= Moves.fusionBolt) {
+//                    throw new RuntimeException(String.format("Move names didn't match: %s and %s", move.name, nameStr));
+//                }
 
                 continue;
             }
@@ -5925,28 +5860,28 @@ public class ParagonLiteHandler {
             if (tr.pokemon.isEmpty())
                 continue;
 
-//            tr.setPokemonHaveCustomMoves(true);
+            tr.setPokemonHaveCustomMoves(true);
 //            tr.setPokemonHaveItems(true);
 
             TrainerPokemon poke1 = tr.pokemon.get(0);
-            poke1.pokemon = romHandler.getPokemon().get(Species.crobat);
-            pokes[poke1.pokemon.number].ability1 = Abilities.battleArmor;
-            poke1.level = 20;
+            poke1.pokemon = romHandler.getPokemon().get(Species.wingull);
+            pokes[poke1.pokemon.number].ability1 = Abilities.compoundEyes;
             poke1.abilitySlot = 1;
-            poke1.moves = new int[]{Moves.tackle, 0, 0, 0};
-            poke1.heldItem = Items.sitrusBerry;
+            poke1.level = 4;
+            poke1.moves = new int[]{Moves.waterPulse, Moves.crossPoison, Moves.venoshock, Moves.powderSnow};
+//            poke1.heldItem = Items.sitrusBerry;
             poke1.IVs = 0;
 
             if (tr.pokemon.size() < 2)
                 tr.pokemon.add(poke1.copy());
             TrainerPokemon poke2 = tr.pokemon.get(1);
-            poke2.pokemon = romHandler.getPokemon().get(Species.slowpoke);
-            pokes[poke2.pokemon.number].ability1 = Abilities.battleArmor;
-            poke2.level = 20;
+            poke2.pokemon = romHandler.getPokemon().get(Species.cresselia);
+            pokes[poke2.pokemon.number].ability1 = Abilities.illuminate;
             poke2.abilitySlot = 1;
-            poke2.moves = new int[]{Moves.stealthRock, 0, 0, 0};
+            poke2.level = 4;
+            poke2.moves = new int[]{Moves.gust, Moves.flowerTrick, Moves.silverWind, Moves.mistBall};
             poke2.IVs = 0;
-            poke2.heldItem = Items.sitrusBerry;
+//            poke2.heldItem = Items.sitrusBerry;
 
 //            if (tr.pokemon.size() < 3)
 //                tr.pokemon.add(poke1.copy());
@@ -5958,7 +5893,6 @@ public class ParagonLiteHandler {
 //        for (Trainer tr : trainers) {
 //            tr.aiFlags = (1 << 14);
 //        }
-        romHandler.setTrainers(trainers, false, false);
     }
 
     private void researchGetEffectVals(int listCount, int listAddress) {

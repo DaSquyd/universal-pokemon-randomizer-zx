@@ -22,6 +22,16 @@ public class ArmParser {
     Map<String, Integer> labelAddressMap = new HashMap<>();
     Map<Integer, SortedSet<Integer>> dataRamAddressMap = new TreeMap<>();
     Map<Integer, Integer> redirectorAddressMap = new TreeMap<>();
+    private static class AddressPair {
+        int Source;
+        int Destination;
+
+        AddressPair(int source, int destination) {
+            Source = source;
+            Destination = destination;
+        }
+    }
+    List<AddressPair> tempRedirectorAddresses = new ArrayList<>();
     ParagonLiteOverlay overlay;
     int initialRamAddress = 0;
     int currentRamAddress = 0;
@@ -98,6 +108,7 @@ public class ArmParser {
                 "HandlerParam_ChangeType",
                 "HandlerParam_ChangeWeather",
                 "HandlerParam_ConsumeItem",
+                "HandlerParam_Damage",
                 "HandlerParam_ForceUseItem",
                 "HandlerParam_Message",
                 "HandlerParam_RecoverHP",
@@ -431,14 +442,27 @@ public class ArmParser {
     }
 
     public int getFuncSize(ParagonLiteOverlay overlay, int initialRamAddress) {
-        if (overlay.readWord(initialRamAddress) == 0)
+        if (overlay.readUnsignedHalfword(initialRamAddress) == 0)
             throw new RuntimeException("Empty function");
 
         final AtomicReference<Integer> maxOffset = new AtomicReference<>(initialRamAddress);
+        final AtomicReference<List<Integer>> branchDestinations = new AtomicReference<>(new ArrayList<>());
 
         traverseData(overlay, initialRamAddress, (context) -> {
             maxOffset.set(Math.max(maxOffset.get(), context.ramAddress + 2));
 
+            // Long Branch with link
+            if ((context.instruction & 0xF800) == 0xF000) {
+                int nextInstruction = overlay.readUnsignedHalfword(overlay.ramToRomAddress(context.ramAddress) + 0x02);
+                
+                int high = context.instruction & 0x07FF;
+                int low = nextInstruction & 0x07FF;
+
+                int offset = (((high << 21) >> 9) | (low << 1)) + 4;
+                int destination = context.ramAddress + offset;
+                branchDestinations.get().add(destination);
+            }
+            
             // PC-relative load
             if ((context.instruction & 0xF800) == 0x4800) {
                 int imm = context.instruction & 0x00FF;
@@ -447,7 +471,36 @@ public class ArmParser {
             }
         });
 
-        return alignNextWord(maxOffset.get()) - initialRamAddress;
+        int endRamAddress = alignNextWord(maxOffset.get());
+        
+        // Check for cross-module jumps
+        Collections.sort(branchDestinations.get());
+        for (int destination : branchDestinations.get()) {
+            if (destination != endRamAddress)
+                continue;
+
+            int romDestination = overlay.ramToRomAddress(destination);
+            
+            // bx pc
+            if (overlay.readUnsignedHalfword(romDestination) != 0x4778)
+                continue;
+            
+            // nop
+            if (overlay.readUnsignedHalfword(romDestination + 0x02) != 0x46C0)
+                continue;
+            
+            // ldr r12, #0x08
+            if (overlay.readWord(romDestination + 0x04) != 0xE59FC000)
+                continue;
+            
+            // bx r12
+            if (overlay.readWord(romDestination + 0x08) != 0xE12FFF1C)
+                continue;
+            
+            endRamAddress += 16;
+        }
+
+        return endRamAddress - initialRamAddress;
     }
 
     public Map<Integer, Set<Integer>> getOutgoingCodeReferences(ParagonLiteOverlay overlay, int initialRamAddress) {
@@ -1561,6 +1614,8 @@ public class ArmParser {
 
         if ((funcOffset < min || funcOffset > max) && overlay != null) {
             if (!redirectorAddressMap.containsKey(funcRamAddress)) { // TODO: Clear on begin parse
+//                tempRedirectorAddresses.add(new AddressPair(currentRamAddress, funcRamAddress));
+                
                 int redirectorRomAddress = overlay.allocateRomNear(16, initialRamAddress, size);
                 overlay.writeHalfword(redirectorRomAddress, 0x4778); // bx pc
                 overlay.writeHalfword(redirectorRomAddress + 0x02, 0x46C0); // nop

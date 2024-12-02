@@ -7,6 +7,8 @@
     cmp     r4, r0
     bne     Return
     
+    mov     r0, r5
+    mov     r1, r4
     bl      Battle::GetPoke
     mov     r1, #2 ; 1/2
     bl      Battle::DivideMaxHPZeroCheck

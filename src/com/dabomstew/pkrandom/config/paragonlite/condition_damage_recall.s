@@ -4,7 +4,6 @@
     mov     r4, r0
     ldr     r0, =ServerFlow.heManager
     mov     r5, r1
-    ldr     r1, =0x2624 ; TODO: unused?
     mov     r6, r2
     mov     r7, r3
     add     r0, r4
@@ -79,7 +78,7 @@ Condition_None:
     mov     r1, r5
     add     r0, r4
     mov     r2, r6
-    bl      BattleServer::CreateDamageMessage
+    bl      BattleServer::Condition_CreateDamageMessage
     
     ldr     r3, =ServerFlow.strParam
     mov     r0, r4
@@ -91,7 +90,6 @@ Condition_None:
 Return:
     ldr     r0, =ServerFlow.heManager
     ldr     r1, [sp, #SP_R3]
-    ldr     r2, =0x2644
     add     r0, r4
     bl      Battle::HEManager_PopState
     pop     {r3-r7, pc}

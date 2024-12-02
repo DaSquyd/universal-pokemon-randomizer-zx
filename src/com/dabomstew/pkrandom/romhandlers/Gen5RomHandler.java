@@ -603,7 +603,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             move.flinchPercentChance = moveData[15] & 0xFF;
 
-            move.effect = MoveEffect.fromIndex(generationOfPokemon(), readUnsignedWord(moveData, 16));
+            int moveEffectId = readUnsignedWord(moveData, 16);
+            move.effect = MoveEffect.fromIndex(generationOfPokemon(), moveEffectId);
+            if (move.effect == null)
+                throw new RuntimeException();
 
             move.recoil = moveData[18];
             move.heal = moveData[19];
@@ -776,15 +779,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         movesNarc.files.clear();
         for (int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
-            if (move.name.length() > 15)
-                throw new RuntimeException(String.format("Move name '%s' was too long!", move.name));
+            String moveDisplayName = move.getDisplayName();
+            if (moveDisplayName.length() > 15)
+                throw new RuntimeException(String.format("Move name '%s' was too long!", moveDisplayName));
 
-            if (i > 0 && move.name.equals(moveNames.get(0))) {
+            if (i > 0 && moveDisplayName.equals(moveNames.get(0))) {
                 String indexedName = String.format("#%03d", i);
                 move.name = indexedName;
                 moveNames.set(i, indexedName);
             } else {
-                moveNames.set(i, move.name);
+                moveNames.set(i, moveDisplayName);
                 moveDescriptions.set(i, sortText(move.description, 3, 233, false));
 
                 moveUsages.set(i * 3, String.format("\uF000Ă\\x0001\\x0000 used\\xFFFE%s!", move.name));

@@ -13,6 +13,11 @@
     cmp     r0, #125 ; Sheer Force
     beq     Return
     
+    mov     r0, #2
+    bl      Battle::Random
+    cmp     r0, #0
+    beq     Return
+    
     mov     r0, r5
     mov     r1, #HE_ChangeStatStage
     mov     r2, r4

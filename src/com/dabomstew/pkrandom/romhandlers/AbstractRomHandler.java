@@ -163,7 +163,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         foePokemonList = new ArrayList<>();
         for (Pokemon pk : mainPokemonList) {
             int gen = pk.getGeneration();
-            int mask = 1 << gen;
+            int mask = 1 << (gen - 1);
             if ((playerAllowedGenerations & mask) != 0)
                 playerPokemonList.add(pk);
             if ((foeAllowedGenerations & mask) != 0)
@@ -174,7 +174,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         foePokemonListInclFormes = new ArrayList<>();
         for (Pokemon pk : mainPokemonListInclFormes) {
             int gen = pk.getGeneration();
-            int mask = 1 << gen;
+            int mask = 1 << (gen - 1);
             if ((playerAllowedGenerations & mask) != 0)
                 playerPokemonListInclFormes.add(pk);
             if ((foeAllowedGenerations & mask) != 0)
@@ -185,7 +185,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         foeAltFormesList = new ArrayList<>();
         for (Pokemon pk : altFormesList) {
             int gen = pk.getGeneration();
-            int mask = 1 << gen;
+            int mask = 1 << (gen - 1);
             if ((playerAllowedGenerations & mask) != 0)
                 playerAltFormesList.add(pk);
             if ((foeAllowedGenerations & mask) != 0)
@@ -196,7 +196,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         foeMegaEvolutionsList = new ArrayList<>();
         for (MegaEvolution mega : megaEvolutionsList) {
             int gen = mega.from.getGeneration();
-            int mask = 1 << gen;
+            int mask = 1 << (gen - 1);
             if ((playerAllowedGenerations & mask) != 0)
                 playerMegaEvolutionsList.add(mega);
             if ((foeAllowedGenerations & mask) != 0)
@@ -7636,7 +7636,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         for (int i = 0; i < starterCount; i++) {
             Pokemon pkmn = randomFullyEvolvedPokemon(allowAltFormes);
-            while (pickedStarters.contains(pkmn) || banned.contains(pkmn)) {
+            while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || !playerPokemonList.contains(pkmn)) {
                 pkmn = randomFullyEvolvedPokemon(allowAltFormes);
             }
             pickedStarters.add(pkmn);

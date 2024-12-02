@@ -86,7 +86,7 @@ CheckChoiceItem:
     
     mov     r0, r6
     mov     r1, #MC_ChoiceLock
-    bl      Battle::GetConditionData
+    bl      Battle::Poke_GetConditionData
     bl      Battle::ConditionPtr_GetMove
     str     r0, [sp, #0]
     
@@ -136,7 +136,7 @@ CheckEncore:
     
     mov     r0, r6
     mov     r1, #23 ; Encore
-    bl      Battle::GetConditionData
+    bl      Battle::Poke_GetConditionData
     bl      Battle::ConditionPtr_GetMove
     str     r0, [sp, #4]
     cmp     r5, r0

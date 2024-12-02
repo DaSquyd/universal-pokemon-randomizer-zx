@@ -173,6 +173,12 @@ public class Move {
             this.statChanges[i].type = StatChangeType.NONE;
         }
     }
+    
+    public String getDisplayName() {
+        if (name.length() > 15)
+            return name.replace(" ", "");
+        return name;
+    }
 
     public boolean isTrapMove() {
         return statusType == MoveStatusType.TRAP || effect == MoveEffect.PREVENT_ESCAPE;
