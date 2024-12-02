@@ -818,14 +818,14 @@ public class ParagonLiteHandler {
         // 1/16 -> 1/8 without Binding Band
         // 1/8  -> 1/6 with Binding Band
 
-//        int conditionHandlerBindFuncAddress = globalAddressMap.getRamAddress(battleServerOvl, "Condition_HandlerBind");
-//
-//        battleServerOvl.writeByte(conditionHandlerBindFuncAddress + 0x8E, 6);
-//        battleServerOvl.writeByte(conditionHandlerBindFuncAddress + 0x94, 8);
+        int conditionHandlerBindFuncAddress = globalAddressMap.getRamAddress(battleServerOvl, "Condition_HandlerBind");
+
+        battleServerOvl.writeByte(conditionHandlerBindFuncAddress + 0x8E, 6);
+        battleServerOvl.writeByte(conditionHandlerBindFuncAddress + 0x94, 8);
         
-        // TODO: finish this
-        List<String> conditionHandlerBindLines = readLines("battleserver/condition_handler_bind.s");
-        battleServerOvl.writeCodeForceInline(conditionHandlerBindLines, "Condition_HandlerBind", true);
+//        // TODO: finish this
+//        List<String> conditionHandlerBindLines = readLines("battleserver/condition_handler_bind.s");
+//        battleServerOvl.writeCodeForceInline(conditionHandlerBindLines, "Condition_HandlerBind", true);
         
         System.out.println("Set Trapped damage");
     }
