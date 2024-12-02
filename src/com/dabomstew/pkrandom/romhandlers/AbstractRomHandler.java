@@ -3818,7 +3818,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Set up Pokemon pool
         cachedReplacementLists = new TreeMap<>();
-        cachedAllList = noLegendaries ? new ArrayList<>(playerNonLegendaryList) : new ArrayList<>(playerPokemonList);
+        cachedAllList = noLegendaries ? new ArrayList<>(foeNonLegendaryList) : new ArrayList<>(foePokemonList);
         if (includeFormes) {
             if (noLegendaries) {
                 cachedAllList.addAll(foeNonLegendaryAltsList);
