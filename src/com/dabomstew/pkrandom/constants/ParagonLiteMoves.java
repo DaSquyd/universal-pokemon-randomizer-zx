@@ -107,7 +107,7 @@ ParagonLiteMoves {
             Moves.headlongRush, // 838
             Moves.barbBarrage, // 839
             Moves.esperWing, // 840
-            Moves.bitterMalice, // 841
+//            Moves.bitterMalice, // 841 TODO: Wait until QSpec fixes this
 //            Moves.tripleArrows, // 843
             Moves.infernalParade, // 844
 //            Moves.ceaselessEdge, // 845
