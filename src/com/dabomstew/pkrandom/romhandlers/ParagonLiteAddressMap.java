@@ -613,6 +613,10 @@ public class ParagonLiteAddressMap {
         int ramAddress = getAddressData(overlay, label).address;
         return overlay.ramToRomAddress(ramAddress);
     }
+    
+    public ParagonLiteOverlay getOverlay(String namespace) {
+        return namespaceToOverlay.get(namespace);
+    }
 
     public ParagonLiteOverlay findOverlay(int address, ParagonLiteOverlay contextOverlay) {
         List<ParagonLiteOverlay> overlays = new ArrayList<>();
