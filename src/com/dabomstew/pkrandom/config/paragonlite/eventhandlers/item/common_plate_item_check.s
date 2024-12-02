@@ -10,12 +10,12 @@
     bne     Return
     
     ; activate once; mostly necessary for rotation battles
-    ldr     r0, [r3]
+    ldrb    r0, [r7]
     cmp     r0, #FALSE
     bne     Return
     
     mov     r0, #TRUE
-    str     r0, [r3]
+    strb    r0, [r7]
     
 PushRun:
     mov     r0, r6
