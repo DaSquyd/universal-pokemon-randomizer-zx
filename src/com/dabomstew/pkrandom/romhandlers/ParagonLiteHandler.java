@@ -3347,6 +3347,9 @@ public class ParagonLiteHandler {
     
     private void setKeenEye() {
         int number = Abilities.keenEye;
+
+        String description = "Sees through the foe's\\xFFFEevasion changes.";
+        abilityDescriptions.set(number, description);
         
         setAbilityEventHandlers(number,
                 new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck),
@@ -3357,10 +3360,15 @@ public class ParagonLiteHandler {
 
     private void setHyperCutter() {
         int number = Abilities.hyperCutter;
+        
+        String description = "Cuts through the foe's\\xFFFEDefense stat changes.";
+        abilityDescriptions.set(number, description);
 
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck, "hyper_cutter.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail));
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck, "hyper_cutter_stat_drop.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail),
+                new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStat, "hyper_cutter_attacking_stat.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStat, "hyper_cutter_defending_stat.s"));
     }
 
     private void setHustle() {

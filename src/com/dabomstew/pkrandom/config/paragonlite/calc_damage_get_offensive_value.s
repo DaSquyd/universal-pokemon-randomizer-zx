@@ -32,26 +32,25 @@
     mov     r4, #0x08 ; Attack
     
 CallModifyStatHandlers:
-    ldr     r0, =0x311D
     bl      Battle::EventVar_Push
     
     mov     r0, r6
     bl      Battle::GetPokeId
     mov     r1, r0
-    mov     r0, #0x03
+    mov     r0, #VAR_AttackingPoke
     bl      Battle::EventVar_SetConstValue
     
     ldr     r0, [sp, #POKE]
     bl      Battle::GetPokeId
     mov     r1, r0
-    mov     r0, #0x04
+    mov     r0, #VAR_DefendingPoke
     bl      Battle::EventVar_SetConstValue
     
-    mov     r0, #0x3B ; poke
+    mov     r0, #VAR_SwapPokeId
     mov     r1, #0x1F ; default is -1 (5 bits)
     bl      Battle::EventVar_SetValue
     
-    mov     r0, #0x51 ; use raw stats
+    mov     r0, #VAR_GeneralUseFlag ; use raw stats
     mov     r1, #0
     bl      Battle::EventVar_SetValue
     
@@ -147,7 +146,6 @@ PostModifyStatValue:
     bl      Battle::FixedRound
     mov     r4, r0
     
-    ldr     r0, =0x3144
     bl      Battle::EventVar_Pop
     
     mov     r0, r4
