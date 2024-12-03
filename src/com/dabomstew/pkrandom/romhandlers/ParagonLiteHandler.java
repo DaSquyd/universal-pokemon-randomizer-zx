@@ -1621,7 +1621,7 @@ public class ParagonLiteHandler {
             }
         }
 
-        int totalChanges = 102;
+        int totalChanges = 103;
         int currentChanges = -1;
         long startTime = System.currentTimeMillis();
         System.out.println("setting abilities...");
@@ -1975,6 +1975,10 @@ public class ParagonLiteHandler {
         // #079 Rivalry (1.0x opposite gender, 1.2x same gender)
         Utils.printProgress(totalChanges, ++currentChanges, "Rivalry");
         setRivalry();
+        
+        // #80 Steadfast (+ immune to taunt)
+        Utils.printProgress(totalChanges, ++currentChanges, "Steadfast");
+        setSteadfast();
 
         // #083 Anger Point (Boost Attack on miss, crit, or flinch)
         Utils.printProgress(totalChanges, ++currentChanges, "Anger Point");
@@ -3546,6 +3550,15 @@ public class ParagonLiteHandler {
         setAbilityEventHandlers(number,
                 new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "tangled_feet_flinch.s"),
                 new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteNoEffect, "tangled_feet_miss.s"));
+    }
+    
+    private void setSteadfast() {
+        int number = Abilities.steadfast;
+
+        // Data
+        setAbilityEventHandlers(number,
+                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail),
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "steadfast_taunt.s"));
     }
 
     private void setRivalry() {
