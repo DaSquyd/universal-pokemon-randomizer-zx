@@ -1,47 +1,44 @@
     push    {r4-r6, lr}
-    mov     r0, #4
     mov     r5, r1
     mov     r4, r2
-    mov     r6, #4
+    
+    mov     r0, #VAR_DefendingPoke
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
-    bne     End
+    bne     Return
     
     ; Get Move ID
-    mov     r0, #18 ; move id
+    mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
-    lsl     r0, r0, #16
-    lsr     r1, r0, #16
-    
-    ; Captivate
-    mov     r0, #255
-    add     r0, #(445 - 255) ; Captivate
-    cmp     r1, r0
-    beq     CancelMove
     
     ; Taunt
-    mov     r0, #255
-    add     r0, #(269 - 255) ; Taunt
-    bne     End
+    mov     r1, #(269 - 0xFF) ; Taunt
+    add     r1, #0xFF
+    cmp     r0, r1
+    beq     CancelMove
+    
+    ; Captivate
+    add     r1, #(445 - 269) ; Captivate
+    bne     Return
     
 CancelMove:
-    mov     r0, #64
-    mov     r1, #1
+    mov     r0, #VAR_NoEffectFlag
+    mov     r1, #TRUE
     bl      Battle::EventVar_RewriteValue
-    cmp     r0, #0
-    beq     End
+    cmp     r0, #FALSE
+    beq     Return
     
     mov     r0, r5
-    mov     r1, #2
+    mov     r1, #HE_AbilityPopup_Add
     mov     r2, r4
     bl      Battle::Handler_PushRun
     
     mov     r0, r5
-    mov     r1, r6
+    mov     r1, #4
     mov     r2, r4
     bl      Battle::Handler_PushWork
-    
     mov     r6, r0
+    
     add     r0, r6, #4
     mov     r1, #2
     mov     r2, #210
@@ -56,9 +53,9 @@ CancelMove:
     bl      Battle::Handler_PopWork
     
     mov     r0, r5
-    mov     r1, #3
+    mov     r1, #HE_AbilityPopup_Remove
     mov     r2, r4
     bl      Battle::Handler_PushRun
     
-End:
+Return:
     pop     {r4-r6,pc}
