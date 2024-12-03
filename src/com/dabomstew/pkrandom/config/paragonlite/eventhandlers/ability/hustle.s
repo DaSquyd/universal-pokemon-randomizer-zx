@@ -36,7 +36,7 @@
     ; ignore multi-strike moves
     mov     r0, r5
     mov     r1, #MVD_MaxHits
-    bl      ARM9::GetMoveMetadata
+    bl      ARM9::GetMoveData
     cmp     r0, #1
     bhi     Return
     
