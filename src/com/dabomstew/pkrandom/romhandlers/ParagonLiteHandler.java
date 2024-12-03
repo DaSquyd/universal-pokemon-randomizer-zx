@@ -1621,7 +1621,7 @@ public class ParagonLiteHandler {
             }
         }
 
-        int totalChanges = 104;
+        int totalChanges = 105;
         int currentChanges = -1;
         long startTime = System.currentTimeMillis();
         System.out.println("setting abilities...");
@@ -2031,6 +2031,10 @@ public class ParagonLiteHandler {
         // #122 Flower Gift
         Utils.printProgress(totalChanges, ++currentChanges, "Flower Gift");
         setFlowerGift();
+
+        // #124 Pickpocket
+        Utils.printProgress(totalChanges, ++currentChanges, "Pickpocket");
+        setPickpocket();
 
         // #131 Healer
         Utils.printProgress(totalChanges, ++currentChanges, "Healer");
@@ -3752,6 +3756,14 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onPreAbilityChange),
                 new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "flower_gift_spatk.s"),
                 new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStatValue));
+    }
+
+    private void setPickpocket() {
+        int number = Abilities.pickpocket;
+
+        abilityDescriptions.set(number, "Steals an item when on\\xFFFEcontact with Pokémon.");
+
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onDamageProcessingEnd_Hit4, "pickpocket.s"));
     }
 
     private void setHealer() {

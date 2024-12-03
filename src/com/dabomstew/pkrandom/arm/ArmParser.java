@@ -112,6 +112,8 @@ public class ArmParser {
                 "HandlerParam_ForceUseItem",
                 "HandlerParam_Message",
                 "HandlerParam_RecoverHP",
+                "HandlerParam_SetTurnFlag",
+                "HandlerParam_SwapItem",
                 "MainModule",
                 "MoveParam",
                 "PartyPoke",
