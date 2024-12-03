@@ -1621,7 +1621,7 @@ public class ParagonLiteHandler {
             }
         }
 
-        int totalChanges = 101;
+        int totalChanges = 102;
         int currentChanges = -1;
         long startTime = System.currentTimeMillis();
         System.out.println("setting abilities...");
