@@ -1928,6 +1928,10 @@ public class ParagonLiteHandler {
         Utils.printProgress(totalChanges, ++currentChanges, "Sand Stream");
         setSandStream();
 
+        // #051 Keen Eye (+ increased accuracy)
+        Utils.printProgress(totalChanges, ++currentChanges, "Keen Eye");
+        setKeenEye();
+
         // #052 Hyper Cutter
         Utils.printProgress(totalChanges, ++currentChanges, "Hyper Cutter");
         setHyperCutter();
@@ -3339,6 +3343,16 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
                 new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
                 new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction, "sand_stream_no_damage"));
+    }
+    
+    private void setKeenEye() {
+        int number = Abilities.keenEye;
+        
+        setAbilityEventHandlers(number,
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck),
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail),
+                new AbilityEventHandler(Gen5BattleEventType.onGetMoveAccuracyStage, "keen_eye_evasion_stage.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onGetMoveAccuracy, "keen_eye_move_accuracy.s"));
     }
 
     private void setHyperCutter() {

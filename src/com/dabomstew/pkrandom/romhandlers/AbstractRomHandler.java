@@ -1791,7 +1791,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         irrelevantAbilities.add(Abilities.runAway);
 
         // #051 Keen Eye
-        // TODO: Rework
+        // TODO: Rework (though, Redux variant is probably fine)
 
         // #052 Hyper Cutter
         // TODO: Rework
