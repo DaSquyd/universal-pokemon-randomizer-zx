@@ -943,9 +943,12 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         stats[Gen5Constants.bsGenderRatioOffset] = (byte) pkmn.genderRatio;
 
-        stats[Gen5Constants.bsAbility1Offset] = (byte) pkmn.ability1;
-        stats[Gen5Constants.bsAbility2Offset] = (byte) pkmn.ability2;
-        stats[Gen5Constants.bsAbility3Offset] = (byte) pkmn.ability3;
+        stats[Gen5Constants.bsAbility1Offset] = (byte) (pkmn.ability1 & 0xFF);
+        stats[Gen5Constants.bsAbility1Offset - 3] |= (byte) (((pkmn.ability1 & 0x0300) >> 2) & 0xFF);
+        stats[Gen5Constants.bsAbility2Offset] = (byte) (pkmn.ability2 & 0xFF);
+        stats[Gen5Constants.bsAbility2Offset - 3] |= (byte) (((pkmn.ability2 & 0x0300) >> 2) & 0xFF);
+        stats[Gen5Constants.bsAbility3Offset] = (byte) (pkmn.ability3 & 0xFF);
+        stats[Gen5Constants.bsAbility3Offset - 3] |= (byte) (((pkmn.ability3 & 0x0300) >> 2) & 0xFF);
 
         writeWord(stats, Gen5Constants.bsExpYieldOffset, pkmn.expYield);
 
