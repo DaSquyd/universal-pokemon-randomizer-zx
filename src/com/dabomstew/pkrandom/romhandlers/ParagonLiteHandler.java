@@ -2652,6 +2652,8 @@ public class ParagonLiteHandler {
             String explanation = abilityExplanations.get(Abilities.adaptability).replace("Adaptability", "Specialized");
             abilityExplanations.set(number, explanation);
         }
+        
+        abilityDescriptions.set(number, abilityDescriptions.get(Abilities.adaptability));
 
         // Data
         if (mode == Mode.ParagonLite)
