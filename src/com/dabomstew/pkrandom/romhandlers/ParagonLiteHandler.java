@@ -1621,7 +1621,7 @@ public class ParagonLiteHandler {
             }
         }
 
-        int totalChanges = 103;
+        int totalChanges = 104;
         int currentChanges = -1;
         long startTime = System.currentTimeMillis();
         System.out.println("setting abilities...");
@@ -1975,7 +1975,7 @@ public class ParagonLiteHandler {
         // #079 Rivalry (1.0x opposite gender, 1.2x same gender)
         Utils.printProgress(totalChanges, ++currentChanges, "Rivalry");
         setRivalry();
-        
+
         // #80 Steadfast (+ immune to taunt)
         Utils.printProgress(totalChanges, ++currentChanges, "Steadfast");
         setSteadfast();
@@ -2027,6 +2027,10 @@ public class ParagonLiteHandler {
         // #119 Frisk -> X-ray Vision
         Utils.printProgress(totalChanges, ++currentChanges, "X-ray Vision");
         setXrayVision();
+
+        // #122 Flower Gift
+        Utils.printProgress(totalChanges, ++currentChanges, "Flower Gift");
+        setFlowerGift();
 
         // #131 Healer
         Utils.printProgress(totalChanges, ++currentChanges, "Healer");
@@ -3299,7 +3303,7 @@ public class ParagonLiteHandler {
                 // Description
                 String description = "Immune to Ice- and\\xFFFEWater-type moves.";
                 abilityDescriptions.set(number, description);
-                
+
                 // Data
                 setAbilityEventHandlers(number,
                         new AbilityEventHandler(Gen5BattleEventType.onAddConditionCheckFail),
@@ -3348,10 +3352,10 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
                 new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction, "sand_stream_no_damage"));
     }
-    
+
     private void setKeenEye() {
         int number = Abilities.keenEye;
-        
+
         setAbilityEventHandlers(number,
                 new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck),
                 new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail),
@@ -3551,7 +3555,7 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "tangled_feet_flinch.s"),
                 new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteNoEffect, "tangled_feet_miss.s"));
     }
-    
+
     private void setSteadfast() {
         int number = Abilities.steadfast;
 
@@ -3731,6 +3735,23 @@ public class ParagonLiteHandler {
         battleStrings1.set(439, "\uF000Ă\\x0001\\x0000 scanned its\\xFFFEtarget and found one \uF000ĉ\\x0001\\x0001!");
         battleStrings1.set(440, "The wild \uF000Ă\\x0001\\x0000 scanned its\\xFFFEtarget and found one \uF000ĉ\\x0001\\x0001!");
         battleStrings1.set(441, "The foe's \uF000Ă\\x0001\\x0000 scanned its\\xFFFEtarget and found one \uF000ĉ\\x0001\\x0001!");
+    }
+
+    private void setFlowerGift() {
+        int number = Abilities.flowerGift;
+
+        setAbilityEventHandlers(number,
+                new AbilityEventHandler(Gen5BattleEventType.onPostLastSwitchIn),
+                new AbilityEventHandler(Gen5BattleEventType.onRotateIn),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onWeatherChange),
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityNullified),
+                new AbilityEventHandler(Gen5BattleEventType.onNotifyAirLock),
+                new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd),
+                new AbilityEventHandler(Gen5BattleEventType.onTurnCheckDone),
+                new AbilityEventHandler(Gen5BattleEventType.onPreAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "flower_gift_spatk.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStatValue));
     }
 
     private void setHealer() {
