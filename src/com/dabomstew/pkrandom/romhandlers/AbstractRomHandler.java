@@ -1196,8 +1196,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean lowBulk = bulk <= 85;
         boolean highBulk = bulk > 110;
 
-        boolean higherOrEqualAttack = pk.attack >= pk.spatk; // minAttack >= maxSpAtk;
-        boolean higherOrEqualSpAtk = pk.spatk >= pk.attack; // minSpAtk >= maxAttack;
+        boolean higherOrEqualAttack = Math.round((pk.attack + 12.5) * 0.9) >= Math.round((pk.spatk + 12.5) * 1.1) ; // minAttack >= maxSpAtk;
+        boolean higherOrEqualSpAtk = Math.round((pk.spatk + 12.5) * 0.9) >= Math.round((pk.attack + 12.5) * 1.1); // minSpAtk >= maxAttack;
 
         long miscTweaks = settings.getCurrentMiscTweaks();
         boolean isCustomTypeEffectiveness = (miscTweaks & MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue()) == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
