@@ -13,7 +13,7 @@
     
     mov     r0, r2
     mov     r1, #8 ; max hits
-    bl      ARM9::GetMoveMetadata
+    bl      ARM9::GetMoveData
     lsl     r0, #24
     lsr     r4, r0, #24
     

@@ -24,7 +24,7 @@
     mov     r7, r2 ; r7 := *defendingMonParam
     
     str     r3, [sp, #MOVE_ID]
-    bl      ARM9::GetMoveMetadata
+    bl      ARM9::GetMoveData
     mov     r4, r0
     
     mov     r0, r6; r0 := *attackingMonParam

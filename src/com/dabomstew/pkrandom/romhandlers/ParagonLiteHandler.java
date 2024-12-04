@@ -1621,7 +1621,7 @@ public class ParagonLiteHandler {
             }
         }
 
-        int totalChanges = 105;
+        int totalChanges = 106;
         int currentChanges = -1;
         long startTime = System.currentTimeMillis();
         System.out.println("setting abilities...");
@@ -1935,6 +1935,10 @@ public class ParagonLiteHandler {
         // #052 Hyper Cutter
         Utils.printProgress(totalChanges, ++currentChanges, "Hyper Cutter");
         setHyperCutter();
+        
+        // #054 Truant
+        Utils.printProgress(totalChanges, ++currentChanges, "Truant");
+        setTruant();
 
         // #055 Hustle (Moves with BP 60 or under gain +1 priority)
         Utils.printProgress(totalChanges, ++currentChanges, "Hustle");
@@ -3376,6 +3380,16 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStat, "hyper_cutter_attacking_stat.s"),
                 new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStat, "hyper_cutter_defending_stat.s"));
     }
+    
+    private void setTruant() {
+        int number = Abilities.truant;
+        
+        setAbilityEventHandlers(number,
+                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteCheck1),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "truant.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd));
+    }
 
     private void setHustle() {
         int number = Abilities.hustle;
@@ -3410,7 +3424,6 @@ public class ParagonLiteHandler {
             default:
                 throw new IllegalStateException("Unexpected value: " + mode);
         }
-
     }
 
     private void setPlus() {
@@ -3750,7 +3763,7 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onPostLastSwitchIn),
                 new AbilityEventHandler(Gen5BattleEventType.onRotateIn),
                 new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
-                new AbilityEventHandler(Gen5BattleEventType.onWeatherChange),
+                new AbilityEventHandler(Gen5BattleEventType.onPostWeatherChange),
                 new AbilityEventHandler(Gen5BattleEventType.onAbilityNullified),
                 new AbilityEventHandler(Gen5BattleEventType.onNotifyAirLock),
                 new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd),
@@ -5939,7 +5952,7 @@ public class ParagonLiteHandler {
             poke1.pokemon = romHandler.getPokemon().get(Species.wingull);
             pokes[poke1.pokemon.number].ability1 = Abilities.compoundEyes;
             poke1.abilitySlot = 1;
-            poke1.level = 4;
+            poke1.level = 16;
             poke1.moves = new int[]{Moves.waterPulse, Moves.crossPoison, Moves.venoshock, Moves.powderSnow};
 //            poke1.heldItem = Items.sitrusBerry;
             poke1.IVs = 0;
@@ -5950,7 +5963,7 @@ public class ParagonLiteHandler {
             poke2.pokemon = romHandler.getPokemon().get(Species.cresselia);
             pokes[poke2.pokemon.number].ability1 = Abilities.illuminate;
             poke2.abilitySlot = 1;
-            poke2.level = 4;
+            poke2.level = 16;
             poke2.moves = new int[]{Moves.gust, Moves.flowerTrick, Moves.silverWind, Moves.mistBall};
             poke2.IVs = 0;
 //            poke2.heldItem = Items.sitrusBerry;
@@ -5959,7 +5972,7 @@ public class ParagonLiteHandler {
 //                tr.pokemon.add(poke1.copy());
         }
 
-        romHandler.setTrainers(trainers, true, true);
+        romHandler.setTrainers(trainers, false, true);
 
         // Set debug AI Flag
 //        for (Trainer tr : trainers) {
