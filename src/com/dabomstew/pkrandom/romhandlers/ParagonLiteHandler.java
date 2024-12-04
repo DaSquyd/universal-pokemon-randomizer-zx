@@ -3371,8 +3371,10 @@ public class ParagonLiteHandler {
         int number = Abilities.hyperCutter;
 
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck, "hyper_cutter.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail));
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck, "hyper_cutter_stat_drop.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail),
+                new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStat, "hyper_cutter_attacking_stat.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStat, "hyper_cutter_defending_stat.s"));
     }
 
     private void setHustle() {
