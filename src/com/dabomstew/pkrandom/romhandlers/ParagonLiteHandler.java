@@ -3383,12 +3383,24 @@ public class ParagonLiteHandler {
     
     private void setTruant() {
         int number = Abilities.truant;
-        
-        setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteCheck1),
-                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
-                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "truant.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd));
+
+        switch (mode) {
+            case ParagonLite: {
+                setAbilityEventHandlers(number,
+                        new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteCheck1),
+                        new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                        new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "truant.s"),
+                        new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd));
+            }
+            case Redux: {
+                setAbilityEventHandlers(number,
+                        new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteCheck1),
+                        new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                        new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail),
+                        new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd),
+                        new AbilityEventHandler(Gen5BattleEventType.onTurnCheckBegin, "truant_redux.s"));
+            }
+        }
     }
 
     private void setHustle() {
