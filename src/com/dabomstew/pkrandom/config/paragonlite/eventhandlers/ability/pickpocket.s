@@ -30,7 +30,8 @@ CheckIsAttacker:
     
     mov     r0, #VAR_TargetCount
     bl      Battle::EventVar_GetValue
-    strb    r0, [sp, #S_TargetCount]
+    mov     r1, sp
+    strb    r0, [r1, #S_TargetCount]
     
 StoreDefendersLoop_Setup:
     mov     r6, #0 ; iterator
@@ -44,7 +45,8 @@ StoreDefendersLoop_Start:
     
 StoreDefendersLoop_End:
     add     r6, #1
-    ldrb    r0, [sp, #S_TargetCount]
+    mov     r0, sp
+    ldrb    r0, [r0, #S_TargetCount]
     cmp     r6, r0
     blt     StoreDefendersLoop_Start
     b       TargetLoop_Start
@@ -59,20 +61,24 @@ CheckIsDefender:
     ; define the attacker as the one and only target
     mov     r0, #VAR_AttackingPoke
     bl      Battle::EventVar_GetValue
-    strb    r0, [sp, #S_Targets]
+    add     r1, sp, #S_Targets
+    strb    r0, [r1]
     mov     r0, #1
-    strb    r0, [sp, #S_TargetCount]
+    mov     r1, sp
+    strb    r0, [r1, #S_TargetCount]
     
     
 TargetLoop_Start:
     ; iterative Fisher-Yates
-    ldrb    r0, [sp, #S_TargetCount]
+    mov     r0, sp
+    ldrb    r0, [r0, #S_TargetCount]
     bl      Battle::Random ; r0 := rand
     add     r1, sp, #S_Targets ; r1 := &targets
     ldrb    r7, [r1, r0] ; r7 := targets[rand]
     
     ; FY: store last value into selected index
-    ldrb    r2, [sp, #S_TargetCount] ; r2 := targetCount
+    mov     r2, sp
+    ldrb    r2, [r2, #S_TargetCount] ; r2 := targetCount
     sub     r2, #1 ; r2 := maxIndex
     ldrb    r2, [r1, r2] ; r2 := targets[maxIndex]
     strb    r2, [r1, r0] ; targets[rand] := targets[maxIndex]
@@ -128,9 +134,11 @@ TargetLoop_Start:
     b       Return
 
 TargetLoop_End:
-    ldrb    r0, [sp, #S_TargetCount]
+    mov     r0, sp
+    ldrb    r0, [r0, #S_TargetCount]
     sub     r0, #1
-    strb    r0, [sp, #S_TargetCount]
+    mov     r1, sp
+    strb    r0, [r1, #S_TargetCount]
     cmp     r0, #0
     bhi     TargetLoop_Start
     
