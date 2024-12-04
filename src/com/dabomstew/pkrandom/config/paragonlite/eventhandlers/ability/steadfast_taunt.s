@@ -10,15 +10,12 @@
     ; Get Move ID
     mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
+    mov     r1, r0
     
     ; Taunt
     mov     r1, #(269 - 0xFF) ; Taunt
     add     r1, #0xFF
     cmp     r0, r1
-    beq     CancelMove
-    
-    ; Captivate
-    add     r1, #(445 - 269) ; Captivate
     bne     Return
     
 CancelMove:
@@ -37,8 +34,8 @@ CancelMove:
     mov     r1, #4
     mov     r2, r4
     bl      Battle::Handler_PushWork
-    mov     r6, r0
     
+    mov     r6, r0
     add     r0, r6, #4
     mov     r1, #2
     mov     r2, #210

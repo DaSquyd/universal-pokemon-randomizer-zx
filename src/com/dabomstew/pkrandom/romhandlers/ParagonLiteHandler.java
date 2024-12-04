@@ -1621,7 +1621,7 @@ public class ParagonLiteHandler {
             }
         }
 
-        int totalChanges = 101;
+        int totalChanges = 105;
         int currentChanges = -1;
         long startTime = System.currentTimeMillis();
         System.out.println("setting abilities...");
@@ -1976,6 +1976,10 @@ public class ParagonLiteHandler {
         Utils.printProgress(totalChanges, ++currentChanges, "Rivalry");
         setRivalry();
 
+        // #80 Steadfast (+ immune to taunt)
+        Utils.printProgress(totalChanges, ++currentChanges, "Steadfast");
+        setSteadfast();
+
         // #083 Anger Point (Boost Attack on miss, crit, or flinch)
         Utils.printProgress(totalChanges, ++currentChanges, "Anger Point");
         setAngerPoint();
@@ -2023,6 +2027,14 @@ public class ParagonLiteHandler {
         // #119 Frisk -> X-ray Vision
         Utils.printProgress(totalChanges, ++currentChanges, "X-ray Vision");
         setXrayVision();
+
+        // #122 Flower Gift
+        Utils.printProgress(totalChanges, ++currentChanges, "Flower Gift");
+        setFlowerGift();
+
+        // #124 Pickpocket
+        Utils.printProgress(totalChanges, ++currentChanges, "Pickpocket");
+        setPickpocket();
 
         // #131 Healer
         Utils.printProgress(totalChanges, ++currentChanges, "Healer");
@@ -3295,7 +3307,7 @@ public class ParagonLiteHandler {
                 // Description
                 String description = "Immune to Ice- and\\xFFFEWater-type moves.";
                 abilityDescriptions.set(number, description);
-                
+
                 // Data
                 setAbilityEventHandlers(number,
                         new AbilityEventHandler(Gen5BattleEventType.onAddConditionCheckFail),
@@ -3344,13 +3356,10 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
                 new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction, "sand_stream_no_damage"));
     }
-    
+
     private void setKeenEye() {
         int number = Abilities.keenEye;
 
-        String description = "Sees through the foe's\\xFFFEevasion changes.";
-        abilityDescriptions.set(number, description);
-        
         setAbilityEventHandlers(number,
                 new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck),
                 new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail),
@@ -3360,15 +3369,10 @@ public class ParagonLiteHandler {
 
     private void setHyperCutter() {
         int number = Abilities.hyperCutter;
-        
-        String description = "Cuts through the foe's\\xFFFEDefense stat changes.";
-        abilityDescriptions.set(number, description);
 
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck, "hyper_cutter_stat_drop.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail),
-                new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStat, "hyper_cutter_attacking_stat.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStat, "hyper_cutter_defending_stat.s"));
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck, "hyper_cutter.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail));
     }
 
     private void setHustle() {
@@ -3556,6 +3560,15 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteNoEffect, "tangled_feet_miss.s"));
     }
 
+    private void setSteadfast() {
+        int number = Abilities.steadfast;
+
+        // Data
+        setAbilityEventHandlers(number,
+                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail),
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "steadfast_taunt.s"));
+    }
+
     private void setRivalry() {
         int number = Abilities.rivalry;
 
@@ -3726,6 +3739,31 @@ public class ParagonLiteHandler {
         battleStrings1.set(439, "\uF000Ă\\x0001\\x0000 scanned its\\xFFFEtarget and found one \uF000ĉ\\x0001\\x0001!");
         battleStrings1.set(440, "The wild \uF000Ă\\x0001\\x0000 scanned its\\xFFFEtarget and found one \uF000ĉ\\x0001\\x0001!");
         battleStrings1.set(441, "The foe's \uF000Ă\\x0001\\x0000 scanned its\\xFFFEtarget and found one \uF000ĉ\\x0001\\x0001!");
+    }
+
+    private void setFlowerGift() {
+        int number = Abilities.flowerGift;
+
+        setAbilityEventHandlers(number,
+                new AbilityEventHandler(Gen5BattleEventType.onPostLastSwitchIn),
+                new AbilityEventHandler(Gen5BattleEventType.onRotateIn),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onWeatherChange),
+                new AbilityEventHandler(Gen5BattleEventType.onAbilityNullified),
+                new AbilityEventHandler(Gen5BattleEventType.onNotifyAirLock),
+                new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd),
+                new AbilityEventHandler(Gen5BattleEventType.onTurnCheckDone),
+                new AbilityEventHandler(Gen5BattleEventType.onPreAbilityChange),
+                new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "flower_gift_spatk.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStatValue));
+    }
+
+    private void setPickpocket() {
+        int number = Abilities.pickpocket;
+
+        abilityDescriptions.set(number, "Steals an item when on\\xFFFEcontact with Pokémon.");
+
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onDamageProcessingEnd_Hit4, "pickpocket.s"));
     }
 
     private void setHealer() {
