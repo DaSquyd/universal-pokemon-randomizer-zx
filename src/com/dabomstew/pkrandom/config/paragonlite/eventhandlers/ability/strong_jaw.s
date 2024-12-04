@@ -3,20 +3,26 @@
     mov     r4, r2
     bl      Battle::EventVar_GetValue
     cmp     r4, r0 ; maybe to ensure same user? same move?
-    bne     End
-    mov     r0, #18 ; move id
+    bne     Return
+    
+    mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
     lsl     r0, r0, #16
     lsr     r0, r0, #16
     
-    mov     r1, #15 ; bite
+    mov     r1, #MF_Bite
     bl      ARM9::MoveHasFlag
-    cmp     r0, #0
-    beq     End
+    cmp     r0, #FALSE
+    beq     Return
     
-    ldr     r1, =6144 ; 1.5x
-    mov     r0, #49 ; move power
+    mov     r0, #VAR_MovePower
+#if PARAGONLITE
+    ldr     r1, =(0x1000 * 1.3)
+#else
+    mov     r1, #((0x1000 * 1.5) >> 10)
+    lsl     r1, #10
+#endif
     bl      Battle::EventVar_MulValue
     
-End:
+Return:
     pop     {r4, pc}
