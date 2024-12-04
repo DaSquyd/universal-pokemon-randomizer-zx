@@ -10,15 +10,29 @@
     
     ldr     r0, [r6, #0x04]
     cmp     r0, #FALSE
-    beq     Return
+    bne     RunMessageAndHeal
     
     
+    ; failed for a different reason...
+    mov     r0, #VAR_FailCause
+    bl      Battle::EventVar_GetValue
+    cmp     r0, #MFC_Flinch
+    bne     Return
+    
+    mov     r0, #TRUE
+    str     r0, [r6, #0x00]
+    b       Return
+    
+    
+RunMessageAndHeal:
+#if PARAGONLITE
     ; NEW - Add Ability Popup
     mov     r0, r5
     mov     r1, #HE_AbilityPopup_Add
     mov     r2, r4
     bl      Battle::Handler_PushRun
     ; ~NEW
+#endif
     
     
     mov     r0, r5
@@ -26,6 +40,14 @@
     mov     r2, r4
     bl      Battle::Handler_PushWork
     mov     r7, r0
+    
+#if !PARAGONLITE
+    ldr     r0, [r7, #HandlerParam_RecoverHP.header]
+    mov     r1, #(BHP_AbilityPopup >> 16)
+    lsl     r1, #16
+    orr     r0, r1
+    str     r0, [r7, #HandlerParam_RecoverHP.header]
+#endif
     
     add     r0, r7, #HandlerParam_Message.exStr
     mov     r1, #2
@@ -41,6 +63,7 @@
     bl      Battle::Handler_PopWork
     
     
+#if PARAGONLITE
     ; NEW - Heal
     mov     r0, r5
     mov     r1, r4
@@ -77,6 +100,7 @@ RemoveAbilityPopup:
     mov     r2, r4
     bl      Battle::Handler_PushRun
     ; ~NEW
+#endif
     
     
     mov     r0, #FALSE

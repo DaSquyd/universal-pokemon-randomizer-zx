@@ -1935,7 +1935,7 @@ public class ParagonLiteHandler {
         // #052 Hyper Cutter
         Utils.printProgress(totalChanges, ++currentChanges, "Hyper Cutter");
         setHyperCutter();
-        
+
         // #054 Truant
         Utils.printProgress(totalChanges, ++currentChanges, "Truant");
         setTruant();
@@ -2940,11 +2940,11 @@ public class ParagonLiteHandler {
 
     private void addRavenousTorque() {
         int number = ParagonLiteAbilities.ravenousTorque;
-        
+
         abilityNames.set(number, "Ravenous Torque");
-        
+
         abilityDescriptions.set(number, "Boosts the Speed stat\\xFFFEafter biting moves.");
-        
+
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "ravenous_torque.s"));
     }
 
@@ -3386,26 +3386,26 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStat, "hyper_cutter_attacking_stat.s"),
                 new AbilityEventHandler(Gen5BattleEventType.onGetDefendingStat, "hyper_cutter_defending_stat.s"));
     }
-    
+
     private void setTruant() {
         int number = Abilities.truant;
 
         switch (mode) {
-            case ParagonLite: {
-                setAbilityEventHandlers(number,
-                        new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteCheck1),
-                        new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
-                        new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "truant.s"),
-                        new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd));
-            }
-            case Redux: {
-                setAbilityEventHandlers(number,
-                        new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteCheck1),
-                        new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
-                        new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail),
-                        new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd),
-                        new AbilityEventHandler(Gen5BattleEventType.onTurnCheckBegin, "truant_redux.s"));
-            }
+            case ParagonLite -> setAbilityEventHandlers(number,
+                    new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteCheck1),
+                    new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                    new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "truant_on_fail.s"),
+                    new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd),
+                    new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteNoEffect, "truant_on_no_effect.s"));
+            case Redux -> setAbilityEventHandlers(number,
+                    new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteCheck1),
+                    new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
+                    new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "truant_on_fail.s"),
+                    new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd),
+                    new AbilityEventHandler(Gen5BattleEventType.onTurnCheckBegin, "truant_redux.s"),
+                    new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteNoEffect, "truant_on_no_effect.s"),
+            new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "truant_on_flinch.s"));
+            default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
     }
 
@@ -3624,9 +3624,9 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "anger_point_crit"),
-                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "anger_point_flinch"),
-                new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteNoEffect, "anger_point_miss"));
+                new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "anger_point_crit.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "anger_point_flinch.s"),
+                new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteNoEffect, "anger_point_miss.s"));
     }
 
     private void setIronFist() {
@@ -5967,11 +5967,11 @@ public class ParagonLiteHandler {
 //            tr.setPokemonHaveItems(true);
 
             TrainerPokemon poke1 = tr.pokemon.get(0);
-            poke1.pokemon = romHandler.getPokemon().get(Species.wingull);
+            poke1.pokemon = romHandler.getPokemon().get(Species.pelipper);
             pokes[poke1.pokemon.number].ability1 = Abilities.compoundEyes;
             poke1.abilitySlot = 1;
-            poke1.level = 16;
-            poke1.moves = new int[]{Moves.waterPulse, Moves.crossPoison, Moves.venoshock, Moves.powderSnow};
+            poke1.level = 20;
+            poke1.moves = new int[]{Moves.fakeOut, 0, 0, 0};
 //            poke1.heldItem = Items.sitrusBerry;
             poke1.IVs = 0;
 
