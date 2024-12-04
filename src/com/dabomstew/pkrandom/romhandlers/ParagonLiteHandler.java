@@ -1586,7 +1586,7 @@ public class ParagonLiteHandler {
     public void setAbilities() {
         registerAbilityEffects();
 
-        int abilityListAdditions = 46;
+        int abilityListAdditions = 47;
 
         // Move AbilityList
         relocateAbilityListRamAddress(abilityListAdditions);
@@ -2939,7 +2939,13 @@ public class ParagonLiteHandler {
     }
 
     private void addRavenousTorque() {
-        // TODO
+        int number = ParagonLiteAbilities.ravenousTorque;
+        
+        abilityNames.set(number, "Ravenous Torque");
+        
+        abilityDescriptions.set(number, "Boosts the Speed stat\\xFFFEafter biting moves.");
+        
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "ravenous_torque.s"));
     }
 
     private void addSuperconductor() {
