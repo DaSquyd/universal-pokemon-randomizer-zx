@@ -11,90 +11,99 @@
 ; It also includes the 1.5x Sp. Def boost for Rock-types in Sandstorm
 ;   and the 1.5x Defense boost for Ice-types in Hail
 
+#define S_ServerFlow 0x00
+#define S_AttackingPoke 0x04
+#define S_MoveCategory 0x08
+#define StackSize 0x0C
+#define PushSize (4 * 5) ; r4-r7, lr
+
+#define Arg_IsCrit (PushSize + 0x00)
+
     push    {r4-r7, lr}
-    add     sp, #-12
+    sub     sp, #StackSize
     mov     r6, r3
-    str     r0, [sp, #0x00]
+    str     r0, [sp, #S_ServerFlow]
     ldrh    r0, [r6]
-    str     r1, [sp, #0x04]
+    str     r1, [sp, #S_AttackingPoke]
     mov     r5, r2
     bl      ARM9::GetMoveCategory
-    mov     r4, #11 ; Sp. Def stat
-    cmp     r0, #2 ; Special
+    mov     r4, #BPV_SpDefStat
+    cmp     r0, #CAT_Special
     beq     ModifyStatEvent
-    mov     r4, #9 ; Defense stat
+    mov     r4, #BPV_DefenseStat
 
 ModifyStatEvent:
      ldr    r0, [r6, #0x08]
-     str    r0, [sp, #0x08]
-     ldr    r0, =0x3154
+     str    r0, [sp, #S_MoveCategory]
      bl     Battle::EventVar_Push
      
-     ldr    r0, [sp, #0x04]
+     ldr    r0, [sp, #S_AttackingPoke]
      bl     Battle::GetPokeId
      mov    r1, r0
-     mov    r0, #3
+     mov    r0, #VAR_AttackingPoke
      bl     Battle::EventVar_SetConstValue
      
      mov    r0, r5
      bl     Battle::GetPokeId
      mov    r1, r0
-     mov    r0, #4
+     mov    r0, #VAR_DefendingPoke
      bl     Battle::EventVar_SetConstValue
      
-     mov    r0, #0x3C
+     mov    r0, #VAR_Stat
      mov    r1, r4
      bl     Battle::EventVar_SetConstValue
      
-     mov    r0, #0x3D
-     mov    r1, #0
+     mov    r0, #VAR_StatSwapFlag
+     mov    r1, #FALSE
      bl     Battle::EventVar_SetValue
      
-     mov    r0, #0x51
-     mov    r1, #0
+     mov    r0, #VAR_GeneralUseFlag
+     mov    r1, #FALSE
      bl     Battle::EventVar_SetRewriteOnceValue
+    
+    mov     r0, #VAR_CritStatFlag
+    mov     r1, #FALSE
+    bl      Battle::EventVar_SetValue
      
-     ldr    r0, [sp, #0x00]
-     mov    r1, #0x3A
+     ldr    r0, [sp, #S_ServerFlow]
+     mov    r1, #EVENT_OnGetDefendingStat
      bl     Battle::Event_CallHandlers
      
-     mov    r0, #0x3D
+     mov    r0, #VAR_StatSwapFlag
      bl     Battle::EventVar_GetValue
-     mov    r1, #1
+     mov    r1, #TRUE
      tst    r0, r1
      beq    CheckRawStat
      
 ; Should flip stats...
-     cmp    r4, #0x09 ; Defense stat
+     cmp    r4, #BPV_DefenseStat
      bne    SetStatToDefense
-     mov    r4, #0x0B ; Set stat to Sp. Def stat
+     mov    r4, #BPV_SpDefStat
      b      UpdateCategory
      
 SetStatToDefense:
-    mov     r4, #9 ; Defense stat
+    mov     r4, #BPV_DefenseStat
 
 UpdateCategory:
-    cmp     r4, #9 ; Defense stat
+    cmp     r4, #BPV_DefenseStat
     bne     SetCategoryToSpecial
-    mov     r0, #1 ; set category to Physical
+    mov     r0, #CAT_Physical
     b       StoreCategory
     
 SetCategoryToSpecial:
-    mov     r0, #2 ; Special
+    mov     r0, #CAT_Special
     
 StoreCategory:
-    str     r0, [sp, #0x08]
+    str     r0, [sp, #S_MoveCategory]
     
 CheckRawStat:
-    mov     r0, #0x51
+    mov     r0, #VAR_GeneralUseFlag
     bl      Battle::EventVar_GetValue
-    lsl     r0, #24
-    lsr     r7, r0, #24
+    mov     r7, r0
     
-    ldr     r0, =0x3163
     bl      Battle::EventVar_Pop
     
-    cmp     r7, #0
+    cmp     r7, #FALSE
     beq     CheckCrit
     
     mov     r0, r5
@@ -103,10 +112,16 @@ CheckRawStat:
     b       CheckWeather
     
 CheckCrit:
-    ldr     r0, [sp, #0x20]
-    cmp     r0, #0
+    ldr     r0, [sp, #Arg_IsCrit]
+    cmp     r0, #FALSE
+    bne     UseCritStat
+    
+    mov     r0, #VAR_CritStatFlag
+    bl      Battle::EventVar_GetValue
+    cmp     r0, #FALSE
     beq     GetStat
     
+UseCritStat:
     mov     r0, r5
     mov     r1, r4
     bl      Battle::GetCritPokeStat
@@ -121,7 +136,7 @@ CheckWeather:
     lsl     r0, #16
     lsr     r7, r0, #16
     
-    ldr     r0, [sp, #0x00]
+    ldr     r0, [sp, #S_ServerFlow]
     bl      Battle::ServerEvent_GetWeather
     cmp     r0, #3 ; hail
     beq     CheckHail
@@ -161,7 +176,7 @@ ModifyStatValueEvent:
     ldr     r4, =0x3178
     mov     r0, r4
     bl      Battle::EventVar_Push
-    ldr     r0, [sp, #0x04]
+    ldr     r0, [sp, #S_AttackingPoke]
     bl      Battle::GetPokeId
     mov     r1, r0
     mov     r0, #3
@@ -182,7 +197,7 @@ ModifyStatValueEvent:
     mov     r0, #0x16
     bl      Battle::EventVar_SetConstValue
     
-    ldr     r1, [sp, #0x08]
+    ldr     r1, [sp, #S_MoveCategory]
     mov     r0, #0x1A
     bl      Battle::EventVar_SetConstValue
     
@@ -196,7 +211,7 @@ ModifyStatValueEvent:
     lsl     r3, r5, #15
     bl      Battle::EventVar_SetMulValue
     
-    ldr     r0, [sp, #0x00]
+    ldr     r0, [sp, #S_ServerFlow]
     mov     r1, #0x3C
     bl      Battle::Event_CallHandlers
     
@@ -206,9 +221,8 @@ ModifyStatValueEvent:
     lsr     r5, r0, #16
     mov     r0, #0x35
     bl      Battle::EventVar_GetValue
-    add     r4, #0x0B
     mov     r6, r0
-    mov     r0, r4
+    
     bl      Battle::EventVar_Pop
     
     mov     r0, r5
@@ -217,5 +231,6 @@ ModifyStatValueEvent:
     
     lsl     r0, #16
     lsr     r0, #16
-    add     sp, #12
+    
+    add     sp, #StackSize
     pop     {r4-r7, pc}

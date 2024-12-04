@@ -1,13 +1,13 @@
     push    {r4, lr}
     mov     r4, r2
     
-    mov     r0, #0x03
+    mov     r0, #VAR_AttackingPoke
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
     bne     Return
     
-    mov     r0, #0x35
-    mov     r1, #0x09 ; Defense
+    mov     r0, #VAR_Stat
+    mov     r1, #BPV_DefenseStat
     bl      Battle::EventVar_RewriteValue
     
 Return:
