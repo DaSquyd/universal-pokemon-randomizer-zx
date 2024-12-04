@@ -15,12 +15,7 @@
     beq     Return
     
     mov     r0, #VAR_MovePower
-#if PARAGONLITE
-    ldr     r1, =(0x1000 * 1.3)
-#else
-    mov     r1, #((0x1000 * 1.5) >> 10)
-    lsl     r1, #10
-#endif
+    ldr     r1, =(0x1000 * (PARAGONLITE ? 1.2 : 1.3))
     bl      Battle::EventVar_MulValue
     
 Return:

@@ -2945,7 +2945,9 @@ public class ParagonLiteHandler {
 
         abilityDescriptions.set(number, "Boosts the Speed stat\\xFFFEafter biting moves.");
 
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "ravenous_torque.s"));
+        setAbilityEventHandlers(number,
+                new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "ravenous_torque_power.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "ravenous_torque_speed.s"));
     }
 
     private void addSuperconductor() {
