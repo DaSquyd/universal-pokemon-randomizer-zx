@@ -16,7 +16,8 @@ CheckContact:
     beq     Return
     
 CheckHeldItem:
-    mov     r0, r4
+    mov     r0, r5
+    mov     r1, r4
     bl      Battle::GetPoke
     bl      Battle::Poke_GetHeldItem
     cmp     r0, #0 ; null item
@@ -86,11 +87,12 @@ TargetLoop_Start:
     mov     r0, r5
     mov     r1, r4
     mov     r2, r7
-    bl      Battle::HandlerCommon_CheckIfCanStealPokeItem
+    bl      Battle::HandlerCommon_CheckIfCannotStealPokeItem
     cmp     r0, #FALSE
-    beq     TargetLoop_End
+    bne     TargetLoop_End
     
-    mov     r0, r7
+    mov     r0, r5
+    mov     r1, r7
     bl      Battle::GetPoke
     bl      Battle::Poke_GetHeldItem
     str     r0, [sp, #S_HeldItem]

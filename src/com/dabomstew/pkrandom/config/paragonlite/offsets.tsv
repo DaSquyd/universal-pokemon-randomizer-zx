@@ -583,7 +583,7 @@ Battle	Data_MoveEffectListAddress4	Data	4	*	0x021E0370	0x021E0350	0x021C5BB8	0x0
 Battle	MoveEvent_RemoveItem	Code		thumb	0x021E03B4	0x021E0394	0x021C5BFC	0x021C5BBC
 Battle	HandlerCommon_CreateSideStatus	Code		thumb	0x021E558C	0x021E556C	0x021CADE4	0x021CADA4
 Battle	HandlerCommon_CheckTargetMonID	Code		thumb	0x021E8618	0x021E85F8	0x021CDE78	0x021CDE38
-Battle	HandlerCommon_CheckIfCanStealPokeItem	Code		thumb	0x021E8708	0x021E86E8	0x021CDF68	0x021CDF28
+Battle	HandlerCommon_CheckIfCannotStealPokeItem	Code		thumb	0x021E8708	0x021E86E8	0x021CDF68	0x021CDF28
 Battle	CommonMultiplyBasePower	Code		thumb	0x021E8880	0x021E8860	0x021CE0E0	0x021CE0A0
 Battle	MakeEmptyCondition	Code		thumb	0x021E8938	0x021E8918	0x021CE198	0x021CE158
 Battle	ConditionPtr_GetMode	Code		thumb	0x021E8948	0x021E8928	0x021CE1A8	0x021CE168

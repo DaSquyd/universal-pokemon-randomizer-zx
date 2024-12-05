@@ -5966,27 +5966,33 @@ public class ParagonLiteHandler {
                 continue;
 
             tr.setPokemonHaveCustomMoves(true);
-//            tr.setPokemonHaveItems(true);
+            tr.setPokemonHaveItems(true);
 
-            TrainerPokemon poke1 = tr.pokemon.get(0);
-            poke1.pokemon = romHandler.getPokemon().get(Species.pelipper);
-            pokes[poke1.pokemon.number].ability1 = Abilities.compoundEyes;
-            poke1.abilitySlot = 1;
-            poke1.level = 20;
-            poke1.moves = new int[]{Moves.fakeOut, 0, 0, 0};
-//            poke1.heldItem = Items.sitrusBerry;
-            poke1.IVs = 0;
+            // Poke 1
+            {
+                TrainerPokemon poke1 = tr.pokemon.get(0);
+                poke1.pokemon = romHandler.getPokemon().get(Species.pelipper);
+                pokes[poke1.pokemon.number].ability1 = Abilities.pickpocket;
+                poke1.abilitySlot = 1;
+                poke1.level = 20;
+                poke1.moves = new int[]{Moves.tackle, 0, 0, 0};
+                poke1.heldItem = Items.sitrusBerry;
+                poke1.IVs = 0;
+            }
 
-            if (tr.pokemon.size() < 2)
-                tr.pokemon.add(poke1.copy());
-            TrainerPokemon poke2 = tr.pokemon.get(1);
-            poke2.pokemon = romHandler.getPokemon().get(Species.cresselia);
-            pokes[poke2.pokemon.number].ability1 = Abilities.illuminate;
-            poke2.abilitySlot = 1;
-            poke2.level = 16;
-            poke2.moves = new int[]{Moves.gust, Moves.flowerTrick, Moves.silverWind, Moves.mistBall};
-            poke2.IVs = 0;
-//            poke2.heldItem = Items.sitrusBerry;
+            // Poke 2
+            {
+                if (tr.pokemon.size() < 2)
+                    tr.pokemon.add(tr.pokemon.get(0).copy());
+                TrainerPokemon poke2 = tr.pokemon.get(1);
+                poke2.pokemon = romHandler.getPokemon().get(Species.cresselia);
+                pokes[poke2.pokemon.number].ability1 = Abilities.illuminate;
+                poke2.abilitySlot = 1;
+                poke2.level = 16;
+                poke2.moves = new int[]{Moves.gust, Moves.flowerTrick, Moves.silverWind, Moves.mistBall};
+                poke2.IVs = 0;
+                poke2.heldItem = Items.sitrusBerry;
+            }
 
 //            if (tr.pokemon.size() < 3)
 //                tr.pokemon.add(poke1.copy());
