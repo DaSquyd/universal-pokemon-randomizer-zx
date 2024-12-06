@@ -1,5 +1,7 @@
 ; Check Pixie Plate
-    cmp     r0, #115
+    mov     r1, #(644 >> 2) ; Pixie Plate
+    lsl     r1, #2
+    cmp     r0, r1
     bne     Main
     
 Fairy:
@@ -8,8 +10,8 @@ Fairy:
     
 ; Blank plate always returns 0 (Normal)
 Main:
-    mov     r1, #149
-    lsl     r1, #1 ; 298
+    mov     r1, #(298 >> 1) ; Flame Plate
+    lsl     r1, #1
     sub     r0, r1
     cmp     r0, #15
     bhi     Other

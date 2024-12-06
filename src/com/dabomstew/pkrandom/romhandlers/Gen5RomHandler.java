@@ -5209,7 +5209,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 hasStatusMoves = true;
 
             if (!consumableOnly && (move.effect == MoveEffect.HIT_2_TO_5_TIMES || move.effect == MoveEffect.TRIPLE_KICK))
-                items.add(ParagonLiteItems.loadedDice);
+                items.add(Items.loadedDice);
 
             if (!consumableOnly && totalQuadrupleEffectiveness > 0 && move.isGoodDamaging(generationOfPokemon())) {
                 int plateItem = Gen5Constants.typeToPlate.get(move.type);
@@ -5264,13 +5264,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
 
         if (totalDoubleEffectiveness >= 3)
-            items.add(ParagonLiteItems.weaknessPolicy);
+            items.add(Items.weaknessPolicy);
         if (totalDoubleEffectiveness >= 4)
-            items.add(ParagonLiteItems.weaknessPolicy);
+            items.add(Items.weaknessPolicy);
         if (totalDoubleEffectiveness >= 5)
-            items.add(ParagonLiteItems.weaknessPolicy);
+            items.add(Items.weaknessPolicy);
         if (totalDoubleEffectiveness >= 6)
-            items.add(ParagonLiteItems.weaknessPolicy);
+            items.add(Items.weaknessPolicy);
 
         if (!consumableOnly && !hasStatusMoves) {
             double defenseRatio = tp.pokemon.getDefenseSpecialDefenseRatio();
@@ -5287,7 +5287,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
 
             for (int i = 0; i < assaultVestFrequency; ++i) {
-                items.add(ParagonLiteItems.assaultVest);
+                items.add(Items.assaultVest);
             }
         }
 
@@ -5670,6 +5670,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setBattleEventStrings();
 
         // Code updates
+        paragonLite.addUtil();
         paragonLite.tempFixFairyStruggle();
         paragonLite.setPokeData();
         paragonLite.setBoxPreview();

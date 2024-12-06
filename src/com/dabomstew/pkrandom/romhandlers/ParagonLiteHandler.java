@@ -108,6 +108,23 @@ public class ParagonLiteHandler {
     List<String> oldMoveNames;
     Map<Integer, String> abilityUpdates;
     PokeUpdate[] pokeUpdates;
+    
+    private static class ItemSpritePalette {
+        int graphicId;
+        int paletteId;
+        
+        ItemSpritePalette() {
+            graphicId = 0x03FD;
+            paletteId = 0x03FE;
+        }
+        
+        ItemSpritePalette(int graphicId, int paletteId) {
+            this.graphicId = graphicId;
+            this.paletteId = paletteId;
+        }
+    }
+    SortedMap<Integer, ItemSpritePalette> itemSprites;
+    
 
     boolean debugMode;
 
@@ -618,6 +635,11 @@ public class ParagonLiteHandler {
         addGlobalBattleTextValue(battleStrings2, "StickyWeb", "Disappeared");
         addBattleStringStandard("The sticky web disappeared\nfrom around your team!");
         addBattleStringStandard("The sticky web disappeared\nfrom around the foe's team!");
+    }
+    
+    public void addUtil() {
+        List<String> binarySearchHalfLines = readLines("arm9/binary_search_half");
+        arm9.writeCode(binarySearchHalfLines, "BinarySearch_Half");
     }
 
     public void tempFixFairyStruggle() {
@@ -5194,6 +5216,8 @@ public class ParagonLiteHandler {
         registerItemEffects();
 
         updateNaturalGiftPowers();
+        
+        initItemSpritesData();
 
         relocateItemListRamAddress(11);
 
@@ -5287,7 +5311,7 @@ public class ParagonLiteHandler {
         addFairyGem();
 
         // #217 Quick Claw
-        addQuickClaw();
+        setQuickClaw();
 
         // #518 Blank Plate
         addBlankPlate();
@@ -5317,7 +5341,54 @@ public class ParagonLiteHandler {
         // Berries
         setBerryList();
 
+        writeItemSpriteData();
+
         System.out.println("Set items");
+    }
+    
+    private void initItemSpritesData() {
+        itemSprites = new TreeMap<>();
+
+        ParagonLiteAddressMap.DataAddress dataAddress = (ParagonLiteAddressMap.DataAddress)globalAddressMap.getAddressData(arm9, "Data_ItemSpriteMap");
+        int count = dataAddress.getSize() / 4;
+        
+        for (int i = 0; i < count; ++i) {
+            int spriteIdRomAddress = dataAddress.getRomAddress() + i * 4;
+            int paletteIdRomAddress = spriteIdRomAddress + 2;
+            
+            int spriteId = arm9.readWord(spriteIdRomAddress);
+            int paletteId = arm9.readWord(paletteIdRomAddress);
+            
+            if (i != 0 && spriteId == 0x03FD)
+                continue;
+            
+            itemSprites.put(i, new ItemSpritePalette(spriteId, paletteId));
+        }
+    }
+    
+    private void writeItemSpriteData() {
+        armParser.addGlobalValue("ITEM_SPRITES_PALETTES_COUNT", itemSprites.size());
+        byte[] data = new byte[itemSprites.size() * 6];
+        
+        int index = 0;
+        for (Map.Entry<Integer, ItemSpritePalette> entry : itemSprites.entrySet()) {
+            int itemNumber = entry.getKey();
+            ItemSpritePalette itemSpritePalette = entry.getValue();
+
+            writeHalf(data, index * 6, itemNumber);
+            writeHalf(data, index * 6 + 2, itemSpritePalette.graphicId);
+            writeHalf(data, index * 6 + 4, itemSpritePalette.paletteId);
+            
+            ++index;
+        }
+        
+        arm9.replaceData(data, "Data_ItemSpriteMap");
+        
+        List<String> itemGetIndexLines = readLines("arm9/item_get_index.s");
+        arm9.writeCodeForceInline(itemGetIndexLines, "Item_GetIndex", true);
+        
+        List<String> itemGetDataLines = readLines("arm9/item_get_data.s");
+        arm9.writeCodeForceInline(itemGetDataLines, "Item_GetData", true);
     }
 
     // In Gen VI, all Berries got a +20 boost to power for Natural Gift across the board.
@@ -5469,7 +5540,7 @@ public class ParagonLiteHandler {
     }
 
     void addWeaknessPolicy() {
-        int number = ParagonLiteItems.weaknessPolicy;
+        int number = Items.weaknessPolicy;
 
         setItemName(number, "Weakness Policy", "Weakness Policies");
         itemDescriptions.set(number, "An item to be held by a Pokémon. Attack\\xFFFEand Sp. Atk sharply increase if the\\xFFFEholder is hit with a move it's weak to.");
@@ -5490,7 +5561,7 @@ public class ParagonLiteHandler {
     }
 
     void addAssaultVest() {
-        int number = ParagonLiteItems.assaultVest;
+        int number = Items.assaultVest;
 
         setItemName(number, "Assault Vest", "Assault Vests");
         itemDescriptions.set(number, "An item to be held by a Pokémon. This\\xFFFEvest boosts the holder's Sp. Def stat\\xFFFEbut prevents the use of status moves.");
@@ -5508,7 +5579,7 @@ public class ParagonLiteHandler {
     }
 
     void addPixiePlate() {
-        int number = ParagonLiteItems.pixiePlate;
+        int number = Items.pixiePlate;
 
         setItemName(number, "Pixie Plate", "Pixie Plates");
         itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEIt is a stone tablet that boosts the\\xFFFEpower of Fairy-type moves.");
@@ -5531,7 +5602,7 @@ public class ParagonLiteHandler {
     }
 
     void addRoseliBerry() {
-        int number = ParagonLiteItems.roseliBerry;
+        int number = Items.roseliBerry;
 
         setItemName(number, "Roseli Berry", "Roseli Berries");
         itemDescriptions.set(number, "Weakens a supereffective Fairy-type\\xFFFEattack against the holding Pokémon.");
@@ -5553,7 +5624,7 @@ public class ParagonLiteHandler {
     }
 
     void addFairyGem() {
-        int number = ParagonLiteItems.fairyGem;
+        int number = Items.fairyGem;
 
         setItemName(number, "Fairy Gem", "Fairy Gems");
         String description = itemDescriptions.get(Items.fireGem).replace("Fire", "Fairy");
@@ -5574,7 +5645,7 @@ public class ParagonLiteHandler {
                 new ItemEventHandler(Gen5BattleEventType.onDamageProcessingEnd, Items.fireGem));
     }
 
-    void addQuickClaw() {
+    void setQuickClaw() {
         int number = Items.quickClaw;
 
         switch (mode) {
@@ -5592,7 +5663,7 @@ public class ParagonLiteHandler {
     }
 
     void addBlankPlate() {
-        int number = ParagonLiteItems.blankPlate;
+        int number = Items.blankPlate;
 
         setItemName(number, "Blank Plate", "Blank Plates");
         itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEIt is a stone tablet that boosts the\\xFFFEpower of Normal-type moves.");
@@ -5615,7 +5686,7 @@ public class ParagonLiteHandler {
     }
 
     void addClearAmulet() {
-        int number = ParagonLiteItems.clearAmulet;
+        int number = Items.clearAmulet;
 
         setItemName(number, "Clear Amulet", "Clear Amulets");
         itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis amulet prevents other Pokémon\\xFFFEfrom lowering the holder's stats.");
@@ -5633,7 +5704,7 @@ public class ParagonLiteHandler {
     }
 
     void addCovertCloak() {
-        int number = ParagonLiteItems.covertCloak;
+        int number = Items.covertCloak;
 
         setItemName(number, "Covert Cloak", "Covert Cloaks");
         itemDescriptions.set(number, "An item to be held by a Pokémon. This\\xFFFEcloak conceals the holder, protecting\\xFFFEit from the additional effects of moves.");
@@ -5651,7 +5722,7 @@ public class ParagonLiteHandler {
     }
 
     void addLoadedDice() {
-        int number = ParagonLiteItems.loadedDice;
+        int number = Items.loadedDice;
 
         setItemName(number, "Loaded Dice", "Loaded Dice");
         itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEIt always rolls a good number, ensuring\\xFFFEthat multistrike moves hit more times.");
@@ -5669,7 +5740,7 @@ public class ParagonLiteHandler {
     }
 
     void addFairyFeather() {
-        int number = ParagonLiteItems.fairyFeather;
+        int number = Items.fairyFeather;
 
         setItemName(number, "Fairy Feather", "Fairy Feathers");
         itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis feather, which gleams faintly when hit by\\xFFFElight, boosts the power of the holder's Fairy-type moves.");
@@ -5924,9 +5995,9 @@ public class ParagonLiteHandler {
         int listRefAddress = funcRomAddress + 0x1C;
         int numBerriesOld = 64;
         int[] newBerries = new int[]{
-                ParagonLiteItems.roseliBerry,
-                ParagonLiteItems.keeBerry,
-                ParagonLiteItems.marangaBerry
+                Items.roseliBerry,
+                Items.keeBerry,
+                Items.marangaBerry
         };
 
         int numBerries = numBerriesOld + newBerries.length;
@@ -6788,9 +6859,6 @@ public class ParagonLiteHandler {
             throw new RuntimeException(e);
         }
 
-        int itemSpriteMapAddress = globalAddressMap.getRamAddress(arm9, "Data_ItemSpriteMap");
-
-        int itemGraphicAddress = itemSpriteMapAddress + number * 4;
         int itemGraphicId;
         if (baseItemNumber < 0) {
             itemGraphicId = itemGraphicsNarc.files.size();
@@ -6802,15 +6870,14 @@ public class ParagonLiteHandler {
             byte[] graphicFile = bitmapFile.writeGraphicFile(params);
             itemGraphicsNarc.files.add(graphicFile);
         } else {
-            itemGraphicId = arm9.readUnsignedHalfword(itemSpriteMapAddress + baseItemNumber * 4);
+            itemGraphicId = itemSprites.get(baseItemNumber).graphicId;
         }
-        arm9.writeHalfword(itemGraphicAddress, itemGraphicId);
 
-        int itemPaletteAddress = itemSpriteMapAddress + number * 4 + 2;
         int itemPaletteId = itemGraphicsNarc.files.size();
         byte[] paletteFile = bitmapFile.writePaletteFile();
         itemGraphicsNarc.files.add(paletteFile);
-        arm9.writeHalfword(itemPaletteAddress, itemPaletteId);
+        
+        itemSprites.put(number, new ItemSpritePalette(itemGraphicId, itemPaletteId));
     }
 
     private void setUISprite(int spriteNumber, String filename, BitmapFile.GraphicsFileParams params) {

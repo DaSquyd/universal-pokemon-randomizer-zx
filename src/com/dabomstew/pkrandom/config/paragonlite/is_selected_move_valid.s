@@ -33,12 +33,14 @@ AssaultVestCheck:
     ; Assault Vest
     mov     r0, r6
     bl      Battle::Poke_GetHeldItem
-    mov     r1, #114 ; Assault Vest
+    mov     r1, #(640 >> 2) ; Assault Vest
+    lsl     r1, #2
     cmp     r0, r1
 #IF PARAGONLITE
     beq     NoStatusMove
     ; Protector
-    add     r1, #(321 - 114) ; Protector
+    lsr     r1, #1
+    add     r1, #(321 - (640 >> 1)) ; Protector
     cmp     r0, r1
 #ENDIF
     bne     CheckChoiceItem
