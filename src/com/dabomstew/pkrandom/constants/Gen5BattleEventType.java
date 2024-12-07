@@ -97,9 +97,9 @@ public class Gen5BattleEventType {
     public static final int onMoveDamageProcessing2 = 0x47;
     public static final int onMoveDamageProcessingEnd = 0x48;
     public static final int onMoveDamageProcessingFinal = 0x49;
-    public static final int onPreviousMoveReaction = 0x4A;
+    public static final int onPreviousMoveReaction = 0x4A; // Shield Dust
     public static final int onMoveDamageReaction1 = 0x4B;
-    public static final int onMoveDamageReaction2 = 0x4C;
+    public static final int onMoveDamageReaction2 = 0x4C; // Destiny Bond
     public static final int onPostMoveDamageSide = 0x4D;
     public static final int onDecrementPP = 0x4E;
     public static final int onDecrementPPDone = 0x4F;
