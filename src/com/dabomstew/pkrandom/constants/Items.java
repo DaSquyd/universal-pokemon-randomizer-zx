@@ -2522,5 +2522,5 @@ public class Items {
     public static final int violetBook2 = 2556;
     public static final int briarsBook = 2557;
     
-    public static final int max = briarsBook;
+    public static final int MAX = briarsBook;
 }

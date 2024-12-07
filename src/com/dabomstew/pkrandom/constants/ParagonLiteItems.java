@@ -27,7 +27,9 @@ import java.util.Set;
 
 public class ParagonLiteItems {
     // 57 new
-    public static final int rustyBottleCap = Items.max + 1;
+    public static final int rustyBottleCap = Items.MAX + 1;
+    
+    public static final int MAX = rustyBottleCap;
     
     public static Set<Integer> getAllowed() {
         return Set.of(

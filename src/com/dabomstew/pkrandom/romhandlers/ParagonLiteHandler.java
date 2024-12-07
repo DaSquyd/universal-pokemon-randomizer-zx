@@ -638,7 +638,7 @@ public class ParagonLiteHandler {
     }
     
     public void addUtil() {
-        List<String> binarySearchHalfLines = readLines("arm9/binary_search_half");
+        List<String> binarySearchHalfLines = readLines("arm9/binary_search_half.s");
         arm9.writeCode(binarySearchHalfLines, "BinarySearch_Half");
     }
 
@@ -5356,8 +5356,8 @@ public class ParagonLiteHandler {
             int spriteIdRomAddress = dataAddress.getRomAddress() + i * 4;
             int paletteIdRomAddress = spriteIdRomAddress + 2;
             
-            int spriteId = arm9.readWord(spriteIdRomAddress);
-            int paletteId = arm9.readWord(paletteIdRomAddress);
+            int spriteId = arm9.readUnsignedHalfword(spriteIdRomAddress);
+            int paletteId = arm9.readUnsignedHalfword(paletteIdRomAddress);
             
             if (i != 0 && spriteId == 0x03FD)
                 continue;
@@ -5424,7 +5424,7 @@ public class ParagonLiteHandler {
 
         int number = Items.dragonScale;
 
-        itemDescriptions.set(number, "An item to be held by a Pokémon. This\\xFFFEmystical scale reduces damage taken\\xFFFEfrom all incoming attacks.");
+        setItemDescription(number, "An item to be held by a Pokémon. This\\xFFFEmystical scale reduces damage taken\\xFFFEfrom all incoming attacks.");
 
         setItemEffect(number, 147); // TODO
 
@@ -5444,7 +5444,7 @@ public class ParagonLiteHandler {
     void setIcyRock() {
         int index = Items.icyRock;
 
-        itemDescriptions.set(index, "An item to be held by a Pokémon.\\xFFFEThis rock summons a hailstorm\\xFFFEwhen the holder enters battle.");
+        setItemDescription(index, "An item to be held by a Pokémon.\\xFFFEThis rock summons a hailstorm\\xFFFEwhen the holder enters battle.");
 
         setItemEventHandlers(index,
                 new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "icy_rock_check.s"),
@@ -5457,7 +5457,7 @@ public class ParagonLiteHandler {
     void setSmoothRock() {
         int number = Items.smoothRock;
 
-        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock summons a sandstorm\\xFFFEwhen the holder enters battle.");
+        setItemDescription(number, "An item to be held by a Pokémon.\\xFFFEThis rock summons a sandstorm\\xFFFEwhen the holder enters battle.");
 
         setItemEventHandlers(number,
                 new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "smooth_rock_check.s"),
@@ -5470,7 +5470,7 @@ public class ParagonLiteHandler {
     void setHeatRock() {
         int number = Items.heatRock;
 
-        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock turns the sunlight harsh\\xFFFEwhen the holder enters battle.");
+        setItemDescription(number, "An item to be held by a Pokémon.\\xFFFEThis rock turns the sunlight harsh\\xFFFEwhen the holder enters battle.");
 
         setItemEventHandlers(number,
                 new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "heat_rock_check.s"),
@@ -5482,7 +5482,7 @@ public class ParagonLiteHandler {
     void setDampRock() {
         int number = Items.dampRock;
 
-        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis rock makes it rain\\xFFFEwhen the holder enters battle.");
+        setItemDescription(number, "An item to be held by a Pokémon.\\xFFFEThis rock makes it rain\\xFFFEwhen the holder enters battle.");
 
         setItemEventHandlers(number,
                 new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "damp_rock_check.s"),
@@ -5493,7 +5493,7 @@ public class ParagonLiteHandler {
 
     void setTypeChangePlate(int number) {
         Type type = Gen5Constants.plateToType.get(number);
-        itemDescriptions.set(number, String.format("An item to be held by a Pokémon.\\xFFFEThis mysterious tablet changes\\xFFFEthe holder's type to %s.", type.camelCase()));
+        setItemDescription(number, String.format("An item to be held by a Pokémon.\\xFFFEThis mysterious tablet changes\\xFFFEthe holder's type to %s.", type.camelCase()));
 
         setItemEventHandlers(number,
                 new ItemEventHandler(Gen5BattleEventType.onSwitchIn, "common_plate_item_check.s"),
@@ -5505,7 +5505,7 @@ public class ParagonLiteHandler {
     void setProtector() {
         int number = Items.protector;
 
-        itemDescriptions.set(number, "An item to be held by a Pokémon. This\\xFFFEarmor boosts the holder's Defense stat\\xFFFEbut prevents the use of status moves.");
+        setItemDescription(number, "An item to be held by a Pokémon. This\\xFFFEarmor boosts the holder's Defense stat\\xFFFEbut prevents the use of status moves.");
 
         setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onGetDefendingStatValue, "protector.s"));
     }
@@ -5543,7 +5543,7 @@ public class ParagonLiteHandler {
         int number = Items.weaknessPolicy;
 
         setItemName(number, "Weakness Policy", "Weakness Policies");
-        itemDescriptions.set(number, "An item to be held by a Pokémon. Attack\\xFFFEand Sp. Atk sharply increase if the\\xFFFEholder is hit with a move it's weak to.");
+        setItemDescription(number, "An item to be held by a Pokémon. Attack\\xFFFEand Sp. Atk sharply increase if the\\xFFFEholder is hit with a move it's weak to.");
 
         ItemData itemData = new ItemData(Item.FieldPocket.ITEMS);
         itemData.price = 100;
@@ -5564,7 +5564,7 @@ public class ParagonLiteHandler {
         int number = Items.assaultVest;
 
         setItemName(number, "Assault Vest", "Assault Vests");
-        itemDescriptions.set(number, "An item to be held by a Pokémon. This\\xFFFEvest boosts the holder's Sp. Def stat\\xFFFEbut prevents the use of status moves.");
+        setItemDescription(number, "An item to be held by a Pokémon. This\\xFFFEvest boosts the holder's Sp. Def stat\\xFFFEbut prevents the use of status moves.");
 
         ItemData itemData = new ItemData(Item.FieldPocket.ITEMS);
         itemData.price = 100;
@@ -5582,7 +5582,7 @@ public class ParagonLiteHandler {
         int number = Items.pixiePlate;
 
         setItemName(number, "Pixie Plate", "Pixie Plates");
-        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEIt is a stone tablet that boosts the\\xFFFEpower of Fairy-type moves.");
+        setItemDescription(number, "An item to be held by a Pokémon.\\xFFFEIt is a stone tablet that boosts the\\xFFFEpower of Fairy-type moves.");
 
         ItemData itemData = new ItemData(Item.FieldPocket.ITEMS);
         itemData.price = getItemPrice(Items.flamePlate);
@@ -5605,7 +5605,7 @@ public class ParagonLiteHandler {
         int number = Items.roseliBerry;
 
         setItemName(number, "Roseli Berry", "Roseli Berries");
-        itemDescriptions.set(number, "Weakens a supereffective Fairy-type\\xFFFEattack against the holding Pokémon.");
+        setItemDescription(number, "Weakens a supereffective Fairy-type\\xFFFEattack against the holding Pokémon.");
 
         ItemData itemData = new ItemData(Item.FieldPocket.BERRIES);
         itemData.price = getItemPrice(Items.occaBerry);
@@ -5628,7 +5628,7 @@ public class ParagonLiteHandler {
 
         setItemName(number, "Fairy Gem", "Fairy Gems");
         String description = itemDescriptions.get(Items.fireGem).replace("Fire", "Fairy");
-        itemDescriptions.set(number, description);
+        setItemDescription(number, description);
 
         ItemData itemData = new ItemData(Item.FieldPocket.ITEMS);
         itemData.price = getItemPrice(Items.fireGem);
@@ -5651,7 +5651,7 @@ public class ParagonLiteHandler {
         switch (mode) {
             case ParagonLite -> {
                 // Description
-                itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEA light, sharp claw that slightly\\xFFFEboosts the user's speed.");
+                setItemDescription(number, "An item to be held by a Pokémon.\\xFFFEA light, sharp claw that slightly\\xFFFEboosts the user's speed.");
 
                 // Data
                 setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onCalcSpeed, "quick_claw.s"));
@@ -5666,7 +5666,7 @@ public class ParagonLiteHandler {
         int number = Items.blankPlate;
 
         setItemName(number, "Blank Plate", "Blank Plates");
-        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEIt is a stone tablet that boosts the\\xFFFEpower of Normal-type moves.");
+        setItemDescription(number, "An item to be held by a Pokémon.\\xFFFEIt is a stone tablet that boosts the\\xFFFEpower of Normal-type moves.");
 
         ItemData itemData = new ItemData(Item.FieldPocket.ITEMS);
         itemData.price = getItemPrice(Items.flamePlate);
@@ -5689,7 +5689,7 @@ public class ParagonLiteHandler {
         int number = Items.clearAmulet;
 
         setItemName(number, "Clear Amulet", "Clear Amulets");
-        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis amulet prevents other Pokémon\\xFFFEfrom lowering the holder's stats.");
+        setItemDescription(number, "An item to be held by a Pokémon.\\xFFFEThis amulet prevents other Pokémon\\xFFFEfrom lowering the holder's stats.");
 
         ItemData itemData = new ItemData(Item.FieldPocket.ITEMS);
         itemData.price = 100;
@@ -5707,7 +5707,7 @@ public class ParagonLiteHandler {
         int number = Items.covertCloak;
 
         setItemName(number, "Covert Cloak", "Covert Cloaks");
-        itemDescriptions.set(number, "An item to be held by a Pokémon. This\\xFFFEcloak conceals the holder, protecting\\xFFFEit from the additional effects of moves.");
+        setItemDescription(number, "An item to be held by a Pokémon. This\\xFFFEcloak conceals the holder, protecting\\xFFFEit from the additional effects of moves.");
 
         ItemData itemData = new ItemData(Item.FieldPocket.ITEMS);
         itemData.price = 100;
@@ -5725,7 +5725,7 @@ public class ParagonLiteHandler {
         int number = Items.loadedDice;
 
         setItemName(number, "Loaded Dice", "Loaded Dice");
-        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEIt always rolls a good number, ensuring\\xFFFEthat multistrike moves hit more times.");
+        setItemDescription(number, "An item to be held by a Pokémon.\\xFFFEIt always rolls a good number, ensuring\\xFFFEthat multistrike moves hit more times.");
 
         ItemData itemData = new ItemData(Item.FieldPocket.ITEMS);
         itemData.price = 100;
@@ -5743,7 +5743,7 @@ public class ParagonLiteHandler {
         int number = Items.fairyFeather;
 
         setItemName(number, "Fairy Feather", "Fairy Feathers");
-        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis feather, which gleams faintly when hit by\\xFFFElight, boosts the power of the holder's Fairy-type moves.");
+        setItemDescription(number, "An item to be held by a Pokémon.\\xFFFEThis feather, which gleams faintly when hit by\\xFFFElight, boosts the power of the holder's Fairy-type moves.");
 
         ItemData itemData = new ItemData(Item.FieldPocket.ITEMS);
         itemData.price = getItemPrice(Items.charcoal);
@@ -5808,9 +5808,32 @@ public class ParagonLiteHandler {
     }
 
     private void setItemName(int itemNumber, String name, String pluralName) {
+        while (itemNumber >= itemNames.size())
+            itemNames.add("");
+        while (itemNumber >= itemNameMessages.size())
+            itemNameMessages.add("");
+        while (itemNumber >= itemPluralNames.size())
+            itemPluralNames.add("");
+        
         itemNames.set(itemNumber, name);
         itemNameMessages.set(itemNumber, "\uF000봁\\x0000a \uF000\uFF00\\x0001ÿ" + name);
         itemPluralNames.set(itemNumber, pluralName);
+    }
+    
+    private void setItemDescription(int itemNumber, String description) {
+        while (itemNumber >= itemDescriptions.size())
+            itemDescriptions.add("");
+
+        itemDescriptions.set(itemNumber, description);
+    }
+    
+    private byte[] getItemData(int itemNumber) {
+        while (itemNumber >= itemDataNarc.files.size()) {
+            int size = itemNumber == itemDataNarc.files.size() ? 36 : 0;
+            itemDataNarc.files.add(new byte[size]);
+        }
+        
+        return itemDataNarc.files.get(itemNumber);
     }
 
     // 0x00
@@ -5818,74 +5841,74 @@ public class ParagonLiteHandler {
         if (price % 10 != 0)
             throw new RuntimeException("Price must be a multiple of 10");
 
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         writeHalf(data, 0x00, price / 10);
     }
 
     private int getItemPrice(int itemNumber) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         return readHalf(data, 0x00) * 10;
     }
 
     // 0x02
     private void setItemEffect(int itemNumber, int effectId) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         data[0x02] = (byte) effectId;
     }
 
     // 0x03
     private void setItemEffectParam(int itemNumber, int value) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         data[0x03] = (byte) value;
     }
 
     // 0x04
     private void setItemPluckEffect(int itemNumber, Item.TempUseEffect effect) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         data[0x04] = (byte) effect.ordinal();
     }
 
     private Item.TempUseEffect getItemPluckEffect(int itemNumber) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         return Item.TempUseEffect.values()[data[0x04] & 0xFF];
     }
 
     // 0x05
     private void setItemFlingEffect(int itemNumber, Item.TempUseEffect effect) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         data[0x05] = (byte) effect.ordinal();
     }
 
     private Item.TempUseEffect getItemFlingEffect(int itemNumber) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         return Item.TempUseEffect.values()[data[0x05] & 0xFF];
     }
 
     // 0x06
     private void setItemFlingPower(int itemNumber, int power) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         data[0x06] = (byte) power;
     }
 
     private int getItemFlingPower(int itemNumber) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         return data[0x06] & 0xFF;
     }
 
     // 0x07
     private void setItemNaturalGiftPower(int itemNumber, int power) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         data[0x07] = (byte) power;
     }
 
     private int getItemNaturalGiftPower(int itemNumber) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         return data[0x07] & 0xFF;
     }
 
     // 0x08 [0-4]
     private void setItemNaturalGiftType(int itemNumber, Type type) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
 
         int typeBits = type != null ? Gen5Constants.typeToByte(type) : -1;
         writeWordBits(data, 0x08, 0x00, 5, typeBits);
@@ -5893,21 +5916,21 @@ public class ParagonLiteHandler {
 
     // 0x08 [5]
     private void setItemIsImportant(int itemNumber, boolean isImportant) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
 
         writeWordBit(data, 0x08, 0x05, isImportant);
     }
 
     // 0x08 [6]
     private void setItemCanRegister(int itemNumber, boolean canRegister) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
 
         writeWordBit(data, 0x08, 0x06, canRegister);
     }
 
     // 0x08 [7-A]
     private void setItemFieldPocket(int itemNumber, Item.FieldPocket fieldPocket) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
 
         writeWordBits(data, 0x08, 0x07, 4, fieldPocket.ordinal());
 
@@ -5918,7 +5941,7 @@ public class ParagonLiteHandler {
     }
 
     private Item.FieldPocket getItemFieldPocket(int itemNumber) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
 
         int pocketId = readWordBits(data, 0x08, 0x07, 4);
         if (pocketId < 0 || pocketId >= Item.FieldPocket.values().length)
@@ -5929,7 +5952,7 @@ public class ParagonLiteHandler {
 
     // 0x08 [B-F]
     private void setItemBattlePockets(int itemNumber, Item.BattlePocket... battlePockets) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
 
         int combined = 0;
         for (Item.BattlePocket battlePocket : battlePockets) {
@@ -5941,51 +5964,51 @@ public class ParagonLiteHandler {
 
     // 0x0A Field Function
     private void setItemFieldFunction(int itemNumber, Item.FieldFuncType fieldFunction) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
 
         data[0x0A] = fieldFunction.getByteValue();
     }
 
     // 0x0B Battle Function
     private void setItemBattleFunction(int itemNumber, Item.BattleFuncType battleFunction) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
 
         data[0x0B] = (byte) battleFunction.ordinal();
     }
 
     // 0x0C
     private void setItemWorkType(int itemNumber, int workType) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
 
         data[0x0C] = (byte) workType;
     }
 
     // 0x0D
     private void setItemType(int itemNumber, Item.ItemType itemType) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         data[0x0D] = (byte) itemType.ordinal();
     }
 
     private Item.ItemType getItemType(int itemNumber) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         return Item.ItemType.values()[data[0x0D] & 0xFF];
     }
 
     // 0x0E
     private void setItemIsConsumable(int itemNumber, boolean isConsumable) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         data[0x0E] = (byte) (isConsumable ? 1 : 0);
     }
 
     private boolean getItemIsConsumable(int itemNumber) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         return data[0x0E] != 0;
     }
 
     // 0x0F
     // Assigns sort index to 0x00; 0xFF is used internally for unsorted items that may be replaced by the new ones here.
     private void primeItemSortIndex(int itemNumber) {
-        byte[] data = itemDataNarc.files.get(itemNumber);
+        byte[] data = getItemData(itemNumber);
         data[0x0F] = 0x00;
     }
 

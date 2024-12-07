@@ -46,13 +46,13 @@ ItemGet_Palette_Find:
     
 ItemGet_Find:
     mov     r3, r0
-    ldr     r0, =Data_ItemSpriteMap
+    ldr     r0, =ARM9::Data_ItemSpriteMap
     ldr     r1, =ITEM_SPRITES_PALETTES_COUNT
     mov     r2, #6
     bl      ARM9::BinarySearch_Half
     lsl     r1, r0, #6
     add     r1, r4
-    ldr     r0, =Data_ItemSpriteMap
+    ldr     r0, =ARM9::Data_ItemSpriteMap
     ldrh    r0, [r0, r1]
     pop     {r3, pc}
     
@@ -62,14 +62,14 @@ ItemGet_ShooterSprite:
     b       ItemGet_Shooter
     
     
-ItemGet_ShooterPalette
+ItemGet_ShooterPalette:
     mov     r4, #2
     
     
 ItemGet_Shooter:
     bl      ARM9::ShooterItem_GetTableIndex
     lsl     r1, r2, #2
-    ldr     r0, =Data_ItemSpriteMap
+    ldr     r0, =ARM9::Data_ItemSpriteMap
     add     r0, r4
     ldrh    r0, [r0, r1]
     pop     {r3, pc}

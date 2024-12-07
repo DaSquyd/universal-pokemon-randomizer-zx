@@ -50,7 +50,7 @@ public class Gen5Constants {
 
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
-            bsCatchRateOffset = 8, bsStageOffset =9, bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
+            bsCatchRateOffset = 8, bsStageOffset = 9, bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
             bsDarkGrassHeldItemOffset = 16, bsGenderRatioOffset = 18, bsBaseFriendshipOffset = 20, bsGrowthCurveOffset = 21,
             bsAbility1Offset = 24, bsAbility2Offset = 25, bsAbility3Offset = 26, bsFormeOffset = 28,
             bsFormeSpriteOffset = 30, bsFormeCountOffset = 32, bsExpYieldOffset = 34, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
@@ -105,7 +105,7 @@ public class Gen5Constants {
 
     public static final String bw1ItemPalettesPrefix = "E903EA03020003000400050006000700",
             bw2ItemPalettesPrefix = "FD03FE03020003000400050006000700";
-    
+
     public static final String sortByNameRefPrefix = "450C00004C050000";
     public static final String sortAllRefPrefix = "0D020000E81D0000";
 
@@ -369,7 +369,7 @@ public class Gen5Constants {
                 Items.ejectButton, Items.fireGem, Items.waterGem, Items.electricGem, Items.grassGem, Items.iceGem,
                 Items.fightingGem, Items.poisonGem, Items.groundGem, Items.flyingGem, Items.psychicGem, Items.bugGem,
                 Items.rockGem, Items.ghostGem, Items.dragonGem, Items.darkGem, Items.steelGem, Items.normalGem,
-                ParagonLiteItems.fairyGem));
+                Items.fairyGem));
         return Collections.unmodifiableList(list);
     }
 
@@ -381,7 +381,7 @@ public class Gen5Constants {
                 Items.ejectButton, Items.fireGem, Items.waterGem, Items.electricGem, Items.grassGem, Items.iceGem,
                 Items.fightingGem, Items.poisonGem, Items.groundGem, Items.flyingGem, Items.psychicGem, Items.bugGem,
                 Items.rockGem, Items.ghostGem, Items.dragonGem, Items.darkGem, Items.steelGem, Items.normalGem,
-                ParagonLiteItems.fairyGem));
+                Items.fairyGem));
         list.addAll(Arrays.asList(Items.eviolite, Items.floatStone, Items.rockyHelmet, Items.ringTarget, Items.bindingBand));
         return Collections.unmodifiableList(list);
     }
@@ -391,7 +391,7 @@ public class Gen5Constants {
     private static List<Integer> initializeGeneralPurposeConsumableItems() {
         List<Integer> list = new ArrayList<>(Gen4Constants.generalPurposeConsumableItems);
         list.addAll(Arrays.asList(Items.redCard, Items.absorbBulb, Items.cellBattery, Items.ejectButton
-                
+
                 /* ParagonLiteItems.snowball, ParagonLiteItems. */));
         return Collections.unmodifiableList(list);
     }
@@ -400,8 +400,8 @@ public class Gen5Constants {
             Items.brightPowder, Items.quickClaw, Items.kingsRock, Items.focusBand, Items.scopeLens, Items.leftovers,
             Items.shellBell, Items.laxIncense, Items.wideLens, Items.expertBelt, Items.lifeOrb, Items.zoomLens,
             Items.destinyKnot, Items.shedShell, Items.razorClaw, Items.razorFang, Items.floatStone, Items.rockyHelmet,
-            
-            ParagonLiteItems.assaultVest, ParagonLiteItems.clearAmulet, ParagonLiteItems.covertCloak));
+
+            Items.assaultVest, Items.clearAmulet, Items.covertCloak));
 
     private static List<Integer> initializeGeneralPurposeItems() {
         List<Integer> list = new ArrayList<>(Gen4Constants.generalPurposeItems);
@@ -412,44 +412,44 @@ public class Gen5Constants {
     public static final Map<Type, Integer> consumableTypeBoostingItems = initializeConsumableTypeBoostingItems();
 
     private static Map<Type, Integer> initializeConsumableTypeBoostingItems() {
-        Map<Type, Integer> map = new HashMap<>();
-        map.put(Type.FIRE, Items.fireGem);
-        map.put(Type.WATER, Items.waterGem);
-        map.put(Type.ELECTRIC, Items.electricGem);
-        map.put(Type.GRASS, Items.grassGem);
-        map.put(Type.ICE, Items.iceGem);
-        map.put(Type.FIGHTING, Items.fightingGem);
-        map.put(Type.POISON, Items.poisonGem);
-        map.put(Type.GROUND, Items.groundGem);
-        map.put(Type.FLYING, Items.flyingGem);
-        map.put(Type.PSYCHIC, Items.psychicGem);
-        map.put(Type.BUG, Items.bugGem);
-        map.put(Type.ROCK, Items.rockGem);
-        map.put(Type.GHOST, Items.ghostGem);
-        map.put(Type.DRAGON, Items.dragonGem);
-        map.put(Type.DARK, Items.darkGem);
-        map.put(Type.STEEL, Items.steelGem);
-        map.put(Type.NORMAL, Items.normalGem);
-        map.put(Type.FAIRY, ParagonLiteItems.fairyGem);
-        return Collections.unmodifiableMap(map);
+        return Map.ofEntries(
+                Map.entry(Type.FIRE, Items.fireGem),
+                Map.entry(Type.WATER, Items.waterGem), 
+                Map.entry(Type.ELECTRIC, Items.electricGem),
+                Map.entry(Type.GRASS, Items.grassGem),
+                Map.entry(Type.ICE, Items.iceGem), 
+                Map.entry(Type.FIGHTING, Items.fightingGem),
+                Map.entry(Type.POISON, Items.poisonGem), 
+                Map.entry(Type.GROUND, Items.groundGem), 
+                Map.entry(Type.FLYING, Items.flyingGem),
+                Map.entry(Type.PSYCHIC, Items.psychicGem),
+                Map.entry(Type.BUG, Items.bugGem),
+                Map.entry(Type.ROCK, Items.rockGem),
+                Map.entry(Type.GHOST, Items.ghostGem), 
+                Map.entry(Type.DRAGON, Items.dragonGem), 
+                Map.entry(Type.DARK, Items.darkGem), 
+                Map.entry(Type.STEEL, Items.steelGem), 
+                Map.entry(Type.NORMAL, Items.normalGem), 
+                Map.entry(Type.FAIRY, Items.fairyGem)
+        );
     }
 
     public static final Map<Integer, List<Integer>> moveBoostingItems = initializeMoveBoostingItems();
 
     private static Map<Integer, List<Integer>> initializeMoveBoostingItems() {
         Map<Integer, List<Integer>> map = new HashMap<>(Gen4Constants.moveBoostingItems);
-        map.put(Moves.trick, Arrays.asList(Items.toxicOrb, Items.flameOrb, Items.ringTarget));
-        map.put(Moves.switcheroo, Arrays.asList(Items.toxicOrb, Items.flameOrb, Items.ringTarget));
+        map.put(Moves.trick, List.of(Items.toxicOrb, Items.flameOrb, Items.ringTarget));
+        map.put(Moves.switcheroo, List.of(Items.toxicOrb, Items.flameOrb, Items.ringTarget));
 
-        map.put(Moves.bind, Arrays.asList(Items.gripClaw, Items.bindingBand));
-        map.put(Moves.clamp, Arrays.asList(Items.gripClaw, Items.bindingBand));
-        map.put(Moves.fireSpin, Arrays.asList(Items.gripClaw, Items.bindingBand));
-        map.put(Moves.magmaStorm, Arrays.asList(Items.gripClaw, Items.bindingBand));
-        map.put(Moves.sandTomb, Arrays.asList(Items.gripClaw, Items.bindingBand));
-        map.put(Moves.whirlpool, Arrays.asList(Items.gripClaw, Items.bindingBand));
-        map.put(Moves.wrap, Arrays.asList(Items.gripClaw, Items.bindingBand));
+        map.put(Moves.bind, List.of(Items.gripClaw, Items.bindingBand));
+        map.put(Moves.clamp, List.of(Items.gripClaw, Items.bindingBand));
+        map.put(Moves.fireSpin, List.of(Items.gripClaw, Items.bindingBand));
+        map.put(Moves.magmaStorm, List.of(Items.gripClaw, Items.bindingBand));
+        map.put(Moves.sandTomb, List.of(Items.gripClaw, Items.bindingBand));
+        map.put(Moves.whirlpool, List.of(Items.gripClaw, Items.bindingBand));
+        map.put(Moves.wrap, List.of(Items.gripClaw, Items.bindingBand));
 
-        map.put(Moves.hornLeech, Arrays.asList(Items.bigRoot));
+        map.put(Moves.hornLeech, List.of(Items.bigRoot));
         return Collections.unmodifiableMap(map);
     }
 
@@ -464,7 +464,7 @@ public class Gen5Constants {
         map.put(Type.DARK, List.of(Items.blackGlasses, Items.dreadPlate));
         map.put(Type.DRAGON, List.of(Items.dragonFang, Items.dracoPlate));
         map.put(Type.ELECTRIC, List.of(Items.magnet, Items.zapPlate));
-        map.put(Type.FAIRY, List.of(ParagonLiteItems.pixiePlate)); // TODO
+        map.put(Type.FAIRY, List.of(Items.fairyFeather, Items.pixiePlate));
         map.put(Type.FIGHTING, List.of(Items.blackBelt, Items.fistPlate));
         map.put(Type.FIRE, List.of(Items.charcoal, Items.flamePlate));
         map.put(Type.FLYING, List.of(Items.sharpBeak, Items.skyPlate));
@@ -472,7 +472,7 @@ public class Gen5Constants {
         map.put(Type.GRASS, List.of(Items.miracleSeed, Items.meadowPlate, Items.roseIncense));
         map.put(Type.GROUND, List.of(Items.softSand, Items.earthPlate));
         map.put(Type.ICE, List.of(Items.neverMeltIce, Items.iciclePlate));
-        map.put(Type.NORMAL, List.of(Items.silkScarf, ParagonLiteItems.blankPlate));
+        map.put(Type.NORMAL, List.of(Items.silkScarf, Items.blankPlate));
         map.put(Type.POISON, List.of(Items.poisonBarb, Items.toxicPlate));
         map.put(Type.PSYCHIC, List.of(Items.twistedSpoon, Items.mindPlate, Items.oddIncense));
         map.put(Type.ROCK, List.of(Items.hardStone, Items.stonePlate, Items.rockIncense));
@@ -481,7 +481,7 @@ public class Gen5Constants {
         map.put(null, Collections.emptyList()); // ??? type
         return Collections.unmodifiableMap(map);
     }
-    
+
     public static final Map<Type, List<Integer>> typeBoostingItemsNoPlates = initializeTypeBoostingItemsNoPlates();
 
     private static Map<Type, List<Integer>> initializeTypeBoostingItemsNoPlates() {
@@ -490,7 +490,7 @@ public class Gen5Constants {
         map.put(Type.DARK, List.of(Items.blackGlasses));
         map.put(Type.DRAGON, List.of(Items.dragonFang));
         map.put(Type.ELECTRIC, List.of(Items.magnet));
-        map.put(Type.FAIRY, List.of()); // TODO
+        map.put(Type.FAIRY, List.of(Items.fairyFeather));
         map.put(Type.FIGHTING, List.of(Items.blackBelt));
         map.put(Type.FIRE, List.of(Items.charcoal));
         map.put(Type.FLYING, List.of(Items.sharpBeak));
@@ -511,75 +511,75 @@ public class Gen5Constants {
     public static final Map<Type, Integer> typeToPlate = initializeTypeToPlate();
 
     private static Map<Type, Integer> initializeTypeToPlate() {
-        Map<Type, Integer> map = new HashMap<>();
-        map.put(Type.NORMAL, ParagonLiteItems.blankPlate);
-        map.put(Type.FIGHTING, Items.fistPlate);
-        map.put(Type.FLYING, Items.skyPlate);
-        map.put(Type.POISON, Items.toxicPlate);
-        map.put(Type.GROUND, Items.earthPlate);
-        map.put(Type.ROCK, Items.stonePlate);
-        map.put(Type.BUG, Items.insectPlate);
-        map.put(Type.GHOST, Items.spookyPlate);
-        map.put(Type.STEEL, Items.ironPlate);
-        map.put(Type.FIRE, Items.flamePlate);
-        map.put(Type.WATER, Items.splashPlate);
-        map.put(Type.GRASS, Items.meadowPlate);
-        map.put(Type.ELECTRIC, Items.zapPlate);
-        map.put(Type.PSYCHIC, Items.mindPlate);
-        map.put(Type.ICE, Items.iciclePlate);
-        map.put(Type.DRAGON, Items.dracoPlate);
-        map.put(Type.DARK, Items.dreadPlate);
-        map.put(Type.FAIRY, ParagonLiteItems.pixiePlate);
-        return map;
+        return Map.ofEntries(
+                Map.entry(Type.NORMAL, Items.blankPlate),
+                Map.entry(Type.FIGHTING, Items.fistPlate),
+                Map.entry(Type.FLYING, Items.skyPlate),
+                Map.entry(Type.POISON, Items.toxicPlate),
+                Map.entry(Type.GROUND, Items.earthPlate),
+                Map.entry(Type.ROCK, Items.stonePlate),
+                Map.entry(Type.BUG, Items.insectPlate),
+                Map.entry(Type.GHOST, Items.spookyPlate),
+                Map.entry(Type.STEEL, Items.ironPlate),
+                Map.entry(Type.FIRE, Items.flamePlate),
+                Map.entry(Type.WATER, Items.splashPlate),
+                Map.entry(Type.GRASS, Items.meadowPlate),
+                Map.entry(Type.ELECTRIC, Items.zapPlate),
+                Map.entry(Type.PSYCHIC, Items.mindPlate),
+                Map.entry(Type.ICE, Items.iciclePlate),
+                Map.entry(Type.DRAGON, Items.dracoPlate),
+                Map.entry(Type.DARK, Items.dreadPlate),
+                Map.entry(Type.FAIRY, Items.pixiePlate)
+        );
     }
 
     public static final Map<Integer, Type> plateToType = initializePlateToType();
 
     private static Map<Integer, Type> initializePlateToType() {
-        Map<Integer, Type> map = new HashMap<>();
-        map.put(ParagonLiteItems.blankPlate, Type.NORMAL);
-        map.put(Items.fistPlate, Type.FIGHTING);
-        map.put(Items.skyPlate, Type.FLYING);
-        map.put(Items.toxicPlate, Type.POISON);
-        map.put(Items.earthPlate, Type.GROUND);
-        map.put(Items.stonePlate, Type.ROCK);
-        map.put(Items.insectPlate, Type.BUG);
-        map.put(Items.spookyPlate, Type.GHOST);
-        map.put(Items.ironPlate, Type.STEEL);
-        map.put(Items.flamePlate, Type.FIRE);
-        map.put(Items.splashPlate, Type.WATER);
-        map.put(Items.meadowPlate, Type.GRASS);
-        map.put(Items.zapPlate, Type.ELECTRIC);
-        map.put(Items.mindPlate, Type.PSYCHIC);
-        map.put(Items.iciclePlate, Type.ICE);
-        map.put(Items.dracoPlate, Type.DRAGON);
-        map.put(Items.dreadPlate, Type.DARK);
-        map.put(ParagonLiteItems.pixiePlate, Type.FAIRY);
-        return map;
+        return Map.ofEntries(
+                Map.entry(Items.blankPlate, Type.NORMAL),
+                Map.entry(Items.fistPlate, Type.FIGHTING),
+                Map.entry(Items.skyPlate, Type.FLYING),
+                Map.entry(Items.toxicPlate, Type.POISON),
+                Map.entry(Items.earthPlate, Type.GROUND),
+                Map.entry(Items.stonePlate, Type.ROCK),
+                Map.entry(Items.insectPlate, Type.BUG),
+                Map.entry(Items.spookyPlate, Type.GHOST),
+                Map.entry(Items.ironPlate, Type.STEEL),
+                Map.entry(Items.flamePlate, Type.FIRE),
+                Map.entry(Items.splashPlate, Type.WATER),
+                Map.entry(Items.meadowPlate, Type.GRASS),
+                Map.entry(Items.zapPlate, Type.ELECTRIC),
+                Map.entry(Items.mindPlate, Type.PSYCHIC),
+                Map.entry(Items.iciclePlate, Type.ICE),
+                Map.entry(Items.dracoPlate, Type.DRAGON),
+                Map.entry(Items.dreadPlate, Type.DARK),
+                Map.entry(Items.pixiePlate, Type.FAIRY)
+        );
     }
-    
+
     public static final Map<Type, Integer> weaknessReducingBerries = initializeWeaknessReducingBerries();
 
     private static Map<Type, Integer> initializeWeaknessReducingBerries() {
-        Map<Type, Integer> map = new HashMap<>();
-        map.put(Type.FIRE, Items.occaBerry);
-        map.put(Type.WATER, Items.passhoBerry);
-        map.put(Type.ELECTRIC, Items.wacanBerry);
-        map.put(Type.GRASS, Items.rindoBerry);
-        map.put(Type.ICE, Items.yacheBerry);
-        map.put(Type.FIGHTING, Items.chopleBerry);
-        map.put(Type.POISON, Items.kebiaBerry);
-        map.put(Type.GROUND, Items.shucaBerry);
-        map.put(Type.FLYING, Items.cobaBerry);
-        map.put(Type.PSYCHIC, Items.payapaBerry);
-        map.put(Type.BUG, Items.tangaBerry);
-        map.put(Type.ROCK, Items.chartiBerry);
-        map.put(Type.GHOST, Items.kasibBerry);
-        map.put(Type.DRAGON, Items.habanBerry);
-        map.put(Type.DARK, Items.colburBerry);
-        map.put(Type.STEEL, Items.babiriBerry);
-        map.put(Type.FAIRY, ParagonLiteItems.roseliBerry);
-        return Collections.unmodifiableMap(map);
+        return Map.ofEntries(
+                Map.entry(Type.FIRE, Items.occaBerry),
+                Map.entry(Type.WATER, Items.passhoBerry),
+                Map.entry(Type.ELECTRIC, Items.wacanBerry),
+                Map.entry(Type.GRASS, Items.rindoBerry),
+                Map.entry(Type.ICE, Items.yacheBerry),
+                Map.entry(Type.FIGHTING, Items.chopleBerry),
+                Map.entry(Type.POISON, Items.kebiaBerry),
+                Map.entry(Type.GROUND, Items.shucaBerry),
+                Map.entry(Type.FLYING, Items.cobaBerry),
+                Map.entry(Type.PSYCHIC, Items.payapaBerry),
+                Map.entry(Type.BUG, Items.tangaBerry),
+                Map.entry(Type.ROCK, Items.chartiBerry),
+                Map.entry(Type.GHOST, Items.kasibBerry),
+                Map.entry(Type.DRAGON, Items.habanBerry),
+                Map.entry(Type.DARK, Items.colburBerry),
+                Map.entry(Type.STEEL, Items.babiriBerry),
+                Map.entry(Type.FAIRY, Items.roseliBerry)
+        );
     }
 
     private static Type[] constructTypeTable() {
@@ -605,50 +605,28 @@ public class Gen5Constants {
         return table;
     }
 
-    public static byte typeToByte(Type type) {
-        if (type == null) {
-            return 0x00; // normal?
-        }
-        switch (type) {
-            case NORMAL:
-                return 0x00;
-            case FIGHTING:
-                return 0x01;
-            case FLYING:
-                return 0x02;
-            case POISON:
-                return 0x03;
-            case GROUND:
-                return 0x04;
-            case ROCK:
-                return 0x05;
-            case BUG:
-                return 0x06;
-            case GHOST:
-                return 0x07;
-            case FIRE:
-                return 0x09;
-            case WATER:
-                return 0x0A;
-            case GRASS:
-                return 0x0B;
-            case ELECTRIC:
-                return 0x0C;
-            case PSYCHIC:
-                return 0x0D;
-            case ICE:
-                return 0x0E;
-            case DRAGON:
-                return 0x0F;
-            case STEEL:
-                return 0x08;
-            case DARK:
-                return 0x10;
-            case FAIRY:
-                return 0x11;
-            default:
-                return 0; // normal by default
-        }
+    public static byte typeToByte(Type type) {            
+        return switch (type) {
+            case NORMAL -> 0x00;
+            case FIGHTING -> 0x01;
+            case FLYING -> 0x02;
+            case POISON -> 0x03;
+            case GROUND -> 0x04;
+            case ROCK -> 0x05;
+            case BUG -> 0x06;
+            case GHOST -> 0x07;
+            case FIRE -> 0x09;
+            case WATER -> 0x0A;
+            case GRASS -> 0x0B;
+            case ELECTRIC -> 0x0C;
+            case PSYCHIC -> 0x0D;
+            case ICE -> 0x0E;
+            case DRAGON -> 0x0F;
+            case STEEL -> 0x08;
+            case DARK -> 0x10;
+            case FAIRY -> 0x11;
+            default -> 0; // normal by default
+        };
     }
 
     public static int getAreaDataEntryLength(int romType) {
@@ -979,21 +957,15 @@ public class Gen5Constants {
     }
 
     private static void setupAllowedItems() {
-        allowedItems = new ItemList(Items.revealGlass);
+        allowedItems = new ItemList(ParagonLiteItems.MAX + 1);
         // Key items + version exclusives
         allowedItems.banRange(Items.explorerKit, 76);
         allowedItems.banRange(Items.dataCard01, 32);
-        Set<Integer> paragonLiteAllowedItems = ParagonLiteItems.getAllowed();
-        for (int paragonLiteItem : paragonLiteAllowedItems) {
-            allowedItems.unbanSingles(paragonLiteItem);
-        }
-        allowedItems.unbanSingles();
         allowedItems.banRange(Items.xtransceiverMale, 18);
         allowedItems.banSingles(Items.libertyPass, Items.propCase, Items.dragonSkull, Items.lightStone, Items.darkStone);
         // Unknown blank items or version exclusives
-        allowedItems.banRange(Items.unused120, 2);
-        allowedItems.banRange(Items.tmCase, 2);
-        allowedItems.banRange(Items.clothingTrunk, 8);
+        allowedItems.banRange(Items.tea, 3);
+        allowedItems.banRange(Items.unused120, 14);
         // TMs & HMs - tms cant be held in gen5
         allowedItems.tmRange(Items.tm01, 92);
         allowedItems.tmRange(Items.tm93, 3);
@@ -1001,6 +973,14 @@ public class Gen5Constants {
         allowedItems.banRange(Items.tm93, 3);
         // Battle Launcher exclusives
         allowedItems.banRange(Items.direHit2, 24);
+        
+        // Items beyond Gen V
+        allowedItems.banRange(Items.weaknessPolicy, (Items.MAX + 1) - Items.weaknessPolicy);
+
+        Set<Integer> paragonLiteAllowedItems = ParagonLiteItems.getAllowed();
+        for (int paragonLiteItem : paragonLiteAllowedItems) {
+            allowedItems.unbanSingles(paragonLiteItem);
+        }
 
         // non-bad items
         // ban specific pokemon hold items, berries, apricorns, mail
