@@ -464,7 +464,7 @@ public class Gen5Constants {
         map.put(Type.DARK, List.of(Items.blackGlasses, Items.dreadPlate));
         map.put(Type.DRAGON, List.of(Items.dragonFang, Items.dracoPlate));
         map.put(Type.ELECTRIC, List.of(Items.magnet, Items.zapPlate));
-        map.put(Type.FAIRY, List.of(ParagonLiteItems.pixiePlate)); // TODO
+        map.put(Type.FAIRY, List.of(ParagonLiteItems.pixiePlate, ParagonLiteItems.fairyFeather));
         map.put(Type.FIGHTING, List.of(Items.blackBelt, Items.fistPlate));
         map.put(Type.FIRE, List.of(Items.charcoal, Items.flamePlate));
         map.put(Type.FLYING, List.of(Items.sharpBeak, Items.skyPlate));
@@ -490,7 +490,7 @@ public class Gen5Constants {
         map.put(Type.DARK, List.of(Items.blackGlasses));
         map.put(Type.DRAGON, List.of(Items.dragonFang));
         map.put(Type.ELECTRIC, List.of(Items.magnet));
-        map.put(Type.FAIRY, List.of()); // TODO
+        map.put(Type.FAIRY, List.of(ParagonLiteItems.fairyFeather));
         map.put(Type.FIGHTING, List.of(Items.blackBelt));
         map.put(Type.FIRE, List.of(Items.charcoal));
         map.put(Type.FLYING, List.of(Items.sharpBeak));
