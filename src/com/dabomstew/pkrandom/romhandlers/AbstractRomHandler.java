@@ -1325,6 +1325,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<Integer> offensiveSunMoves = new HashSet<>();
         Set<Integer> supportSunMoves = new HashSet<>();
         Set<Integer> rainMoves = new HashSet<>();
+        int mercilessMovesFromLevel = 0;
+        Set<Integer> mercilessMoves = new HashSet<>();
 
         for (MoveLearnt ml : movesLearnt) {
             Move m = moves.get(ml.move);
@@ -1342,6 +1344,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (m.isCustomTriageMove) {
                         triageSupportMoves.add(m.number);
                         triageSupportMovesFromLevel++;
+                    }
+                    
+                    if (m.statusType == MoveStatusType.POISON || m.statusType == MoveStatusType.TOXIC_POISON) {
+                        mercilessMoves.add(m.number);
+                        mercilessMovesFromLevel++;
                     }
 
                     continue;
@@ -1439,6 +1446,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL
                     || m.effect == MoveEffect.ELECTRO_SHOT)
                 rainMoves.add(m.number);
+
+            if (m.statusType == MoveStatusType.POISON || m.statusType == MoveStatusType.TOXIC_POISON) {
+                mercilessMoves.add(m.number);
+                mercilessMovesFromLevel++;
+            }
         }
 
         for (int tmIdx = 0; tmIdx < tmhmMoves.size(); tmIdx++) {
@@ -1459,6 +1471,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                 case STATUS -> {
                     if (m.isCustomTriageMove)
                         triageSupportMoves.add(m.number);
+
+                    if (m.statusType == MoveStatusType.POISON || m.statusType == MoveStatusType.TOXIC_POISON)
+                        mercilessMoves.add(m.number);
 
                     continue;
                 }
@@ -1524,6 +1539,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL
                     || m.effect == MoveEffect.ELECTRO_SHOT)
                 rainMoves.add(m.number);
+
+            if (m.statusType == MoveStatusType.POISON || m.statusType == MoveStatusType.TOXIC_POISON)
+                mercilessMoves.add(m.number);
         }
 
         for (int tutorMoveIdx = 0; tutorMoveIdx < tutorMoveCount; tutorMoveIdx++) {
@@ -1546,6 +1564,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                         triageSupportMoves.add(m.number);
                     }
 
+                    if (m.statusType == MoveStatusType.POISON || m.statusType == MoveStatusType.TOXIC_POISON)
+                        mercilessMoves.add(m.number);
+
                     continue;
                 }
             }
@@ -1610,6 +1631,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL
                     || m.effect == MoveEffect.ELECTRO_SHOT)
                 rainMoves.add(m.number);
+
+            if (m.statusType == MoveStatusType.POISON || m.statusType == MoveStatusType.TOXIC_POISON)
+                mercilessMoves.add(m.number);
         }
 
         boolean hasNormalMoves = !typeGoodDamageMovesLearnt.get(Type.NORMAL).isEmpty() && typeGoodDamageMovesAll.get(Type.NORMAL).size() >= 2;
@@ -2336,7 +2360,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (weakToWater || highPhysBulk || lowBulk)
             irrelevantAbilities.add(Abilities.waterCompaction);
 
-        // #196 Merciless
+        // #196 Merciless (we do hp == 1 because this usually requires setup)
+        if (pk.hp == 1 || mercilessMovesFromLevel == 0 || mercilessMoves.size() < 2)
+            irrelevantAbilities.add(Abilities.merciless);
+        
         // #197 Shields Down
 
         // #198 Stakeout
