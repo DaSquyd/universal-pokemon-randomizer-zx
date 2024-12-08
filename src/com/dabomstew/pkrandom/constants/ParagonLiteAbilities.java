@@ -163,7 +163,7 @@ public class ParagonLiteAbilities {
             liquidate, // 519
             florilate, // 520
             contaminate, // 521
-//            volcanicFury, // 522
+            volcanicFury, // 522
 //            pastoralAroma, // 523
             healSpore // 524
     );

@@ -1586,7 +1586,7 @@ public class ParagonLiteHandler {
     public void setAbilities() {
         registerAbilityEffects();
 
-        int abilityListAdditions = 47;
+        int abilityListAdditions = 48;
 
         // Move AbilityList
         relocateAbilityListRamAddress(abilityListAdditions);
@@ -1621,7 +1621,7 @@ public class ParagonLiteHandler {
             }
         }
 
-        int totalChanges = 106;
+        int totalChanges = 107;
         int currentChanges = -1;
         long startTime = System.currentTimeMillis();
         System.out.println("setting abilities...");
@@ -1844,6 +1844,10 @@ public class ParagonLiteHandler {
         // #521 Contaminate
         Utils.printProgress(totalChanges, ++currentChanges, "Contaminate");
         addContaminate();
+        
+        // #522 Volcanic Fury
+        Utils.printProgress(totalChanges, ++currentChanges, "Volcanic Fury");
+        addVolcanicFury();
 
         // #524 Heal Spore
         Utils.printProgress(totalChanges, ++currentChanges, "Heal Spore");
@@ -3063,22 +3067,35 @@ public class ParagonLiteHandler {
         }
     }
 
-    private void addHealSpore() {
-        int index = ParagonLiteAbilities.healSpore;
+    private void addVolcanicFury() {
+        int number = ParagonLiteAbilities.volcanicFury;
 
         // Name
-        abilityNames.set(index, "Heal Spore");
+        abilityNames.set(number, "Volcanic Fury");
 
         // Description
-        abilityDescriptions.set(index, "Heals allies when\\xFFFEhit by an attack.");
+        abilityDescriptions.set(number, "Burns targets when\\xFFFEat half HP.");
+
+        // Data
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onAddCondition, "volcanic_fury.s"));
+    }
+    
+    private void addHealSpore() {
+        int number = ParagonLiteAbilities.healSpore;
+
+        // Name
+        abilityNames.set(number, "Heal Spore");
+
+        // Description
+        abilityDescriptions.set(number, "Heals allies when\\xFFFEhit by an attack.");
 
         // TODO: Explanation
         if (abilityExplanations != null) {
-            abilityExplanations.set(index, "A");
+            abilityExplanations.set(number, "A");
         }
 
         // Data
-        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "heal_spore.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "heal_spore.s"));
     }
 
     private void setDamp() {
