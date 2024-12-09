@@ -112,6 +112,8 @@ public class ArmParser {
                 "HandlerParam_ForceUseItem",
                 "HandlerParam_Message",
                 "HandlerParam_RecoverHP",
+                "HandlerParam_RemoveSideCondition",
+                "HandlerParam_SetAnimation",
                 "HandlerParam_SetTurnFlag",
                 "HandlerParam_SwapItem",
                 "MainModule",
@@ -156,6 +158,10 @@ public class ArmParser {
 
     public void addGlobalValue(String name, boolean value) {
         engineManager.put(name, value ? 1 : 0);
+    }
+    
+    public Object getGlobalValue(String name) {
+        return engineManager.get(name);
     }
 
     public void addStruct(String structName) {

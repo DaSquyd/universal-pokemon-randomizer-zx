@@ -36,6 +36,7 @@ public class ParagonLiteHandler {
         NARCArchive moveAnimationScriptsNarc;
         NARCArchive battleAnimationScriptsNarc;
         NARCArchive battleUIGraphicsNarc;
+        NARCArchive moveAnimationBackgroundsNarc;
         NARCArchive trainerAIScriptsNarc;
 
         List<String> battleStrings1;
@@ -85,6 +86,7 @@ public class ParagonLiteHandler {
     NARCArchive moveAnimationScriptsNarc;
     NARCArchive battleAnimationScriptsNarc;
     NARCArchive battleUIGraphicsNarc;
+    NARCArchive moveAnimationBackgroundsNarc;
     NARCArchive trainerAIScriptsNarc;
 
     List<String> battleStrings1;
@@ -311,6 +313,7 @@ public class ParagonLiteHandler {
         moveAnimationScriptsNarc = params.moveAnimationScriptsNarc;
         battleAnimationScriptsNarc = params.battleAnimationScriptsNarc;
         battleUIGraphicsNarc = params.battleUIGraphicsNarc;
+        moveAnimationBackgroundsNarc = params.moveAnimationBackgroundsNarc;
 
         battleStrings1 = params.battleStrings1;
         battleStrings2 = params.battleStrings2;
@@ -613,11 +616,19 @@ public class ParagonLiteHandler {
         // Sticky Web
         addGlobalBattleTextValue(battleStrings2, "StickyWeb", "Laid");
         addBattleStringStandard("A sticky web has been laid out\non the ground around your team!");
-        addBattleStringStandard("A sticky web has been laid out\non the ground around the foe's team!");
+        addBattleStringStandard("A sticky web has been laid out\non the ground around the opposing team!");
 
         addGlobalBattleTextValue(battleStrings2, "StickyWeb", "Disappeared");
         addBattleStringStandard("The sticky web disappeared\nfrom around your team!");
-        addBattleStringStandard("The sticky web disappeared\nfrom around the foe's team!");
+        addBattleStringStandard("The sticky web disappeared\nfrom around the opposing team!");
+
+        addGlobalBattleTextValue(battleStrings2, "AuroraVeil", "Activated");
+        addBattleStringStandard("Aurora veil made your team stronger\nagainst physical and special moves!");
+        addBattleStringStandard("Aurora veil made the opposing team stronger\nagainst physical and special moves!");
+
+        addGlobalBattleTextValue(battleStrings2, "AuroraVeil", "Disappeared");
+        addBattleStringStandard("Your team's\nAurora Veil disappeared!");
+        addBattleStringStandard("Your opposing team's\nAurora Veil disappeared!");
     }
 
     public void tempFixFairyStruggle() {
@@ -1001,23 +1012,32 @@ public class ParagonLiteHandler {
         int sideStatusAddTableRef = sideEffectEventAddItemRomAddress + 0xA8;
         int sideStatusAddTable4Ref = sideEffectEventAddItemRomAddress + 0xAC;
 
-        int newCount = 15; // Sticky Web, Aurora Veil
-        battleServerOvl.writeByte(sideStatusCountByteAddress, newCount);
+        int newCount = 2; // Sticky Web, Aurora Veil
+        int oldTotal = battleServerOvl.readUnsignedByte(sideStatusCountByteAddress);
+        int newTotal = oldTotal + newCount;
+        battleServerOvl.writeByte(sideStatusCountByteAddress, newTotal);
 
         int battleSideStatusInitRomAddress = globalAddressMap.getRomAddress(battleServerOvl, "SideStatus_Init");
-        battleServerOvl.writeByte(battleSideStatusInitRomAddress, newCount); // mov r2, #newCount
+        battleServerOvl.writeByte(battleSideStatusInitRomAddress, newTotal); // mov r2, #newTotal
         battleServerOvl.writeHalfword(battleSideStatusInitRomAddress + 0x08, 0x0152); // lsl r1, #5
 
-        updateBattleServerFunctionSideStatusCount("SideStatus_AddItem", 0x0C, newCount);
-        updateBattleServerFunctionSideStatusCount("SideStatus_GetCount", 0x00, newCount);
-        updateBattleServerFunctionSideStatusCount("SideStatus_IsEffectActive", 0x00, newCount);
-        updateBattleServerFunctionSideStatusCount("SideStatus_RemoveItem", 0x02, newCount);
-        updateBattleServerFunctionSideStatusCount("SideStatus_TurnCheck", 0x0E, newCount);
-        updateBattleServerFunctionSideStatusCount("SideStatus_GetCountFromEventItem", 0x08, newCount);
+        updateBattleServerFunctionSideStatusCount("SideStatus_AddItem", 0x0C, newTotal);
+        updateBattleServerFunctionSideStatusCount("SideStatus_GetCount", 0x00, newTotal);
+        updateBattleServerFunctionSideStatusCount("SideStatus_IsEffectActive", 0x00, newTotal);
+        updateBattleServerFunctionSideStatusCount("SideStatus_RemoveItem", 0x02, newTotal);
+        updateBattleServerFunctionSideStatusCount("SideStatus_TurnCheck", 0x0E, newTotal);
+        updateBattleServerFunctionSideStatusCount("SideStatus_GetCountFromEventItem", 0x08, newTotal);
+
+        // Replace hardcoded null values (only used by the pledge moves)
+        int pledgeFuncAddress = getEventHandlerFuncReferenceAddress(Moves.waterPledge, getMoveListAddress(), getMoveListCount(), Gen5BattleEventType.onDamageProcessingEnd_Hit2);
+        int nullId = (Integer)armParser.getGlobalValue("SC_Null");
+        battleServerOvl.writeByte(pledgeFuncAddress + 0x1C, nullId);
+        battleServerOvl.writeByte(pledgeFuncAddress + 0x80, nullId);
+        
 
         int oldSideStatusAddTable = battleServerOvl.readWord(sideStatusAddTableRef);
 
-        byte[] newData = new byte[12 * newCount];
+        byte[] newData = new byte[12 * newTotal];
 
         for (int i = 0; i < 14; ++i) {
             int sideStatusId = battleServerOvl.readWord(oldSideStatusAddTable + i * 12);
@@ -1029,8 +1049,8 @@ public class ParagonLiteHandler {
             writeWord(newData, i * 12 + 8, sideStatusMaxLevel);
         }
 
-        addSideStatus(newData, 14, "StickyWeb", "sticky_web", Gen5BattleEventType.onSwitchIn);
-//        addSideStatus(newData, 15, "AuroraVeil", "aurora_veil", Gen5BattleEventType.onMoveDamageProcessing2);
+        addSideStatus(newData, oldTotal, "StickyWeb", "sticky_web", Gen5BattleEventType.onSwitchIn);
+        addSideStatus(newData, oldTotal + 1, "AuroraVeil", "aurora_veil", Gen5BattleEventType.onMoveDamageProcessing2);
 
         int effectTableRomAddress = battleOvl.writeData(newData, "Data_SideStatusEffectTable");
         int effectTableRamAddress = battleOvl.romToRamAddress(effectTableRomAddress);
@@ -4204,6 +4224,7 @@ public class ParagonLiteHandler {
                         Moves.pollenPuff, // #676
                         Moves.powerTrip, // #681
                         Moves.revelationDance, // #686
+                        Moves.auroraVeil, // #694
                         Moves.psychicFangs, // #706
                         Moves.bodyPress, // #776
                         Moves.steelBeam, // #796
@@ -4261,6 +4282,7 @@ public class ParagonLiteHandler {
                         Moves.pollenPuff, // #676
                         Moves.powerTrip, // #681
                         Moves.revelationDance, // #686
+                        Moves.auroraVeil, // #694
                         Moves.psychicFangs, // #706
                         Moves.bodyPress, // #776
                         Moves.steelBeam, // #796
@@ -4292,23 +4314,12 @@ public class ParagonLiteHandler {
         int moveDataSize = 36;
         arm9.replaceData(new byte[moveDataSize * totalMoves], "Data_MoveCache");
 
-//        arm9.writeHalfword(0x0204A8DA, 0xE005);
-
-//        arm9.writeByte(0x020143C2, 0x24);
-//        arm9.writeByte(0x020155C0, 0x24);
-//        arm9.writeHalfword(0x020919D4, 0x0240);
-
         for (int moveToClear : movesToClear) {
             clearMoveEventHandlers(moveToClear);
         }
 
         // TODO: For some reason the relocator addresses values are wrong
         relocateMoveListRamAddress(newMoves.length - movesToClear.length);
-
-
-        // #013 Razor Wind
-        if (mode == Mode.Redux)
-            setMoveAnimations(Moves.razorWind);
 
         // + #562 Belch
         setMoveEventHandlers(Moves.belch, new MoveEventHandler(Gen5BattleEventType.onMoveExecuteCheck2, "belch.s"));
@@ -4441,14 +4452,24 @@ public class ParagonLiteHandler {
         // #693 Brutal Swing
         setMoveAnimations(Moves.brutalSwing, 774);
 
-        // TODO: +#694 Aurora Veil
+        // +#694 Aurora Veil
+        setMoveEventHandlers(Moves.auroraVeil, new MoveEventHandler(Gen5BattleEventType.onUncategorizedMoveNoTarget, "aurora_veil.s"));
         setMoveAnimations(Moves.auroraVeil, 767);
+        byte[] auroraVeilNscr = readBytes("694_aurora_veil.nscr");
+        byte[] auroraVeilNcgr = readBytes("694_aurora_veil.nsgr");
+        byte[] auroraVeilNclr = readBytes("694_aurora_veil.nclr");
+        moveAnimationBackgroundsNarc.files.set(6, auroraVeilNscr);
+        moveAnimationBackgroundsNarc.files.set(7, auroraVeilNcgr);
+        moveAnimationBackgroundsNarc.files.set(8, auroraVeilNclr);
 
         // #705 Fleur Cannon
         setMoveAnimations(Moves.fleurCannon, 761);
 
         // #706 Psychic Fangs
-        cloneMoveEventHandlers(Moves.psychicFangs, Moves.brickBreak);
+        setMoveEventHandlers(Moves.psychicFangs,
+                new MoveEventHandler(Gen5BattleEventType.onMoveDamageProcessing1, Moves.brickBreak),
+                new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd, Moves.brickBreak),
+                new MoveEventHandler(Gen5BattleEventType.onGetMoveDamage, "common_screen_break.s"));
         setMoveAnimations(Moves.psychicFangs, 748, 798);
 
         // #708 Shadow Bone
@@ -4674,6 +4695,10 @@ public class ParagonLiteHandler {
 
         // #011 Vise Grip
         setMoveAuxiliaryAnimation(Moves.viseGrip, "Trap", auxiliaryAnimationScriptIndices);
+        
+        // #013 Razor Wind
+        if (mode == Mode.Redux)
+            setMoveAnimations(Moves.razorWind);
 
         // + #024 Double Kick
         setMoveEventHandlers(Moves.doubleKick, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
@@ -4732,6 +4757,12 @@ public class ParagonLiteHandler {
         // #243 Mirror Coat
         if (mode == Mode.ParagonLite)
             cloneMoveEventHandlers(Moves.mirrorCoat, Moves.eruption);
+        
+        // #280 Brick Break
+        setMoveEventHandlers(Moves.brickBreak,
+                new MoveEventHandler(Gen5BattleEventType.onMoveDamageProcessing1),
+                new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd),
+                new MoveEventHandler(Gen5BattleEventType.onGetMoveDamage, "common_screen_break.s"));
 
         // #282 Knock Off
 //        setMoveEventHandlers(Moves.knockOff,
@@ -4758,7 +4789,7 @@ public class ParagonLiteHandler {
         // #360 Gyro Ball
         if (mode == Mode.ParagonLite)
             setMoveEventHandlers(Moves.gyroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "gyro_ball.s"));
-
+        
         // #362 Brine
         if (mode == Mode.ParagonLite)
             setMoveEventHandlers(Moves.brine, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "super_effective_vs_steel.s"));
@@ -5222,6 +5253,9 @@ public class ParagonLiteHandler {
 
         // #235 Dragon Scale
         setDragonScale();
+        
+        // #269 Light Clay
+        setLightClay();
 
         // #271 Power Herb
         setPowerHerb();
@@ -5375,6 +5409,13 @@ public class ParagonLiteHandler {
         setItemEffect(number, 147); // TODO
 
         setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onGetDefendingStatValue, "dragon_scale.s"));
+    }
+    
+    void setLightClay() {
+        int number = Items.lightClay;
+        
+        // Updated to work with Aurora Veil
+        setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onCheckSideConditionParam, "light_clay.s"));
     }
 
     void setPowerHerb() {

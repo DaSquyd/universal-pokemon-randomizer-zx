@@ -5588,6 +5588,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         String moveAnimationScriptsFilename = romEntry.getFile("MoveAnimationScripts");
         String battleAnimationScriptsFilename = romEntry.getFile("BattleAnimationScripts");
         String battleUIGraphicsFilename = romEntry.getFile("BattleUIGraphics");
+        String moveAnimationBackgroundsFilename = romEntry.getFile("MoveAnimationBackgrounds");
         String trainerAIScriptsFilename = romEntry.getFile("TrainerAIScripts");
         try {
             params.pokemonGraphicsNarc = readNARC(pokemonGraphicsFilename);
@@ -5597,6 +5598,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             params.moveAnimationScriptsNarc = readNARC(moveAnimationScriptsFilename);
             params.battleAnimationScriptsNarc = readNARC(battleAnimationScriptsFilename);
             params.battleUIGraphicsNarc = readNARC(battleUIGraphicsFilename);
+            params.moveAnimationBackgroundsNarc = readNARC(moveAnimationBackgroundsFilename);
             params.trainerAIScriptsNarc = readNARC(trainerAIScriptsFilename);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -5658,6 +5660,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             writeNARC(moveAnimationScriptsFilename, params.moveAnimationScriptsNarc);
             writeNARC(battleAnimationScriptsFilename, params.battleAnimationScriptsNarc);
             writeNARC(battleUIGraphicsFilename, params.battleUIGraphicsNarc);
+            writeNARC(moveAnimationBackgroundsFilename, params.moveAnimationBackgroundsNarc);
             writeNARC(trainerAIScriptsFilename, params.trainerAIScriptsNarc);
         } catch (IOException e) {
             throw new RuntimeException(e);

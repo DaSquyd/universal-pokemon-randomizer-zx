@@ -182,7 +182,7 @@ public class Gen5BattleEventType {
     public static final int onHeldItemDecide = 0x9C;
     public static final int onItemRewriteDone = 0x9D;
     public static final int onCallFieldEffect = 0x9E;
-    public static final int onCheckSideEffectParam = 0x9F;
+    public static final int onCheckSideConditionParam = 0x9F;
     public static final int onUncategorizedMove = 0xA0;
     public static final int onUncategorizedMoveNoTarget = 0xA1;
     public static final int onCombinedMoveCheck = 0xA2;
