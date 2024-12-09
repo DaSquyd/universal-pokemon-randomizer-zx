@@ -1029,7 +1029,8 @@ public class ParagonLiteHandler {
         updateBattleServerFunctionSideStatusCount("SideStatus_GetCountFromEventItem", 0x08, newTotal);
 
         // Replace hardcoded null values (only used by the pledge moves)
-        int pledgeFuncAddress = getEventHandlerFuncReferenceAddress(Moves.waterPledge, getMoveListAddress(), getMoveListCount(), Gen5BattleEventType.onDamageProcessingEnd_Hit2);
+        int pledgeFuncRefAddress = getEventHandlerFuncReferenceAddress(Moves.waterPledge, getMoveListAddress(), getMoveListCount(), Gen5BattleEventType.onDamageProcessingEnd_Hit2);
+        int pledgeFuncAddress = battleOvl.readWord(pledgeFuncRefAddress) - 1;
         int nullId = (Integer)armParser.getGlobalValue("SC_Null");
         battleServerOvl.writeByte(pledgeFuncAddress + 0x1C, nullId);
         battleServerOvl.writeByte(pledgeFuncAddress + 0x80, nullId);
