@@ -58,11 +58,13 @@ ARM9	GFL_WordSetClearAll	Code		thumb	0x0201F338	0x0201F320	0x02024A00	0x020249D4
 ARM9	PML_SpeciesNamesResidentInit	Code		thumb	0x0201F360	0x0201F348	0x02024A28	0x020249FC
 ARM9	GFL_WordSetFormatNumber	Code		thumb	0x0201F372	0x0201F35A	0x02024A40	0x02024A14
 ARM9	WCharsNCopy	Code		thumb	0x0201F438	0x0201F420	0x02024B00	0x02024AD4
-ARM9	ReadInFileForItem	Code		thumb	0x02020F50	0x02020F34	0x0202676C	0x02026740
+ARM9	Item_GetIndex	Code		thumb			0x0202669C	0x02026670
+ARM9	Item_GetData	Code		thumb	0x02020F50	0x02020F34	0x0202676C	0x02026740
 ARM9	IsItemBerry	Code		thumb			0x02026C20	0x02026BF4
 ARM9	GetTrainerData	Code		thumb	0x0202A248	0x0202A230	0x0203050C	0x020304E0
 ARM9	LoadTrainerFile	Code		thumb	0x0202A3C4	0x0202A3AC	0x0203070C	0x020306E0
 ARM9	LoadTrPokeFile	Code		thumb	0x0202A3D4	0x0202A3BC	0x02030750	0x02030724
+ARM9	ShooterItem_GetTableIndex	Code		thumb			0x02035970	0x02035944
 ARM9	GFL_HeapAllocate	Code		arm,thumb	0x0203074C	0x02030734	0x0203A228	0x0203A1FC
 ARM9	GFL_TCBMgrAddTask	Code		arm,thumb	0x02030DC0	0x02030DA8	0x0203A640	0x0203A614
 ARM9	GFL_RandomMT	Code		arm,thumb	0x0203F0C0	0x0203F0A8	0x02043F58	0x02043F2C
@@ -204,9 +206,12 @@ ARM9	Data_EnemyPartyIndices	Data	8		--	--	0x02090094	0x02090068
 ARM9	Data_StatNatureAdjust	Data	128		0x0209E2BC	0x0209E2A4	0x020903A0	0x02090374
 ARM9	Data_NatureStat	Data	128		0x0209E33C	0x0209E324	0x02090420	0x020903F4
 ARM9	Data_BerryIDs	Data	128				0x02090B78	0x02090B4C
+ARM9	Data_ShooterItemSpriteMap	Data	184				0x02090BF8	0x02090BCC
 ARM9	Data_ItemSpriteMap	Data	2556		0x0209EB84	0x0209EB6C	0x02090D7C	0x02090D50
 ARM9	Data_CurrentMsg	Data	4		0x020A7390	0x020A7378	0x0209A474	0x0209A448
 ARM9	Data_MoveCache	Data	20160		0x02146554	0x02146534	0x02141434	0x021413F4
+Bag	Sort_Name	Code		thumb			0x0219B904	0x0219B8C4
+Bag	Sort_RepositoryNo	Code		thumb			0x021A0788	0x021A0748
 Bag	Data_ItemsAlphabetical	Data	568				0x021A1178	0x021A1138
 Battle	Setup_GetBattleStyle	Code		thumb	0x021B85A8	0x021B8588	0x0219BDC0	0x0219BD80
 Battle	MainModule_GetBattleType	Code		thumb	0x021B86D8	0x021B86B8	0x0219BF14	0x0219BED4
@@ -243,6 +248,7 @@ Battle	ActionOrderTool_SendToLast	Code		thumb			0x021A0728	0x021A06E8
 Battle	ActionOrder_Proc	Code		thumb			0x021A07B8	0x021A0778
 Battle	ServerControl_CheckActivation	Code		thumb			0x021A1714	0x021A16D4
 Battle	ServerControl_MoveStart	Code		thumb			0x021A2740	0x021A2700
+Battle	ServerControl_SubstituteExclude	Code		thumb			0x021A2C9C	0x021A2C5C
 Battle	ServerControl_IsGuaranteedHit	Code		thumb			0x021A2E0C	0x021A2DCC
 Battle	ServerControl_CheckNoEffect	Code		thumb			0x021A2F94	0x021A2F54
 Battle	ServerControl_CheckNoEffectCore	Code		thumb			0x021A31D0	0x021A3190
@@ -571,6 +577,7 @@ Battle	Handler_MoldBreakerSkipCheck	Code		thumb	0x021DB1C8	0x021DB1A8	0x021C0A10
 Battle	Inst_ItemEffectListCountCmp	Inst	2		0x021DCF32	0x021DCF12	0x021C277A	0x021C273A
 Battle	Data_ItemEffectListAddress	Data	4	*	0x021DCF3C	0x021DCF1C	0x021C2784	0x021C2744
 Battle	Data_ItemEffectListAddress4	Data	4	*	0x021DCF40	0x021DCF20	0x021C2788	0x021C2748
+Battle	CommonGetItemParam	Code		thumb	0x021DD018	0x021DCFF8	0x021C2860	0x021C2820
 Battle	ItemEvent_PushRun	Code		thumb	0x021DD064	0x021DD044	0x021C28AC	0x021C286C
 Battle	CommonBerrySuperEffectiveCheck	Code		thumb	0x021DDCF8	0x021DDCD8	0x021C3540	0x021C3500
 Battle	CommonTypeBoostItem	Code		thumb	0x021DF95C	0x021DF93C	0x021C51A4	0x021C5164
