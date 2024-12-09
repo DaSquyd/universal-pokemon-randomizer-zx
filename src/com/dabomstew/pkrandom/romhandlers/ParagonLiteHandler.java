@@ -1032,8 +1032,8 @@ public class ParagonLiteHandler {
         int pledgeFuncRefAddress = getEventHandlerFuncReferenceAddress(Moves.waterPledge, getMoveListAddress(), getMoveListCount(), Gen5BattleEventType.onDamageProcessingEnd_Hit2);
         int pledgeFuncAddress = battleOvl.readWord(pledgeFuncRefAddress) - 1;
         int nullId = (Integer)armParser.getGlobalValue("SC_Null");
-        battleServerOvl.writeByte(pledgeFuncAddress + 0x1C, nullId);
-        battleServerOvl.writeByte(pledgeFuncAddress + 0x80, nullId);
+        battleOvl.writeByte(pledgeFuncAddress + 0x1C, nullId);
+        battleOvl.writeByte(pledgeFuncAddress + 0x80, nullId);
         
 
         int oldSideStatusAddTable = battleServerOvl.readWord(sideStatusAddTableRef);
@@ -4455,10 +4455,11 @@ public class ParagonLiteHandler {
 
         // +#694 Aurora Veil
         setMoveEventHandlers(Moves.auroraVeil, new MoveEventHandler(Gen5BattleEventType.onUncategorizedMoveNoTarget, "aurora_veil.s"));
+//        cloneMoveEventHandlers(Moves.auroraVeil, Moves.lightScreen);
         setMoveAnimations(Moves.auroraVeil, 767);
-        byte[] auroraVeilNscr = readBytes("694_aurora_veil.nscr");
-        byte[] auroraVeilNcgr = readBytes("694_aurora_veil.nsgr");
-        byte[] auroraVeilNclr = readBytes("694_aurora_veil.nclr");
+        byte[] auroraVeilNscr = readBytes("moveanims/bg/694_aurora_veil.nscr");
+        byte[] auroraVeilNcgr = readBytes("moveanims/bg/694_aurora_veil.ncgr");
+        byte[] auroraVeilNclr = readBytes("moveanims/bg/694_aurora_veil.nclr");
         moveAnimationBackgroundsNarc.files.set(6, auroraVeilNscr);
         moveAnimationBackgroundsNarc.files.set(7, auroraVeilNcgr);
         moveAnimationBackgroundsNarc.files.set(8, auroraVeilNclr);
@@ -4469,7 +4470,7 @@ public class ParagonLiteHandler {
         // #706 Psychic Fangs
         setMoveEventHandlers(Moves.psychicFangs,
                 new MoveEventHandler(Gen5BattleEventType.onMoveDamageProcessing1, Moves.brickBreak),
-                new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd, Moves.brickBreak),
+                new MoveEventHandler(Gen5BattleEventType.onMoveDamageProcessingEnd, Moves.brickBreak),
                 new MoveEventHandler(Gen5BattleEventType.onGetMoveDamage, "common_screen_break.s"));
         setMoveAnimations(Moves.psychicFangs, 748, 798);
 
@@ -4762,7 +4763,7 @@ public class ParagonLiteHandler {
         // #280 Brick Break
         setMoveEventHandlers(Moves.brickBreak,
                 new MoveEventHandler(Gen5BattleEventType.onMoveDamageProcessing1),
-                new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd),
+                new MoveEventHandler(Gen5BattleEventType.onMoveDamageProcessingEnd),
                 new MoveEventHandler(Gen5BattleEventType.onGetMoveDamage, "common_screen_break.s"));
 
         // #282 Knock Off
