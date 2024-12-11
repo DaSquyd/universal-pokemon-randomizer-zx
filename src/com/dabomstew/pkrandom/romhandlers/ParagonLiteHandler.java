@@ -36,8 +36,9 @@ public class ParagonLiteHandler {
         NARCArchive moveAnimationScriptsNarc;
         NARCArchive battleAnimationScriptsNarc;
         NARCArchive battleUIGraphicsNarc;
-        NARCArchive moveAnimationBackgroundsNarc;
+        NARCArchive moveBackgroundsNarc;
         NARCArchive trainerAIScriptsNarc;
+        NARCArchive moveAnimatedBackgroundsNarc;
 
         List<String> battleStrings1;
         List<String> battleStrings2;
@@ -86,8 +87,9 @@ public class ParagonLiteHandler {
     NARCArchive moveAnimationScriptsNarc;
     NARCArchive battleAnimationScriptsNarc;
     NARCArchive battleUIGraphicsNarc;
-    NARCArchive moveAnimationBackgroundsNarc;
+    NARCArchive moveBackgroundsNarc;
     NARCArchive trainerAIScriptsNarc;
+    NARCArchive moveAnimatedBackgroundsNarc;
 
     List<String> battleStrings1;
     List<String> battleStrings2;
@@ -313,7 +315,8 @@ public class ParagonLiteHandler {
         moveAnimationScriptsNarc = params.moveAnimationScriptsNarc;
         battleAnimationScriptsNarc = params.battleAnimationScriptsNarc;
         battleUIGraphicsNarc = params.battleUIGraphicsNarc;
-        moveAnimationBackgroundsNarc = params.moveAnimationBackgroundsNarc;
+        moveBackgroundsNarc = params.moveBackgroundsNarc;
+        moveAnimatedBackgroundsNarc = params.moveAnimatedBackgroundsNarc;
 
         battleStrings1 = params.battleStrings1;
         battleStrings2 = params.battleStrings2;
@@ -4455,14 +4458,17 @@ public class ParagonLiteHandler {
 
         // +#694 Aurora Veil
         setMoveEventHandlers(Moves.auroraVeil, new MoveEventHandler(Gen5BattleEventType.onUncategorizedMoveNoTarget, "aurora_veil.s"));
-//        cloneMoveEventHandlers(Moves.auroraVeil, Moves.lightScreen);
         setMoveAnimations(Moves.auroraVeil, 767);
         byte[] auroraVeilNscr = readBytes("moveanims/bg/694_aurora_veil.nscr");
         byte[] auroraVeilNcgr = readBytes("moveanims/bg/694_aurora_veil.ncgr");
         byte[] auroraVeilNclr = readBytes("moveanims/bg/694_aurora_veil.nclr");
-        moveAnimationBackgroundsNarc.files.set(6, auroraVeilNscr);
-        moveAnimationBackgroundsNarc.files.set(7, auroraVeilNcgr);
-        moveAnimationBackgroundsNarc.files.set(8, auroraVeilNclr);
+        byte[] auroraVeilAnimBin = readBytes("moveanims/bg/694_aurora_veil_anim.bin");
+        byte[] auroraVeilAnimNclr = readBytes("moveanims/bg/694_aurora_veil_anim.nclr");
+        moveBackgroundsNarc.files.set(6, auroraVeilNscr);
+        moveBackgroundsNarc.files.set(7, auroraVeilNcgr);
+        moveBackgroundsNarc.files.set(8, auroraVeilNclr);
+        moveAnimatedBackgroundsNarc.files.add(auroraVeilAnimBin); // 46
+        moveAnimatedBackgroundsNarc.files.add(auroraVeilAnimNclr); // 47
 
         // #705 Fleur Cannon
         setMoveAnimations(Moves.fleurCannon, 761);

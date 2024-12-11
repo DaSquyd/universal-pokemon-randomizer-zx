@@ -5588,8 +5588,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         String moveAnimationScriptsFilename = romEntry.getFile("MoveAnimationScripts");
         String battleAnimationScriptsFilename = romEntry.getFile("BattleAnimationScripts");
         String battleUIGraphicsFilename = romEntry.getFile("BattleUIGraphics");
-        String moveAnimationBackgroundsFilename = romEntry.getFile("MoveAnimationBackgrounds");
+        String moveBackgroundsFilename = romEntry.getFile("MoveBackgrounds");
         String trainerAIScriptsFilename = romEntry.getFile("TrainerAIScripts");
+        String moveAnimatedBackgroundsFilename = romEntry.getFile("MoveAnimatedBackgrounds");
         try {
             params.pokemonGraphicsNarc = readNARC(pokemonGraphicsFilename);
             params.moveAnimationsNarc = readNARC(moveAnimationsFilename);
@@ -5598,8 +5599,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             params.moveAnimationScriptsNarc = readNARC(moveAnimationScriptsFilename);
             params.battleAnimationScriptsNarc = readNARC(battleAnimationScriptsFilename);
             params.battleUIGraphicsNarc = readNARC(battleUIGraphicsFilename);
-            params.moveAnimationBackgroundsNarc = readNARC(moveAnimationBackgroundsFilename);
+            params.moveBackgroundsNarc = readNARC(moveBackgroundsFilename);
             params.trainerAIScriptsNarc = readNARC(trainerAIScriptsFilename);
+            params.moveAnimatedBackgroundsNarc = readNARC(moveAnimatedBackgroundsFilename);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -5660,8 +5662,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             writeNARC(moveAnimationScriptsFilename, params.moveAnimationScriptsNarc);
             writeNARC(battleAnimationScriptsFilename, params.battleAnimationScriptsNarc);
             writeNARC(battleUIGraphicsFilename, params.battleUIGraphicsNarc);
-            writeNARC(moveAnimationBackgroundsFilename, params.moveAnimationBackgroundsNarc);
+            writeNARC(moveBackgroundsFilename, params.moveBackgroundsNarc);
             writeNARC(trainerAIScriptsFilename, params.trainerAIScriptsNarc);
+            writeNARC(moveAnimatedBackgroundsFilename, params.moveAnimatedBackgroundsNarc);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
