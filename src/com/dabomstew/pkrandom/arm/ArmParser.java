@@ -121,6 +121,7 @@ public class ArmParser {
                 "PartyPoke",
                 "PokeCon",
                 "ServerFlow",
+                "SideStatus",
                 "TrainerAIEnv",
         };
 
@@ -760,7 +761,7 @@ public class ArmParser {
             case "b" -> format18(args.split(","));
             case "bic" -> format4(args.split(","), 14);
             case "bl" -> format19(args.split(","), false);
-            case "blx" -> format19(args.split(","), true);
+            case "blx" -> parseBlx(args);
             case "bx" -> format5(args.split(","), 3);
             case "cmn" -> format4(args.split(","), 11);
             case "cmp" -> parseCmp(args);
@@ -867,6 +868,16 @@ public class ArmParser {
             return format1(args, 2);
 
         throw new DataFormatException();
+    }
+    
+    private byte[] parseBlx(String argsStr) throws DataFormatException {
+        int register = parseRegister(argsStr);
+        if (register == -1)
+            return format19(argsStr.split(","), true);
+        
+        byte[] bytes = format5(argsStr.split(","), 3);
+        bytes[0] |= (byte)0x80; // sets blx mode
+        return bytes;
     }
 
     private byte[] parseCmp(String argsStr) throws DataFormatException {

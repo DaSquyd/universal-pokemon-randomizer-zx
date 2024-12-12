@@ -1008,45 +1008,20 @@ public class ParagonLiteHandler {
         System.out.println("Set screen power");
     }
 
-    public void setNewSideStatus() {
-        int sideEffectEventAddItemRomAddress = globalAddressMap.getRomAddress(battleServerOvl, "SideStatus_AddItem");
-
-        int sideStatusCountByteAddress = sideEffectEventAddItemRomAddress + 0x92;
-        int sideStatusAddTableRef = sideEffectEventAddItemRomAddress + 0xA8;
-        int sideStatusAddTable4Ref = sideEffectEventAddItemRomAddress + 0xAC;
-
+    public void setNewSideStatus() {        
         int newCount = 2; // Sticky Web, Aurora Veil
-        int oldTotal = battleServerOvl.readUnsignedByte(sideStatusCountByteAddress);
+        int oldTotal = 14;
         int newTotal = oldTotal + newCount;
-        battleServerOvl.writeByte(sideStatusCountByteAddress, newTotal);
+        armParser.addGlobalValue("SIDE_STATUS_COUNT", newTotal);
 
-        int battleSideStatusInitRomAddress = globalAddressMap.getRomAddress(battleServerOvl, "SideStatus_Init");
-        battleServerOvl.writeByte(battleSideStatusInitRomAddress, newTotal); // mov r2, #newTotal
-        battleServerOvl.writeHalfword(battleSideStatusInitRomAddress + 0x08, 0x0152); // lsl r1, #5
-
-        updateBattleServerFunctionSideStatusCount("SideStatus_AddItem", 0x0C, newTotal);
-        updateBattleServerFunctionSideStatusCount("SideStatus_GetCount", 0x00, newTotal);
-        updateBattleServerFunctionSideStatusCount("SideStatus_IsEffectActive", 0x00, newTotal);
-        updateBattleServerFunctionSideStatusCount("SideStatus_RemoveItem", 0x02, newTotal);
-        updateBattleServerFunctionSideStatusCount("SideStatus_TurnCheck", 0x0E, newTotal);
-        updateBattleServerFunctionSideStatusCount("SideStatus_GetCountFromEventItem", 0x08, newTotal);
-
-        // Replace hardcoded null values (only used by the pledge moves)
-        int pledgeFuncRefAddress = getEventHandlerFuncReferenceAddress(Moves.waterPledge, getMoveListAddress(), getMoveListCount(), Gen5BattleEventType.onDamageProcessingEnd_Hit2);
-        int pledgeFuncAddress = battleOvl.readWord(pledgeFuncRefAddress) - 1;
-        int nullId = (Integer)armParser.getGlobalValue("SC_Null");
-        battleOvl.writeByte(pledgeFuncAddress + 0x1C, nullId);
-        battleOvl.writeByte(pledgeFuncAddress + 0x80, nullId);
-        
-
-        int oldSideStatusAddTable = battleServerOvl.readWord(sideStatusAddTableRef);
+        int oldSideStatusEffectTable = globalAddressMap.getRomAddress(battleServerOvl, "Data_SideStatusEffectTable");
 
         byte[] newData = new byte[12 * newTotal];
 
         for (int i = 0; i < 14; ++i) {
-            int sideStatusId = battleServerOvl.readWord(oldSideStatusAddTable + i * 12);
-            int sideStatusEffectRef = battleServerOvl.readWord(oldSideStatusAddTable + i * 12 + 4);
-            int sideStatusMaxLevel = battleServerOvl.readWord(oldSideStatusAddTable + i * 12 + 8);
+            int sideStatusId = battleServerOvl.readWord(oldSideStatusEffectTable + i * 12);
+            int sideStatusEffectRef = battleServerOvl.readWord(oldSideStatusEffectTable + i * 12 + 4);
+            int sideStatusMaxLevel = battleServerOvl.readWord(oldSideStatusEffectTable + i * 12 + 8);
 
             writeWord(newData, i * 12, sideStatusId);
             writeWord(newData, i * 12 + 4, sideStatusEffectRef);
@@ -1056,16 +1031,35 @@ public class ParagonLiteHandler {
         addSideStatus(newData, oldTotal, "StickyWeb", "sticky_web", Gen5BattleEventType.onSwitchIn);
         addSideStatus(newData, oldTotal + 1, "AuroraVeil", "aurora_veil", Gen5BattleEventType.onMoveDamageProcessing2);
 
-        int effectTableRomAddress = battleOvl.writeData(newData, "Data_SideStatusEffectTable");
-        int effectTableRamAddress = battleOvl.romToRamAddress(effectTableRomAddress);
-        battleServerOvl.writeWord(sideStatusAddTableRef, effectTableRamAddress, true);
-        battleServerOvl.writeWord(sideStatusAddTable4Ref, effectTableRamAddress + 4, true);
-    }
+        battleOvl.writeData(newData, "Data_SideStatusEffectTable");
 
-    private void updateBattleServerFunctionSideStatusCount(String functionName, int instructionOffset, int newSideStatusCount) {
-        int funcRomAddress = globalAddressMap.getRomAddress(battleServerOvl, functionName);
+        List<String> initLines = readLines("battleserver/side_status_init.s");
+        battleServerOvl.writeCodeForceInline(initLines, "SideStatus_Init", true);
 
-        battleServerOvl.writeByte(funcRomAddress + instructionOffset, newSideStatusCount * 16);
+        List<String> addItemLines = readLines("battleserver/side_status_add_item.s");
+        battleServerOvl.writeCodeForceInline(addItemLines, "SideStatus_AddItem", true);
+
+        List<String> getLevelLines = readLines("battleserver/side_status_get_level.s");
+        battleServerOvl.writeCodeForceInline(getLevelLines, "SideStatus_GetLevel", true);
+
+        List<String> isActiveLines = readLines("battleserver/side_status_is_active.s");
+        battleServerOvl.writeCodeForceInline(isActiveLines, "SideStatus_IsActive", true);
+
+        List<String> removeItemLines = readLines("battleserver/side_status_remove_item.s");
+        battleServerOvl.writeCodeForceInline(removeItemLines, "SideStatus_RemoveItem", true);
+
+        List<String> turnCheckLines = readLines("battleserver/side_status_turn_check.s");
+        battleServerOvl.writeCodeForceInline(turnCheckLines, "SideStatus_TurnCheck", true);
+
+        List<String> getLevelsFromEventItemLines = readLines("battleserver/side_status_get_level_from_event_item.s");
+        battleServerOvl.writeCodeForceInline(getLevelsFromEventItemLines, "SideStatus_GetLevelFromEventItem", true);
+        
+        // Replace hardcoded null values (only used by the pledge moves)
+        int pledgeFuncRefAddress = getEventHandlerFuncReferenceAddress(Moves.waterPledge, getMoveListAddress(), getMoveListCount(), Gen5BattleEventType.onDamageProcessingEnd_Hit2);
+        int pledgeFuncAddress = battleOvl.readWord(pledgeFuncRefAddress) - 1;
+        int nullId = (Integer)armParser.getGlobalValue("SC_Null");
+        battleOvl.writeByte(pledgeFuncAddress + 0x1C, nullId);
+        battleOvl.writeByte(pledgeFuncAddress + 0x80, nullId);
     }
 
     private void addSideStatus(byte[] data, int statusId, String name, String handlerName, int eventType) {

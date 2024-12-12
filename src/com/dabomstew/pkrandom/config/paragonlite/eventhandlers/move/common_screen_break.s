@@ -12,17 +12,17 @@
     bl      Battle::GetTeamIdFromPokePos
     mov     r6, r0
     mov     r1, #SC_Reflect
-    bl      BattleServer::SideStatus_IsEffectActive
+    bl      BattleServer::SideStatus_IsActive
     cmp     r0, #FALSE
     bne     Work
     
     mov     r1, #SC_LightScreen
-    bl      BattleServer::SideStatus_IsEffectActive
+    bl      BattleServer::SideStatus_IsActive
     cmp     r0, #FALSE
     bne     Work
     
     mov     r1, #SC_AuroraVeil
-    bl      BattleServer::SideStatus_IsEffectActive
+    bl      BattleServer::SideStatus_IsActive
     cmp     r0, #FALSE
     beq     Return
     

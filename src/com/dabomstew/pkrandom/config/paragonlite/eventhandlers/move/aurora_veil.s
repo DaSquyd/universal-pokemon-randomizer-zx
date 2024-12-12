@@ -1,6 +1,6 @@
 #DEFINE S_Side 0x00
 #DEFINE S_ConditionType 0x04
-#DEFINE S_ConditionPtr 0x08
+#DEFINE S_ConditionData 0x08
 #DEFINE S_MessageId 0x0C
 #DEFINE S_Work 0x10
 
@@ -22,7 +22,7 @@
     
     mov     r0, #5 ; turns
     bl      Battle::MakeTurnCondition_Turns
-    str     r0, [sp, #S_ConditionPtr]
+    str     r0, [sp, #S_ConditionData]
     
     mov     r0, r5
     bl      Battle::GetTeamIdFromPokePos

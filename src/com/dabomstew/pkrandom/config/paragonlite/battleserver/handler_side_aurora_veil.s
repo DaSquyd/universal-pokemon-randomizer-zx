@@ -18,7 +18,7 @@ CheckActive:
     bl      Battle::EventVar_GetValue
     bl      Battle::GetTeamIdFromPokePos
     mov     r1, r7
-    bl      BattleServer::SideStatus_IsEffectActive
+    bl      BattleServer::SideStatus_IsActive
     cmp     r0, #FALSE
     bne     Return ; don't re-apply screen
     
