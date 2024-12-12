@@ -36,12 +36,13 @@ ARM9	GetPartyPokeAddress	Code		thumb	0x0201AB44	0x0201AB28	0x0201FF34	0x0201FF08
 ARM9	ReadPokePersonalData	Code		thumb	0x0201AE38	0x0201AE1C	0x020202D8	0x020202AC
 ARM9	DoesPokerusHaveDuration	Code		thumb	0x0201B284	0x0201B268	0x0202076C	0x02020740
 ARM9	PokeHasPokerus	Code		thumb	0x0201B2A8	0x0201B28C	0x02020790	0x02020764
-ARM9	GetMoveMetadata	Code		thumb	0x0201BD44	0x0201BD28	0x020212AC	0x02021280
+ARM9	GetMoveData	Code		thumb	0x0201BD44	0x0201BD28	0x020212AC	0x02021280
 ARM9	MoveHasFlag	Code		thumb	0x0201BED4	0x0201BEB8	0x0202143C	0x02021410
 ARM9	GetMoveConditionDurationData	Code		thumb	0x0201BF74	0x0201BF58	0x020214DC	0x020214B0
 ARM9	GetMoveStatChangeStat	Code		thumb	0x0201C03C	0x0201C020	0x020215A4	0x02021578
 ARM9	GetMoveStatChangeStage	Code		thumb	0x0201C0D8	0x0201C0BC	0x02021640	0x02021614
 ARM9	GetMoveMaxPP	Code		thumb	0x0201C174	0x0201C158	0x020216DC	0x020216B0
+ARM9	GetMoveWeather	Code		thumb	0x0201C1A0	0x0201C184	0x02021708	0x020216DC
 ARM9	GetMoveQuality	Code		thumb	0x0201C1D8	0x0201C1BC	0x02021740	0x02021714
 ARM9	GetMoveType	Code		thumb	0x0201C1E4	0x0201C1C8	0x0202174C	0x02021720
 ARM9	GetMoveBasePower	Code		thumb	0x0201C1F4	0x0201C1D8	0x0202175C	0x02021730
@@ -57,11 +58,13 @@ ARM9	GFL_WordSetClearAll	Code		thumb	0x0201F338	0x0201F320	0x02024A00	0x020249D4
 ARM9	PML_SpeciesNamesResidentInit	Code		thumb	0x0201F360	0x0201F348	0x02024A28	0x020249FC
 ARM9	GFL_WordSetFormatNumber	Code		thumb	0x0201F372	0x0201F35A	0x02024A40	0x02024A14
 ARM9	WCharsNCopy	Code		thumb	0x0201F438	0x0201F420	0x02024B00	0x02024AD4
-ARM9	ReadInFileForItem	Code		thumb	0x02020F50	0x02020F34	0x0202676C	0x02026740
+ARM9	Item_GetIndex	Code		thumb			0x0202669C	0x02026670
+ARM9	Item_GetData	Code		thumb	0x02020F50	0x02020F34	0x0202676C	0x02026740
 ARM9	IsItemBerry	Code		thumb			0x02026C20	0x02026BF4
 ARM9	GetTrainerData	Code		thumb	0x0202A248	0x0202A230	0x0203050C	0x020304E0
 ARM9	LoadTrainerFile	Code		thumb	0x0202A3C4	0x0202A3AC	0x0203070C	0x020306E0
 ARM9	LoadTrPokeFile	Code		thumb	0x0202A3D4	0x0202A3BC	0x02030750	0x02030724
+ARM9	ShooterItem_GetTableIndex	Code		thumb			0x02035970	0x02035944
 ARM9	GFL_HeapAllocate	Code		arm,thumb	0x0203074C	0x02030734	0x0203A228	0x0203A1FC
 ARM9	GFL_TCBMgrAddTask	Code		arm,thumb	0x02030DC0	0x02030DA8	0x0203A640	0x0203A614
 ARM9	GFL_RandomMT	Code		arm,thumb	0x0203F0C0	0x0203F0A8	0x02043F58	0x02043F2C
@@ -190,6 +193,7 @@ ARM9	GFL_G3DResGetTexData	Code		arm,thumb	0x02047268	0x02047250	0x0204964C	0x020
 ARM9	GFL_G3DResAllocTexMem	Code		arm,thumb	0x02047278	0x02047260	0x02049658	0x0204962C
 ARM9	GFL_ArcSysReadHeapNew	Code		arm,thumb	0x02048F78	0x02048F60	0x0204A960	0x0204A934
 ARM9	sys_memset16	Code		arm	0x02082A60	0x02082A48	0x02078650	0x02078624
+ARM9	sys_memset	Code		arm			0x020787D4	0x020787A8
 ARM9	Mod64Signed	Code		arm	0x0209BE64	0x0209BE4C	0x0208D430	0x0208D404
 ARM9	Divide64Signed	Code		arm	0x0209BE74	0x0209BE5C	0x0208D440	0x0208D414
 ARM9	Divide64Unsigned	Code		arm	0x0209C024	0x0209C00C	0x0208D5F0	0x0208D5C4
@@ -203,10 +207,12 @@ ARM9	Data_EnemyPartyIndices	Data	8		--	--	0x02090094	0x02090068
 ARM9	Data_StatNatureAdjust	Data	128		0x0209E2BC	0x0209E2A4	0x020903A0	0x02090374
 ARM9	Data_NatureStat	Data	128		0x0209E33C	0x0209E324	0x02090420	0x020903F4
 ARM9	Data_BerryIDs	Data	128				0x02090B78	0x02090B4C
+ARM9	Data_ShooterItemSpriteMap	Data	184				0x02090BF8	0x02090BCC
 ARM9	Data_ItemSpriteMap	Data	2556		0x0209EB84	0x0209EB6C	0x02090D7C	0x02090D50
 ARM9	Data_CurrentMsg	Data	4		0x020A7390	0x020A7378	0x0209A474	0x0209A448
 ARM9	Data_MoveCache	Data	20160		0x02146554	0x02146534	0x02141434	0x021413F4
-Bag	Data_ItemsAlphabetical	Data	568				0x021A1178	0x021A1138
+TrainerAI	Data_AIScriptCommands	Data	492	*	0x0218A5C8	0x0218A5A8	0x02181CF4	0x02181CB4
+Bag	Sort_Name	Code		thumb			0x0219B904	0x0219B8C4
 Battle	Setup_GetBattleStyle	Code		thumb	0x021B85A8	0x021B8588	0x0219BDC0	0x0219BD80
 Battle	MainModule_GetBattleType	Code		thumb	0x021B86D8	0x021B86B8	0x0219BF14	0x0219BED4
 Battle	MainModule_AreClientIDsOpposing	Code		thumb	0x021B8D08	0x021B8CE8	0x0219C594	0x0219C554
@@ -239,9 +245,14 @@ Battle	ServerEvent_CalculateSpeed	Code		thumb	0x021BC968	0x021BC948	0x021A041C	0
 Battle	ActionOrder_SearchByPokeID	Code		thumb			0x021A04E0	0x021A04A0
 Battle	ActionOrderTool_Interrupt	Code		thumb			0x021A0670	0x021A0630
 Battle	ActionOrderTool_SendToLast	Code		thumb			0x021A0728	0x021A06E8
+Bag	Sort_RepositoryNo	Code		thumb			0x021A0788	0x021A0748
 Battle	ActionOrder_Proc	Code		thumb			0x021A07B8	0x021A0778
+Field	Encounter_CreateWildPoke	Code		thumb			0x021A0E00	0x021A0DC0
+Bag	Data_ItemsAlphabetical	Data	568				0x021A1178	0x021A1138
+Field	Encounter_GenPID	Code		thumb			0x021A1548	0x021A1508
 Battle	ServerControl_CheckActivation	Code		thumb			0x021A1714	0x021A16D4
 Battle	ServerControl_MoveStart	Code		thumb			0x021A2740	0x021A2700
+Battle	ServerControl_SubstituteExclude	Code		thumb			0x021A2C9C	0x021A2C5C
 Battle	ServerControl_IsGuaranteedHit	Code		thumb			0x021A2E0C	0x021A2DCC
 Battle	ServerControl_CheckNoEffect	Code		thumb			0x021A2F94	0x021A2F54
 Battle	ServerControl_CheckNoEffectCore	Code		thumb			0x021A31D0	0x021A3190
@@ -449,7 +460,7 @@ Battle	GetRawPokeStat	Code		thumb	0x021D58C8	0x021D58A8	0x021BB0E8	0x021BB0A8
 Battle	GetPokeStat	Code		thumb	0x021D59D4	0x021D59B4	0x021BB1F4	0x021BB1B4
 Battle	GetCritPokeStat	Code		thumb	0x021D5AF8	0x021D5AD8	0x021BB318	0x021BB2D8
 Battle	Poke_GetHeldItem	Code		thumb	0x021D5B60	0x021D5B40	0x021BB380	0x021BB340
-Battle	IsPokeFullHP	Code		thumb	0x021D5B68	0x021D5B48	0x021BB388	0x021BB348
+Battle	Poke_IsFullHP	Code		thumb	0x021D5B68	0x021D5B48	0x021BB388	0x021BB348
 Battle	IsPokeFainted	Code		thumb	0x021D5B88	0x021D5B68	0x021BB3A8	0x021BB368
 Battle	Poke_GetTurnFlag	Code		thumb	0x021D5BD0	0x021D5BB0	0x021BB3F0	0x021BB3B0
 Battle	Poke_GetConditionFlag	Code		thumb	0x021D5BFC	0x021D5BDC	0x021BB41C	0x021BB3DC
@@ -544,6 +555,7 @@ Battle	Condition_MakeSetTurns	Code		thumb	0x021D7D98	0x021D7D78	0x021BD5CC	0x021
 Battle	Unk_21BD6E4	Code		thumb	0x021D7EB0	0x021D7E90	0x021BD6E4	0x021BD6A4
 Battle	DoesBattleStyleRequireTargetSelect	Code		thumb	0x021D7F10	0x021D7EF0	0x021BD758	0x021BD718
 Battle	GetNumPokesOnField	Code		thumb	0x021D7F4C	0x021D7F2C	0x021BD794	0x021BD754
+Battle	Action_GetMoveId	Code		thumb	0x021D8360	0x021D8340	0x021BDBA8	0x021BDB68
 Battle	Action_IsDeplete	Code		thumb	0x021D8400	0x021D83E0	0x021BDC48	0x021BDC08
 Battle	BattleAction_GetActionType	Code		thumb	0x021D8474	0x021D8454	0x021BDCBC	0x021BDC7C
 Battle	Inst_AbilityEffectListCountCmp	Data	1		0x021D84FE	0x021D84DE	0x021BDD46	0x021BDD06
@@ -554,12 +566,17 @@ Battle	ResetSlowStartState	Code		thumb	0x021D8994	0x021D8974	0x021BE1DC	0x021BE1
 Battle	CommonWeatherGuard	Code		thumb	0x021D8B0C	0x021D8AEC	0x021BE354	0x021BE314
 Battle	CommonLowHPTypeBoostAbility	Code		thumb	0x021D8CCC	0x021D8CAC	0x021BE514	0x021BE4D4
 Battle	CommonPokeHasAbility	Code		thumb	0x021D8DBC	0x021D8D9C	0x021BE604	0x021BE5C4
+Battle	CommonIsFlowerGiftPoke	Code		thumb	0x021D8E20	0x021D8E00	0x021BE668	0x021BE628
 Battle	CommonStatDropGuardCheck	Code		thumb	0x021D92AC	0x021D928C	0x021BEAF4	0x021BEAB4
 Battle	CommonStatDropGuardMessage	Code		thumb	0x021D92EC	0x021D92CC	0x021BEB34	0x021BEAF4
 Battle	TryRemoveStatus	Code		thumb	0x021D9668	0x021D9648	0x021BEEB0	0x021BEE70
 Battle	CommonAddStatusFailed	Code		thumb	0x021D9690	0x021D9670	0x021BEED8	0x021BEE98
 Battle	CommonRemoveStatus	Code		thumb	0x021D96FC	0x021D96DC	0x021BEF44	0x021BEF04
 Battle	CommonWeatherChangeAbility	Code		thumb	0x021D97D4	0x021D97B4	0x021BF01C	0x021BEFDC
+Storage	MakeBox2Main	Code		thumb	0x021DEDF8	0x021DEDD8	0x021BF060	0x021BF020
+Storage	DisplayPreview	Code		thumb	0x021DEF80	0x021DEF60	0x021BF1E8	0x021BF1A8
+Storage	Unk_21BF3A4	Code		thumb			0x021BF3A4	0x021BF364
+Storage	Unk_21BF3CC	Code		thumb			0x021BF3CC	0x021BF38C
 Battle	CommonContactStatusAbility	Code		thumb	0x021D9E28	0x021D9E08	0x021BF670	0x021BF630
 Battle	CommonTypeImmuneCheck	Code		thumb	0x021DA8C8	0x021DA8A8	0x021C0110	0x021C00D0
 Battle	CommonTypeRecoverHP	Code		thumb	0x021DA8FC	0x021DA8DC	0x021C0144	0x021C0104
@@ -568,6 +585,7 @@ Battle	Handler_MoldBreakerSkipCheck	Code		thumb	0x021DB1C8	0x021DB1A8	0x021C0A10
 Battle	Inst_ItemEffectListCountCmp	Inst	2		0x021DCF32	0x021DCF12	0x021C277A	0x021C273A
 Battle	Data_ItemEffectListAddress	Data	4	*	0x021DCF3C	0x021DCF1C	0x021C2784	0x021C2744
 Battle	Data_ItemEffectListAddress4	Data	4	*	0x021DCF40	0x021DCF20	0x021C2788	0x021C2748
+Battle	CommonGetItemParam	Code		thumb	0x021DD018	0x021DCFF8	0x021C2860	0x021C2820
 Battle	ItemEvent_PushRun	Code		thumb	0x021DD064	0x021DD044	0x021C28AC	0x021C286C
 Battle	CommonBerrySuperEffectiveCheck	Code		thumb	0x021DDCF8	0x021DDCD8	0x021C3540	0x021C3500
 Battle	CommonTypeBoostItem	Code		thumb	0x021DF95C	0x021DF93C	0x021C51A4	0x021C5164
@@ -580,8 +598,11 @@ Battle	Data_MoveEffectListAddress4	Data	4	*	0x021E0370	0x021E0350	0x021C5BB8	0x0
 Battle	MoveEvent_RemoveItem	Code		thumb	0x021E03B4	0x021E0394	0x021C5BFC	0x021C5BBC
 Battle	HandlerCommon_CreateSideStatus	Code		thumb	0x021E558C	0x021E556C	0x021CADE4	0x021CADA4
 Battle	HandlerCommon_CheckTargetMonID	Code		thumb	0x021E8618	0x021E85F8	0x021CDE78	0x021CDE38
-Battle	HandlerCommon_CheckIfCanStealPokeItem	Code		thumb	0x021E8708	0x021E86E8	0x021CDF68	0x021CDF28
+Battle	HandlerCommon_CheckIfCannotStealPokeItem	Code		thumb	0x021E8708	0x021E86E8	0x021CDF68	0x021CDF28
+Storage	Unk_21CE078	Code		thumb			0x021CE078	0x021CE038
+Storage	Unk_21CE0A8	Code		thumb			0x021CE0A8	0x021CE068
 Battle	CommonMultiplyBasePower	Code		thumb	0x021E8880	0x021E8860	0x021CE0E0	0x021CE0A0
+Storage	Unk_21CE100	Code		thumb			0x021CE100	0x021CE0C0
 Battle	MakeEmptyCondition	Code		thumb	0x021E8938	0x021E8918	0x021CE198	0x021CE158
 Battle	ConditionPtr_GetMode	Code		thumb	0x021E8948	0x021E8928	0x021CE1A8	0x021CE168
 Battle	MakeTurnCondition_Turns	Code		thumb	0x021E8960	0x021E8940	0x021CE1C0	0x021CE180
@@ -610,6 +631,10 @@ Battle	TypePair_LoadTypes	Code		thumb			0x021CE58C	0x021CE54C
 Battle	TypePair_HasType	Code		thumb			0x021CE5A4	0x021CE564
 Battle	TypePair_HasSharedType	Code		thumb			0x021CE5C8	0x021CE588
 Battle	TypePair_IsMonoType	Code		thumb			0x021CE628	0x021CE5E8
+Storage	Preview_Ability	Code		thumb	0x021EB134	0x021EB114	0x021CE62C	0x021CE5EC
+Storage	PreviewCore	Code		thumb	0x021EB2C4	0x021EB2A4	0x021CE7D8	0x021CE798
+Storage	Unk_21D06E4	Code		thumb			0x021D06E4	0x021D06A4
+Storage	DisplayPreview_TypeGraphics	Code		thumb			0x021D0A68	0x021D0A28
 Battle	DisplayMessage	Code		thumb	0x021EAF38	0x021EAF18	0x021D0B2C	0x021D0AEC
 Battle	StringParam_AddArg	Code		thumb	0x021EAF70	0x021EAF50	0x021D0B64	0x021D0B24
 Battle	Inst_Unknown1ListCountCmp	Inst	2		0x021EEF2C	0x021EEF0C	0x021D4FE8	0x021D4FA8
@@ -648,6 +673,7 @@ Battle	Data_EffectivenessMultipliers	Data	5		0x021F0447	0x021F0427	0x021D74EB	0x
 Battle	Data_TypeEffectivenessTable	Data	292		0x021F049C	0x021F047C	0x021D7540	0x021D7500
 Battle	Data_AbilityEffectList	Data	1264	4*	0x021F0E94	0x021F0E74	0x021D7F38	0x021D7EF8
 Battle	Data_ItemEffectList	Data	1376	4*	0x021F1EC4	0x021F1EA4	0x021D8F68	0x021D8F28
+Storage	Box2_Main_C	Data	12		0x021F1420	0x021F1400	0x021D9680	0x021D9640
 Battle	Data_MoveEffectList	Data	2064	4*	0x021F3050	0x021F3030	0x021DA0F4	0x021DA0B4
 Battle	Data_Unknown1List	Data	112	4*	0x021F39F8	0x021F39D8	0x021DAABC	0x021DAA7C
 Battle	Data_BattleField	Data	360				0x021DD928	0x021DD8E8
@@ -683,11 +709,11 @@ BattleLevel	Data_Unk21F4280	Data	0		0x0220AF40	0x0220AF20	0x021F4280	0x021F4240
 BattleServer	WonderRoomEventHandler	Code		thumb	0x068981A0	0x068981A0	0x068981A0	0x068981A0
 BattleServer	SideStatus_Init	Code		thumb	0x06898BFC	0x06898BFC	0x06898BFC	0x06898BFC
 BattleServer	SideStatus_AddItem	Code		thumb	0x06898C10	0x06898C10	0x06898C10	0x06898C10
-BattleServer	SideStatus_GetCount	Code		thumb	0x06898CE0	0x06898CE0	0x06898CE0	0x06898CE0
-BattleServer	SideStatus_IsEffectActive	Code		thumb			0x06898CF4	0x06898CF4
+BattleServer	SideStatus_GetLayers	Code		thumb	0x06898CE0	0x06898CE0	0x06898CE0	0x06898CE0
+BattleServer	SideStatus_IsActive	Code		thumb			0x06898CF4	0x06898CF4
 BattleServer	SideStatus_RemoveItem	Code		thumb			0x06898D10	0x06898D10
 BattleServer	SideStatus_TurnCheck	Code		thumb			0x06898D54	0x06898D54
-BattleServer	SideStatus_GetCountFromEventItem	Code		thumb			0x06898DE0	0x06898DE0
+BattleServer	SideStatus_GetLayersFromEventItem	Code		thumb			0x06898DE0	0x06898DE0
 BattleServer	CommonScreenEffect	Code		thumb			0x06898E54	0x06898E54
 BattleServer	Condition_CreateDamageMessage	Code		thumb	0x0689B8CC	0x0689B8CC	0x0689BA5C	0x0689BA5C
 BattleServer	Condition_GetDamageText	Code		thumb	0x0689B92C	0x0689B92C	0x0689BABC	0x0689BABC
@@ -705,19 +731,4 @@ BattleServer	Data_FieldStatusEffectTable	Data	56	4*	0x0689D650	0x0689D650	0x0689
 BattleServer	Data_SideStatusEffectTable	Data	112	4*	0x0689D780	0x0689D780	0x0689D908	0x0689D908
 BattleServer	Data_PlateItems	Data	32		0x0689E38C	0x0689E38C	0x0689E514	0x0689E514
 BattleServer	Data_MoldBreakerIgnoredAbilities	Data	112		0x0689E450	0x0689E450	0x0689E5D8	0x0689E5D8
-BattleServer	SideStatusManager	Data	448		0x0689E7E0	0x0689E7E0	0x0689E960	0x0689E960
-Field	Encounter_CreateWildPoke	Code		thumb			0x021A0E00	0x021A0DC0
-Field	Encounter_GenPID	Code		thumb			0x021A1548	0x021A1508
-Storage	MakeBox2Main	Code		thumb	0x021DEDF8	0x021DEDD8	0x021BF060	0x021BF020
-Storage	DisplayPreview	Code		thumb	0x021DEF80	0x021DEF60	0x021BF1E8	0x021BF1A8
-Storage	Unk_21BF3A4	Code		thumb			0x021BF3A4	0x021BF364
-Storage	Unk_21BF3CC	Code		thumb			0x021BF3CC	0x021BF38C
-Storage	Unk_21CE078	Code		thumb			0x021CE078	0x021CE038
-Storage	Unk_21CE0A8	Code		thumb			0x021CE0A8	0x021CE068
-Storage	Unk_21CE100	Code		thumb			0x021CE100	0x021CE0C0
-Storage	Preview_Ability	Code		thumb	0x021EB134	0x021EB114	0x021CE62C	0x021CE5EC
-Storage	PreviewCore	Code		thumb	0x021EB2C4	0x021EB2A4	0x021CE7D8	0x021CE798
-Storage	Unk_21D06E4	Code		thumb			0x021D06E4	0x021D06A4
-Storage	DisplayPreview_TypeGraphics	Code		thumb			0x021D0A68	0x021D0A28
-Storage	Box2_Main_C	Data	12		0x021F1420	0x021F1400	0x021D9680	0x021D9640
-TrainerAI	Data_AIScriptCommands	Data	492	*	0x0218A5C8	0x0218A5A8	0x02181CF4	0x02181CB4
+BattleServer	SideStatuses	Data	448		0x0689E7E0	0x0689E7E0	0x0689E960	0x0689E960

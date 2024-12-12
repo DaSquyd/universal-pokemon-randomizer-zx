@@ -20,7 +20,7 @@
     mov     r1, r6
     bl      Battle::GetPoke
     mov     r7, r0
-    bl      Battle::IsPokeFullHP
+    bl      Battle::Poke_IsFullHP
     cmp     r0, #FALSE
     bne     DisplayFullHPMessage
     

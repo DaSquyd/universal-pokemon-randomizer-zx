@@ -10,65 +10,66 @@
 ; We make a modification that allows us to pass in the actual stat of choice to be modified or
 ;   left alone using 0x35.
 
-#DEFINE STACK_SIZE 0x18
-
-; Stack Vars
-#DEFINE POKE (STACK_SIZE - 0x18)
+#define S_DefendingPoke 0x00
+#DEFINE PushSize (4 * 6) ; r3-r7, lr
 
 ; Stack Args
-#DEFINE IS_CRIT (STACK_SIZE + 0x00)
+#DEFINE Arg_IsCrit (PushSize + 0x00)
 
     push    {r3-r7, lr}
     mov     r7, r0
     mov     r6, r1
     mov     r5, r3
-    str     r2, [sp, #POKE]
+    str     r2, [sp, #S_DefendingPoke]
     
     ldrh    r0, [r5]
     bl      ARM9::GetMoveCategory
-    mov     r4, #0x0A ; Sp. Atk
-    cmp     r0, #2 ; Special
+    mov     r4, #BPV_SpAtkStat
+    cmp     r0, #CAT_Special
     beq     CallModifyStatHandlers
-    mov     r4, #0x08 ; Attack
+    mov     r4, #BPV_AttackStat
     
 CallModifyStatHandlers:
-    ldr     r0, =0x311D
     bl      Battle::EventVar_Push
     
     mov     r0, r6
     bl      Battle::GetPokeId
     mov     r1, r0
-    mov     r0, #0x03
+    mov     r0, #VAR_AttackingPoke
     bl      Battle::EventVar_SetConstValue
     
-    ldr     r0, [sp, #POKE]
+    ldr     r0, [sp, #S_DefendingPoke]
     bl      Battle::GetPokeId
     mov     r1, r0
-    mov     r0, #0x04
+    mov     r0, #VAR_DefendingPoke
     bl      Battle::EventVar_SetConstValue
     
-    mov     r0, #0x3B ; poke
-    mov     r1, #0x1F ; default is -1 (5 bits)
-    bl      Battle::EventVar_SetValue
-    
-    mov     r0, #0x51 ; use raw stats
-    mov     r1, #0
-    bl      Battle::EventVar_SetValue
-    
-    mov     r0, #0x35 ; stat
+    mov     r0, #VAR_Stat
     mov     r1, r4
     bl      Battle::EventVar_SetValue
     
+    mov     r0, #VAR_SwapPokeId
+    mov     r1, #0x1F ; default is -1 (5 bits)
+    bl      Battle::EventVar_SetValue
+    
+    mov     r0, #VAR_GeneralUseFlag ; use raw stats
+    mov     r1, #FALSE
+    bl      Battle::EventVar_SetValue
+    
+    mov     r0, #VAR_CritStatFlag
+    mov     r1, #FALSE
+    bl      Battle::EventVar_SetValue
+    
     mov     r0, r7
-    mov     r1, #0x39 ; OnModifyStat
+    mov     r1, #EVENT_OnGetAttackingStat
     bl      Battle::Event_CallHandlers
     
 PostModifyStat:
-    mov     r0, #0x35 ; stat
+    mov     r0, #VAR_Stat
     bl      Battle::EventVar_GetValue
     mov     r4, r0
 
-    mov     r0, #0x3B ; poke
+    mov     r0, #VAR_SwapPokeId
     bl      Battle::EventVar_GetValue
     mov     r1, r0
     cmp     r0, #0x1F
@@ -79,9 +80,9 @@ PostModifyStat:
     mov     r6, r0
     
 CheckUseRawStat:
-    mov     r0, #0x51 ; use raw stats
+    mov     r0, #VAR_GeneralUseFlag
     bl      Battle::EventVar_GetValue
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     CheckUseCritStat
     
     mov     r0, r6
@@ -90,10 +91,16 @@ CheckUseRawStat:
     b       CallModifyStatValueHandlers
     
 CheckUseCritStat:
-    ldr     r0, [sp, #IS_CRIT]
-    cmp     r0, #0
+    ldr     r0, [sp, #Arg_IsCrit]
+    cmp     r0, #FALSE
+    bne     UseCritStat
+    
+    mov     r0, #VAR_CritStatFlag
+    bl      Battle::EventVar_GetValue
+    cmp     r0, #FALSE
     beq     GetStat
     
+UseCritStat:
     mov     r0, r6
     mov     r1, r4
     bl      Battle::GetCritPokeStat
@@ -107,47 +114,46 @@ GetStat:
 CallModifyStatValueHandlers:
     mov     r4, r0
     
-    mov     r0, #0x12 ; move id
+    mov     r0, #VAR_MoveId
     ldrh    r1, [r5]
     bl      Battle::EventVar_SetConstValue
     
-    mov     r0, #0x16 ; move type
+    mov     r0, #VAR_MoveType
     ldrb    r1, [r5, #0x06]
     bl      Battle::EventVar_SetConstValue
     
-    mov     r0, #0x1A ; move category
+    mov     r0, #VAR_MoveCategory
     ldr     r1, [r5, #0x08]
     bl      Battle::EventVar_SetConstValue
     
-    mov     r0, #0x33 ; stat value
+    mov     r0, #VAR_OffensiveValue
     mov     r1, r4
     bl      Battle::EventVar_SetValue
     
     mov     r1, #1
     lsl     r1, #12
-    mov     r0, #0x35 ; stat value multiplier
-    mov     r2, #0xCD
-    lsl     r2, #1 ; 0x019A (0.1x)
-    lsl     r3, r1, #5 ; 0x50000 (5.0x)
+    mov     r0, #VAR_Ratio
+    mov     r2, #(Math.round(0x1000 * 0.1) >> 1)
+    lsl     r2, #1
+    lsl     r3, r1, #5 ; (5.0x)
     bl      Battle::EventVar_SetMulValue
     
     mov     r0, r7
-    mov     r1, #0x3B ; OnModifyStatValue
+    mov     r1, #EVENT_OnGetAttackingStatValue
     bl      Battle::Event_CallHandlers
     
 PostModifyStatValue:
-    mov     r0, #0x33 ; stat value
+    mov     r0, #VAR_OffensiveValue
     bl      Battle::EventVar_GetValue
     mov     r4, r0
     
-    mov     r0, #0x35 ; stat value multiplier
+    mov     r0, #VAR_Ratio
     bl      Battle::EventVar_GetValue
     mov     r1, r0
     mov     r0, r4
     bl      Battle::FixedRound
     mov     r4, r0
     
-    ldr     r0, =0x3144
     bl      Battle::EventVar_Pop
     
     mov     r0, r4

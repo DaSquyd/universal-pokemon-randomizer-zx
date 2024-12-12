@@ -6,8 +6,12 @@
     cmp     r4, r0
     bne     Return
     
-    mov     r0, #VAR_Stat
-    mov     r1, #BPV_DefenseStat
+    mov     r0, #VAR_EvasionStage
+    bl      Battle::EventVar_GetValue
+    cmp     r0, #6 ; +0
+    bls     Return
+    
+    mov     r1, #6 ; +0
     bl      Battle::EventVar_RewriteValue
     
 Return:

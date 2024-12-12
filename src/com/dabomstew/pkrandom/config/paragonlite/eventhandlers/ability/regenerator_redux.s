@@ -16,7 +16,7 @@
     bne     Return
     
     mov     r0, r6
-    bl      Battle::IsPokeFullHP
+    bl      Battle::Poke_IsFullHP
     cmp     r0, #0
     bne     Return
     

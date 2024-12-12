@@ -151,7 +151,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        
+
         int playerAllowedGenerations = (1 << generationOfPokemon()) - 1;
         int foeAllowedGenerations = (1 << generationOfPokemon()) - 1;
         if (settings != null) {
@@ -202,7 +202,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if ((foeAllowedGenerations & mask) != 0)
                 foeMegaEvolutionsList.add(mega);
         }
-        
+
         playerLegendaryList = new ArrayList<>();
         playerUltraBeastList = new ArrayList<>();
         playerNonLegendaryList = new ArrayList<>();
@@ -228,7 +228,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 foeNonLegendaryList.add(p);
             }
         }
-        
+
         playerLegendaryListInclFormes = new ArrayList<>();
         playerNonLegendaryListInclFormes = new ArrayList<>();
         for (Pokemon p : playerPokemonListInclFormes) {
@@ -786,6 +786,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
         return playerNonLegendaryList.get(this.random.nextInt(playerNonLegendaryList.size()));
     }
+
     public Pokemon randomNonLegendaryPlayerPokemonInclFormes() {
         checkPokemonRestrictions();
         return playerNonLegendaryListInclFormes.get(this.random.nextInt(playerNonLegendaryListInclFormes.size()));
@@ -1196,8 +1197,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean lowBulk = bulk <= 85;
         boolean highBulk = bulk > 110;
 
-        boolean higherOrEqualAttack = pk.attack >= pk.spatk; // minAttack >= maxSpAtk;
-        boolean higherOrEqualSpAtk = pk.spatk >= pk.attack; // minSpAtk >= maxAttack;
+        boolean higherOrEqualAttack = Math.round((pk.attack + 12.5) * 0.9) >= Math.round((pk.spatk + 12.5) * 1.1); // minAttack >= maxSpAtk;
+        boolean higherOrEqualSpAtk = Math.round((pk.spatk + 12.5) * 0.9) >= Math.round((pk.attack + 12.5) * 1.1); // minSpAtk >= maxAttack;
 
         long miscTweaks = settings.getCurrentMiscTweaks();
         boolean isCustomTypeEffectiveness = (miscTweaks & MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue()) == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
@@ -1435,7 +1436,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.effect == MoveEffect.RECOVER_HP_50_WEATHER || m.effect == MoveEffect.GROWTH)
                 supportSunMoves.add(m.number);
 
-            if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL)
+            if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL
+                    || m.effect == MoveEffect.ELECTRO_SHOT)
                 rainMoves.add(m.number);
         }
 
@@ -1519,7 +1521,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.effect == MoveEffect.RECOVER_HP_50_WEATHER || m.effect == MoveEffect.GROWTH)
                 supportSunMoves.add(m.number);
 
-            if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL)
+            if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL
+                    || m.effect == MoveEffect.ELECTRO_SHOT)
                 rainMoves.add(m.number);
         }
 
@@ -1604,7 +1607,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.effect == MoveEffect.RECOVER_HP_50_WEATHER || m.effect == MoveEffect.GROWTH)
                 supportSunMoves.add(m.number);
 
-            if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL)
+            if (m.type == Type.WATER || m.effect == MoveEffect.THUNDER || m.effect == MoveEffect.HURRICANE || m.effect == MoveEffect.WEATHER_BALL
+                    || m.effect == MoveEffect.ELECTRO_SHOT)
                 rainMoves.add(m.number);
         }
 
@@ -1791,7 +1795,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         irrelevantAbilities.add(Abilities.runAway);
 
         // #051 Keen Eye
-        // TODO: Rework
+        // TODO: Rework (though, Redux variant is probably fine)
 
         // #052 Hyper Cutter
         // TODO: Rework
@@ -2055,8 +2059,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         irrelevantAbilities.add(Abilities.badDreams);
 
         // #124 Pickpocket
-        // TODO: Rework
-        irrelevantAbilities.add(Abilities.pickpocket);
+        if (stabContactMovesFromLevel == 0 || contactMoves.size() < 2)
+            irrelevantAbilities.add(Abilities.pickpocket);
 
         // #125 Sheer Force
         if (highAtk || highSpA || pk.bst() >= 550 || sheerForceMovesFromLevel == 0 || sheerForceMoves.size() < 2)
@@ -3818,7 +3822,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Set up Pokemon pool
         cachedReplacementLists = new TreeMap<>();
-        cachedAllList = noLegendaries ? new ArrayList<>(playerNonLegendaryList) : new ArrayList<>(playerPokemonList);
+        cachedAllList = noLegendaries ? new ArrayList<>(foeNonLegendaryList) : new ArrayList<>(foePokemonList);
         if (includeFormes) {
             if (noLegendaries) {
                 cachedAllList.addAll(foeNonLegendaryAltsList);

@@ -41,7 +41,7 @@ Loop_Start:
     bne     Loop_CheckContinue
     
     mov     r0, r7
-    bl      Battle::IsPokeFullHP
+    bl      Battle::Poke_IsFullHP
     cmp     r0, #FALSE
     bne     Loop_CheckContinue
     

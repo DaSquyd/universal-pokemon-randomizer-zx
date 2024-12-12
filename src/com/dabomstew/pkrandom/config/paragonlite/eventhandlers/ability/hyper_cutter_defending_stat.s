@@ -7,7 +7,12 @@
     bne     Return
     
     mov     r0, #VAR_Stat
-    mov     r1, #BPV_DefenseStat
+    bl      Battle::EventVar_GetValue
+    cmp     r0, #BPV_DefenseStat
+    bne     Return
+    
+    mov     r0, #VAR_CritStatFlag
+    mov     r1, #TRUE
     bl      Battle::EventVar_RewriteValue
     
 Return:

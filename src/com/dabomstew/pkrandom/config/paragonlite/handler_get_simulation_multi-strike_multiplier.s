@@ -18,7 +18,7 @@
     
     mov     r0, r2
     mov     r1, #MVDATA_HIT_MAX
-    bl      ARM9::GetMoveMetadata
+    bl      ARM9::GetMoveData
     mov     r4, r0
     cmp     r4, #1
     bhi     IsMultiStrike

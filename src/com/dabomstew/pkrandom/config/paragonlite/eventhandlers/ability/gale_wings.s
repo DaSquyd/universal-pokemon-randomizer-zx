@@ -10,7 +10,7 @@
     mov     r0, r5
     mov     r1, r4
     bl      Battle::GetPoke
-    bl      Battle::IsPokeFullHP
+    bl      Battle::Poke_IsFullHP
     cmp     r0, #0
     beq     End
     

@@ -1,27 +1,20 @@
     push    {r4-r6, lr}
+    mov     r0, #4
     mov     r5, r1
     mov     r4, r2
-    
-    mov     r0, #VAR_DefendingPoke
+    mov     r6, #4
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
     bne     Return
     
-    ; Get Move ID
-    mov     r0, #VAR_MoveId
+    mov     r0, #VAR_MoveType
     bl      Battle::EventVar_GetValue
-    
-    ; Taunt
-    mov     r1, #(269 - 0xFF) ; Taunt
-    add     r1, #0xFF
-    cmp     r0, r1
-    beq     CancelMove
-    
-    ; Captivate
-    add     r1, #(445 - 269) ; Captivate
+    cmp     r0, #TYPE_Water
+    beq     ApplyImmunity
+    cmp     r0, #TYPE_Ice
     bne     Return
     
-CancelMove:
+ApplyImmunity:
     mov     r0, #VAR_NoEffectFlag
     mov     r1, #TRUE
     bl      Battle::EventVar_RewriteValue
@@ -34,14 +27,14 @@ CancelMove:
     bl      Battle::Handler_PushRun
     
     mov     r0, r5
-    mov     r1, #4
+    mov     r1, r6
     mov     r2, r4
     bl      Battle::Handler_PushWork
-    mov     r6, r0
     
+    mov     r6, r0
     add     r0, r6, #4
     mov     r1, #2
-    mov     r2, #210
+    mov     r2, #210 ; "It doesn't affect [poke]..."
     bl      Battle::Handler_StrSetup
     
     add     r0, r6, #4
@@ -58,4 +51,4 @@ CancelMove:
     bl      Battle::Handler_PushRun
     
 Return:
-    pop     {r4-r6,pc}
+    pop     {r4-r6, pc}
