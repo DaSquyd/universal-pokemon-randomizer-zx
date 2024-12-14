@@ -709,11 +709,11 @@ BattleLevel	Data_Unk21F4280	Data	0		0x0220AF40	0x0220AF20	0x021F4280	0x021F4240
 BattleServer	WonderRoomEventHandler	Code		thumb	0x068981A0	0x068981A0	0x068981A0	0x068981A0
 BattleServer	SideStatus_Init	Code		thumb	0x06898BFC	0x06898BFC	0x06898BFC	0x06898BFC
 BattleServer	SideStatus_AddItem	Code		thumb	0x06898C10	0x06898C10	0x06898C10	0x06898C10
-BattleServer	SideStatus_GetLayers	Code		thumb	0x06898CE0	0x06898CE0	0x06898CE0	0x06898CE0
+BattleServer	SideStatus_GetLevel	Code		thumb	0x06898CE0	0x06898CE0	0x06898CE0	0x06898CE0
 BattleServer	SideStatus_IsActive	Code		thumb			0x06898CF4	0x06898CF4
 BattleServer	SideStatus_RemoveItem	Code		thumb			0x06898D10	0x06898D10
 BattleServer	SideStatus_TurnCheck	Code		thumb			0x06898D54	0x06898D54
-BattleServer	SideStatus_GetLayersFromEventItem	Code		thumb			0x06898DE0	0x06898DE0
+BattleServer	SideStatus_GetLevelFromEventItem	Code		thumb			0x06898DE0	0x06898DE0
 BattleServer	CommonScreenEffect	Code		thumb			0x06898E54	0x06898E54
 BattleServer	Condition_CreateDamageMessage	Code		thumb	0x0689B8CC	0x0689B8CC	0x0689BA5C	0x0689BA5C
 BattleServer	Condition_GetDamageText	Code		thumb	0x0689B92C	0x0689B92C	0x0689BABC	0x0689BABC
