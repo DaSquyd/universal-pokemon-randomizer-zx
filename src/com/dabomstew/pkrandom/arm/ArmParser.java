@@ -41,8 +41,8 @@ public class ArmParser {
             return obj instanceof AddressPair other && overlay == other.overlay && address == other.address;
         }
     }
-    Map<Integer, AddressPair> redirectorAddressMap = new TreeMap<>();
-    List<AddressPair> redirectorAddresses = new ArrayList<>();
+    Map<Integer, AddressPair> instructionAddressToRedirector = new TreeMap<>();
+    List<AddressPair> redirectors = new ArrayList<>();
 
     ParagonLiteOverlay overlay;
     int initialRamAddress = 0;
@@ -219,8 +219,8 @@ public class ArmParser {
         size = 0;
         labelAddressMap.clear();
         dataRamAddressMap.clear();
-        redirectorAddressMap.clear();
-        redirectorAddresses.clear();
+        instructionAddressToRedirector.clear();
+        redirectors.clear();
 
         this.overlay = overlay;
         this.initialRamAddress = initialRamAddress;
@@ -437,7 +437,7 @@ public class ArmParser {
         }
         
         currentRamAddress = alignNextWord(currentRamAddress);
-        int redirectorAddressesSize = redirectorAddresses.size() * 16;
+        int redirectorAddressesSize = redirectors.size() * 16;
         size = currentRamAddress - initialRamAddress + redirectorAddressesSize;
 
         byte[] returnValue = new byte[size];
@@ -445,7 +445,7 @@ public class ArmParser {
             returnValue[i] = bytes.get(i);
 
         // Add No Op
-        if (!isWordAligned(bytes.size()) && (addedData || !redirectorAddresses.isEmpty()))
+        if (!isWordAligned(bytes.size()) && (addedData || !redirectors.isEmpty()))
             writeHalfword(returnValue, bytes.size(), 0x46C0);
 
         // Register any of the values in the ldr data as addresses if applicable
@@ -465,21 +465,46 @@ public class ArmParser {
             }
         }
 
+        Map<AddressPair, Integer> addressPairToRedirectorAddress = new HashMap<>(redirectors.size());
+        
         // Add redirector functions
-        for (AddressPair addressPair : redirectorAddresses) {
+        for (AddressPair redirector : redirectors) {
+            addressPairToRedirectorAddress.put(redirector, currentRamAddress);
             int offset = currentRamAddress - initialRamAddress;
+            
             writeHalfword(returnValue, offset, 0x4778); // bx pc
             writeHalfword(returnValue, offset + 2, 0x46C0); // nop            
             writeWord(returnValue, offset + 4, 0xE59FC000); // ldr r12, =(address+1 or address+0)
             writeWord(returnValue, offset + 8, 0xE12FFF1C); // bx r12
             
-            if (addressPair.overlay == null)
-                addressPair.overlay = globalAddressMap.findOverlay(addressPair.address, overlay);
+            if (redirector.overlay == null)
+                redirector.overlay = globalAddressMap.findOverlay(redirector.address, overlay);
 
-            ParagonLiteAddressMap.CodeAddress codeAddress = (ParagonLiteAddressMap.CodeAddress)globalAddressMap.getAddressData(addressPair.overlay, addressPair.address);
-            writeWord(returnValue, offset + 12, addressPair.address + (codeAddress.getEncoding() == 4 ? 0 : 1));
+            ParagonLiteAddressMap.CodeAddress codeAddress = (ParagonLiteAddressMap.CodeAddress)globalAddressMap.getAddressData(redirector.overlay, redirector.address);
+            writeWord(returnValue, offset + 12, redirector.address + (codeAddress.getEncoding() == 4 ? 0 : 1));
             
             currentRamAddress += 16;
+        }
+
+        // Update existing cross-module branch instructions to jump to the newly added functions
+        for (Map.Entry<Integer, AddressPair> entry : instructionAddressToRedirector.entrySet()) {
+            int instructionAddress = entry.getKey();
+            int instructionOffset = instructionAddress - initialRamAddress;
+            AddressPair redirector = entry.getValue();
+
+            int redirectorAddress = addressPairToRedirectorAddress.get(redirector);
+
+            int tempCurrentRamAddress = currentRamAddress;
+            currentRamAddress = instructionAddress;
+            byte[] instructionBytes;
+            try {
+                instructionBytes = format19(new String[]{Integer.toString(redirectorAddress)}, false);
+            } catch (DataFormatException e) {
+                throw new RuntimeException(e);
+            }
+            currentRamAddress = tempCurrentRamAddress;
+            
+            System.arraycopy(instructionBytes, 0, returnValue, instructionOffset, instructionBytes.length);
         }
 
         currentContext = null;
@@ -774,8 +799,13 @@ public class ArmParser {
 
         line = line.toLowerCase();
 
-        if (line.startsWith("bl ") || line.startsWith("blx "))
+        if (line.startsWith("bl "))
             return 4;
+        
+        if (line.startsWith("blx ")) {
+            String args = line.split(" ", 2)[1].trim();
+            return parseRegister(args) == -1 ? 4 : 2;
+        }
 
         if (line.startsWith("dcb "))
             return 1;
@@ -1680,10 +1710,10 @@ public class ArmParser {
         if ((funcOffset < min || funcOffset > max) && overlay != null) {
             AddressPair addressPair = new AddressPair(globalAddressMap.getOverlay(namespace), funcRamAddress);
             
-            if (!redirectorAddresses.contains(addressPair))
-                redirectorAddresses.add(addressPair);
+            if (!redirectors.contains(addressPair))
+                redirectors.add(addressPair);
             
-            redirectorAddressMap.put(currentRamAddress, addressPair);
+            instructionAddressToRedirector.put(currentRamAddress, addressPair);
 
             exchangeInstructionSet = false;
             funcOffset = 0;
