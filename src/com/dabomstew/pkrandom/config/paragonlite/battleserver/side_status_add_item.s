@@ -1,13 +1,12 @@
 #define S_Arg_SideId 0x00
 #define S_Arg_HandlerTable 0x04
 #define S_Arg_NumHandlers 0x08
-
 #define S_SideId 0x0C
 #define S_NumHandlers 0x10
 
-#define Arg_R0_SideId 0x14
-#define Arg_R1_StatusId 0x18
-#define Arg_R2_Condition 0x1C
+#define Arg_R0_SideId 0x28
+#define Arg_R1_StatusId 0x2C
+#define Arg_R2_Condition 0x30
 
     push    {r0-r3}
     push    {r4-r7, lr}
@@ -95,6 +94,7 @@ Loop_End:
     add     r6, #1
     cmp     r6, #SIDE_STATUS_COUNT
     bcc     Loop_Start
+    
     mov     r0, #0
     add     sp, #0x14
     pop     {r4-r7}
