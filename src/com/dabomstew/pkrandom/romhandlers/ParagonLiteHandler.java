@@ -61,7 +61,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.ParagonLite;
+    public static Mode mode = Mode.Redux;
 
     Gen5RomHandler romHandler;
 
@@ -3443,8 +3443,7 @@ public class ParagonLiteHandler {
                     new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "truant_on_fail.s"),
                     new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd),
                     new AbilityEventHandler(Gen5BattleEventType.onTurnCheckBegin, "truant_redux.s"),
-                    new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteNoEffect, "truant_on_no_effect.s"),
-            new AbilityEventHandler(Gen5BattleEventType.onMoveExecuteFail, "truant_on_flinch.s"));
+                    new AbilityEventHandler(Gen5BattleEventType.OnMoveExecuteNoEffect, "truant_on_no_effect.s"));
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
     }

@@ -325,7 +325,7 @@ public enum MoveEffect {
     GLACIATE(330),
     FREEZE_SHOCK(331),
     ICE_BURN(332),
-    HURRICANE(337, 337, 333), // TODO: Confirm this for Gen IV
+    HURRICANE(337, 333, 333), // TODO: Confirm this for Gen IV
     DMG_USER_SPE_DEF_SPD_MINUS_1(334), // V-create
     FUSION_FLARE(335),
     FUSION_BOLT(336),
