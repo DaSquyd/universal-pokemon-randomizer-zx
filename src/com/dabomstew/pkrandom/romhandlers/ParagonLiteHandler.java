@@ -1008,30 +1008,30 @@ public class ParagonLiteHandler {
         System.out.println("Set screen power");
     }
 
-    public void setNewSideStatus() {        
+    public void setNewSideStatus() {
         int newCount = 2; // Sticky Web, Aurora Veil
         int oldTotal = 14;
         int newTotal = oldTotal + newCount;
         armParser.addGlobalValue("SIDE_STATUS_COUNT", newTotal);
 
-        int oldSideStatusEffectTable = globalAddressMap.getRomAddress(battleServerOvl, "Data_SideStatusEffectTable");
+        int sideStatusEffectTable = globalAddressMap.getRomAddress(battleServerOvl, "Data_SideStatusEffectTable");
 
-        byte[] newData = new byte[12 * newTotal];
+        byte[] newData = new byte[8 * newTotal];
 
         for (int i = 0; i < 14; ++i) {
-            int sideStatusId = battleServerOvl.readWord(oldSideStatusEffectTable + i * 12);
-            int sideStatusEffectRef = battleServerOvl.readWord(oldSideStatusEffectTable + i * 12 + 4);
-            int sideStatusMaxLevel = battleServerOvl.readWord(oldSideStatusEffectTable + i * 12 + 8);
+            int sideStatusId = battleServerOvl.readWord(sideStatusEffectTable + i * 12);
+            int sideStatusEffectRef = battleServerOvl.readWord(sideStatusEffectTable + i * 12 + 4);
+            int sideStatusMaxLevel = battleServerOvl.readWord(sideStatusEffectTable + i * 12 + 8);
 
-            writeWord(newData, i * 12, sideStatusId);
-            writeWord(newData, i * 12 + 4, sideStatusEffectRef);
-            writeWord(newData, i * 12 + 8, sideStatusMaxLevel);
+            writeHalf(newData, i * 8, sideStatusId);
+            writeHalf(newData, i * 8 + 2, sideStatusMaxLevel);
+            writeWord(newData, i * 8 + 4, sideStatusEffectRef);
         }
 
-        addSideStatus(newData, oldTotal, "StickyWeb", "sticky_web", Gen5BattleEventType.onSwitchIn);
-        addSideStatus(newData, oldTotal + 1, "AuroraVeil", "aurora_veil", Gen5BattleEventType.onMoveDamageProcessing2);
+        addSideStatus(newData, oldTotal, 1, "StickyWeb", "sticky_web", Gen5BattleEventType.onSwitchIn);
+        addSideStatus(newData, oldTotal + 1, 1, "AuroraVeil", "aurora_veil", Gen5BattleEventType.onMoveDamageProcessing2);
 
-        battleOvl.writeData(newData, "Data_SideStatusEffectTable");
+        battleServerOvl.writeBytes(sideStatusEffectTable, newData);
 
         List<String> initLines = readLines("battleserver/side_status_init.s");
         battleServerOvl.writeCodeForceInline(initLines, "SideStatus_Init", true);
@@ -1054,6 +1054,9 @@ public class ParagonLiteHandler {
         List<String> getLevelsFromEventItemLines = readLines("battleserver/side_status_get_level_from_event_item.s");
         battleServerOvl.writeCodeForceInline(getLevelsFromEventItemLines, "SideStatus_GetLevelFromEventItem", true);
         
+        List<String> sideStatusEndMessageLines = readLines("battle/servercontrol/side_status_end_message_core.s");
+        battleOvl.writeCodeForceInline(sideStatusEndMessageLines, "ServerControl_SideStatusEndMessageCore", true);
+        
         // Replace hardcoded null values (only used by the pledge moves)
         int pledgeFuncRefAddress = getEventHandlerFuncReferenceAddress(Moves.waterPledge, getMoveListAddress(), getMoveListCount(), Gen5BattleEventType.onDamageProcessingEnd_Hit2);
         int pledgeFuncAddress = battleOvl.readWord(pledgeFuncRefAddress) - 1;
@@ -1062,7 +1065,7 @@ public class ParagonLiteHandler {
         battleOvl.writeByte(pledgeFuncAddress + 0x80, nullId);
     }
 
-    private void addSideStatus(byte[] data, int statusId, String name, String handlerName, int eventType) {
+    private void addSideStatus(byte[] data, int statusId, int maxLevel, String name, String handlerName, int eventType) {
         List<String> handlerLines = readLines(String.format("battleserver/handler_side_%s.s", handlerName));
         int handlerLinesRomAddress = battleOvl.writeCode(handlerLines, String.format("HandlerSide_%s", name));
         int handlerLinesRamAddress = battleOvl.romToRamAddress(handlerLinesRomAddress);
@@ -1076,9 +1079,9 @@ public class ParagonLiteHandler {
         int eventAddRomAddress = battleOvl.writeCode(eventAddLines, String.format("SideStatusEventAdd_%s", name));
         int eventAddRamAddress = battleOvl.romToRamAddress(eventAddRomAddress);
 
-        writeWord(data, statusId * 12, statusId);
-        writeWord(data, statusId * 12 + 4, eventAddRamAddress + 1);
-        writeWord(data, statusId * 12 + 8, 1); // max level
+        writeHalf(data, statusId * 8, statusId);
+        writeHalf(data, statusId * 8 + 2, maxLevel);
+        writeWord(data, statusId * 8 + 4, eventAddRamAddress + 1);
     }
 
     public void setBattlePokeCreate() {
