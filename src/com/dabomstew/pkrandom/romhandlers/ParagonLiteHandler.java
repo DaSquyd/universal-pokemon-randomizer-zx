@@ -61,7 +61,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.Redux;
+    public static Mode mode = Mode.ParagonLite;
 
     Gen5RomHandler romHandler;
 
@@ -1607,7 +1607,7 @@ public class ParagonLiteHandler {
     public void setAbilities() {
         registerAbilityEffects();
 
-        int abilityListAdditions = 48;
+        int abilityListAdditions = 49;
 
         // Move AbilityList
         relocateAbilityListRamAddress(abilityListAdditions);
@@ -1642,7 +1642,7 @@ public class ParagonLiteHandler {
             }
         }
 
-        int totalChanges = 107;
+        int totalChanges = 108;
         int currentChanges = -1;
         long startTime = System.currentTimeMillis();
         System.out.println("setting abilities...");
@@ -1753,6 +1753,10 @@ public class ParagonLiteHandler {
         // #263 Dragon's Maw
         Utils.printProgress(totalChanges, ++currentChanges, "Dragon's Maw");
         addDragonsMaw();
+        
+        // #270 Thermal Exchange
+        Utils.printProgress(totalChanges, ++currentChanges, "Thermal Exchange");
+        addThermalExchange();
 
         // #274 Wind Rider
         Utils.printProgress(totalChanges, ++currentChanges, "Wind Rider");
@@ -2558,6 +2562,37 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "dragons_maw.s"));
+    }
+    
+    private void addThermalExchange() {
+        int number = Abilities.thermalExchange;
+        
+        // Name
+        abilityNames.set(number, "ThermalExchange");
+
+        // Description
+        String description = "Raises Attack when hit\\xFFFEby a Fire-type move.";
+        abilityDescriptions.set(number, description);
+        
+        // Data
+        if (mode == Mode.ParagonLite || mode == Mode.Redux) {
+            setAbilityEventHandlers(number,
+                    new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "thermal_exchange_boost.s"),
+                    new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "thermal_exchange_resist.s"),
+                    new AbilityEventHandler(Gen5BattleEventType.onAddConditionCheckFail, Abilities.waterVeil),
+                    new AbilityEventHandler(Gen5BattleEventType.onAddConditionFail, Abilities.waterVeil),
+                    new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, Abilities.waterVeil),
+                    new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, Abilities.waterVeil),
+                    new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd, Abilities.waterVeil));
+        } else {
+            setAbilityEventHandlers(number,
+                    new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "thermal_exchange_boost.s"),
+                    new AbilityEventHandler(Gen5BattleEventType.onAddConditionCheckFail, Abilities.waterVeil),
+                    new AbilityEventHandler(Gen5BattleEventType.onAddConditionFail, Abilities.waterVeil),
+                    new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, Abilities.waterVeil),
+                    new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, Abilities.waterVeil),
+                    new AbilityEventHandler(Gen5BattleEventType.onActionProcessingEnd, Abilities.waterVeil));
+        }
     }
 
     private void addWindRider() {
@@ -6033,28 +6068,28 @@ public class ParagonLiteHandler {
             // Poke 1
             {
                 TrainerPokemon poke1 = tr.pokemon.get(0);
-                poke1.pokemon = romHandler.getPokemon().get(Species.pelipper);
+                poke1.pokemon = romHandler.getPokemon().get(Species.weavile);
                 pokes[poke1.pokemon.number].ability1 = Abilities.pickpocket;
                 poke1.abilitySlot = 1;
                 poke1.level = 20;
-                poke1.moves = new int[]{Moves.tackle, 0, 0, 0};
+                poke1.moves = new int[]{Moves.icePunch, Moves.fakeOut, 0, 0};
                 poke1.heldItem = Items.sitrusBerry;
                 poke1.IVs = 0;
             }
 
-            // Poke 2
-            {
-                if (tr.pokemon.size() < 2)
-                    tr.pokemon.add(tr.pokemon.get(0).copy());
-                TrainerPokemon poke2 = tr.pokemon.get(1);
-                poke2.pokemon = romHandler.getPokemon().get(Species.cresselia);
-                pokes[poke2.pokemon.number].ability1 = Abilities.illuminate;
-                poke2.abilitySlot = 1;
-                poke2.level = 16;
-                poke2.moves = new int[]{Moves.gust, Moves.flowerTrick, Moves.silverWind, Moves.mistBall};
-                poke2.IVs = 0;
-                poke2.heldItem = Items.sitrusBerry;
-            }
+//            // Poke 2
+//            {
+//                if (tr.pokemon.size() < 2)
+//                    tr.pokemon.add(tr.pokemon.get(0).copy());
+//                TrainerPokemon poke2 = tr.pokemon.get(1);
+//                poke2.pokemon = romHandler.getPokemon().get(Species.cresselia);
+//                pokes[poke2.pokemon.number].ability1 = Abilities.illuminate;
+//                poke2.abilitySlot = 1;
+//                poke2.level = 16;
+//                poke2.moves = new int[]{Moves.gust, Moves.flowerTrick, Moves.silverWind, Moves.mistBall};
+//                poke2.IVs = 0;
+//                poke2.heldItem = Items.sitrusBerry;
+//            }
 
 //            if (tr.pokemon.size() < 3)
 //                tr.pokemon.add(poke1.copy());
@@ -6137,8 +6172,8 @@ public class ParagonLiteHandler {
         // Always do 100% damage, no variance
 
         // TODO: Reimplement this somehow
-//        int battleRandAddress = battleOvl.find("64 21 08 1A 00 04 00 0C 78 43 64 21");
-//        battleOvl.writeHalfword(battleRandAddress + 2, 0x2064);
+        int battleRandAddress = battleOvl.find("64 21 08 1A 00 04 00 0C 78 43 64 21");
+        battleOvl.writeHalfword(battleRandAddress + 2, 0x2064);
 
         // Remove crit chance at no change to ratio
         int critChanceAddress = battleOvl.find(Gen5Constants.critChanceLocator);

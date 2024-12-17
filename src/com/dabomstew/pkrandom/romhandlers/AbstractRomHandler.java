@@ -2601,8 +2601,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.seedSower);
 
         // #270 Thermal Exchange
-        if (weakToFire || !higherOrEqualAttack)
-            irrelevantAbilities.add(Abilities.thermalExchange);
+        if (isParagonLite) {
+            if (resistsFire && !higherOrEqualAttack)
+                irrelevantAbilities.add(Abilities.thermalExchange);
+        }
+        else {
+            if (weakToFire || !higherOrEqualAttack)
+                irrelevantAbilities.add(Abilities.thermalExchange);
+        }
 
         // #271 Anger Shell
         if (lowBulk || (!highPhysBulk && !highSpecBulk) || ((highAtk || highSpA) && highSpeed))

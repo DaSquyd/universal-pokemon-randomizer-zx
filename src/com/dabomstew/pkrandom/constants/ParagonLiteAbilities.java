@@ -131,7 +131,7 @@ public class ParagonLiteAbilities {
 //            Abilities.quickDraw, // 259
             Abilities.transistor, // 262
             Abilities.dragonsMaw, // 263
-//            Abilities.thermalExchange, // 270
+            Abilities.thermalExchange, // 270
             Abilities.windRider, // 274
             Abilities.rockyPayload, // 276
 //            Abilities.windPower, // 277

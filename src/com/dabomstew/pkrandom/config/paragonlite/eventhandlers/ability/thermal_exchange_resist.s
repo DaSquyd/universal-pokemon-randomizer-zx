@@ -8,12 +8,9 @@
     
     mov     r0, #VAR_MoveType
     bl      Battle::EventVar_GetValue
-    cmp     r0, #TYPE_Ground
-    beq     ApplyMod
-    cmp     r0, #TYPE_Water
+    cmp     r0, #TYPE_Fire
     bne     Return
     
-ApplyMod:
     mov     r0, #VAR_Ratio
     mov     r1, #((0x1000 * 0.5) >> 8)
     lsl     r1, #8
