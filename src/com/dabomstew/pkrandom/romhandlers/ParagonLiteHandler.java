@@ -1607,7 +1607,7 @@ public class ParagonLiteHandler {
     public void setAbilities() {
         registerAbilityEffects();
 
-        int abilityListAdditions = 49;
+        int abilityListAdditions = 50;
 
         // Move AbilityList
         relocateAbilityListRamAddress(abilityListAdditions);
@@ -1642,7 +1642,7 @@ public class ParagonLiteHandler {
             }
         }
 
-        int totalChanges = 108;
+        int totalChanges = 109;
         int currentChanges = -1;
         long startTime = System.currentTimeMillis();
         System.out.println("setting abilities...");
@@ -1769,6 +1769,10 @@ public class ParagonLiteHandler {
         // #277 Wind Power
         Utils.printProgress(totalChanges, ++currentChanges, "Wind Power");
         addWindPower();
+        
+        // #283 Good as Gold
+        Utils.printProgress(totalChanges, ++currentChanges, "Good as Gold");
+        addGoodAsGold();
 
         // #292 Sharpness
         Utils.printProgress(totalChanges, ++currentChanges, "Sharpness");
@@ -2644,26 +2648,39 @@ public class ParagonLiteHandler {
         // TODO
     }
 
-    private void addSharpness() {
-        int index = Abilities.sharpness;
+    private void addGoodAsGold() {
+        int number = Abilities.sharpness;
 
         // Name
-        abilityNames.set(index, "Sharpness");
+        abilityNames.set(number, "Good as Gold");
+
+        // Description
+        abilityDescriptions.set(number, "A body of solid gold makes\\xFFFEit immune to Status moves.");
+        
+        // Data
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "good_as_gold_no_effect.s"));
+    }
+
+    private void addSharpness() {
+        int number = Abilities.sharpness;
+
+        // Name
+        abilityNames.set(number, "Sharpness");
 
         // Description
         String description = abilityDescriptions.get(Abilities.ironFist).replace("punching", "slicing");
-        abilityDescriptions.set(index, description);
+        abilityDescriptions.set(number, description);
 
         // Explanation
         if (abilityExplanations != null) {
             String explanation = abilityExplanations.get(Abilities.ironFist)
                     .replace("Iron Fist", "Sharpness")
                     .replace("moves that punch", "moves that slice");
-            abilityExplanations.set(index, explanation);
+            abilityExplanations.set(number, explanation);
         }
 
         // Data
-        setAbilityEventHandlers(index, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "sharpness.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePower, "sharpness.s"));
     }
 
     private void addSupremeOverlord() {
