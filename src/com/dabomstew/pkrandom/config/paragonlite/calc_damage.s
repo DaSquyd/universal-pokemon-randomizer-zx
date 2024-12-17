@@ -15,7 +15,7 @@
 #DEFINE ARG_EFFECTIVENESS (STACK_SIZE + 0x00)
 #DEFINE ARG_TARGET_DMG_RATIO (STACK_SIZE + 0x04)
 #DEFINE ARG_IS_CRITICAL_HIT (STACK_SIZE + 0x08)
-#DEFINE ARG_IS_DEBUG_MODE (STACK_SIZE + 0x0C)
+#DEFINE ARG_SKIP_RANDOMNESS (STACK_SIZE + 0x0C)
 #DEFINE ARG_DEST_DAMAGE_PTR (STACK_SIZE + 0x10)
 
     push    {r4-r7, lr}
@@ -170,8 +170,8 @@ Debug:
     beq     STAB
 #endif
     
-    ldr     r0, [sp, #ARG_IS_DEBUG_MODE]
-    cmp     r0, #0
+    ldr     r0, [sp, #ARG_SKIP_RANDOMNESS]
+    cmp     r0, #FALSE
     beq     Random
     
     mov     r0, #85

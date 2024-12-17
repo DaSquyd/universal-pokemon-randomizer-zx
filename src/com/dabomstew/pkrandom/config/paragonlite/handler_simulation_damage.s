@@ -5,15 +5,15 @@
 #DEFINE CALC_EFFECTIVENESS 0x00
 #DEFINE CALC_TARGET_DMG_RATIO 0x04
 #DEFINE CALC_CRITICAL_FLAG 0x08
-#DEFINE CALC_DEBUG_MODE 0x0C
+#DEFINE CALC_SKIP_RANDOMNESS 0x0C
 #DEFINE CALC_OUT_DAMAGE 0x10
 #DEFINE DEFENDING_MON_PARAM 0x14
 #DEFINE ATTACKING_MON_PARAM 0x18
 #DEFINE OUT_DAMAGE 0x1C
 #DEFINE MOVE_PARAM 0x20
 
-#DEFINE ARG_0 (STACK_SIZE + 0x00)
-#DEFINE DEBUG_MODE (STACK_SIZE + 0x04)
+#DEFINE ARG_USE_EFFECTIVENESS (STACK_SIZE + 0x00)
+#DEFINE ARG_USE_RANDOMNESS (STACK_SIZE + 0x04)
 
 #DEFINE EFFECTIVENESS_NEUTRAL 3
 
@@ -67,7 +67,7 @@ BindMoveEvent:
     bl      Battle::MoveEvent_AddItem
     
 Effectiveness:
-    ldr     r0, [sp, #ARG_0]
+    ldr     r0, [sp, #ARG_USE_EFFECTIVENESS]
     cmp     r0, #0
     beq     NeutralEffectiveness
     
@@ -91,14 +91,14 @@ GetMoveParam:
     bl      Battle::ServerEvent_GetMoveParam
     
 CheckDebugMode:
-    ldr     r0, [sp, #DEBUG_MODE]
-    mov     r1, #1
-    cmp     r0, #0
+    ldr     r0, [sp, #ARG_USE_RANDOMNESS]
+    mov     r1, #TRUE
+    cmp     r0, #FALSE
     beq     StoreDebug
-    mov     r1, #0
+    mov     r1, #FALSE
     
 StoreDebug:
-    str     r1, [sp, #CALC_DEBUG_MODE]
+    str     r1, [sp, #CALC_SKIP_RANDOMNESS]
     
 CriticalHit:
     mov     r0, r5 ; r0 := serverFlow
