@@ -4,8 +4,8 @@ import com.dabomstew.pkrandom.arm.exceptions.ArmParseException;
 
 public class ArmArg_HighRegister extends ArmArg_Register {
 
-    ArmArg_HighRegister(int line, String arg) throws ArmParseException {
-        super(line, arg);
+    ArmArg_HighRegister(int line, String op, String[] args, int arg) throws ArmParseException {
+        super(line, op, args, arg);
     }
 
     @Override

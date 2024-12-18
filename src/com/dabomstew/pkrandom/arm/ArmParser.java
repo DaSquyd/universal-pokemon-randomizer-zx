@@ -1,7 +1,7 @@
 package com.dabomstew.pkrandom.arm;
 
 import com.dabomstew.pkrandom.FileFunctions;
-import com.dabomstew.pkrandom.arm.exceptions.ArmParseException;
+import com.dabomstew.pkrandom.arm.exceptions.*;
 import com.dabomstew.pkrandom.romhandlers.ParagonLiteAddressMap;
 import com.dabomstew.pkrandom.romhandlers.ParagonLiteOverlay;
 import org.openjdk.nashorn.api.scripting.JSObject;
@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.zip.DataFormatException;
 
 public class ArmParser {
     ParagonLiteAddressMap globalAddressMap;
@@ -41,6 +40,7 @@ public class ArmParser {
             return obj instanceof AddressPair other && overlay == other.overlay && address == other.address;
         }
     }
+
     Map<Integer, AddressPair> instructionAddressToRedirector = new TreeMap<>();
     List<AddressPair> redirectors = new ArrayList<>();
 
@@ -172,7 +172,7 @@ public class ArmParser {
     public void addGlobalValue(String name, boolean value) {
         engineManager.put(name, value ? 1 : 0);
     }
-    
+
     public Object getGlobalValue(String name) {
         return engineManager.get(name);
     }
@@ -210,9 +210,23 @@ public class ArmParser {
         Invalid
     }
 
+    private static class ParseLine {
+        int number;
+        String str;
+
+        ParseLine(int number, String str) {
+            this.number = number;
+            this.str = str;
+        }
+    }
+
     public byte[] parse(List<String> lines, ParagonLiteOverlay overlay, int initialRamAddress) throws ArmParseException {
         if (!isWordAligned(initialRamAddress))
             throw new RuntimeException("Initial RAM offset must be word-aligned.");
+
+        List<ParseLine> parseLines = new ArrayList<>(lines.size());
+        for (int i = 0; i < lines.size(); ++i)
+            parseLines.add(new ParseLine(i, lines.get(i)));
 
         List<Byte> bytes = new ArrayList<>();
 
@@ -231,11 +245,12 @@ public class ArmParser {
 
         Stack<IfState> ifStateStack = new Stack<>();
 
-        for (int i = 0; i < lines.size(); ++i) {
-            String str = stripComment(lines.get(i)).trim();
+        for (int i = 0; i < parseLines.size(); ++i) {
+            int lineNumber = parseLines.get(i).number;
+            String str = stripComment(parseLines.get(i).str).trim();
             if (str.toUpperCase().startsWith("#ELSE")) {
                 if (ifStateStack.isEmpty())
-                    throw new ArmParseException(i, "ELSE used when no IF was stated");
+                    throw new ArmParseException(lineNumber, str, "ELSE used when no IF was stated");
 
                 switch (ifStateStack.pop()) {
                     case Processing, Complete -> ifStateStack.push(IfState.Complete);
@@ -247,16 +262,11 @@ public class ArmParser {
                 continue;
             } else if (str.toUpperCase().startsWith("#ELIF ")) {
                 if (ifStateStack.isEmpty())
-                    throw new ArmParseException(i, "ELIF used when no IF was stated");
+                    throw new ArmParseException(lineNumber, str, "ELIF used when no IF was stated");
 
                 String[] elifSplit = str.split(" ", 2);
                 String expression = elifSplit[1];
-                int expressionValue;
-                try {
-                    expressionValue = parseValue(expression);
-                } catch (DataFormatException e) {
-                    throw new RuntimeException(e);
-                }
+                int expressionValue = parseValue(lineNumber, str, expression);
 
                 switch (ifStateStack.pop()) {
                     case Processing, Complete -> ifStateStack.push(IfState.Complete);
@@ -268,14 +278,14 @@ public class ArmParser {
                 continue;
             } else if (str.toUpperCase().startsWith("#ENDIF")) {
                 if (ifStateStack.isEmpty())
-                    throw new ArmParseException(i, "ENDIF used when no IF was stated");
+                    throw new ArmParseException(lineNumber, str, "ENDIF used when no IF was stated");
 
                 ifStateStack.pop();
                 continue;
             }
 
             if (!ifStateStack.isEmpty() && ifStateStack.peek() != IfState.Processing) {
-                lines.set(i, "");
+                parseLines.get(i).str = "";
                 continue;
             }
 
@@ -287,12 +297,7 @@ public class ArmParser {
 
                 String[] ifSplit = str.split(" ", 2);
                 String expression = ifSplit[1];
-                int expressionValue;
-                try {
-                    expressionValue = parseValue(expression);
-                } catch (DataFormatException e) {
-                    throw new RuntimeException(e);
-                }
+                int expressionValue = parseValue(lineNumber, str, expression);
 
                 ifStateStack.push(expressionValue == 0 ? IfState.Idle : IfState.Processing);
                 continue;
@@ -302,48 +307,44 @@ public class ArmParser {
                 String[] defSplit = str.split(" ", 3);
                 String varName = defSplit[1];
                 String varValueStr = defSplit[2];
-                try {
-                    int varValue = parseValue(varValueStr);
-                    currentContext.setAttribute(varName, varValue, ScriptContext.ENGINE_SCOPE);
-                } catch (DataFormatException e) {
-                    throw new RuntimeException(e);
-                }
+                int varValue = parseValue(lineNumber, str, varValueStr);
+                currentContext.setAttribute(varName, varValue, ScriptContext.ENGINE_SCOPE);
             } else if (str.toUpperCase().startsWith("#SWITCH ")) {
                 String[] switchSplit = str.split(" ", 3);
                 String switchRegister1 = switchSplit[1];
                 String switchRegister2 = switchSplit.length == 3 ? switchSplit[2] : switchRegister1;
-                List<String> oldLines = lines;
-                lines = new ArrayList<>(lines.size() + 5);
-                for (int j = 0; j < i; ++j) {
-                    lines.add(oldLines.get(j));
-                }
-                lines.add(String.format("add %s, %s, %s", switchRegister1, switchRegister2, switchRegister2));
-                lines.add(String.format("add %s, pc", switchRegister1));
-                lines.add(String.format("ldrh %s, [%s, #2]", switchRegister1, switchRegister1));
-                lines.add(String.format("add pc, %s", switchRegister1));
-                for (int j = i + 1; j < oldLines.size(); ++j) {
-                    lines.add(oldLines.get(j));
-                }
+                List<ParseLine> oldParseLines = parseLines;
+                parseLines = new ArrayList<>(parseLines.size() + 5);
+                for (int j = 0; j < i; ++j)
+                    parseLines.add(oldParseLines.get(j));
+
+                parseLines.add(new ParseLine(lineNumber, String.format("add %s, %s, %s", switchRegister1, switchRegister2, switchRegister2)));
+                parseLines.add(new ParseLine(lineNumber, String.format("add %s, pc", switchRegister1)));
+                parseLines.add(new ParseLine(lineNumber, String.format("ldrh %s, [%s, #2]", switchRegister1, switchRegister1)));
+                parseLines.add(new ParseLine(lineNumber, String.format("add pc, %s", switchRegister1)));
+                for (int j = i + 1; j < oldParseLines.size(); ++j)
+                    parseLines.add(oldParseLines.get(j));
+
                 --i;
                 continue;
             } else if (str.toUpperCase().startsWith("#SWITCH_FULL ")) {
                 String[] switchSplit = str.split(" ", 3);
                 String switchRegister1 = switchSplit[1];
                 String switchRegister2 = switchSplit.length == 3 ? switchSplit[2] : switchRegister1;
-                List<String> oldLines = lines;
-                lines = new ArrayList<>(lines.size() + 5);
-                for (int j = 0; j < i; ++j) {
-                    lines.add(oldLines.get(j));
-                }
-                lines.add(String.format("add %s, %s, %s", switchRegister1, switchRegister2, switchRegister2));
-                lines.add(String.format("add %s, pc", switchRegister1));
-                lines.add(String.format("ldrh %s, [%s, #6]", switchRegister1, switchRegister1));
-                lines.add(String.format("lsl %s, #16", switchRegister1));
-                lines.add(String.format("asr %s, #16", switchRegister1));
-                lines.add(String.format("add pc, %s", switchRegister1));
-                for (int j = i + 1; j < oldLines.size(); ++j) {
-                    lines.add(oldLines.get(j));
-                }
+                List<ParseLine> oldParseLines = parseLines;
+                parseLines = new ArrayList<>(parseLines.size() + 5);
+                for (int j = 0; j < i; ++j)
+                    parseLines.add(oldParseLines.get(j));
+
+                parseLines.add(new ParseLine(lineNumber, String.format("add %s, %s, %s", switchRegister1, switchRegister2, switchRegister2)));
+                parseLines.add(new ParseLine(lineNumber, String.format("add %s, pc", switchRegister1)));
+                parseLines.add(new ParseLine(lineNumber, String.format("ldrh %s, [%s, #6]", switchRegister1, switchRegister1)));
+                parseLines.add(new ParseLine(lineNumber, String.format("lsl %s, #16", switchRegister1)));
+                parseLines.add(new ParseLine(lineNumber, String.format("asr %s, #16", switchRegister1)));
+                parseLines.add(new ParseLine(lineNumber, String.format("add pc, %s", switchRegister1)));
+                for (int j = i + 1; j < oldParseLines.size(); ++j)
+                    parseLines.add(oldParseLines.get(j));
+                    
                 --i;
                 continue;
             } else if (str.endsWith(":")) {
@@ -356,31 +357,27 @@ public class ArmParser {
         }
 
         if (!ifStateStack.isEmpty())
-            throw new ArmParseException(lines.size(), "No #ENDIF found");
+            throw new ArmParseException(parseLines.size(), "", "No #ENDIF found");
 
         int lastNonSwitchAddress = initialRamAddress;
         currentRamAddress = initialRamAddress;
-        for (int i = 0; i < lines.size(); ++i) {
-            String line = lines.get(i);
-            if (line == null)
+        for (ParseLine parseLine : parseLines) {
+            int lineNumber = parseLine.number;
+            String str = parseLine.str;
+            if (str == null)
                 continue;
 
-            String str = stripComment(line).trim();
+            str = stripComment(str).trim();
             if (str.toUpperCase().startsWith("#CASE ")) {
                 String label = str.split(" ", 2)[1].trim();
                 if (!labelAddressMap.containsKey(label))
-                    throw new RuntimeException(String.format("Could not find label \"%s\" for case %d", label, i));
+                    throw new ExpectedLabelException(lineNumber, str, label);
                 int labelAddress = labelAddressMap.get(label);
                 int offset = labelAddress - (lastNonSwitchAddress + 4);
-                lines.set(i, "dcw " + offset);
+                parseLine.str = "dcw " + offset;
             } else if (str.startsWith("dcd ")) {
                 String dataValueStr = str.split(" ", 2)[1].trim();
-                int dataValue;
-                try {
-                    dataValue = parseValue(dataValueStr);
-                } catch (DataFormatException e) {
-                    throw new RuntimeException(e);
-                }
+                int dataValue = parseValue(lineNumber, str, dataValueStr);
 
                 if (!dataRamAddressMap.containsKey(dataValue))
                     dataRamAddressMap.put(dataValue, new TreeSet<>());
@@ -396,7 +393,9 @@ public class ArmParser {
         size = alignNextWord(currentRamAddress) - initialRamAddress;
 
         currentRamAddress = initialRamAddress;
-        for (String str : lines) {
+        for (ParseLine parseLine : parseLines) {
+            int lineNumber = parseLine.number;
+            String str = parseLine.str;
             if (str.startsWith("#"))
                 continue;
 
@@ -412,12 +411,7 @@ public class ArmParser {
             String op = str.substring(0, firstSpaceIndex).toLowerCase();
             String args = str.substring(firstSpaceIndex + 1).replace(" ", "");
 
-            byte[] instructionBytes;
-            try {
-                instructionBytes = parseInstruction(op, args);
-            } catch (DataFormatException e) {
-                throw new RuntimeException(e);
-            }
+            byte[] instructionBytes = parseInstruction(lineNumber, op, args);
 
             for (byte instructionByte : instructionBytes)
                 bytes.add(instructionByte);
@@ -435,7 +429,7 @@ public class ArmParser {
                 }
             }
         }
-        
+
         currentRamAddress = alignNextWord(currentRamAddress);
         int redirectorAddressesSize = redirectors.size() * 16;
         size = currentRamAddress - initialRamAddress + redirectorAddressesSize;
@@ -466,23 +460,23 @@ public class ArmParser {
         }
 
         Map<AddressPair, Integer> addressPairToRedirectorAddress = new HashMap<>(redirectors.size());
-        
+
         // Add redirector functions
         for (AddressPair redirector : redirectors) {
             addressPairToRedirectorAddress.put(redirector, currentRamAddress);
             int offset = currentRamAddress - initialRamAddress;
-            
+
             writeHalfword(returnValue, offset, 0x4778); // bx pc
             writeHalfword(returnValue, offset + 2, 0x46C0); // nop            
             writeWord(returnValue, offset + 4, 0xE59FC000); // ldr r12, =(address+1 or address+0)
             writeWord(returnValue, offset + 8, 0xE12FFF1C); // bx r12
-            
+
             if (redirector.overlay == null)
                 redirector.overlay = globalAddressMap.findOverlay(redirector.address, overlay);
 
-            ParagonLiteAddressMap.CodeAddress codeAddress = (ParagonLiteAddressMap.CodeAddress)globalAddressMap.getAddressData(redirector.overlay, redirector.address);
+            ParagonLiteAddressMap.CodeAddress codeAddress = (ParagonLiteAddressMap.CodeAddress) globalAddressMap.getAddressData(redirector.overlay, redirector.address);
             writeWord(returnValue, offset + 12, redirector.address + (codeAddress.getEncoding() == 4 ? 0 : 1));
-            
+
             currentRamAddress += 16;
         }
 
@@ -496,14 +490,9 @@ public class ArmParser {
 
             int tempCurrentRamAddress = currentRamAddress;
             currentRamAddress = instructionAddress;
-            byte[] instructionBytes;
-            try {
-                instructionBytes = format19(new String[]{Integer.toString(redirectorAddress)}, false);
-            } catch (DataFormatException e) {
-                throw new RuntimeException(e);
-            }
+            byte[] instructionBytes = format19(-1, "", new String[]{Integer.toString(redirectorAddress)}, false);
             currentRamAddress = tempCurrentRamAddress;
-            
+
             System.arraycopy(instructionBytes, 0, returnValue, instructionOffset, instructionBytes.length);
         }
 
@@ -511,7 +500,7 @@ public class ArmParser {
 
         if (returnValue.length > 0x02000000)
             throw new ArmParseException();
-        
+
         return returnValue;
     }
 
@@ -801,7 +790,7 @@ public class ArmParser {
 
         if (line.startsWith("bl "))
             return 4;
-        
+
         if (line.startsWith("blx ")) {
             String args = line.split(" ", 2)[1].trim();
             return parseRegister(args) == -1 ? 4 : 2;
@@ -827,67 +816,67 @@ public class ArmParser {
         return line;
     }
 
-    private byte[] parseInstruction(String op, String args) throws DataFormatException {
+    private byte[] parseInstruction(int line, String op, String args) throws ArmParseException {
         return switch (op) {
-            case "adc" -> format4(args.split(","), 5);
-            case "add" -> parseAdd(args);
-            case "and" -> format4(args.split(","), 0);
-            case "asr" -> parseAsr(args);
-            case "b" -> format18(args.split(","));
-            case "bic" -> format4(args.split(","), 14);
-            case "bl" -> format19(args.split(","), false);
-            case "blx" -> parseBlx(args);
-            case "bx" -> format5(args.split(","), 3);
-            case "cmn" -> format4(args.split(","), 11);
-            case "cmp" -> parseCmp(args);
-            case "eor" -> format4(args.split(","), 1);
-            case "ldm", "stm" -> parseLdmStmia(args, op);
-            case "ldr", "str" -> parseLdrStr(args, op);
-            case "ldrb", "strb" -> parseLdrbStrb(args, op);
-            case "ldrh", "strh" -> parseLdrhStrh(args, op);
-            case "ldsb" -> parseLdsb(args);
-            case "ldsh" -> parseLdsh(args);
-            case "lsl" -> parseLslLsr(args, 0);
-            case "lsr" -> parseLslLsr(args, 1);
-            case "mov" -> parseMov(args);
-            case "mul" -> format4(args.split(","), 13);
-            case "mvn" -> format4(args.split(","), 15);
-            case "neg" -> format4(args.split(","), 9);
-            case "orr" -> format4(args.split(","), 12);
-            case "pop", "push" -> parsePopPush(args, op);
-            case "ror" -> format4(args.split(","), 7);
-            case "sbc" -> format4(args.split(","), 6);
-            case "swi" -> format17(args.split(","));
-            case "sub" -> parseSub(args);
-            case "tst" -> format4(args.split(","), 8);
+            case "adc" -> format4(line, op, args.split(","), 5);
+            case "add" -> parseAdd(line, op, args);
+            case "and" -> format4(line, op, args.split(","), 0);
+            case "asr" -> parseAsr(line, op, args);
+            case "b" -> format18(line, op, args.split(","));
+            case "bic" -> format4(line, op, args.split(","), 14);
+            case "bl" -> format19(line, op, args.split(","), false);
+            case "blx" -> parseBlx(line, op, args);
+            case "bx" -> format5(line, op, args.split(","), 3);
+            case "cmn" -> format4(line, op, args.split(","), 11);
+            case "cmp" -> parseCmp(line, op, args);
+            case "eor" -> format4(line, op, args.split(","), 1);
+            case "ldm", "stm" -> parseLdmStmia(line, op, args);
+            case "ldr", "str" -> parseLdrStr(line, op, args);
+            case "ldrb", "strb" -> parseLdrbStrb(line, op, args);
+            case "ldrh", "strh" -> parseLdrhStrh(line, op, args);
+            case "ldsb" -> parseLdsb(line, op, args);
+            case "ldsh" -> parseLdsh(line, op, args);
+            case "lsl" -> parseLslLsr(line, op, args, 0);
+            case "lsr" -> parseLslLsr(line, op, args, 1);
+            case "mov" -> parseMov(line, op, args);
+            case "mul" -> format4(line, op, args.split(","), 13);
+            case "mvn" -> format4(line, op, args.split(","), 15);
+            case "neg" -> format4(line, op, args.split(","), 9);
+            case "orr" -> format4(line, op, args.split(","), 12);
+            case "pop", "push" -> parsePopPush(line, op, args);
+            case "ror" -> format4(line, op, args.split(","), 7);
+            case "sbc" -> format4(line, op, args.split(","), 6);
+            case "swi" -> format17(line, op, args.split(","));
+            case "sub" -> parseSub(line, op, args);
+            case "tst" -> format4(line, op, args.split(","), 8);
 
             // Conditional Branching
-            case "beq" -> format16(args.split(","), 0);
-            case "bne" -> format16(args.split(","), 1);
-            case "bcs" -> format16(args.split(","), 2);
-            case "bcc" -> format16(args.split(","), 3);
-            case "bmi" -> format16(args.split(","), 4);
-            case "bpl" -> format16(args.split(","), 5);
-            case "bvs" -> format16(args.split(","), 6);
-            case "bvc" -> format16(args.split(","), 7);
-            case "bhi" -> format16(args.split(","), 8);
-            case "bls" -> format16(args.split(","), 9);
-            case "bge" -> format16(args.split(","), 10);
-            case "blt" -> format16(args.split(","), 11);
-            case "bgt" -> format16(args.split(","), 12);
-            case "ble" -> format16(args.split(","), 13);
+            case "beq" -> format16(line, op, args.split(","), 0);
+            case "bne" -> format16(line, op, args.split(","), 1);
+            case "bcs" -> format16(line, op, args.split(","), 2);
+            case "bcc" -> format16(line, op, args.split(","), 3);
+            case "bmi" -> format16(line, op, args.split(","), 4);
+            case "bpl" -> format16(line, op, args.split(","), 5);
+            case "bvs" -> format16(line, op, args.split(","), 6);
+            case "bvc" -> format16(line, op, args.split(","), 7);
+            case "bhi" -> format16(line, op, args.split(","), 8);
+            case "bls" -> format16(line, op, args.split(","), 9);
+            case "bge" -> format16(line, op, args.split(","), 10);
+            case "blt" -> format16(line, op, args.split(","), 11);
+            case "bgt" -> format16(line, op, args.split(","), 12);
+            case "ble" -> format16(line, op, args.split(","), 13);
 
             // Data
-            case "dcb" -> getDataBytes(args, 1, Byte.MIN_VALUE, Byte.MAX_VALUE);
-            case "dcw" -> getDataBytes(args, 2, Short.MIN_VALUE, Short.MAX_VALUE);
-            case "dcd" -> getDataBytes(args, 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            case "dcb" -> getDataBytes(line, op, args, 1, Byte.MIN_VALUE, Byte.MAX_VALUE);
+            case "dcw" -> getDataBytes(line, op, args, 2, Short.MIN_VALUE, Short.MAX_VALUE);
+            case "dcd" -> getDataBytes(line, op, args, 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
             default -> new byte[0];
         };
 
     }
 
-    private byte[] parseAdd(String argsStr) throws DataFormatException {
+    private byte[] parseAdd(int line, String op, String argsStr) throws ArmParseException {
         // Format 2     (3) ADD Rd, Rs, Rn/#Offset3
         // Format 3     (2) ADD Rd, #Offset8
         // Format 5     (2) ADD Rd/Hd, Rs/Hs
@@ -898,12 +887,12 @@ public class ArmParser {
 
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("sp"))
-                return format13(args);
+                return format13(line, op, args);
 
             if (args[1].startsWith("#")) {
-                if (parseValue(args[1]) <= 7)
-                    return format2(new String[]{args[0], args[0], args[1]}, 0);
-                return format3(args, 2);
+                if (parseValue(line, op, args[1]) <= 7)
+                    return format2(line, op, new String[]{args[0], args[0], args[1]}, 0);
+                return format3(line, op, args, 2);
             }
 
             int rd = parseRegister(args[0]);
@@ -911,22 +900,22 @@ public class ArmParser {
 
             // Prefer format2
             if (rd < 8 && rs < 8)
-                return format2(new String[]{args[0], args[1], args[0]}, 0);
+                return format2(line, op, new String[]{args[0], args[1], args[0]}, 0);
 
-            return format5(args, 0);
+            return format5(line, op, args, 0);
         }
 
         if (args.length == 3) {
             if (args[1].equalsIgnoreCase("pc") || args[1].equalsIgnoreCase("sp"))
-                return format12(args);
+                return format12(line, op, args);
 
-            return format2(args, 0);
+            return format2(line, op, args, 0);
         }
 
-        throw new DataFormatException();
+        throw new ArmParseArgCountException(line, op, args, 2, 3);
     }
 
-    private byte[] parseAsr(String argsStr) throws DataFormatException {
+    private byte[] parseAsr(int line, String op, String argsStr) throws ArmParseException {
         // Format 1     (3) ASR Rd, Rs, #Offset5
         // Format 4     (2) ASR Rd, Rs
 
@@ -934,28 +923,28 @@ public class ArmParser {
 
         if (args.length == 2) {
             if (args[1].startsWith("#"))
-                return format1(new String[]{args[0], args[0], args[1]}, 2);
+                return format1(line, op, new String[]{args[0], args[0], args[1]}, 2);
 
-            return format4(args, 4);
+            return format4(line, op, args, 4);
         }
 
         if (args.length == 3)
-            return format1(args, 2);
+            return format1(line, op, args, 2);
 
-        throw new DataFormatException();
+        throw new ArmParseArgCountException(line, op, args, 2, 3);
     }
-    
-    private byte[] parseBlx(String argsStr) throws DataFormatException {
+
+    private byte[] parseBlx(int line, String op, String argsStr) throws ArmParseException {
         int register = parseRegister(argsStr);
         if (register == -1)
-            return format19(argsStr.split(","), true);
-        
-        byte[] bytes = format5(argsStr.split(","), 3);
-        bytes[0] |= (byte)0x80; // sets blx mode
+            return format19(line, op, argsStr.split(","), true);
+
+        byte[] bytes = format5(line, op, argsStr.split(","), 3);
+        bytes[0] |= (byte) 0x80; // sets blx mode
         return bytes;
     }
 
-    private byte[] parseCmp(String argsStr) throws DataFormatException {
+    private byte[] parseCmp(int line, String op, String argsStr) throws ArmParseException {
         // Format 3     (2) CMP Rd, #Offset8        op 1
         // Format 4     (2) CMP Rd, Rs              op 10
         // Format 5     (2) CMP Rd/Hd, Rs/Hs        op 1
@@ -963,56 +952,56 @@ public class ArmParser {
         String[] args = argsStr.split(",");
 
         if (args.length != 2)
-            throw new DataFormatException();
+            throw new ArmParseArgCountException(line, op, args, 2);
 
         if (args[1].startsWith("#"))
-            return format3(args, 1);
+            return format3(line, op, args, 1);
 
         int rd = parseRegister(args[0]);
         int rs = parseRegister(args[1]);
 
         if (rd > 7 || rs > 7)
-            return format5(args, 1);
+            return format5(line, op, args, 1);
 
-        return format4(args, 10);
+        return format4(line, op, args, 10);
     }
 
-    private byte[] parseLdmStmia(String argsStr, String op) throws DataFormatException {
+    private byte[] parseLdmStmia(int line, String op, String argsStr) throws ArmParseException {
         // Format 15    LDM Rb!, { Rlist }
 
         String[] args = argsStr.split(",");
 
         if (args.length < 2)
-            throw new DataFormatException();
+            throw new ArmParseArgCountException(line, op, args, 2);
 
+        String formatMessage = "Expected format {rx, rx-rx}!";
+        
         String rbStr = args[0];
         if (!rbStr.endsWith("!"))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         args[0] = rbStr.substring(0, rbStr.length() - 1);
 
         String rlistFirst = args[1];
         if (!rlistFirst.startsWith("{"))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         args[1] = rlistFirst.substring(1);
 
         String rlistLast = args[args.length - 1];
         if (!rlistLast.endsWith("}"))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         args[args.length - 1] = rlistLast.substring(0, rlistLast.length() - 1);
 
-        if (op.equalsIgnoreCase("ldm"))
-            return format15(args, 1);
-
-        if (op.equalsIgnoreCase("stm"))
-            return format15(args, 0);
-
-        throw new DataFormatException();
+        return switch (op.toLowerCase()) {
+            case "ldm" -> format15(line, op, args, true);
+            case "stm" -> format15(line, op, args, false);
+            default -> throw new ExpectedOpException(line, op, args, "ldm", "stm");
+        };
     }
 
-    private byte[] parseLdrStr(String argsStr, String op) throws DataFormatException {
+    private byte[] parseLdrStr(int line, String op, String argsStr) throws ArmParseException {
         // Format 6     LDR Rd, [PC, #Imm]
         // Format 7     LDR Rd, [Rb, Ro]
         // Format 9     LDR Rd, [Rb, #Imm]
@@ -1023,7 +1012,7 @@ public class ArmParser {
 
             // Hack to allow "LDR Rd, =Number" to use "LDR Rd, [PC, #NumberAddressOffset]"
             if (args[1].startsWith("=")) {
-                int imm = parseValue(args[1]);
+                int imm = parseValue(line, op, args, args[1]);
                 if (!dataRamAddressMap.containsKey(imm))
                     dataRamAddressMap.put(imm, new TreeSet<>());
                 SortedSet<Integer> dataRamAddresses = dataRamAddressMap.get(imm);
@@ -1047,47 +1036,46 @@ public class ArmParser {
                     }
                 }
 
-                return format6(new String[]{args[0], "PC", "#" + newImm});
+                return format6(line, op, new String[]{args[0], "PC", "#" + newImm});
             }
 
             args = new String[]{args[0], args[1].substring(0, args[1].length() - 1), "#0]"};
         }
 
         if (args.length != 3)
-            throw new DataFormatException();
-
+            throw new ArmParseArgCountException(line, op, args, 3);
+        
+        String formatMessage = "Must follow format [rx, rx/imm]";
+        
         if (!args[1].startsWith("["))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         if (!args[2].endsWith("]"))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         args[1] = args[1].substring(1);
         args[2] = args[2].substring(0, args[2].length() - 1);
 
         if (op.equalsIgnoreCase("ldr") && args[1].equalsIgnoreCase("pc"))
-            return format6(args);
+            return format6(line, op, args);
 
-        int loadStoreBit = -1;
-
-        if (op.equalsIgnoreCase("ldr"))
-            loadStoreBit = 1;
-        if (op.equalsIgnoreCase("str"))
-            loadStoreBit = 0;
-
-        if (loadStoreBit == -1)
-            throw new DataFormatException();
+        boolean loadStore;
+        switch (op.toLowerCase()) {
+            case "ldr" -> loadStore = true;
+            case "str" -> loadStore = false;
+            default -> throw new ExpectedOpException(line, op, args, "ldr", "str");
+        }
 
         if (args[1].equalsIgnoreCase("sp"))
-            return format11(args, loadStoreBit);
+            return format11(line, op, args, loadStore);
 
         if (args[2].startsWith("#"))
-            return format9(args, loadStoreBit, 0);
+            return format9(line, op, args, loadStore, false);
 
-        return format7(args, loadStoreBit, 0);
+        return format7(line, op, args, loadStore, false);
     }
 
-    private byte[] parseLdrbStrb(String argsStr, String op) throws DataFormatException {
+    private byte[] parseLdrbStrb(int line, String op, String argsStr) throws ArmParseException {
         // Format 7     LDRB Rd, [Rb, Ro]
         // Format 9     LDRB Rd, [Rb, #Imm]
 
@@ -1096,34 +1084,33 @@ public class ArmParser {
             args = new String[]{args[0], args[1].substring(0, args[1].length() - 1), "#0]"};
 
         if (args.length != 3)
-            throw new DataFormatException();
+            throw new ArmParseArgCountException(line, op, args, 3);
+        
+        String formatMessage = "Must follow format [rx, rx/imm]";
 
         if (!args[1].startsWith("["))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         if (!args[2].endsWith("]"))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         args[1] = args[1].substring(1);
         args[2] = args[2].substring(0, args[2].length() - 1);
 
-        int loadStoreFlag = -1;
-
-        if (op.equalsIgnoreCase("ldrb"))
-            loadStoreFlag = 1;
-        if (op.equalsIgnoreCase("strb"))
-            loadStoreFlag = 0;
-
-        if (loadStoreFlag == -1)
-            throw new DataFormatException();
+        boolean loadStore;
+        switch (op.toLowerCase()) {
+            case "ldrb" -> loadStore = true;
+            case "strb" -> loadStore = false;
+            default -> throw new ExpectedOpException(line, op, args, "ldrb", "strb");
+        }
 
         if (args[2].startsWith("#"))
-            return format9(args, loadStoreFlag, 1);
+            return format9(line, op, args, loadStore, true);
 
-        return format7(args, loadStoreFlag, 1);
+        return format7(line, op, args, loadStore, true);
     }
 
-    private byte[] parseLdrhStrh(String argsStr, String op) throws DataFormatException {
+    private byte[] parseLdrhStrh(int line, String op, String argsStr) throws ArmParseException {
         // Format 8     LDRH Rd, [Rb, Ro]
         // Format 10    LDRH Rd, [Rb, #Imm]
 
@@ -1132,69 +1119,77 @@ public class ArmParser {
             args = new String[]{args[0], args[1].substring(0, args[1].length() - 1), "#0]"};
 
         if (args.length != 3)
-            throw new DataFormatException();
+            throw new ArmParseArgCountException(line, op, args, 3);
+
+        String formatMessage = "Must follow format [rx, rx/imm]";
 
         if (!args[1].startsWith("["))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         if (!args[2].endsWith("]"))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         args[1] = args[1].substring(1);
         args[2] = args[2].substring(0, args[2].length() - 1);
 
-        int loadStoreFlag = -1;
-
-        if (op.equalsIgnoreCase("ldrh"))
-            loadStoreFlag = 1;
-        if (op.equalsIgnoreCase("strh"))
-            loadStoreFlag = 0;
+        boolean loadStore;
+        switch (op.toLowerCase()) {
+            case "ldrh" -> loadStore = true;
+            case "strh" -> loadStore = false;
+            default -> throw new ExpectedOpException(line, op, args, "ldrh", "strh");
+        }
 
         if (args[2].startsWith("#"))
-            return format10(args, loadStoreFlag);
+            return format10(line, op, args, loadStore);
 
-        return format8(args, 0, loadStoreFlag);
+        return format8(line, op, args, false, loadStore);
     }
 
-    private byte[] parseLdsb(String argsStr) throws DataFormatException {
+    private byte[] parseLdsb(int line, String op, String argsStr) throws ArmParseException {
         // Format 8     LDSB Rd, [Rb, Ro]
 
         String[] args = argsStr.split(",");
+
         if (args.length != 3)
-            throw new DataFormatException();
+            throw new ArmParseArgCountException(line, op, args, 3);
+
+        String formatMessage = "Must follow format [rx, rx/imm]";
 
         if (!args[1].startsWith("["))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         if (!args[2].endsWith("]"))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         args[1] = args[1].substring(1);
         args[2] = args[2].substring(0, args[2].length() - 1);
 
-        return format8(args, 1, 0);
+        return format8(line, op, args, true, false);
     }
 
-    private byte[] parseLdsh(String argsStr) throws DataFormatException {
+    private byte[] parseLdsh(int line, String op, String argsStr) throws ArmParseException {
         // Format 8     LDSH Rd, [Rb, Ro]
 
         String[] args = argsStr.split(",");
+
         if (args.length != 3)
-            throw new DataFormatException();
+            throw new ArmParseArgCountException(line, op, args, 3);
+
+        String formatMessage = "Must follow format [rx, rx/imm]";
 
         if (!args[1].startsWith("["))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         if (!args[2].endsWith("]"))
-            throw new DataFormatException();
+            throw new ArmParseException(line, op, args, formatMessage);
 
         args[1] = args[1].substring(1);
         args[2] = args[2].substring(0, args[2].length() - 1);
 
-        return format8(args, 1, 1);
+        return format8(line, op, args, true, true);
     }
 
-    private byte[] parseLslLsr(String argsStr, int isRightShift) throws DataFormatException {
+    private byte[] parseLslLsr(int line, String op, String argsStr, int isRightShift) throws ArmParseException {
         // Format 1     (3) LSL/LSR Rd, Rs, #Offset5 or... LSL/LSR Rd, #Offset5
         // Format 4     (2) LSL/LSR Rd, Rs
 
@@ -1202,27 +1197,28 @@ public class ArmParser {
 
         if (args.length == 2) {
             if (args[1].startsWith("#"))
-                return format1(new String[]{args[0], args[0], args[1]}, isRightShift);
+                return format1(line, op, new String[]{args[0], args[0], args[1]}, isRightShift);
 
-            return format4(args, 2 + isRightShift);
+            return format4(line, op, args, 2 + isRightShift);
         }
 
         if (args.length == 3)
-            return format1(args, isRightShift);
+            return format1(line, op, args, isRightShift);
 
-        throw new DataFormatException();
+        throw new ArmParseArgCountException(line, op, args, 2, 3);
     }
 
-    private byte[] parseMov(String argsStr) throws DataFormatException {
+    private byte[] parseMov(int line, String op, String argsStr) throws ArmParseException {
         // Format 3     (2) MOV Rd, #Offset8
         // Format 5     (2) MOV Rd, Hs
 
         String[] args = argsStr.split(",");
+        
         if (args.length != 2)
-            throw new DataFormatException();
+            throw new ArmParseArgCountException(line, op, args, 2);
 
         if (args[1].startsWith("#"))
-            return format3(args, 0);
+            return format3(line, op, args, 0);
 
         // Hack to allow "MOV Rd, Rs" to become "ADD Rd, Rs, #0" internally; Format 2 with "ADD" opcode (0)
         // Only used when both registers are low, otherwise use Format 5
@@ -1230,29 +1226,34 @@ public class ArmParser {
         int rs = parseRegister(args[1]);
         if (rd <= 7 && rs <= 7) {
             args = new String[]{args[0], args[1], "#0"};
-            return format2(args, 0);
+            return format2(line, op, args, 0);
         }
 
         if (rd <= 7 && (rs == 13 || rs == 15)) {
             args = new String[]{args[0], args[1], "#0"};
-            return format12(args);
+            return format12(line, op, args);
         }
 
-        return format5(args, 2);
+        return format5(line, op, args, 2);
     }
 
-    private byte[] parsePopPush(String argsStr, String op) throws DataFormatException {
+    private byte[] parsePopPush(int line, String op, String argsStr) throws ArmParseException {
         // Format 14    PUSH/POP {Rlist}
 
-        if (!argsStr.startsWith("{") || !argsStr.endsWith("}"))
-            throw new DataFormatException();
+        if (!argsStr.startsWith("{") || !argsStr.endsWith("}")) {
+            switch (op.toLowerCase()) {
+                case "push" -> throw new ArmParseException(line, String.format("%s %s", op, argsStr), "Must follow format: {rx, rx-rx, lr}");
+                case "pop" -> throw new ArmParseException(line, String.format("%s %s", op, argsStr), "Must follow format: {rx, rx-rx, pc}");
+                default -> throw new ExpectedOpException(line, op, new String[]{argsStr}, "push", "pop");
+            }
+        }
 
         String[] args = argsStr.substring(1, argsStr.length() - 1).split(",");
 
-        return format14(args, op);
+        return format14(line, op, args);
     }
 
-    private byte[] parseSub(String argsStr) throws DataFormatException {
+    private byte[] parseSub(int line, String op, String argsStr) throws ArmParseException {
         // Format 2     (3) SUB Rd, Rs, Rn/#Offset3
         // Format 3     (2) SUB Rd, #Offset8
         // Format 13    (2) SUB SP, #Imm
@@ -1261,113 +1262,116 @@ public class ArmParser {
 
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("sp"))
-                return format13(new String[]{args[0], "#-(" + args[1].substring(1) + ")"}); // flip
+                return format13(line, op, new String[]{args[0], "#-(" + args[1].substring(1) + ")"}); // flip
 
             if (args[1].startsWith("#"))
-                return format3(args, 3);
+                return format3(line, op, args, 3);
 
-            return format2(new String[]{args[0], args[0], args[1]}, 1);
+            return format2(line, op, new String[]{args[0], args[0], args[1]}, 1);
         }
 
         if (args.length == 3)
-            return format2(args, 1);
+            return format2(line, op, args, 1);
 
-        throw new DataFormatException();
+        throw new ArmParseArgCountException(line, op, args, 2, 3);
     }
 
-    private void throwParseError(int formatNumber, String op, String[] args, String message) {
-        throw new IllegalArgumentException(String.format("Parse Error - Format %d: %s %s; %s", formatNumber, op, String.join(" ", args), message));
-    }
-
-    private void assertRegisterRange(int formatNumber, String op, String[] args, String register, String registerName, int registerValue, int registerValueMin, int registerValueMax) {
-        if (registerValue < registerValueMin || registerValue > registerValueMax)
-            throwParseError(formatNumber, op, args, String.format("%s (%s) must be in range of r%d-r%d", register, registerName, registerValueMin, registerValueMax));
-    }
-
-    private void assertImmediateRange(int formatNumber, String op, String[] args, int immediateValue, int immediateValueMin, int immediateValueMax) {
-        if (immediateValue < immediateValueMin || immediateValue > immediateValueMax)
-            throwParseError(formatNumber, op, args, String.format("imm (%d) must be in range of %d-%d", immediateValue, immediateValueMin, immediateValueMax));
-    }
-
-    // Format 1: move shifted register
-    private byte[] format1(String[] args, int opcode) throws DataFormatException {
+    // Format 1: move shifted register    
+    private byte[] format1(int line, String op, String[] args, int opcode) throws ArmParseException {
         if (opcode < 0 || opcode > 2)
-            throw new DataFormatException();
+            throw new UnexpectedOpcodeException(line, op, args, opcode, 0, 2);
 
         int rd = parseRegister(args[0]);
         int rs = parseRegister(args[1]);
-        int imm = parseValue(args[2]);
+        int imm = parseValue(line, op, args, args[2]);
 
-        if (rd < 0 || rd > 7 || rs < 0 || rs > 7 || imm < 0 || imm > 31)
-            throw new DataFormatException();
+        if (rd < 0 || rd > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 0);
+
+        if (rs < 0 || rs > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 1);
+
+        if (imm < 0 || imm > 31)
+            throw new ExpectedNumberException(line, op, args, 2, 0, 31);
 
         return halfwordToBytes(rd | (rs << 3) | (imm << 6) | (opcode << 11));
     }
 
     // Format 2: add/subtract
-    private byte[] format2(String[] args, int op) throws DataFormatException {
+    private byte[] format2(int line, String op, String[] args, int opcode) throws ArmParseException {
         int rd = parseRegister(args[0]);
         int rs = parseRegister(args[1]);
 
         boolean isImmediate = args[2].startsWith("#");
-        int rnOrImm = isImmediate ? parseValue(args[2]) : parseRegister(args[2]);
+        int rnOrImm = isImmediate ? parseValue(line, op, args, args[2]) : parseRegister(args[2]);
 
-        String opName = op == 0 ? "add" : "sub";
-        assertRegisterRange(2, opName, args, "rd", args[0], rd, 0, 7);
-        assertRegisterRange(2, opName, args, "rs", args[1], rs, 0, 7);
-        if (isImmediate)
-            assertImmediateRange(2, opName, args, rnOrImm, 0, 7);
-        else
-            assertRegisterRange(2, opName, args, "rn", args[2], rnOrImm, 0, 7);
+        if (opcode != 0 && opcode != 1)
+            throw new UnexpectedOpcodeException(line, op, args, opcode, 0, 1);
 
-        return halfwordToBytes(rd | (rs << 3) | (rnOrImm << 6) | (op << 9) | ((isImmediate ? 1 : 0) << 10) | 0x1800);
+        if (rd < 0 || rd > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 0);
+
+        if (rs < 0 || rs > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 1);
+
+        if (rnOrImm < 0 || rnOrImm > 7) {
+            if (isImmediate)
+                throw new ExpectedNumberException(line, op, args, 2, 0, 7);
+            else
+                throw new ExpectedLowRegisterException(line, op, args, 2);
+        }
+
+        return halfwordToBytes(rd | (rs << 3) | (rnOrImm << 6) | (opcode << 9) | ((isImmediate ? 1 : 0) << 10) | 0x1800);
     }
 
     // Format 3: move/compare/add/subtract immediate
-    private byte[] format3(String[] args, int op) throws DataFormatException {
-        if (op < 0 || op > 3)
-            throw new DataFormatException();
+    private byte[] format3(int line, String op, String[] args, int opcode) throws ArmParseException {
+        if (opcode < 0 || opcode > 3)
+            throw new UnexpectedOpcodeException(line, op, args, opcode, 0, 3);
 
         int rd = parseRegister(args[0]);
-        int imm = parseValue(args[1]);
+        int imm = parseValue(line, op, args, args[1]);
 
         if (rd < 0 || rd > 7)
-            throw new DataFormatException();
+            throw new ExpectedLowRegisterException(line, op, args, 0);
 
         if (imm < 0 || imm > 255) {
-            throw new DataFormatException("Number was too big; use ldr instead");
+            throw new ExpectedNumberException(line, op, args, 1, 0, 255);
         }
 
-        return halfwordToBytes(imm | (rd << 8) | (op << 11) | 0x2000);
+        return halfwordToBytes(imm | (rd << 8) | (opcode << 11) | 0x2000);
     }
 
     // Format 4: ALU operations
-    private byte[] format4(String[] args, int op) throws DataFormatException {
+    private byte[] format4(int line, String op, String[] args, int opcode) throws ArmParseException {
         if (args.length != 2)
-            throw new DataFormatException();
+            throw new ArmParseArgCountException(line, op, args, 2);
 
-        if (op < 0 || op > 15)
-            throw new DataFormatException();
+        if (opcode < 0 || opcode > 15)
+            throw new UnexpectedOpcodeException(line, op, args, opcode, 0, 15);
 
         int rd = parseRegister(args[0]);
         int rs = parseRegister(args[1]);
 
-        if (rd < 0 || rd > 7 || rs < 0 || rs > 7)
-            throw new DataFormatException();
+        if (rd < 0 || rd > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 0);
 
-        return halfwordToBytes(rd | (rs << 3) | (op << 6) | 0x4000);
+        if (rs < 0 || rs > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 1);
+
+        return halfwordToBytes(rd | (rs << 3) | (opcode << 6) | 0x4000);
     }
 
     // Format 5: Hi register operations/branch exchange
-    private byte[] format5(String[] args, int op) throws DataFormatException {
-        if (op < 0 || op > 3)
-            throw new DataFormatException();
+    private byte[] format5(int line, String op, String[] args, int opcode) throws ArmParseException {
+        if (opcode < 0 || opcode > 3)
+            throw new UnexpectedOpcodeException(line, op, args, opcode, 0, 3);
 
         // branch exchange
         if (args.length == 1) {
             int rs = parseRegister(args[0]);
             if (rs < 0 || rs > 15)
-                throw new DataFormatException();
+                throw new ExpectedRegisterException(line, op, args, 0);
 
             return halfwordToBytes(rs << 3 | 0x4700);
         }
@@ -1375,8 +1379,11 @@ public class ArmParser {
         int rd = parseRegister(args[0]);
         int rs = parseRegister(args[1]);
 
-        if (rd < 0 || rd > 15 || rs < 0 || rs > 15)
-            throw new DataFormatException();
+        if (rd < 0 || rd > 15)
+            throw new ExpectedRegisterException(line, op, args, 0);
+
+        if (rs < 0 || rs > 15)
+            throw new ExpectedRegisterException(line, op, args, 1);
 
         int h1 = rd > 7 ? 1 : 0;
         int h2 = rs > 7 ? 1 : 0;
@@ -1384,16 +1391,20 @@ public class ArmParser {
         rd &= 0x07;
         rs &= 0x07;
 
-        return halfwordToBytes(rd | (rs << 3) | (h2 << 6) | (h1 << 7) | (op << 8) | 0x4400);
+        return halfwordToBytes(rd | (rs << 3) | (h2 << 6) | (h1 << 7) | (opcode << 8) | 0x4400);
     }
 
     // Format 6: PC-relative load
-    private byte[] format6(String[] args) throws DataFormatException {
+    private byte[] format6(int line, String op, String[] args) throws ArmParseException {
         int rd = parseRegister(args[0]);
-        int imm = alignNextWord(parseValue(args[2]));
+        int imm = alignNextWord(parseValue(line, op, args, args[2]));
 
-        if (rd < 0 || rd > 7 || imm < 0 || imm > ((255 << 2) + 4))
-            throw new DataFormatException();
+        if (rd < 0 || rd > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 0);
+
+        int immMax = (255 << 2) + 4;
+        if (imm < 0 || imm > immMax)
+            throw new ExpectedNumberException(line, op, args, 1, 0, immMax);
 
         imm = ((imm - 4) >> 2) & 0xFF;
 
@@ -1401,49 +1412,69 @@ public class ArmParser {
     }
 
     // Format 7: load/store with register offset
-    private byte[] format7(String[] args, int loadStoreFlag, int byteWordFlag) throws DataFormatException {
-        if (loadStoreFlag < 0 || loadStoreFlag > 1 || byteWordFlag < 0 || byteWordFlag > 1)
-            throw new DataFormatException();
+    private byte[] format7(int line, String op, String[] args, boolean loadStore, boolean byteWord) throws ArmParseException {
+        int loadStoreFlag = loadStore ? 1 : 0;
+        int byteWordFlag = byteWord ? 1 : 0;
 
         int rd = parseRegister(args[0]);
         int rb = parseRegister(args[1]);
         int ro = parseRegister(args[2]);
 
-        if (rd < 0 || rd > 7 || rb < 0 || rb > 7 || ro < 0 || ro > 7)
-            throw new DataFormatException();
+        if (rd < 0 || rd > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 0);
+
+        if (rb < 0 || rb > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 1);
+
+        if (ro < 0 || ro > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 2);
 
         return halfwordToBytes(rd | (rb << 3) | (ro << 6) | (byteWordFlag << 10) | (loadStoreFlag << 11) | 0x5000);
     }
 
     // Format 8: load/store sign-extended byte/halfword
-    private byte[] format8(String[] args, int signExtendedFlag, int hFlag) throws DataFormatException {
-        if (signExtendedFlag < 0 || signExtendedFlag > 1 || hFlag < 0 || hFlag > 1)
-            throw new DataFormatException();
+    private byte[] format8(int line, String op, String[] args, boolean signExtended, boolean high) throws ArmParseException {
+        int signExtendedFlag = signExtended ? 1 : 0;
+        int highFlag = high ? 1 : 0;
 
         int rd = parseRegister(args[0]);
         int rb = parseRegister(args[1]);
         int ro = parseRegister(args[2]);
 
-        if (rd < 0 || rd > 7 || rb < 0 || rb > 7 || ro < 0 || ro > 7)
-            throw new DataFormatException();
+        if (rd < 0 || rd > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 0);
 
-        return halfwordToBytes(rd | (rb << 3) | (ro << 6) | (signExtendedFlag << 10) | (hFlag << 11) | 0x5200);
+        if (rb < 0 || rb > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 1);
+
+        if (ro < 0 || ro > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 2);
+
+        return halfwordToBytes(rd | (rb << 3) | (ro << 6) | (signExtendedFlag << 10) | (highFlag << 11) | 0x5200);
     }
 
     // Format 9: load/store with immediate offset
-    private byte[] format9(String[] args, int loadStoreFlag, int byteWordFlag) throws DataFormatException {
-        if (loadStoreFlag < 0 || loadStoreFlag > 1 || byteWordFlag < 0 || byteWordFlag > 1)
-            throw new DataFormatException();
+    private byte[] format9(int line, String op, String[] args, boolean loadStore, boolean byteWord) throws ArmParseException {
+        int loadStoreFlag = loadStore ? 1 : 0;
+        int byteWordFlag = byteWord ? 1 : 0;
 
         int rd = parseRegister(args[0]);
         int rb = parseRegister(args[1]);
-        int imm = parseValue(args[2]);
-        if (rd < 0 || rd > 7 || rb < 0 || rb > 7 || imm < 0 || imm > (0x1F << (byteWordFlag == 0 ? 2 : 0)))
-            throw new DataFormatException();
+        int imm = parseValue(line, op, args, args[2]);
+
+        if (rd < 0 || rd > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 0);
+
+        if (rb < 0 || rb > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 1);
+
+        int immMax = 0x1F << (byteWordFlag == 0 ? 2 : 0);
+        if (imm < 0 || imm > immMax)
+            throw new ExpectedNumberException(line, op, args, 2, 0, immMax);
 
         if (byteWordFlag == 0) {
             if (!isWordAligned(imm))
-                throw new DataFormatException("Immediate must be word-aligned for STR and LDR.");
+                throw new ImmediateWordAlignmentException(line, op, args, 2, imm);
 
             imm = imm >> 2;
         }
@@ -1452,56 +1483,69 @@ public class ArmParser {
     }
 
     // Format 10: load/store halfword
-    private byte[] format10(String[] args, int loadStoreBit) throws DataFormatException {
-        if (loadStoreBit < 0 || loadStoreBit > 1)
-            throw new DataFormatException();
+    private byte[] format10(int line, String op, String[] args, boolean loadStore) throws ArmParseException {
+        int loadStoreFlag = loadStore ? 1 : 0;
 
         int rd = parseRegister(args[0]);
         int rb = parseRegister(args[1]);
-        int imm = parseValue(args[2]);
-        if (rd < 0 || rd > 7 || rb < 0 || rb > 7 || imm < 0 || imm > 62)
-            throw new DataFormatException();
+        int imm = parseValue(line, op, args, args[2]);
+
+        if (rd < 0 || rd > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 0);
+
+        if (rb < 0 || rb > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 1);
+
+        if (imm < 0 || imm > 62)
+            throw new ExpectedNumberException(line, op, args, 2, 0, 62);
 
         if (!isHalfwordAligned(imm))
-            throw new DataFormatException("Immediate must be halfword-aligned.");
+            throw new ImmediateHalfwordAlignmentException(line, op, args, 2, imm);
 
         imm >>= 1;
 
-        return halfwordToBytes(rd | (rb << 3) | (imm << 6) | (loadStoreBit << 11) | 0x8000);
+        return halfwordToBytes(rd | (rb << 3) | (imm << 6) | (loadStoreFlag << 11) | 0x8000);
     }
 
     // Format 11: SP-relative load/store
-    private byte[] format11(String[] args, int loadStoreBit) throws DataFormatException {
-        if (loadStoreBit < 0 || loadStoreBit > 1)
-            throw new DataFormatException();
+    private byte[] format11(int line, String op, String[] args, boolean loadStore) throws ArmParseException {
+        int loadStoreFlag = loadStore ? 1 : 0;
 
         int rd = parseRegister(args[0]);
-        int imm = parseValue(args[2]);
-        if (rd < 0 || rd > 7 || imm < 0 || imm > 1020)
-            throw new DataFormatException();
+        int imm = parseValue(line, op, args, args[2]);
+
+        if (rd < 0 || rd > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 0);
+
+        if (imm < 0 || imm > 1020)
+            throw new ExpectedNumberException(line, op, args, 2, 0, 1020);
 
         if (!isWordAligned(imm))
-            throw new DataFormatException("Immediate must be word-aligned.");
+            throw new ImmediateWordAlignmentException(line, op, args, 2, imm);
 
         imm >>= 2;
 
-        return halfwordToBytes(imm | (rd << 8) | (loadStoreBit << 11) | 0x9000);
+        return halfwordToBytes(imm | (rd << 8) | (loadStoreFlag << 11) | 0x9000);
     }
 
     // Format 12: load address
-    private byte[] format12(String[] args) throws DataFormatException {
+    private byte[] format12(int line, String op, String[] args) throws ArmParseException {
         int rd = parseRegister(args[0]);
         int source = switch (parseRegister(args[1])) {
-            case 13 -> 1;
-            case 15 -> 0;
-            default -> throw new DataFormatException();
+            case 13 -> 1; // sp
+            case 15 -> 0; // pc
+            default -> throw new ExpectedRegisterException(line, op, args, 1, new String[]{"sp", "pc"});
         };
-        int imm = parseValue(args[2]);
-        if (rd < 0 || rd > 7 || imm < 0 || imm > 1020)
-            throw new DataFormatException();
+        int imm = parseValue(line, op, args, args[2]);
+
+        if (rd < 0 || rd > 7)
+            throw new ExpectedLowRegisterException(line, op, args, 0);
+
+        if (imm < 0 || imm > 1020)
+            throw new ExpectedNumberException(line, op, args, 2, 0, 1020);
 
         if (!isWordAligned(imm))
-            throw new DataFormatException("Immediate must be word-aligned.");
+            throw new ImmediateWordAlignmentException(line, op, args, 2, imm);
 
         imm >>= 2;
 
@@ -1509,15 +1553,17 @@ public class ArmParser {
     }
 
     // Format 13: add offset to Stack Pointer
-    private byte[] format13(String[] args) throws DataFormatException {
-        int imm = parseValue(args[1]);
-        if (imm < -508 || imm > 508)
-            throw new DataFormatException();
+    private byte[] format13(int line, String op, String[] args) throws ArmParseException {
+        int imm = parseValue(line, op, args, args[1]);
+        int immMin = -508;
+        int immMax = 508;
+        if (imm < immMin || imm > immMax)
+            throw new ExpectedNumberException(line, op, args, 1, immMin, immMax);
 
         int signFlag = imm < 0 ? 1 : 0;
         imm = Math.abs(imm);
         if (!isWordAligned(imm))
-            throw new DataFormatException("Immediate must be word-aligned.");
+            throw new ImmediateWordAlignmentException(line, op, args, 1, imm);
 
         imm >>= 2;
 
@@ -1525,68 +1571,103 @@ public class ArmParser {
     }
 
     // Format 14: push/pop registers
-    private byte[] format14(String[] args, String op) throws DataFormatException {
+    private byte[] format14(int line, String op, String[] args) throws ArmParseException {
         int rlist = 0;
         int pclrBit = 0;
+
+        List<String> tokensList = new ArrayList<>();
+        for (String s : args) {
+            String[] argTokens = s.split("-");
+            for (String argToken : argTokens)
+                tokensList.add(argToken.trim());
+        }
+        String[] tokens = new String[tokensList.size()];
+        for (int i = 0; i < tokens.length; ++i)
+            tokens[i] = tokensList.get(i);
+
+        int currentToken = 0;
+
         for (String arg : args) {
             if (arg.contains("-")) {
                 String[] registers = arg.split("-");
                 int rStart = parseRegister(registers[0]);
                 int rEnd = parseRegister(registers[1]);
 
-                if (rStart < 0 || rStart > 7 || rEnd < 0 || rEnd > 7)
-                    throw new DataFormatException();
+                if (rStart < 0 || rStart > 7)
+                    throw new ExpectedLowRegisterException(line, op, tokens, currentToken, registers[0]);
+                ++currentToken;
 
-                for (int i = rStart; i <= rEnd; ++i) {
+                if (rEnd < 0 || rEnd > 7)
+                    throw new ExpectedLowRegisterException(line, op, tokens, currentToken, registers[1]);
+                ++currentToken;
+
+                for (int i = rStart; i <= rEnd; ++i)
                     rlist |= 1 << i;
-                }
 
                 continue;
             }
 
             int register = parseRegister(arg);
             if (register < 0)
-                throw new DataFormatException();
+                throw new ExpectedRegisterException(line, op, tokens, currentToken, new String[]{"r0-r7", "lr", "pc"});
 
             if (register <= 7) {
                 rlist |= 1 << register;
+                ++currentToken;
                 continue;
             }
 
-            if (op.equalsIgnoreCase("push") && arg.equalsIgnoreCase("lr")) {
-                pclrBit = 1;
-                continue;
+            switch (op.toLowerCase()) {
+                case "push": {
+                    if (arg.equalsIgnoreCase("lr"))
+                        pclrBit = 1;
+                    else
+                        throw new ExpectedRegisterException(line, op, tokens, currentToken, arg, new String[]{"lr"});
+                    break;
+                }
+                case "pop": {
+                    if (arg.equalsIgnoreCase("pc"))
+                        pclrBit = 1;
+                    else
+                        throw new ExpectedRegisterException(line, op, tokens, currentToken, arg, new String[]{"pc"});
+                    break;
+                }
+                default:
+                    throw new ExpectedOpException(line, op, args, "push", "pop");
             }
 
-            if (op.equalsIgnoreCase("pop") && arg.equalsIgnoreCase("pc")) {
-                pclrBit = 1;
-                continue;
-            }
-
-            throw new DataFormatException();
+            ++currentToken;
         }
 
-        int loadStoreBit = -1;
-
-        if (op.equalsIgnoreCase("push"))
-            loadStoreBit = 0;
-        if (op.equalsIgnoreCase("pop"))
-            loadStoreBit = 1;
-
-        if (loadStoreBit == -1)
-            throw new DataFormatException();
+        int loadStoreBit;
+        switch (op.toLowerCase()) {
+            case "push" -> loadStoreBit = 0;
+            case "pop" -> loadStoreBit = 1;
+            default -> throw new ExpectedOpException(line, op, args, "push", "pop");
+        }
 
         return halfwordToBytes(rlist | (pclrBit << 8) | (loadStoreBit << 11) | 0xB400);
     }
 
     // Format 15: multiple load/store
-    private byte[] format15(String[] args, int loadStoreBit) throws DataFormatException {
-        if (loadStoreBit < 0 || loadStoreBit > 1)
-            throw new DataFormatException();
+    private byte[] format15(int line, String op, String[] args, boolean loadStore) throws ArmParseException {
+        int loadStoreFlag = loadStore ? 1 : 0;
 
         int rb = parseRegister(args[0]);
         if (rb < 0 || rb > 7)
-            throw new DataFormatException();
+            throw new ExpectedLowRegisterException(line, op, args, 0);
+
+        List<String> tokensList = new ArrayList<>();
+        for (String s : args) {
+            String[] argTokens = s.split("-");
+            for (String argToken : argTokens)
+                tokensList.add(argToken.trim());
+        }
+        String[] tokens = new String[tokensList.size()];
+        for (int i = 0; i < tokens.length; ++i)
+            tokens[i] = tokensList.get(i);
+
+        int currentToken = 0;
 
         int rlist = 0;
         for (int i = 1; i < args.length; ++i) {
@@ -1595,38 +1676,42 @@ public class ArmParser {
                 int rStart = parseRegister(registers[0]);
                 int rEnd = parseRegister(registers[1]);
 
-                if (rStart < 0 || rStart > 7 || rEnd < 0 || rEnd > 7)
-                    throw new DataFormatException();
+                if (rStart < 0 || rStart > 7)
+                    throw new ExpectedLowRegisterException(line, op, tokens, currentToken, registers[0]);
+                ++currentToken;
 
-                for (int j = rStart; j <= rEnd; ++j) {
+                if (rEnd < 0 || rEnd > 7)
+                    throw new ExpectedLowRegisterException(line, op, tokens, currentToken, registers[1]);
+                ++currentToken;
+
+                for (int j = rStart; j <= rEnd; ++j)
                     rlist |= 1 << j;
-                }
 
                 continue;
             }
 
             int register = parseRegister(args[i]);
             if (register < 0 || register > 7)
-                throw new DataFormatException();
+                throw new ExpectedLowRegisterException(line, op, tokens, currentToken, args[i]);
 
             rlist |= 1 << register;
         }
 
-        return halfwordToBytes(rlist | (rb << 8) | (loadStoreBit << 11) | 0xC000);
+        return halfwordToBytes(rlist | (rb << 8) | (loadStoreFlag << 11) | 0xC000);
     }
 
     // Format 16: conditional branch
-    private byte[] format16(String[] args, int condition) throws DataFormatException {
+    private byte[] format16(int line, String op, String[] args, int condition) throws ArmParseException {
         if (condition < 0 || condition > 13)
-            throw new DataFormatException();
+            throw new UnexpectedOpcodeException(line, op, args, condition, 0, 13);
 
         if (!labelAddressMap.containsKey(args[0]))
-            throw new DataFormatException(String.format("Could not find label \"%s\"", args[0]));
+            throw new ExpectedLabelException(line, op, args, 0);
 
         int jumpAddress = labelAddressMap.get(args[0]);
         int offset = jumpAddress - currentRamAddress - 4;
         if (offset < -256 || offset > 255)
-            throw new DataFormatException("Offset is too large");
+            throw new BranchOffsetException(line, op, args, 0, offset, -256, 255);
 
         offset = (offset >> 1) & 0xFF;
 
@@ -1634,27 +1719,27 @@ public class ArmParser {
     }
 
     // Format 17: software interrupt
-    private byte[] format17(String[] args) throws DataFormatException {
+    private byte[] format17(int line, String op, String[] args) throws ArmParseException {
         int value = Integer.parseInt(args[0]);
         if (value < 0 || value > 255)
-            throw new DataFormatException();
+            throw new ExpectedNumberException(line, op, args, 0, 0, 255);
 
         return halfwordToBytes(value | 0xDF00);
     }
 
     // Format 18: unconditional branch
-    private byte[] format18(String[] args) throws DataFormatException {
+    private byte[] format18(int line, String op, String[] args) throws ArmParseException {
         if (args.length != 1)
-            throw new DataFormatException();
+            throw new ArmParseArgCountException(line, op, args, 1);
 
         if (!labelAddressMap.containsKey(args[0]))
-            throw new DataFormatException();
+            throw new ExpectedLabelException(line, op, args, 0);
 
         int jumpAddress = labelAddressMap.get(args[0]);
 
         int offset = (jumpAddress - currentRamAddress - 4);
         if (offset < -2048 || offset > 2047)
-            throw new DataFormatException("Offset is too large");
+            throw new BranchOffsetException(line, op, args, 0, offset, -2048, 2047);
 
         offset = (offset >> 1) & 0x07FF;
 
@@ -1662,7 +1747,7 @@ public class ArmParser {
     }
 
     // Format 19: long branch with link
-    private byte[] format19(String[] args, boolean exchangeInstructionSet) throws DataFormatException {
+    private byte[] format19(int line, String op, String[] args, boolean exchangeInstructionSet) throws ArmParseException {
         if (globalAddressMap == null || overlay == null) {
             // Expected for getFuncSize only
             return new byte[4];
@@ -1673,9 +1758,7 @@ public class ArmParser {
         int targetFunctionEncoding;
 
         if (args[0].contains("::")) {
-            String[] funcStrs = args[0].split("::");
-            if (funcStrs.length != 2)
-                throw new DataFormatException("Expected Namespace::FuncName format but got " + args[0] + ".");
+            String[] funcStrs = args[0].split("::", 2);
 
             namespace = funcStrs[0];
             String funcName = funcStrs[1];
@@ -1683,7 +1766,7 @@ public class ArmParser {
             globalAddressMap.addReference(namespace, funcName, overlay, currentRamAddress);
             ParagonLiteAddressMap.AddressBase addressBase = globalAddressMap.getAddressData(namespace, funcName);
             if (!(addressBase instanceof ParagonLiteAddressMap.CodeAddress codeAddress))
-                throw new DataFormatException();
+                throw new ArmParseException(line, op, args, String.format("%s::%s is not a code address", namespace, funcName));
 
             funcRamAddress = codeAddress.getRamAddress();
             targetFunctionEncoding = codeAddress.getEncoding();
@@ -1694,11 +1777,8 @@ public class ArmParser {
 
             // TODO: Give proper warning when this was changed
             exchangeInstructionSet = targetFunctionEncoding == 4;
-
-            if (!isWordAligned(funcRamAddress))
-                throw new DataFormatException(String.format("Function address of %s (0x%08X) is not word-aligned", args[0], funcRamAddress));
         } else {
-            funcRamAddress = parseValue(args[0]);
+            funcRamAddress = parseValue(line, op, args, args[0]);
             targetFunctionEncoding = 2; // TODO: Assume Thumb for now
         }
 
@@ -1709,10 +1789,10 @@ public class ArmParser {
 
         if ((funcOffset < min || funcOffset > max) && overlay != null) {
             AddressPair addressPair = new AddressPair(globalAddressMap.getOverlay(namespace), funcRamAddress);
-            
+
             if (!redirectors.contains(addressPair))
                 redirectors.add(addressPair);
-            
+
             instructionAddressToRedirector.put(currentRamAddress, addressPair);
 
             exchangeInstructionSet = false;
@@ -1720,7 +1800,7 @@ public class ArmParser {
         }
 
         if (funcOffset < min || funcOffset > max)
-            throw new DataFormatException();
+            throw new BranchOffsetException(line, op, args, 0, funcOffset, min, max);
 
         int offsetHigh = (funcOffset >> 12) & 0x07FF;
         int offsetLow = (funcOffset >> 1) & 0x07FF;
@@ -1737,10 +1817,10 @@ public class ArmParser {
     }
 
     // Data
-    private byte[] getDataBytes(String valueStr, int size, int minValue, int maxValue) throws DataFormatException {
-        int value = parseValue(valueStr);
+    private byte[] getDataBytes(int line, String op, String valueStr, int size, int minValue, int maxValue) throws ArmParseException {
+        int value = parseValue(line, op, valueStr, valueStr);
         if (value < minValue || value > maxValue)
-            throw new DataFormatException("Value " + value + " was outside of range.");
+            throw new ExpectedNumberException(line, op, new String[]{valueStr}, 0, minValue, maxValue);
 
         if (size == 1)
             return new byte[]{(byte) (value & 0xFF)};
@@ -1769,7 +1849,7 @@ public class ArmParser {
             };
         }
 
-        throw new DataFormatException();
+        throw new ArmParseException(line, op, new String[]{valueStr}, String.format("Unexpected size %d", size));
     }
 
     private int parseRegister(String registerStr) {
@@ -1794,7 +1874,17 @@ public class ArmParser {
         };
     }
 
-    private int parseValue(String valueStr) throws DataFormatException {
+    private int parseValue(int line, String op, String[] args, String valueStr) throws ArmParseException {
+        String joinedArgs = String.join(", ", args).trim();
+        return parseValue(line, op, joinedArgs, valueStr);
+    }
+
+    private int parseValue(int line, String op, String args, String valueStr) throws ArmParseException {
+        String lineStr = String.format("%s %s", op, args).trim();
+        return parseValue(line, lineStr, valueStr);
+    }
+
+    private int parseValue(int line, String lineStr, String valueStr) throws ArmParseException {
         if (valueStr.startsWith("=") || valueStr.startsWith("#")) {
             valueStr = valueStr.substring(1).trim(); // remove = or #
         }
@@ -1809,9 +1899,9 @@ public class ArmParser {
                 return asInt;
             if (evalObj instanceof Boolean asBoolean)
                 return asBoolean ? 1 : 0;
-            throw new DataFormatException();
+            throw new ArmParseEvalException(line, lineStr, valueStr);
         } catch (ScriptException e) {
-            throw new DataFormatException(String.format("Could not parse %s: %s", valueStr, e));
+            throw new ArmParseEvalException(line, lineStr, valueStr);
         }
     }
 

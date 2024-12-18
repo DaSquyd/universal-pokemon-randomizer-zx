@@ -25,8 +25,8 @@ public class ArmArg_Register extends ArmArg {
         pc
     }
 
-    public ArmArg_Register(int line, String arg) throws ArmParseException {
-        value = parseArg(line, arg);
+    public ArmArg_Register(int line, String op, String[] args, int arg) throws ArmParseException {
+        value = parseArg(line, op, args, arg);
     }
 
     public ArmArg_Register(Type type) throws ArmDecodeException {
@@ -75,8 +75,8 @@ public class ArmArg_Register extends ArmArg {
         };
     }
     
-    protected int parseArg(int line, String arg) throws ArmArgException {
-        return switch (arg.toLowerCase()) {
+    protected int parseArg(int line, String op, String[] args, int arg) throws ArmArgException {
+        return switch (args[arg].toLowerCase()) {
             case "r0" -> 0;
             case "r1" -> 1;
             case "r2" -> 2;
@@ -93,7 +93,7 @@ public class ArmArg_Register extends ArmArg {
             case "r13", "sp" -> 13;
             case "r14", "lr" -> 14;
             case "r15", "pc" -> 15;
-            default -> throw new ArmArgException(line, arg);
+            default -> throw new ArmArgException(line, op, args, arg);
         };
     }
 

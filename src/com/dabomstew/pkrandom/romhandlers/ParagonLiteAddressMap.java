@@ -19,7 +19,7 @@ public class ParagonLiteAddressMap {
         Set<ReferenceAddressInterface> incomingReferences;
 
         // Instruction
-        AddressBase(ParagonLiteOverlay overlay, int address) {
+        AddressBase(ParagonLiteOverlay overlay, int address) {            
             this.overlay = overlay;
             this.address = address;
             incomingReferences = new HashSet<>();

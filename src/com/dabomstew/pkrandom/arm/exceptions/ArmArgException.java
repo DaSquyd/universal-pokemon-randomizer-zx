@@ -4,7 +4,7 @@ public class ArmArgException extends ArmParseException {
     @java.io.Serial
     private static final long serialVersionUID = 0x43A4462C48021334L;
 
-    public ArmArgException(int line, String arg) {
-        super(line, String.format("Invalid arg %s", arg));
+    public ArmArgException(int line, String op, String[] args, int arg) {
+        super(line, op, args, String.format("Invalid arg %s", args[arg]));
     }
 }
