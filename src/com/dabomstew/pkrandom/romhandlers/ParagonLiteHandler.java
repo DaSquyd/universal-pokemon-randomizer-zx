@@ -61,7 +61,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.ParagonLite;
+    public static Mode mode = Mode.Redux;
 
     Gen5RomHandler romHandler;
 
@@ -631,7 +631,7 @@ public class ParagonLiteHandler {
 
         addGlobalBattleTextValue(battleStrings2, "AuroraVeil", "Disappeared");
         addBattleStringStandard("Your team's\nAurora Veil disappeared!");
-        addBattleStringStandard("Your opposing team's\nAurora Veil disappeared!");
+        addBattleStringStandard("The opposing team's\nAurora Veil disappeared!");
     }
 
     public void tempFixFairyStruggle() {
@@ -2649,7 +2649,7 @@ public class ParagonLiteHandler {
     }
 
     private void addGoodAsGold() {
-        int number = Abilities.sharpness;
+        int number = Abilities.goodAsGold;
 
         // Name
         abilityNames.set(number, "Good as Gold");
@@ -6085,12 +6085,12 @@ public class ParagonLiteHandler {
             // Poke 1
             {
                 TrainerPokemon poke1 = tr.pokemon.get(0);
-                poke1.pokemon = romHandler.getPokemon().get(Species.weavile);
-                pokes[poke1.pokemon.number].ability1 = Abilities.pickpocket;
+                poke1.pokemon = romHandler.getPokemon().get(Species.cofagrigus);
+                pokes[poke1.pokemon.number].ability1 = Abilities.goodAsGold;
                 poke1.abilitySlot = 1;
-                poke1.level = 20;
-                poke1.moves = new int[]{Moves.icePunch, Moves.fakeOut, 0, 0};
-                poke1.heldItem = Items.sitrusBerry;
+                poke1.level = 53;
+                poke1.moves = new int[]{Moves.haze, Moves.meanLook, Moves.hex, 0};
+//                poke1.heldItem = Items.sitrusBerry;
                 poke1.IVs = 0;
             }
 
