@@ -390,15 +390,16 @@ public class ParagonLiteHandler {
     }
 
     private enum BattleTextVar {
-        TrainerName('Ā'),
-        Species('ā'),
-        Nickname('Ă'),
-        Type('ă'),
-        Ability('Ć'),
-        Move('ć'),
-        Item('ĉ'),
-        RealNickname('Č'),
-        TrainerClass('Ď');
+        TrainerName('\u0100'),
+        SpeciesName('\u0101'),
+        PokeNickname('\u0102'),
+        Type('\u0103'),
+        PokedexType('\u0104'),
+        Place('\u0105'),
+        AbilityName('\u0106'),
+        MoveName('\u0107'),
+        Nature('\u0108'),
+        ItemName('\u0109');
 
         final char value;
 
@@ -441,7 +442,7 @@ public class ParagonLiteHandler {
     }
 
     private String[] makeBattleStringWildFoe(String format, BattleTextVar... vars) {
-        if (vars.length < 1 || vars[0] != BattleTextVar.Nickname)
+        if (vars.length < 1 || vars[0] != BattleTextVar.PokeNickname)
             throw new RuntimeException();
 
         String nicknameVarStr = "__NICKNAME_VAR__";
@@ -485,136 +486,136 @@ public class ParagonLiteHandler {
 
     private void setbattleEventStrings1() {
         // Heal Prevention (Heal Block + Psychic Noise
-        setBattleStringWildFoe(884, "{0}'s healing prevention\nwore off!", BattleTextVar.Nickname);
-        setBattleStringWildFoe(887, "{0} was prevented\nfrom healing!", BattleTextVar.Nickname);
-        setBattleStringWildFoe(890, "{0} can't use\n{0} because healing is prevented!", BattleTextVar.Nickname, BattleTextVar.Move);
+        setBattleStringWildFoe(884, "{0}'s healing prevention\nwore off!", BattleTextVar.PokeNickname);
+        setBattleStringWildFoe(887, "{0} was prevented\nfrom healing!", BattleTextVar.PokeNickname);
+        setBattleStringWildFoe(890, "{0} can't use\n{0} because healing is prevented!", BattleTextVar.PokeNickname, BattleTextVar.MoveName);
 
         // Frostbite
-        setBattleStringWildFoe(288, "{0} got\nfrostbite!", BattleTextVar.Nickname);
-        setBattleStringWildFoe(291, "{0} was hurt\nby its frostbite!", BattleTextVar.Nickname);
-        setBattleStringWildFoe(294, "{0}'s frostbite was healed!", BattleTextVar.Nickname);
-        setBattleStringWildFoe(297, "{0} already\nhas frostbite!", BattleTextVar.Nickname);
-        setBattleStringWildFoe(300, "{0} cannot\nget frostbite!", BattleTextVar.Nickname);
+        setBattleStringWildFoe(288, "{0} got\nfrostbite!", BattleTextVar.PokeNickname);
+        setBattleStringWildFoe(291, "{0} was hurt\nby its frostbite!", BattleTextVar.PokeNickname);
+        setBattleStringWildFoe(294, "{0}'s frostbite was healed!", BattleTextVar.PokeNickname);
+        setBattleStringWildFoe(297, "{0} already\nhas frostbite!", BattleTextVar.PokeNickname);
+        setBattleStringWildFoe(300, "{0} cannot\nget frostbite!", BattleTextVar.PokeNickname);
 
         // Common Speed Was Not Lowered
         addGlobalBattleTextValue(battleStrings1, "Common", "SpeedNotLowered");
-        addBattleStringWildFoe("{0}'s Speed\nwas not lowered!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0}'s Speed\nwas not lowered!", BattleTextVar.PokeNickname);
 
         // Polluted Terrain damage
         addGlobalBattleTextValue(battleStrings1, "PollutedTerrain", "Hurt");
-        addBattleStringWildFoe("{0} was hurt\nby the polluted terrain!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} was hurt\nby the polluted terrain!", BattleTextVar.PokeNickname);
 
         // Haunted Terrain damage
         addGlobalBattleTextValue(battleStrings1, "HauntedTerrain", "Hurt");
-        addBattleStringWildFoe("{0} was hurt\nby the haunted terrain!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} was hurt\nby the haunted terrain!", BattleTextVar.PokeNickname);
 
         // #023 Shadow Tag
         addGlobalBattleTextValue(battleStrings1, "ShadowTag", "Activate");
         switch (mode) {
-            case ParagonLite -> addBattleStringWildFoe("{0} steps on shadows\nto prevent escape!", BattleTextVar.Nickname);
-            case Redux -> addBattleStringWildFoe("{0} steps stalks\nthe shadows!", BattleTextVar.Nickname);
+            case ParagonLite -> addBattleStringWildFoe("{0} steps on shadows\nto prevent escape!", BattleTextVar.PokeNickname);
+            case Redux -> addBattleStringWildFoe("{0} steps stalks\nthe shadows!", BattleTextVar.PokeNickname);
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
 
         // #025 Wonder Guard
         addGlobalBattleTextValue(battleStrings1, "WonderGuard", "Activate");
-        addBattleStringWildFoe("{0} is cloaked in\na mysterious power!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} is cloaked in\na mysterious power!", BattleTextVar.PokeNickname);
 
         // #035 Illuminate
         addGlobalBattleTextValue(battleStrings1, "Illuminate", "Activate");
-        addBattleStringWildFoe("{0} illuminated the area!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} illuminated the area!", BattleTextVar.PokeNickname);
 
         // #037 Huge Power
         addGlobalBattleTextValue(battleStrings1, "HugePower", "Activate");
-        addBattleStringWildFoe("{0} is flexing\nits muscles!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} is flexing\nits muscles!", BattleTextVar.PokeNickname);
 
         // #041 Water Veil
         addGlobalBattleTextValue(battleStrings1, "WaterVeil", "Activate");
-        addBattleStringWildFoe("{0} is cloaked\nin water!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} is cloaked\nin water!", BattleTextVar.PokeNickname);
 
         // #042 Magnet Pull
         addGlobalBattleTextValue(battleStrings1, "MagnetPull", "Activate");
-        addBattleStringWildFoe("{0} is generating\na magnetic field!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} is generating\na magnetic field!", BattleTextVar.PokeNickname);
 
         // #057 Plus
         addGlobalBattleTextValue(battleStrings1, "Plus", "Activate");
-        addBattleStringWildFoe("{0} is overflowing\nwith a positive charge!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} is overflowing\nwith a positive charge!", BattleTextVar.PokeNickname);
 
         // #058 Minus
         addGlobalBattleTextValue(battleStrings1, "Minus", "Activate");
-        addBattleStringWildFoe("{0} is overflowing\nwith a negative charge!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} is overflowing\nwith a negative charge!", BattleTextVar.PokeNickname);
 
         // #071 Arena Trap
         addGlobalBattleTextValue(battleStrings1, "ArenaTrap", "Activate");
         switch (mode) {
-            case ParagonLite -> addBattleStringWildFoe("{0} digs\na pit trap!", BattleTextVar.Nickname);
-            case Redux -> addBattleStringWildFoe("{0} traps\nthe arena!", BattleTextVar.Nickname);
+            case ParagonLite -> addBattleStringWildFoe("{0} digs\na pit trap!", BattleTextVar.PokeNickname);
+            case Redux -> addBattleStringWildFoe("{0} traps\nthe arena!", BattleTextVar.PokeNickname);
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
 
         // #074 Pure Power
         addGlobalBattleTextValue(battleStrings1, "PurePower", "Activate");
-        addBattleStringWildFoe("{0} is focusing\nits mind!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} is focusing\nits mind!", BattleTextVar.PokeNickname);
 
         // #105 Super Luck
         addGlobalBattleTextValue(battleStrings1, "SuperLuck", "Activate");
-        addBattleStringWildFoe("{0} is feeling lucky!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} is feeling lucky!", BattleTextVar.PokeNickname);
 
         // #277 Wind Power
         addGlobalBattleTextValue(battleStrings1, "WindPower", "Activate");
-        addBattleStringWildFoe("Being hit by {1} charged\n{0} with power!", BattleTextVar.Nickname, BattleTextVar.Move);
+        addBattleStringWildFoe("Being hit by {1} charged\n{0} with power!", BattleTextVar.PokeNickname, BattleTextVar.MoveName);
 
         // #293 Supreme Overloard
         addGlobalBattleTextValue(battleStrings1, "SupremeOverlord", "Activate");
-        addBattleStringWildFoe("{0} gained strength\nfrom the fallen!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} gained strength\nfrom the fallen!", BattleTextVar.PokeNickname);
 
         // #506 Stone Home
         addGlobalBattleTextValue(battleStrings1, "StoneHome", "Activate");
-        addBattleStringWildFoe("{0} protects its allies\nwith its shell!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} protects its allies\nwith its shell!", BattleTextVar.PokeNickname);
 
         // #508 Rip Tide
         addGlobalBattleTextValue(battleStrings1, "RipTide", "Activate");
-        addBattleStringWildFoe("{0} generated a\nstrong current for its team!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} generated a\nstrong current for its team!", BattleTextVar.PokeNickname);
 
         // #564 Sticky Web
         addGlobalBattleTextValue(battleStrings1, "StickyWeb", "Enter");
-        addBattleStringWildFoe("{0} was caught\nin a sticky web!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} was caught\nin a sticky web!", BattleTextVar.PokeNickname);
 
         // #596 Spiky Shield
         addGlobalBattleTextValue(battleStrings1, "SpikyShield", "Activate");
-        addBattleStringWildFoe("{0} was hurt\nby Spiky Shield!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} was hurt\nby Spiky Shield!", BattleTextVar.PokeNickname);
 
 
         // MOVES
 
         // #800 Meteor Beam
         addGlobalBattleTextValue(battleStrings1, "MeteorBeam", "Charge");
-        addBattleStringWildFoe("{0} is overflowing\nwith space power!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} is overflowing\nwith space power!", BattleTextVar.PokeNickname);
 
         // 809 Poltergeist
         addGlobalBattleTextValue(battleStrings1, "Poltergeist", "Hit");
-        addBattleStringWildFoe("{0} is about to be\nattacked by its {1}!", BattleTextVar.Nickname, BattleTextVar.Item);
+        addBattleStringWildFoe("{0} is about to be\nattacked by its {1}!", BattleTextVar.PokeNickname, BattleTextVar.ItemName);
 
         // #905 Electro Shot
         addGlobalBattleTextValue(battleStrings1, "ElectroShot", "Charge");
-        addBattleStringWildFoe("{0} absorbed\nelectricity!", BattleTextVar.Nickname);
+        addBattleStringWildFoe("{0} absorbed\nelectricity!", BattleTextVar.PokeNickname);
 
 
         // ITEMS
 
         // #114 Assault Vest
         addCommonGlobalBattleTextValue(battleStrings1, "StatusMovePreventItem", "StatusMoveAttempted");
-        makeBattleStringWildFoe("{0} can't use {1}\nbecause of the {2}!", BattleTextVar.Nickname, BattleTextVar.Move, BattleTextVar.Item);
+        makeBattleStringWildFoe("{0} can't use {1}\nbecause of the {2}!", BattleTextVar.PokeNickname, BattleTextVar.MoveName, BattleTextVar.ItemName);
 
         // Weather Rocks, Plates
         addCommonGlobalBattleTextValue(battleStrings1, "GlowItem", "Activate");
-        addBattleStringWildFoe("{0}'s {1}\nbegan to glow!", BattleTextVar.Nickname, BattleTextVar.Item);
+        addBattleStringWildFoe("{0}'s {1}\nbegan to glow!", BattleTextVar.PokeNickname, BattleTextVar.ItemName);
     }
 
-    private void setBattleEventStrings2() {
+    private void setBattleEventStrings2() {        
         // Status move prevent item
         addCommonGlobalBattleTextValue(battleStrings2, "StatusMovePreventItem", "StatusMoveSelected");
-        addBattleStringStandard("The effects of the {0} prevent\nstatus moves from being used!", BattleTextVar.Item);
+        addBattleStringStandard("The effects of the {0} prevent\nstatus moves from being used!", BattleTextVar.ItemName);
 
         // Sticky Web
         addGlobalBattleTextValue(battleStrings2, "StickyWeb", "Laid");
@@ -6090,7 +6091,7 @@ public class ParagonLiteHandler {
                 poke1.abilitySlot = 1;
                 poke1.level = 53;
                 poke1.moves = new int[]{Moves.haze, Moves.meanLook, Moves.hex, 0};
-//                poke1.heldItem = Items.sitrusBerry;
+                poke1.heldItem = Items.sitrusBerry;
                 poke1.IVs = 0;
             }
 
