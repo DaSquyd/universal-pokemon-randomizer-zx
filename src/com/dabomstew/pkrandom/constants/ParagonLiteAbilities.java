@@ -110,7 +110,7 @@ public class ParagonLiteAbilities {
             Abilities.fluffy, // 218
 //            Abilities.dazzling, // 219
 //            Abilities.soulHeart, // 220
-//            Abilities.tanglingHair, // 221
+            Abilities.tanglingHair, // 221
 //            Abilities.receiver, // 222
 //            Abilities.powerOfAlchemy, // 223
 //            Abilities.beastBoost, // 224
@@ -135,7 +135,7 @@ public class ParagonLiteAbilities {
             Abilities.windRider, // 274
             Abilities.rockyPayload, // 276
 //            Abilities.windPower, // 277
-//            Abilities.goodAsGold, // 283
+            Abilities.goodAsGold, // 283
 //            Abilities.cudChew, // 291
             Abilities.sharpness, // 292
             Abilities.supremeOverlord, // 293

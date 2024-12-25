@@ -1608,7 +1608,7 @@ public class ParagonLiteHandler {
     public void setAbilities() {
         registerAbilityEffects();
 
-        int abilityListAdditions = 50;
+        int abilityListAdditions = 51;
 
         // Move AbilityList
         relocateAbilityListRamAddress(abilityListAdditions);
@@ -1643,7 +1643,7 @@ public class ParagonLiteHandler {
             }
         }
 
-        int totalChanges = 109;
+        int totalChanges = 110;
         int currentChanges = -1;
         long startTime = System.currentTimeMillis();
         System.out.println("setting abilities...");
@@ -1743,6 +1743,10 @@ public class ParagonLiteHandler {
         addFluffy();
         moldBreakerIgnoredAbilities.add(Abilities.fluffy);
 
+        // #221 Tangling Hair
+        Utils.printProgress(totalChanges, ++currentChanges, "Tangling Hair");
+        addTanglingHair();
+
         // #238 Cotton Down
         Utils.printProgress(totalChanges, ++currentChanges, "Cotton Down");
         addCottonDown();
@@ -1758,10 +1762,12 @@ public class ParagonLiteHandler {
         // #270 Thermal Exchange
         Utils.printProgress(totalChanges, ++currentChanges, "Thermal Exchange");
         addThermalExchange();
+        moldBreakerIgnoredAbilities.add(Abilities.thermalExchange);
 
         // #274 Wind Rider
         Utils.printProgress(totalChanges, ++currentChanges, "Wind Rider");
         addWindRider();
+        moldBreakerIgnoredAbilities.add(Abilities.windRider);
 
         // #276 Rocky Payload
         Utils.printProgress(totalChanges, ++currentChanges, "Rocky Payload");
@@ -1774,6 +1780,7 @@ public class ParagonLiteHandler {
         // #283 Good as Gold
         Utils.printProgress(totalChanges, ++currentChanges, "Good as Gold");
         addGoodAsGold();
+        moldBreakerIgnoredAbilities.add(Abilities.goodAsGold);
 
         // #292 Sharpness
         Utils.printProgress(totalChanges, ++currentChanges, "Sharpness");
@@ -1801,6 +1808,7 @@ public class ParagonLiteHandler {
         // #502 Insectivore
         Utils.printProgress(totalChanges, ++currentChanges, "Insectivore");
         addInsectivore();
+        moldBreakerIgnoredAbilities.add(ParagonLiteAbilities.insectivore);
 
         // #503 Prestige
         Utils.printProgress(totalChanges, ++currentChanges, "Prestige");
@@ -1813,6 +1821,7 @@ public class ParagonLiteHandler {
         // #505 Assimilate
         Utils.printProgress(totalChanges, ++currentChanges, "Assimilate");
         addAssimilate();
+        moldBreakerIgnoredAbilities.add(ParagonLiteAbilities.assimilate);
 
         // #506 Stone Home
         Utils.printProgress(totalChanges, ++currentChanges, "Stone Home");
@@ -1821,6 +1830,7 @@ public class ParagonLiteHandler {
         // #507 Cacophony
         Utils.printProgress(totalChanges, ++currentChanges, "Cacophony");
         addCacophony();
+        moldBreakerIgnoredAbilities.add(ParagonLiteAbilities.cacophony);
 
         Utils.printProgress(totalChanges, ++currentChanges, "Rip Tide");
         addRipTide();
@@ -1832,6 +1842,7 @@ public class ParagonLiteHandler {
         // #510 Glazeware
         Utils.printProgress(totalChanges, ++currentChanges, "Glazeware");
         addGlazeware();
+        moldBreakerIgnoredAbilities.add(ParagonLiteAbilities.glazeware);
 
         // #511 Sun-Soaked
         Utils.printProgress(totalChanges, ++currentChanges, "Sun-Soaked");
@@ -1840,6 +1851,7 @@ public class ParagonLiteHandler {
         // #512 Colossal
         Utils.printProgress(totalChanges, ++currentChanges, "Colossal");
         addColossal();
+        moldBreakerIgnoredAbilities.add(ParagonLiteAbilities.colossal);
 
         // #513 Final Thread
 //        Utils.printProgress(totalChanges, ++currentChanges, "Final Thread");
@@ -1937,6 +1949,7 @@ public class ParagonLiteHandler {
         // #035 Illuminate
         Utils.printProgress(totalChanges, ++currentChanges, "Illuminate");
         addIlluminate();
+        moldBreakerIgnoredAbilities.add(Abilities.illuminate);
 
         // #037 Huge Power (1.5x Attack)
         Utils.printProgress(totalChanges, ++currentChanges, "Huge Power");
@@ -1985,6 +1998,8 @@ public class ParagonLiteHandler {
         // #058 Minus (4/3 ally Sp. Def)
         Utils.printProgress(totalChanges, ++currentChanges, "Minus");
         setMinus();
+        if (mode == Mode.ParagonLite)
+            moldBreakerIgnoredAbilities.add(Abilities.minus);
 
         // #061 Shed Skin
         Utils.printProgress(totalChanges, ++currentChanges, "Shed Skin");
@@ -1997,6 +2012,8 @@ public class ParagonLiteHandler {
         // #072 Vital Spirit (boosts Sp. Def on hit)
         Utils.printProgress(totalChanges, ++currentChanges, "Vital Spirit");
         setVitalSpirit();
+        if (mode == Mode.ParagonLite)
+            moldBreakerIgnoredAbilities.remove(Abilities.illuminate);
 
         // #073 White Smoke
         Utils.printProgress(totalChanges, ++currentChanges, "White Smoke");
@@ -2017,6 +2034,7 @@ public class ParagonLiteHandler {
         // #80 Steadfast (+ immune to taunt)
         Utils.printProgress(totalChanges, ++currentChanges, "Steadfast");
         setSteadfast();
+        moldBreakerIgnoredAbilities.add(Abilities.steadfast);
 
         // #083 Anger Point (Boost Attack on miss, crit, or flinch)
         Utils.printProgress(totalChanges, ++currentChanges, "Anger Point");
@@ -2057,6 +2075,8 @@ public class ParagonLiteHandler {
         // #115 Ice Body (+ Ice-type immunity)
         Utils.printProgress(totalChanges, ++currentChanges, "Ice Body");
         setIceBody();
+        if (mode == Mode.ParagonLite || mode == Mode.Redux)
+            moldBreakerIgnoredAbilities.add(Abilities.iceBody);
 
         // #117 Snow Warning (+ no hail damage)
         Utils.printProgress(totalChanges, ++currentChanges, "Snow Warning");
@@ -2108,10 +2128,14 @@ public class ParagonLiteHandler {
         // #154 Justified (+ immunity to Dark-type moves)
         Utils.printProgress(totalChanges, ++currentChanges, "Justified");
         setJustified();
+        if (mode == Mode.ParagonLite || mode == Mode.Redux)
+            moldBreakerIgnoredAbilities.add(Abilities.justified);
 
         // #155 Rattled (+ Activate on Intimidate)
         Utils.printProgress(totalChanges, ++currentChanges, "Rattled");
         setRattled();
+        if (mode == Mode.Redux)
+            moldBreakerIgnoredAbilities.add(Abilities.rattled);
 
         // #157 Sap Sipper -> Herbivore
         Utils.printProgress(totalChanges, ++currentChanges, "Herbivore");
@@ -2514,6 +2538,19 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, "fluffy.s"));
+    }
+
+    private void addTangledHir() {
+        int number = Abilities.tanglingHair;
+
+        // Name
+        abilityNames.set(number, "Tangled Hair");
+        
+        // Description
+        abilityDescriptions.set(number, abilityDescriptions.get(Abilities.gooey));
+
+        // Data
+        cloneAbilityEventHandlers(number, Abilities.gooey);
     }
 
     private void addCottonDown() {
@@ -3565,7 +3602,6 @@ public class ParagonLiteHandler {
 
     private void setMinus() {
         int number = Abilities.minus;
-
 
         switch (mode) {
             case ParagonLite -> {
