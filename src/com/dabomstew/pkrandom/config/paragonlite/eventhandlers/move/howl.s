@@ -45,7 +45,15 @@ LoopStart:
     bl      Battle::GetPoke
     mov     r1, #BPV_EffectiveAbility
     bl      Battle::GetPokeStat
-    cmp     r0, #283 ; Good as Gold
+    ; TODO: make this not work as dumb as this
+    mov     r1, #43 ; soundproof
+    cmp     r0, r1
+    beq     LoopEnd
+    add     r1, #(283 - 43) ; Good as Gold
+    cmp     r0, r1
+    beq     LoopEnd
+    add     r1, #(507 - 283) ; Cacophony
+    cmp     r0, r1
     beq     LoopEnd
     
     ldr     r0, [sp, #S_PokeCount]
