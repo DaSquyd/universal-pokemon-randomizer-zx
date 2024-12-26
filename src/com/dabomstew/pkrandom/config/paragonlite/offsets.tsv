@@ -257,6 +257,10 @@ Battle	ServerControl_MoveExeCheck1	Code		thumb	0x021C003C	0x021C001C	0x021A3B00	
 Battle	ServerControl_CheckMoveExeFreezeThaw	Code		thumb	0x021C0424	0x021C0404	0x021A3EE8	0x021A3EA8
 Battle	ServerDisplay_MoveExecuteFailMessage	Code		thumb	0x021C0540	0x021C0520	0x021A4004	0x021A3FC4
 Battle	ServerControl_DamageRoot	Code		thumb	0x021C093C	0x021C091C	0x021A4400	0x021A43C0
+Battle	ServerControl_DamageSingleCount	Code		thumb			0x021A4870	0x021A4830
+Battle	ServerControl_DamageMultiCount	Code		thumb			0x021A4A04	0x021A49C4
+Battle	ServerControl_DamageSide	Code		thumb			0x021A4C84	0x021A4C44
+Battle	ServerControl_DamageSideCore	Code		thumb			0x021A4CD0	0x021A4C90
 Battle	ServerControl_DamageFreezeThaw	Code		thumb	0x021C1D00	0x021C1CE0	0x021A57C4	0x021A5784
 Battle	ServerEvent_CalcDamage	Code		thumb	0x021C1E94	0x021C1E74	0x021A5958	0x021A5918
 Battle	ServerControl_CheckSimpleDamageEnabled	Code		thumb	0x021C20DC	0x021C20BC	0x021A5BAC	0x021A5B6C
@@ -429,7 +433,7 @@ Battle	Data_BattleClient_Init_LineNum	Data	4		0x021CD8E8	0x021CD8C8	0x021B18B8	0
 Battle	Client_ActionSelect_Fight	Code		thumb	0x021CEAB4	0x021CEA94	0x021B3C40	0x021B3C00
 Battle	Unk_21B3E60	Code		thumb	0x021CECD4	0x021CECB4	0x021B3E60	0x021B3E20
 Battle	CheckForSelectableMove	Code		thumb	0x021CF544	0x021CF524	0x021B476C	0x021B472C
-Battle	IsSelectedMoveValid	Code		thumb	0x021CF5D0	0x021CF5B0	0x021B47F8	0x021B47B8
+Battle	IsUnselectableMove	Code		thumb	0x021CF5D0	0x021CF5B0	0x021B47F8	0x021B47B8
 Battle	StoreSelectableMoveFlag	Code		thumb	0x021CF83C	0x021CF81C	0x021B4A64	0x021B4A24
 Battle	CanPokeUseHeldItem	Code		thumb	0x021CF8BC	0x021CF89C	0x021B4AE4	0x021B4AA4
 Battle	IsPokeTrapped	Code		thumb	0x021CF9D4	0x021CF9B4	0x021B4BFC	0x021B4BBC

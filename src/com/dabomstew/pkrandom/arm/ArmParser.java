@@ -199,10 +199,6 @@ public class ArmParser {
         return Integer.parseInt(str);
     }
 
-    public byte[] parse(List<String> lines) throws ArmParseException {
-        return parse(lines, null, 0);
-    }
-
     enum IfState {
         Processing,
         Idle,
@@ -467,7 +463,7 @@ public class ArmParser {
             int offset = currentRamAddress - initialRamAddress;
 
             writeHalfword(returnValue, offset, 0x4778); // bx pc
-            writeHalfword(returnValue, offset + 2, 0x46C0); // nop            
+            writeHalfword(returnValue, offset + 2, 0x46C0); // nop
             writeWord(returnValue, offset + 4, 0xE59FC000); // ldr r12, =(address+1 or address+0)
             writeWord(returnValue, offset + 8, 0xE12FFF1C); // bx r12
 
@@ -504,8 +500,8 @@ public class ArmParser {
         return returnValue;
     }
 
-    public int getByteLength(List<String> lines) throws ArmParseException {
-        byte[] bytes = parse(lines);
+    public int getByteLength(ParagonLiteOverlay overlay, List<String> lines) throws ArmParseException {
+        byte[] bytes = parse(lines, overlay, overlay.getAddress()); // uses base address as default
         return bytes.length;
     }
 

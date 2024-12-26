@@ -419,7 +419,7 @@ public class ParagonLiteOverlay {
 
     public int writeCode(List<String> lines, String label) {
         try {
-            int size = armParser.getByteLength(lines);
+            int size = armParser.getByteLength(this, lines);
             int romAddress = allocateRom(size);
 
             writeCodeInternal(lines, romAddress, label);
@@ -431,7 +431,7 @@ public class ParagonLiteOverlay {
 
     public int writeCodeUnnamed(List<String> lines) {
         try {
-            int size = armParser.getByteLength(lines);
+            int size = armParser.getByteLength(this, lines);
             int romAddress = allocateRom(size);
 
             String label = String.format("Code_0x%08X", romAddress);
@@ -554,7 +554,7 @@ public class ParagonLiteOverlay {
 
     public void replaceCode(List<String> lines, String label) {
         try {
-            int size = armParser.getByteLength(lines);
+            int size = armParser.getByteLength(this, lines);
             int romAddress = allocateRom(size);
 
             int ramAddress = romToRamAddress(romAddress);

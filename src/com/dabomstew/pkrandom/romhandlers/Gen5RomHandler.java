@@ -5694,7 +5694,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setTypeForPlate();
         paragonLite.setGemDamageBoost();
         paragonLite.setMultiStrikeLoadedDice();
-        paragonLite.setIsSelectedMoveValid();
+        paragonLite.setIsUnselectableMove();
         paragonLite.setWeatherDamage();
         paragonLite.setShinyRate();
         paragonLite.setTrainerShiny();
@@ -5707,7 +5707,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setBattlePokeCreate();
         paragonLite.setMaxSpeedFix();
         paragonLite.setDynamicTurnOrder();
-
         paragonLite.setMoves();
         paragonLite.setItems();
         paragonLite.setAbilities();

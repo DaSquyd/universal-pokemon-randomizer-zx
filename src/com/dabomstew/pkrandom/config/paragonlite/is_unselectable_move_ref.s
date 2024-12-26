@@ -28,13 +28,13 @@
 ; Is the user holding Choice Band/Specs/Scarf and is already locked into a move?
 CheckChoiceItem:
     bl      Battle::CanPokeUseHeldItem
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     CheckEncore
     
     mov     r0, r6
     mov     r1, #MC_ChoiceLock
     bl      Battle::CheckCondition
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     CheckEncore
     
     mov     r0, r6
@@ -46,7 +46,7 @@ CheckChoiceItem:
     ldr     r1, [sp, #0]
     mov     r0, r6
     bl      Battle::HasMove
-    cmp     r0, #0 ; false
+    cmp     r0, #FALSE
     beq     CheckEncore
     
     ldr     r0, [sp, #0]
@@ -57,7 +57,7 @@ CheckChoiceItem:
     beq     ChoiceItemReturnTrue
     
     mov     r0, r4
-    mov     r1, #1 ; File 0x11
+    mov     r1, #1
     mov     r2, #99 ; "The [item] allows the use of only [move]"
     bl      Battle::DisplayMessage
     
@@ -74,7 +74,7 @@ CheckChoiceItem:
     
 ChoiceItemReturnTrue:
     add     sp, #20
-    mov     r0, #1
+    mov     r0, #TRUE
     pop     {r4-r7, pc}
     
 

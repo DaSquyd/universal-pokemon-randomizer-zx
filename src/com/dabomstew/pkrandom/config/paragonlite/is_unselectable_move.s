@@ -46,7 +46,7 @@ AssaultVestCheck:
 NoStatusMove:
     mov     r0, r5
     bl      ARM9::IsMoveDamaging
-    cmp     r0, #0
+    cmp     r0, #FALSE
     bne     CheckChoiceItem
     
     cmp     r4, #0
@@ -59,7 +59,6 @@ NoStatusMove:
     
     mov     r0, r6
     bl      Battle::Poke_GetHeldItem
-    
     mov     r1, r0
     mov     r0, r4
     bl      Battle::StringParam_AddArg
@@ -74,6 +73,8 @@ NoStatusMove_ReturnTrue:
 
 ; Is the user holding Choice Band/Specs/Scarf and is already locked into a move?
 CheckChoiceItem:
+    mov     r0, r7
+    mov     r1, r6
     bl      Battle::CanPokeUseHeldItem
     cmp     r0, #FALSE
     beq     CheckEncore
@@ -104,7 +105,7 @@ CheckChoiceItem:
     beq     ChoiceItemReturnTrue
     
     mov     r0, r4
-    mov     r1, #1 ; File 0x11
+    mov     r1, #1
     mov     r2, #99 ; "The [item] allows the use of only [move]"
     bl      Battle::DisplayMessage
     
