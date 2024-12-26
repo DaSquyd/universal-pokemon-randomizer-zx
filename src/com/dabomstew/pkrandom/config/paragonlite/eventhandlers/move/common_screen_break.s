@@ -16,11 +16,13 @@
     cmp     r0, #FALSE
     bne     Work
     
+    mov     r0, r6
     mov     r1, #SC_LightScreen
     bl      BattleServer::SideStatus_IsActive
     cmp     r0, #FALSE
     bne     Work
     
+    mov     r0, r6
     mov     r1, #SC_AuroraVeil
     bl      BattleServer::SideStatus_IsActive
     cmp     r0, #FALSE
