@@ -2540,7 +2540,7 @@ public class ParagonLiteHandler {
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, "fluffy.s"));
     }
 
-    private void addTangledHir() {
+    private void addTanglingHair() {
         int number = Abilities.tanglingHair;
 
         // Name
