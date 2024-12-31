@@ -135,6 +135,9 @@ public class ArmParser {
                 "ServerFlow",
                 "SideStatus",
                 "TrainerAIEnv",
+                "UnovaLink_MenuParam",
+                "UnovaLink_MenuParam_Button",
+                "UnovaLink_MenuWork"
         };
 
         for (String structName : structNames) {

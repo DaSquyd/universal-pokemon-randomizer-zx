@@ -1,0 +1,14 @@
+{
+  "frame": 0,
+  "fontPalette": 4,
+  "frameGraphic": 8,
+  "framePalette": 12,
+  "message": 16,
+  "font": 20,
+  "buttonCount": 24,
+  "cursor": 28,
+  "callback": 32,
+  "workAddress": 36,
+  "buttons": 40,
+  "SIZE_WITHOUT_BUTTONS": 40
+}

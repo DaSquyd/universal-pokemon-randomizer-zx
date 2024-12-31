@@ -5677,6 +5677,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         // Code updates
         paragonLite.tempFixFairyStruggle();
+        paragonLite.setKeySystem();
         paragonLite.setPokeData();
         paragonLite.setBoxPreview();
         paragonLite.fixChallengeModeLevelBug();

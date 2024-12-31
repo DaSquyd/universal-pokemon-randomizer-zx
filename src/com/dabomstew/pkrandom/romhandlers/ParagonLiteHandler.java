@@ -70,12 +70,15 @@ public class ParagonLiteHandler {
 
     ParagonLiteOverlay arm9;
     ParagonLiteOverlay fieldOvl;
+    ParagonLiteOverlay uiCommonOvl;
     ParagonLiteOverlay bagOvl;
     ParagonLiteOverlay battleOvl;
     ParagonLiteOverlay battleLevelOvl;
     ParagonLiteOverlay battleServerOvl;
     ParagonLiteOverlay trainerAIOvl;
     ParagonLiteOverlay storageOvl;
+    ParagonLiteOverlay fieldSaveOvl;
+    ParagonLiteOverlay unovaLinkOvl;
 
     Pokemon[] pokes;
     List<Move> moves;
@@ -176,12 +179,15 @@ public class ParagonLiteHandler {
         Gen5RomHandler.RomEntry romEntry = params.romEntry;
 
         int fieldOvlNumber = romEntry.getInt("FieldOvlNumber");
+        int uiCommonOvlNumber = romEntry.getInt("UICommonOvlNumber");
         int bagOvlNumber = romEntry.getInt("BagOvlNumber");
         int battleOvlNumber = romEntry.getInt("BattleOvlNumber");
         int BattleLevelOvlNumber = romEntry.getInt("BattleLevelOvlNumber");
         int battleServerOvlNumber = romEntry.getInt("BattleServerOvlNumber");
         int trainerAIOvlNumber = romEntry.getInt("TrainerAIOvlNumber");
         int storageOvlNumber = romEntry.getInt("PCOvlNumber");
+        int fieldSaveOvlNumber = romEntry.getInt("FieldSaveOvlNumber");
+        int unovaLinkOvlNumber = romEntry.getInt("unovaLinkOvlNumber");
 
         globalAddressMap = new ParagonLiteAddressMap();
         armParser = new ArmParser(globalAddressMap);
@@ -201,6 +207,10 @@ public class ParagonLiteHandler {
 //            byte[] fieldOvlData = romHandler.readOverlay(fieldOvlNumber);
 //            int fieldOvlAddress = romHandler.getOverlayAddress(fieldOvlNumber);
 //            fieldOvl = new ParagonLiteOverlay(romHandler, fieldOvlNumber, "Field", fieldOvlData, fieldOvlAddress, ParagonLiteOverlay.Insertion.Front, armParser, globalAddressMap);
+
+            byte[] uiCommonOvlData = romHandler.readOverlay(uiCommonOvlNumber);
+            int uiCommonOvlAddress = romHandler.getOverlayAddress(uiCommonOvlNumber);
+            uiCommonOvl = new ParagonLiteOverlay(romHandler, uiCommonOvlNumber, "UICommon", uiCommonOvlData, uiCommonOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
 
             byte[] bagOvlData = romHandler.readOverlay(bagOvlNumber);
             int bagOvlAddress = romHandler.getOverlayAddress(bagOvlNumber);
@@ -225,6 +235,14 @@ public class ParagonLiteHandler {
             byte[] storageOvlData = romHandler.readOverlay(storageOvlNumber);
             int storageOvlAddress = romHandler.getOverlayAddress(storageOvlNumber);
             storageOvl = new ParagonLiteOverlay(romHandler, storageOvlNumber, "Storage", storageOvlData, storageOvlAddress, ParagonLiteOverlay.Insertion.Back, armParser, globalAddressMap);
+            
+            byte[] fieldSaveOvlData = romHandler.readOverlay(fieldSaveOvlNumber);
+            int fieldSaveOvlAddress = romHandler.getOverlayAddress(fieldSaveOvlNumber);
+            fieldSaveOvl = new ParagonLiteOverlay(romHandler, fieldSaveOvlNumber, "FieldSave", fieldSaveOvlData, fieldSaveOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
+            
+            byte[] unovaLinkOvlData = romHandler.readOverlay(unovaLinkOvlNumber);
+            int unovaLinkOvlAddress = romHandler.getOverlayAddress(unovaLinkOvlNumber);
+            unovaLinkOvl = new ParagonLiteOverlay(romHandler, unovaLinkOvlNumber, "UnovaLink", unovaLinkOvlData, unovaLinkOvlAddress, ParagonLiteOverlay.Insertion.Back, armParser, globalAddressMap);
 
             ParagonLiteOverlay[] battleOverlays = new ParagonLiteOverlay[]{arm9, battleOvl, battleLevelOvl, battleServerOvl, trainerAIOvl};
             battleOvl.addContextOverlays(battleOverlays);
@@ -648,6 +666,10 @@ public class ParagonLiteHandler {
 
         int getMoveParamRomAddress = globalAddressMap.getRomAddress(battleOvl, "ServerEvent_GetMoveParam");
         battleOvl.writeByte(getMoveParamRomAddress + 0x9A, 0x12);
+    }
+    
+    public void setKeySystem() {
+        readLines("")
     }
 
     public void setPokeData() {
@@ -1123,10 +1145,10 @@ public class ParagonLiteHandler {
     }
 
     public void setMaxSpeedFix() {
-        // There's a bug where the max effective speed stat is intended to be 10000, but it's only stored at a maximum of 8191, leaving room for overflows
+        // There's a bug where the max effective speed stat is intended to be 10000, but it's only stored at a maximum of 8191 (0x1FFF), leaving room for overflows
         // We fix this by instead setting the limit to just be 8191 instead of 10000.
         int calculateSpeedRomAddress = globalAddressMap.getRomAddress(battleOvl, "ServerEvent_CalculateSpeed");
-        battleOvl.writeWord(calculateSpeedRomAddress + 0xBC, 0x01FFF, false);
+        battleOvl.writeWord(calculateSpeedRomAddress + 0xBC, 0x1FFF, false);
     }
 
     public void setDynamicTurnOrder() {

@@ -8,9 +8,9 @@
     str     r0, [sp, #BattleDataBlock]
     mov     r5, r2
     mov     r0, r1
-    bl      ARM9::GetSaveInfoBase ; 02017934
-    bl      ARM9::GetKeyInfoSaveBlock ; 020104A4
-    bl      ARM9::GetDifficultyFromKey ; 02010528
+    bl      ARM9::GameData_GetSaveControlWork
+    bl      ARM9::Save_GetKeySystem
+    bl      ARM9::KeySystem_GetGameDifficulty
     mov     r4, r0
     mov     r0, r5
     bl      ARM9::GetDifficultyLevelChange ; uses zone data to get a value (pretty much just 1-5 as far as I'm aware)

@@ -1,0 +1,14 @@
+{
+  "sequence": 0,
+  "isSelected": 4,
+  "isChanging": 8,
+  "cursor": 12,
+  "background": 16,
+  "backgroundChange1": 48,
+  "backgroundChange2": 80,
+  "backgroundBuffer": 112,
+  "backgroundCount": 144,
+  "selectedAnim": 146,
+  "menuParam": 148,
+  "SIZE_WITHOUT_PARAM": 148
+}
