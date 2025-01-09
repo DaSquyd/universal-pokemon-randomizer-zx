@@ -137,7 +137,8 @@ public class ArmParser {
                 "TrainerAIEnv",
                 "UnovaLink_MenuParam",
                 "UnovaLink_MenuParam_Button",
-                "UnovaLink_MenuWork"
+                "UnovaLink_MenuWork",
+                "UnovaLinkWork",
         };
 
         for (String structName : structNames) {
@@ -1291,7 +1292,7 @@ public class ArmParser {
             throw new ExpectedLowRegisterException(line, op, args, 1);
 
         if (imm < 0 || imm > 31)
-            throw new ExpectedNumberException(line, op, args, 2, 0, 31);
+            throw new ExpectedNumberException(line, op, args, 2, imm, 0, 31);
 
         return halfwordToBytes(rd | (rs << 3) | (imm << 6) | (opcode << 11));
     }
@@ -1315,7 +1316,7 @@ public class ArmParser {
 
         if (rnOrImm < 0 || rnOrImm > 7) {
             if (isImmediate)
-                throw new ExpectedNumberException(line, op, args, 2, 0, 7);
+                throw new ExpectedNumberException(line, op, args, 2, rnOrImm, 0, 7);
             else
                 throw new ExpectedLowRegisterException(line, op, args, 2);
         }
@@ -1335,7 +1336,7 @@ public class ArmParser {
             throw new ExpectedLowRegisterException(line, op, args, 0);
 
         if (imm < 0 || imm > 255) {
-            throw new ExpectedNumberException(line, op, args, 1, 0, 255);
+            throw new ExpectedNumberException(line, op, args, 1, imm, 0, 255);
         }
 
         return halfwordToBytes(imm | (rd << 8) | (opcode << 11) | 0x2000);
@@ -1403,7 +1404,7 @@ public class ArmParser {
 
         int immMax = (255 << 2) + 4;
         if (imm < 0 || imm > immMax)
-            throw new ExpectedNumberException(line, op, args, 1, 0, immMax);
+            throw new ExpectedNumberException(line, op, args, 1, imm, 0, immMax);
 
         imm = ((imm - 4) >> 2) & 0xFF;
 
@@ -1469,7 +1470,7 @@ public class ArmParser {
 
         int immMax = 0x1F << (byteWordFlag == 0 ? 2 : 0);
         if (imm < 0 || imm > immMax)
-            throw new ExpectedNumberException(line, op, args, 2, 0, immMax);
+            throw new ExpectedNumberException(line, op, args, 2, imm, 0, immMax);
 
         if (byteWordFlag == 0) {
             if (!isWordAligned(imm))
@@ -1496,7 +1497,7 @@ public class ArmParser {
             throw new ExpectedLowRegisterException(line, op, args, 1);
 
         if (imm < 0 || imm > 62)
-            throw new ExpectedNumberException(line, op, args, 2, 0, 62);
+            throw new ExpectedNumberException(line, op, args, 2, imm, 0, 62);
 
         if (!isHalfwordAligned(imm))
             throw new ImmediateHalfwordAlignmentException(line, op, args, 2, imm);
@@ -1517,7 +1518,7 @@ public class ArmParser {
             throw new ExpectedLowRegisterException(line, op, args, 0);
 
         if (imm < 0 || imm > 1020)
-            throw new ExpectedNumberException(line, op, args, 2, 0, 1020);
+            throw new ExpectedNumberException(line, op, args, 2, imm, 0, 1020);
 
         if (!isWordAligned(imm))
             throw new ImmediateWordAlignmentException(line, op, args, 2, imm);
@@ -1541,7 +1542,7 @@ public class ArmParser {
             throw new ExpectedLowRegisterException(line, op, args, 0);
 
         if (imm < 0 || imm > 1020)
-            throw new ExpectedNumberException(line, op, args, 2, 0, 1020);
+            throw new ExpectedNumberException(line, op, args, 2, imm, 0, 1020);
 
         if (!isWordAligned(imm))
             throw new ImmediateWordAlignmentException(line, op, args, 2, imm);
@@ -1557,7 +1558,7 @@ public class ArmParser {
         int immMin = -508;
         int immMax = 508;
         if (imm < immMin || imm > immMax)
-            throw new ExpectedNumberException(line, op, args, 1, immMin, immMax);
+            throw new ExpectedNumberException(line, op, args, 1, imm, immMin, immMax);
 
         int signFlag = imm < 0 ? 1 : 0;
         imm = Math.abs(imm);
@@ -1721,7 +1722,7 @@ public class ArmParser {
     private byte[] format17(int line, String op, String[] args) throws ArmParseException {
         int value = Integer.parseInt(args[0]);
         if (value < 0 || value > 255)
-            throw new ExpectedNumberException(line, op, args, 0, 0, 255);
+            throw new ExpectedNumberException(line, op, args, 0, value, 0, 255);
 
         return halfwordToBytes(value | 0xDF00);
     }
@@ -1819,7 +1820,7 @@ public class ArmParser {
     private byte[] getDataBytes(int line, String op, String valueStr, int size, int minValue, int maxValue) throws ArmParseException {
         int value = parseValue(line, op, valueStr, valueStr);
         if (value < minValue || value > maxValue)
-            throw new ExpectedNumberException(line, op, new String[]{valueStr}, 0, minValue, maxValue);
+            throw new ExpectedNumberException(line, op, new String[]{valueStr}, 0, value, minValue, maxValue);
 
         if (size == 1)
             return new byte[]{(byte) (value & 0xFF)};

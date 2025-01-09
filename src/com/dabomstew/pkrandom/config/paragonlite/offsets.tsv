@@ -1,11 +1,25 @@
 File	Function Name	Type	Data Len	Encoding	White	Black	White 2	Black 2
 ARM9	Data_StartModuleParams	Data	36	*******8	0x02004FB0	0x02004FB0	0x02004FB0	0x02004FB0
-ARM9	GetKeyInfoSaveBlock	Code		thumb	--	--	0x020104A4	0x020104A4
-ARM9	GetDifficultyFromKey	Code		thumb	--	--	0x02010528	0x02010528
+ARM9	GameInit	Code		thumb			0x02005264	0x02005264
+ARM9	PlaySeqFullVol	Code		thumb			0x02006254	0x02006254
+ARM9	SaveControl_Init	Code		thumb			0x020070F0	0x020070F0
+ARM9	KeySystem_Init	Code		thumb	--	--	0x02010474	0x02010474
+ARM9	KeySystem_Copy	Code		thumb	--	--	0x02010490	0x02010490
+ARM9	Save_GetKeySystem	Code		thumb	--	--	0x020104A4	0x020104A4
+ARM9	KeySystem_SetKeyObtained	Code		thumb	--	--	0x020104B0	0x020104B0
+ARM9	KeySystem_IsKeyObtained	Code		thumb	--	--	0x020104C4	0x020104C4
+ARM9	KeySystem_SetKeyEnabled	Code		thumb	--	--	0x020104E0	0x020104E0
+ARM9	KeySystem_IsKeyEnabled	Code		thumb	--	--	0x020104F4	0x020104F4
+ARM9	KeySystem_SetGameDifficulty	Code		thumb	--	--	0x02010514	0x02010514
+ARM9	KeySystem_GetGameDifficulty	Code		thumb	--	--	0x02010528	0x02010528
+ARM9	KeySystem_SetWhiteForestBlackCity	Code		thumb	--	--	0x02010550	0x02010550
+ARM9	KeySystem_GetWhiteForestBlackCity	Code		thumb	--	--	0x02010564	0x02010564
+ARM9	KeySystem_SetMysteryDoor	Code		thumb	--	--	0x0201058C	0x0201058C
+ARM9	KeySystem_GetMysteryDoor	Code		thumb	--	--	0x020105A0	0x020105A0
 ARM9	VM_LoadScript	Code		thumb	0x0201127C	0x0201127C	0x02015910	0x02015910
 ARM9	VM_GetEnv	Code		thumb	0x02012134	0x02012134	0x020159DC	0x020159DC
 ARM9	Script_ReadArg	Code		thumb	0x0201134C	0x0201134C	0x02015A04	0x02015A04
-ARM9	GetSaveInfoBase	Code		thumb	--	--	0x02017934	0x02017934
+ARM9	GameData_GetSaveControlWork	Code		thumb	--	--	0x02017934	0x02017934
 ARM9	Difficulty_AdjustPokeLevel	Code		thumb	--	--	0x020185D0	0x020185D0
 ARM9	GetDifficultyLevelChange	Code		thumb	--	--	0x02018D08	0x02018CDC
 ARM9	Unk_2019B14	Code		thumb	0x02014C24	0x02014C08	0x02019B14	0x02019AE8
@@ -65,8 +79,12 @@ ARM9	GetTrainerData	Code		thumb	0x0202A248	0x0202A230	0x0203050C	0x020304E0
 ARM9	LoadTrainerFile	Code		thumb	0x0202A3C4	0x0202A3AC	0x0203070C	0x020306E0
 ARM9	LoadTrPokeFile	Code		thumb	0x0202A3D4	0x0202A3BC	0x02030750	0x02030724
 ARM9	ShooterItem_GetTableIndex	Code		thumb			0x02035970	0x02035944
+ARM9	Title_Proc	Code		thumb			0x02036318	0x020362EC
 ARM9	GFL_HeapAllocate	Code		arm,thumb	0x0203074C	0x02030734	0x0203A228	0x0203A1FC
+ARM9	GFL_HeapFree	Code		thumb			0x0203A278	0x0203A24C
 ARM9	GFL_TCBMgrAddTask	Code		arm,thumb	0x02030DC0	0x02030DA8	0x0203A640	0x0203A614
+ARM9	GFL_HIDGetNewPressKeys	Code		thumb			0x0203DF28	0x0203DEFC
+ARM9	GFL_HIDGetReleasedKeys	Code		thumb			0x0203DF70	0x0203DF44
 ARM9	GFL_RandomMT	Code		arm,thumb	0x0203F0C0	0x0203F0A8	0x02043F58	0x02043F2C
 ARM9	GetCRC16	Code		thumb	0x0203F214	0x0203F1FC	0x02044088	0x0204405C
 ARM9	BuildSeed	Code		arm,thumb	0x0203F270	0x0203F258	0x020440C4	0x02044098
@@ -192,8 +210,10 @@ ARM9	GFL_G3DResUploadTexDataCore	Code		arm,thumb	0x0204721C	0x02047204	0x0204961
 ARM9	GFL_G3DResGetTexData	Code		arm,thumb	0x02047268	0x02047250	0x0204964C	0x02049620
 ARM9	GFL_G3DResAllocTexMem	Code		arm,thumb	0x02047278	0x02047260	0x02049658	0x0204962C
 ARM9	GFL_ArcSysReadHeapNew	Code		arm,thumb	0x02048F78	0x02048F60	0x0204A960	0x0204A934
+ARM9	GFL_G2DSysReadArcPaletteResource	Code		thumb			0x0204B380	0x0204B354
 ARM9	sys_memset16	Code		arm	0x02082A60	0x02082A48	0x02078650	0x02078624
 ARM9	sys_memset	Code		arm			0x020787D4	0x020787A8
+ARM9	memcpyx	Code		arm			0x0207894C	0x02078920
 ARM9	Mod64Signed	Code		arm	0x0209BE64	0x0209BE4C	0x0208D430	0x0208D404
 ARM9	Divide64Signed	Code		arm	0x0209BE74	0x0209BE5C	0x0208D440	0x0208D414
 ARM9	Divide64Unsigned	Code		arm	0x0209C024	0x0209C00C	0x0208D5F0	0x0208D5C4
@@ -723,8 +743,8 @@ BattleServer	Data_SideStatusEffectTable	Data	112	4*	0x0689D780	0x0689D780	0x0689
 BattleServer	Data_PlateItems	Data	32		0x0689E38C	0x0689E38C	0x0689E514	0x0689E514
 BattleServer	Data_MoldBreakerIgnoredAbilities	Data	112		0x0689E450	0x0689E450	0x0689E5D8	0x0689E5D8
 BattleServer	SideStatuses	Data	448		0x0689E7E0	0x0689E7E0	0x0689E960	0x0689E960
-Field	Encounter_CreateWildPoke	Code		thumb			0x021A0E00	0x021A0DC0
-Field	Encounter_GenPID	Code		thumb			0x021A1548	0x021A1508
+Local	Encounter_CreateWildPoke	Code		thumb			0x021A0E00	0x021A0DC0
+Local	Encounter_GenPID	Code		thumb			0x021A1548	0x021A1508
 Storage	MakeBox2Main	Code		thumb	0x021DEDF8	0x021DEDD8	0x021BF060	0x021BF020
 Storage	DisplayPreview	Code		thumb	0x021DEF80	0x021DEF60	0x021BF1E8	0x021BF1A8
 Storage	Unk_21BF3A4	Code		thumb			0x021BF3A4	0x021BF364
@@ -737,4 +757,168 @@ Storage	PreviewCore	Code		thumb	0x021EB2C4	0x021EB2A4	0x021CE7D8	0x021CE798
 Storage	Unk_21D06E4	Code		thumb			0x021D06E4	0x021D06A4
 Storage	DisplayPreview_TypeGraphics	Code		thumb			0x021D0A68	0x021D0A28
 Storage	Box2_Main_C	Data	12		0x021F1420	0x021F1400	0x021D9680	0x021D9640
+Title	StartMenuProc_End	Code		thumb			0x0219DA18	0x0219D9D8
 TrainerAI	Data_AIScriptCommands	Data	492	*	0x0218A5C8	0x0218A5A8	0x02181CF4	0x02181CB4
+UnovaLink	Proc_Init	Code		thumb			0x021BEF20	0x021BEEE0
+UnovaLink	Seq_FadeIn	Code		thumb			0x021BF17C	0x021BF13C
+UnovaLink	Seq_FadeOutWhite	Code		thumb			0x021BF23C	0x021BF1FC
+UnovaLink	Seq_DeleteDisplay	Code		thumb			0x021BF27C	0x021BF23C
+UnovaLink	BG_TransScreen	Code		thumb			0x021BF5FC	0x021BF5BC
+UnovaLink	Map_Remove	Code		thumb			0x021BF8CC	0x021BF88C
+UnovaLink	Map_ContainsKey	Code		thumb			0x021BF8FC	0x021BF8BC
+UnovaLink	Map_GetValue	Code		thumb			0x021BF924	0x021BF8E4
+UnovaLink	Title_Create	Code		thumb			0x021BFBCC	0x021BFB8C
+UnovaLink	Info_Create	Code		thumb			0x021BFC30	0x021BFBF0
+UnovaLink	Seq_Main	Code		thumb			0x021BFCE8	0x021BFCA8
+UnovaLink	Seq_BreakSave	Code		thumb			0x021BFD6C	0x021BFD2C
+UnovaLink	Seq_MainMenu	Code		thumb			0x021BFE04	0x021BFDC4
+UnovaLink	Seq_CreateDisplayMainMenu	Code		thumb			0x021BFF18	0x021BFED8
+UnovaLink	Seq_CreateDisplayText	Code		thumb			0x021BFF5C	0x021BFF1C
+UnovaLink	UI_CreateMainMenu	Code		thumb			0x021BFFA0	0x021BFF60
+UnovaLink	UI_IsEndCreateMainMenu	Code		thumb			0x021C0094	0x021C0054
+UnovaLink	UI_DeleteMainMenu	Code		thumb			0x021C00DC	0x021C009C
+UnovaLink	UI_CreateText	Code		thumb			0x021C00FC	0x021C00BC
+UnovaLink	UI_IsEndCreateText	Code		thumb			0x021C0128	0x021C00E8
+UnovaLink	UI_DeleteText	Code		thumb			0x021C0158	0x021C0118
+UnovaLink	Text_Init	Code		thumb			0x021C058C	0x021C054C
+UnovaLink	Text_Exit	Code		thumb			0x021C0644	0x021C0604
+UnovaLink	Text_Draw	Code		thumb			0x021C0694	0x021C0654
+UnovaLink	Text_Print	Code		thumb			0x021C077C	0x021C073C
+UnovaLink	Text_PrintBuf	Code		thumb			0x021C0798	0x021C0758
+UnovaLink	Text_SetColor	Code		thumb			0x021C07B0	0x021C0770
+UnovaLink	Text_SetPos	Code		thumb			0x021C07B4	0x021C0774
+UnovaLink	Text_PrintInner	Code		thumb			0x021C07BC	0x021C077C
+UnovaLink	Text_IsMsgEnd	Code		thumb			0x021C099C	0x021C095C
+UnovaLink	Text_EndWait	Code		thumb			0x021C09A0	0x021C0960
+UnovaLink	Text_WriteWindowFrame	Code		thumb			0x021C09C8	0x021C0988
+UnovaLink	Text_ClearCharacter	Code		thumb			0x021C09E0	0x021C09A0
+UnovaLink	Text_ClearScreen	Code		thumb			0x021C09FC	0x021C09BC
+UnovaLink	Text_ChangePalette	Code		thumb			0x021C0A1C	0x021C09DC
+UnovaLink	Text_SetMsgCursor	Code		thumb			0x021C0A80	0x021C0A40
+UnovaLink	Text_CalcPosCore	Code		thumb			0x021C0AA4	0x021C0A64
+UnovaLink	TextSet_Init	Code		thumb			0x021C0B60	0x021C0B20
+UnovaLink	TextSet_Exit	Code		thumb			0x021C0BEC	0x021C0BAC
+UnovaLink	TextSet_Draw	Code		thumb			0x021C0C14	0x021C0BD4
+UnovaLink	TextSet_IsDrawComplete	Code		thumb			0x021C0C34	0x021C0BF4
+UnovaLink	List_Init	Code		thumb			0x021C0C5C	0x021C0C1C
+UnovaLink	List_InitEx	Code		thumb			0x021C0C80	0x021C0C40
+UnovaLink	List_Exit	Code		thumb			0x021C0D90	0x021C0D50
+UnovaLink	List_Main	Code		thumb			0x021C0DC0	0x021C0D80
+UnovaLink	List_Draw	Code		thumb			0x021C0DDC	0x021C0D9C
+UnovaLink	Menu_Init	Code		thumb			0x021C0E14	0x021C0DD4
+UnovaLink	Menu_Exit	Code		thumb			0x021C0F28	0x021C0EE8
+UnovaLink	Menu_Main	Code		thumb			0x021C0F50	0x021C0F10
+UnovaLink	Menu_Draw	Code		thumb			0x021C1120	0x021C10E0
+UnovaLink	Menu_IsDrawComplete	Code		thumb			0x021C1180	0x021C1140
+UnovaLink	Menu_IsSelected	Code		thumb			0x021C11A8	0x021C1168
+UnovaLink	Menu_Reset	Code		thumb			0x021C11AC	0x021C116C
+UnovaLink	Menu_GetParam	Code		thumb			0x021C11D8	0x021C1198
+UnovaLink	Menu_GetCursor	Code		thumb			0x021C11DC	0x021C119C
+UnovaLink	Menu_IsChanging	Code		thumb			0x021C11E0	0x021C11A0
+UnovaLink	InitSeq	Code		thumb			0x021C11E4	0x021C11A4
+UnovaLink	ExitSeq	Code		thumb			0x021C122C	0x021C11EC
+UnovaLink	MainSeq	Code		thumb			0x021C1234	0x021C11F4
+UnovaLink	IsSeqCompleted	Code		thumb			0x021C1250	0x021C1210
+UnovaLink	NextSeq	Code		thumb			0x021C1268	0x021C1228
+UnovaLink	CallSeq	Code		thumb			0x021C1280	0x021C1240
+UnovaLink	EndSeq	Code		thumb			0x021C12A4	0x021C1264
+UnovaLink	ReturnSeq	Code		thumb			0x021C12B0	0x021C1270
+UnovaLink	SetReserveSeq	Code		thumb			0x021C12C8	0x021C1288
+UnovaLink	NextReserveSeq	Code		thumb			0x021C12E0	0x021C12A0
+UnovaLink	MainPaletteAnim	Code		thumb			0x021C1C68	0x021C1C28
+UnovaLink	KeySystem_Init	Code		thumb			0x021C2B58	0x021C2B18
+UnovaLink	KeySystem_Exit	Code		thumb			0x021C2B9C	0x021C2B5C
+UnovaLink	KeySystem_GetKey	Code		thumb			0x021C2BC0	0x021C2B80
+UnovaLink	KeySystem_Main	Code		thumb			0x021C2D14	0x021C2CD4
+UnovaLink	KeySystem_SendReceive_Main	Code		thumb			0x021C2E24	0x021C2DE4
+UnovaLink	KeySystem_Settings_Main	Code		thumb			0x021C32B0	0x021C3270
+UnovaLink	KeySystem_Settings_Difficulty	Code		thumb			0x021C33C4	0x021C3384
+UnovaLink	KeySystem_Settings_City	Code		thumb			0x021C354C	0x021C350C
+UnovaLink	KeySystem_Settings_Door	Code		thumb			0x021C36EC	0x021C36AC
+UnovaLink	KeySystem_SendReceive_ReceiveDemo	Code		thumb			0x021C3874	0x021C3834
+UnovaLink	KeySystem_SendReceive_SendDemo	Code		thumb			0x021C39EC	0x021C39AC
+UnovaLink	KeySystem_Save	Code		thumb			0x021C3B3C	0x021C3AFC
+UnovaLink	KeySystem_CreateMainMenuUI	Code		thumb			0x021C3C6C	0x021C3C2C
+UnovaLink	KeySystem_CreateSendReceiveUI	Code		thumb			0x021C3CB0	0x021C3C70
+UnovaLink	KeySystem_CreateSettingsUI	Code		thumb			0x021C3CF4	0x021C3CB4
+UnovaLink	KeySystem_CreateSettingsDifficultyUI	Code		thumb			0x021C3D38	0x021C3CF8
+UnovaLink	KeySystem_CreateSettingsCityUI	Code		thumb			0x021C3D7C	0x021C3D3C
+UnovaLink	KeySystem_CreateReceiveDemoUI	Code		thumb			0x021C3DC0	0x021C3D80
+UnovaLink	KeySystem_CreateSendDemoUI	Code		thumb			0x021C3E04	0x021C3DC4
+UnovaLink	KeySystem_CreateSendReceiveYesNoUI	Code		thumb			0x021C3E48	0x021C3E08
+UnovaLink	KeySystem_CreateSettingsDoorUI	Code		thumb			0x021C3E8C	0x021C3E4C
+UnovaLink	KeySystem_UI_CreateMainMenu	Code		thumb			0x021C3ED0	0x021C3E90
+UnovaLink	KeySystem_UI_IsEndCreateMainMenu	Code		thumb			0x021C3FA8	0x021C3F68
+UnovaLink	KeySystem_UI_DestroyMainMenu	Code		thumb			0x021C3FE8	0x021C3FA8
+UnovaLink	KeySystem_UI_CreateSendReceive	Code		thumb			0x021C4008	0x021C3FC8
+UnovaLink	KeySystem_UI_IsEndCreateSendReceive	Code		thumb			0x021C40AC	0x021C406C
+UnovaLink	KeySystem_UI_DestroySendReceive	Code		thumb			0x021C40C8	0x021C4088
+UnovaLink	KeySystem_UI_CreateSettings	Code		thumb			0x021C4138	0x021C40F8
+UnovaLink	KeySystem_UI_IsEndCreateSettings	Code		thumb			0x021C4214	0x021C41D4
+UnovaLink	KeySystem_UI_DestroySettings	Code		thumb			0x021C4248	0x021C4208
+UnovaLink	KeySystem_UI_CreateDifficulty	Code		thumb			0x021C426C	0x021C422C
+UnovaLink	KeySystem_UI_IsEndCreateDifficulty	Code		thumb			0x021C42B8	0x021C4278
+UnovaLink	KeySystem_UI_DestroyDifficulty	Code		thumb			0x021C42E8	0x021C42A8
+UnovaLink	KeySystem_UI_CreateCity	Code		thumb			0x021C4308	0x021C42C8
+UnovaLink	KeySystem_UI_IsEndCreateCity	Code		thumb			0x021C4354	0x021C4314
+UnovaLink	KeySystem_UI_DestroyCity	Code		thumb			0x021C4384	0x021C4344
+UnovaLink	KeySystem_UI_CreateReceiveDemo	Code		thumb			0x021C43A4	0x021C4364
+UnovaLink	KeySystem_UI_IsEndCreateReceiveDemo	Code		thumb			0x021C43C0	0x021C4380
+UnovaLink	KeySystem_UI_DestroyReceiveDemo	Code		thumb			0x021C43C4	0x021C4384
+UnovaLink	KeySystem_UI_CreateSendDemo	Code		thumb			0x021C43D4	0x021C4394
+UnovaLink	KeySystem_UI_IsEndCreateSendDemo	Code		thumb			0x021C4450	0x021C4410
+UnovaLink	KeySystem_UI_DestroySendDemo	Code		thumb			0x021C4470	0x021C4430
+UnovaLink	KeySystem_UI_CreateSendReceiveYesno	Code		thumb			0x021C44AC	0x021C446C
+UnovaLink	KeySystem_UI_IsEndCreateSendReceiveYesno	Code		thumb			0x021C4524	0x021C44E4
+UnovaLink	KeySystem_UI_DestroySendReceiveYesno	Code		thumb			0x021C4558	0x021C4518
+UnovaLink	KeySystem_UI_CreateDoor	Code		thumb			0x021C4564	0x021C4524
+UnovaLink	KeySystem_UI_IsEndCreateDoor	Code		thumb			0x021C45B0	0x021C4570
+UnovaLink	KeySystem_UI_DestroyDoor	Code		thumb			0x021C45E0	0x021C45A0
+UnovaLink	KeySystem_KeyData_Init	Code		thumb			0x021C4600	0x021C45C0
+UnovaLink	KeySystem_KeyData_SetSave	Code		thumb			0x021C4638	0x021C45F8
+UnovaLink	KeySystem_KeyData_IsGet	Code		thumb			0x021C4668	0x021C4628
+UnovaLink	KeySystem_KeyData_Merge	Code		thumb			0x021C46C4	0x021C4684
+UnovaLink	KeySystem_PlayerData_Init	Code		thumb			0x021C46F4	0x021C46B4
+UnovaLink	KeySystem_Select_Init	Code		thumb			0x021C4728	0x021C46E8
+UnovaLink	KeySystem_Select_Exit	Code		thumb			0x021C4870	0x021C4830
+UnovaLink	KeySystem_Select_Main	Code		thumb			0x021C48A4	0x021C4864
+UnovaLink	KeySystem_Select_IsDrawEnd	Code		thumb			0x021C48B0	0x021C4870
+UnovaLink	KeySystem_Select_GetSelect	Code		thumb			0x021C48BC	0x021C487C
+UnovaLink	KeySystem_Select_IsDecide	Code		thumb			0x021C48C8	0x021C4888
+UnovaLink	KeySystem_Select_Reset	Code		thumb			0x021C48D4	0x021C4894
+UnovaLink	KeySystem_Select_GetUnselected	Code		thumb			0x021C48E8	0x021C48A8
+UnovaLink	KeySystem_Select_GetUnselectedIndex	Code		thumb			0x021C48EC	0x021C48AC
+UnovaLink	KeySystem_Select_DecideCallback	Code		thumb			0x021C48F0	0x021C48B0
+UnovaLink	KeySystem_Select_Difficulty_Init	Code		thumb			0x021C4924	0x021C48E4
+UnovaLink	KeySystem_Select_Difficulty_DecideCallback	Code		thumb			0x021C49C0	0x021C4980
+UnovaLink	KeySystem_Select_City_Init	Code		thumb			0x021C4A58	0x021C4A18
+UnovaLink	KeySystem_Select_City_DecideCallback	Code		thumb			0x021C4AD4	0x021C4A94
+UnovaLink	KeySystem_Select_Door_Init	Code		thumb			0x021C4BA4	0x021C4B64
+UnovaLink	KeySystem_Select_Door_DecideCallback	Code		thumb			0x021C4C40	0x021C4C00
+UnovaLink	KeySystem_Msg_GetDifficultInfo	Code		thumb			0x021C4CD8	0x021C4C98
+UnovaLink	KeySystem_Msg_GetCityInfo	Code		thumb			0x021C4CE8	0x021C4CA8
+UnovaLink	KeySystem_Msg_GetDoorInfo	Code		thumb			0x021C4CF8	0x021C4CB8
+UnovaLink	KeySystem_Msg_GetLockListInfo	Code		thumb			0x021C4D08	0x021C4CC8
+UnovaLink	KeySystem_Msg_CreateKey	Code		thumb			0x021C4D3C	0x021C4CFC
+UnovaLink	KeySystem_Demo_Init	Code		thumb			0x021C4E08	0x021C4DC8
+UnovaLink	KeySystem_Demo_Exit	Code		thumb			0x021C4EC4	0x021C4E84
+UnovaLink	KeySystem_Demo_Start	Code		thumb			0x021C4EFC	0x021C4EBC
+UnovaLink	KeySystem_Demo_Main	Code		thumb			0x021C4F5C	0x021C4F1C
+UnovaLink	KeySystem_Demo_MainModeUnlock	Code		thumb			0x021C4F68	0x021C4F28
+UnovaLink	KeySystem_Demo_MainModeGet	Code		thumb			0x021C52E4	0x021C52A4
+UnovaLink	KeySystem_NetCallBack_SendReceiveEnd	Code		thumb			0x021C5420	0x021C53E0
+UnovaLink	MemoryLink_Seq_Main	Code		thumb			0x021C5424	0x021C53E4
+UnovaLink	Data_KeySystem_UI_Main	Data	16	***4			0x021C8FA8	0x021C8F68
+UnovaLink	Data_KeySystem_UI_SendReceive	Data	16	***4			0x021C8FB8	0x021C8F78
+UnovaLink	Data_KeySystem_UI_Settings	Data	16	***4			0x021C8FC8	0x021C8F88
+UnovaLink	Data_KeySystem_UI_Settings_Difficulty	Data	16	***4			0x021C8FD8	0x021C8F98
+UnovaLink	Data_KeySystem_UI_Settings_City	Data	16	***4			0x021C8FE8	0x021C8FA8
+UnovaLink	Data_KeySystem_UI_SendReceive_Receive	Data	16	***4			0x021C8FF8	0x021C8FB8
+UnovaLink	Data_KeySystem_UI_SendReceive_Send	Data	16	***4			0x021C9008	0x021C8FC8
+UnovaLink	Data_KeySystem_UI_SendReceive_YesNo	Data	16	***4			0x021C9018	0x021C8FD8
+UnovaLink	Data_KeySystem_UI_Settings_Door	Data	16	***4			0x021C9028	0x021C8FE8
+UnovaLink	Data_aMAN	Data	4				0x021C9314	0x021C92D4
+UnovaLink	Data_aKeySystemUtilC	Data	18				0x021C9330	0x021C92F0
+UnovaLink	Data_aKEM	Data	4				0x021C9480	0x021C9440
+UnovaLink	Data_aKLL	Data	4				0x021C9484	0x021C9444
+UnovaLink	Data_aDNM	Data	4				0x021C9488	0x021C9448

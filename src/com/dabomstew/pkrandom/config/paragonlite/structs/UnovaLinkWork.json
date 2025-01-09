@@ -1,0 +1,20 @@
+{
+  "displayPtr": 0,
+  "seqPtr": 4,
+  "graphicPtr": 8,
+  "paramPtr": 12,
+  "textPtr": 16,
+  "infoPtr": 20,
+  "titlePtr": 24,
+  "menuPtr": 28,
+  "listPtr": 32,
+  "textsetPtr": 36,
+  "scrollMenuPtr": 40,
+  "fontPtr": 44,
+  "quePtr": 48,
+  "msgPtr": 52,
+  "wordPtr": 56,
+  "backgroundPtr": 60,
+  "object": 64,
+  "select": 180
+}

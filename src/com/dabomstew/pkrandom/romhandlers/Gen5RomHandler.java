@@ -5615,10 +5615,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int moveNamesTextOffset = romEntry.getInt("MoveNamesTextOffset");
         int moveDescriptionsTextOffset = romEntry.getInt("MoveDescriptionsTextOffset");
         int itemNamesTextOffset = romEntry.getInt("ItemNamesTextOffset");
+        int unovaLinkTextOffset = romEntry.getInt("UnovaLinkTextOffset");
         int itemNameMessagesTextOffset = romEntry.getInt("ItemNameMessagesTextOffset");
         int itemPluralNamesTextOffset = romEntry.getInt("ItemPluralNamesTextOffset");
         int itemDescriptionsTextOffset = romEntry.getInt("ItemDescriptionsTextOffset");
 
+        params.unovaLinkStrings = getStrings(false, unovaLinkTextOffset);
+        
         params.battleStrings1 = getStrings(false, battleTextOffset1);
         params.battleStrings2 = getStrings(false, battleTextOffset2);
         params.battleStringsPokestar = (isWhite2() || isBlack2()) ? getStrings(false, battleTextOffsetPokestar) : null;
@@ -5650,6 +5653,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         setStrings(false, moveNamesTextOffset, params.moveNames);
         setStrings(false, moveDescriptionsTextOffset, params.moveDescriptions);
         setStrings(false, itemNamesTextOffset, itemNames);
+        setStrings(false, unovaLinkTextOffset, params.unovaLinkStrings);
         setStrings(false, itemNameMessagesTextOffset, params.itemNameMessages);
         setStrings(false, itemPluralNamesTextOffset, params.itemPluralNames);
         setStrings(false, itemDescriptionsTextOffset, params.itemDescriptions);
@@ -5677,53 +5681,53 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         // Code updates
         paragonLite.tempFixFairyStruggle();
-        paragonLite.setKeySystem();
-        paragonLite.setPokeData();
-        paragonLite.setBoxPreview();
-        paragonLite.fixChallengeModeLevelBug();
-        paragonLite.setGetEffectiveWeather();
-        paragonLite.setWeatherPowerMod();
-//        paragonLite.setTerrains();
-        paragonLite.setMonoTypeSTAB();
-        paragonLite.setCalcDamageOffensiveValue();
-        paragonLite.setCalcDamageDefensiveValue();
-        paragonLite.setCalcDamage();
-        paragonLite.setCritRatio();
-        paragonLite.setStatus();
-        paragonLite.setStatChangeIntimidateFlag();
-        paragonLite.setTrapDamage();
-        paragonLite.setTypeForPlate();
-        paragonLite.setGemDamageBoost();
-        paragonLite.setMultiStrikeLoadedDice();
-        paragonLite.setIsUnselectableMove();
-        paragonLite.setWeatherDamage();
-        paragonLite.setShinyRate();
-        paragonLite.setTrainerShiny();
-        paragonLite.setGhostEscape();
-        paragonLite.setCheckNoEffect();
-        paragonLite.setCallModifyEffectivenessHandler();
-        paragonLite.setHandlerSimulationDamage();
-        paragonLite.setScreenPower();
-        paragonLite.setNewSideStatus();
-        paragonLite.setBattlePokeCreate();
-        paragonLite.setMaxSpeedFix();
-        paragonLite.setDynamicTurnOrder();
-        paragonLite.setMoves();
-        paragonLite.setItems();
-        paragonLite.setAbilities();
-
-        paragonLite.setTypeEffectiveness();
-
-        if (debugMode)
-            paragonLite.setPokemonData();
-
+        paragonLite.setUnovaLink();
+//        paragonLite.setPokeData();
+//        paragonLite.setBoxPreview();
+//        paragonLite.fixChallengeModeLevelBug();
+//        paragonLite.setGetEffectiveWeather();
+//        paragonLite.setWeatherPowerMod();
+////        paragonLite.setTerrains();
+//        paragonLite.setMonoTypeSTAB();
+//        paragonLite.setCalcDamageOffensiveValue();
+//        paragonLite.setCalcDamageDefensiveValue();
+//        paragonLite.setCalcDamage();
+//        paragonLite.setCritRatio();
+//        paragonLite.setStatus();
+//        paragonLite.setStatChangeIntimidateFlag();
+//        paragonLite.setTrapDamage();
+//        paragonLite.setTypeForPlate();
+//        paragonLite.setGemDamageBoost();
+//        paragonLite.setMultiStrikeLoadedDice();
+//        paragonLite.setIsUnselectableMove();
+//        paragonLite.setWeatherDamage();
+//        paragonLite.setShinyRate();
+//        paragonLite.setTrainerShiny();
+//        paragonLite.setGhostEscape();
+//        paragonLite.setCheckNoEffect();
+//        paragonLite.setCallModifyEffectivenessHandler();
+//        paragonLite.setHandlerSimulationDamage();
+//        paragonLite.setScreenPower();
+//        paragonLite.setNewSideStatus();
+//        paragonLite.setBattlePokeCreate();
+//        paragonLite.setMaxSpeedFix();
+//        paragonLite.setDynamicTurnOrder();
+//        paragonLite.setMoves();
+//        paragonLite.setItems();
+//        paragonLite.setAbilities();
+//
+//        paragonLite.setTypeEffectiveness();
+//
 //        if (debugMode)
-//            paragonLite.setTrainerAI();
-
+//            paragonLite.setPokemonData();
+//
+////        if (debugMode)
+////            paragonLite.setTrainerAI();
+//
+////        if (debugMode)
+//        paragonLite.setTrainers();
+//
 //        if (debugMode)
-        paragonLite.setTrainers();
-
-        if (debugMode)
-            paragonLite.test();
+//            paragonLite.test();
     }
 }

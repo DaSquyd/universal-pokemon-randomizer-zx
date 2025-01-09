@@ -8,7 +8,7 @@ public class ExpectedNumberException extends ArmParseException {
         super();
     }
     
-    public ExpectedNumberException(int line, String op, String[] args, int arg, int min, int max) {
-        super(line, op, args, String.format("Unexpected token \"%s\" for argument %d; must be between %d and %d, inclusive", args[arg], arg, min, max));
+    public ExpectedNumberException(int line, String op, String[] args, int arg, int number, int min, int max) {
+        super(line, op, args, String.format("Unexpected token \"%s\" (%d) for argument %d; must be between %d and %d, inclusive", args[arg], number, arg, min, max));
     }
 }

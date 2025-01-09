@@ -7,6 +7,7 @@ import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.arm.ArmDecoder;
 import com.dabomstew.pkrandom.arm.ArmParser;
 import com.dabomstew.pkrandom.arm.exceptions.ArmDecodeException;
+import com.dabomstew.pkrandom.arm.exceptions.ArmParseException;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -39,6 +40,8 @@ public class ParagonLiteHandler {
         NARCArchive moveBackgroundsNarc;
         NARCArchive trainerAIScriptsNarc;
         NARCArchive moveAnimatedBackgroundsNarc;
+        
+        List<String> unovaLinkStrings;
 
         List<String> battleStrings1;
         List<String> battleStrings2;
@@ -61,7 +64,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.Redux;
+    public static Mode mode = Mode.ParagonLite;
 
     Gen5RomHandler romHandler;
 
@@ -72,6 +75,7 @@ public class ParagonLiteHandler {
     ParagonLiteOverlay fieldOvl;
     ParagonLiteOverlay uiCommonOvl;
     ParagonLiteOverlay bagOvl;
+    ParagonLiteOverlay titleOvl;
     ParagonLiteOverlay battleOvl;
     ParagonLiteOverlay battleLevelOvl;
     ParagonLiteOverlay battleServerOvl;
@@ -93,6 +97,8 @@ public class ParagonLiteHandler {
     NARCArchive moveBackgroundsNarc;
     NARCArchive trainerAIScriptsNarc;
     NARCArchive moveAnimatedBackgroundsNarc;
+
+    List<String> unovaLinkStrings;
 
     List<String> battleStrings1;
     List<String> battleStrings2;
@@ -181,13 +187,14 @@ public class ParagonLiteHandler {
         int fieldOvlNumber = romEntry.getInt("FieldOvlNumber");
         int uiCommonOvlNumber = romEntry.getInt("UICommonOvlNumber");
         int bagOvlNumber = romEntry.getInt("BagOvlNumber");
+        int titleOvlNumber = romEntry.getInt("TitleOvlNumber");
         int battleOvlNumber = romEntry.getInt("BattleOvlNumber");
         int BattleLevelOvlNumber = romEntry.getInt("BattleLevelOvlNumber");
         int battleServerOvlNumber = romEntry.getInt("BattleServerOvlNumber");
         int trainerAIOvlNumber = romEntry.getInt("TrainerAIOvlNumber");
         int storageOvlNumber = romEntry.getInt("PCOvlNumber");
         int fieldSaveOvlNumber = romEntry.getInt("FieldSaveOvlNumber");
-        int unovaLinkOvlNumber = romEntry.getInt("unovaLinkOvlNumber");
+        int unovaLinkOvlNumber = romEntry.getInt("UnovaLinkOvlNumber");
 
         globalAddressMap = new ParagonLiteAddressMap();
         armParser = new ArmParser(globalAddressMap);
@@ -207,7 +214,7 @@ public class ParagonLiteHandler {
 //            byte[] fieldOvlData = romHandler.readOverlay(fieldOvlNumber);
 //            int fieldOvlAddress = romHandler.getOverlayAddress(fieldOvlNumber);
 //            fieldOvl = new ParagonLiteOverlay(romHandler, fieldOvlNumber, "Field", fieldOvlData, fieldOvlAddress, ParagonLiteOverlay.Insertion.Front, armParser, globalAddressMap);
-
+            
             byte[] uiCommonOvlData = romHandler.readOverlay(uiCommonOvlNumber);
             int uiCommonOvlAddress = romHandler.getOverlayAddress(uiCommonOvlNumber);
             uiCommonOvl = new ParagonLiteOverlay(romHandler, uiCommonOvlNumber, "UICommon", uiCommonOvlData, uiCommonOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
@@ -215,6 +222,10 @@ public class ParagonLiteHandler {
             byte[] bagOvlData = romHandler.readOverlay(bagOvlNumber);
             int bagOvlAddress = romHandler.getOverlayAddress(bagOvlNumber);
             bagOvl = new ParagonLiteOverlay(romHandler, bagOvlNumber, "Bag", bagOvlData, bagOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
+
+            byte[] titleOvlData = romHandler.readOverlay(titleOvlNumber);
+            int titleOvlAddress = romHandler.getOverlayAddress(titleOvlNumber);
+            titleOvl = new ParagonLiteOverlay(romHandler, titleOvlNumber, "Title", titleOvlData, titleOvlAddress, ParagonLiteOverlay.Insertion.Front, armParser, globalAddressMap);
 
             byte[] battleOvlData = romHandler.readOverlay(battleOvlNumber);
             int battleOvlAddress = romHandler.getOverlayAddress(battleOvlNumber);
@@ -244,23 +255,37 @@ public class ParagonLiteHandler {
             int unovaLinkOvlAddress = romHandler.getOverlayAddress(unovaLinkOvlNumber);
             unovaLinkOvl = new ParagonLiteOverlay(romHandler, unovaLinkOvlNumber, "UnovaLink", unovaLinkOvlData, unovaLinkOvlAddress, ParagonLiteOverlay.Insertion.Back, armParser, globalAddressMap);
 
-            ParagonLiteOverlay[] battleOverlays = new ParagonLiteOverlay[]{arm9, battleOvl, battleLevelOvl, battleServerOvl, trainerAIOvl};
-            battleOvl.addContextOverlays(battleOverlays);
-            battleLevelOvl.addContextOverlays(battleOverlays);
-            battleServerOvl.addContextOverlays(battleOverlays);
-            trainerAIOvl.addContextOverlays(battleOverlays);
-
-            ParagonLiteOverlay[] storageOverlays = new ParagonLiteOverlay[]{arm9, storageOvl};
-            storageOvl.addContextOverlays(storageOverlays);
-
-            arm9.addContextOverlays(battleOverlays);
-            arm9.addContextOverlays(storageOverlays);
+            // Battle Overlays
+            {
+                ParagonLiteOverlay[] battleOverlays = new ParagonLiteOverlay[]{arm9, battleOvl, battleLevelOvl, battleServerOvl, trainerAIOvl};
+                battleOvl.addContextOverlays(battleOverlays);
+                battleLevelOvl.addContextOverlays(battleOverlays);
+                battleServerOvl.addContextOverlays(battleOverlays);
+                trainerAIOvl.addContextOverlays(battleOverlays);
+                arm9.addContextOverlays(battleOverlays);
+            }
+            
+            // Storage Overlays
+            {
+                ParagonLiteOverlay[] storageOverlays = new ParagonLiteOverlay[]{arm9, storageOvl};
+                storageOvl.addContextOverlays(storageOverlays);
+                arm9.addContextOverlays(storageOverlays);
+            }
+            
+            // Title Overlays
+            {
+                ParagonLiteOverlay[] unovaLinkOverlays = new ParagonLiteOverlay[]{arm9, uiCommonOvl, titleOvl, unovaLinkOvl};
+                titleOvl.addContextOverlays(unovaLinkOverlays);
+                unovaLinkOvl.addContextOverlays(unovaLinkOverlays);
+                arm9.addContextOverlays(unovaLinkOverlays);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         int gameIndex = romHandler.getGen5GameIndex();
-        if (gameIndex < 0 || gameIndex > 3) throw new RuntimeException();
+        if (gameIndex < 0 || gameIndex > 3)
+            throw new RuntimeException();
 
         int namespaceColumn = 0;
         int funcNameColumn = 1;
@@ -282,12 +307,14 @@ public class ParagonLiteHandler {
 
             String namespace = values[namespaceColumn];
             String label = values[funcNameColumn];
-            if (addressStartColumn + gameIndex >= values.length) throw new RuntimeException();
+            if (addressStartColumn + gameIndex >= values.length)
+                throw new RuntimeException();
 
             String offsetStr = values[addressStartColumn + gameIndex];
             if (offsetStr.equals("--")) continue;
 
-            if (!offsetStr.startsWith("0x")) throw new RuntimeException();
+            if (!offsetStr.startsWith("0x"))
+                throw new RuntimeException();
 
             offsetStr = offsetStr.substring(2); // remove 0x
             int romAddress = Integer.parseUnsignedInt(offsetStr, 16);
@@ -321,7 +348,7 @@ public class ParagonLiteHandler {
         Utils.printProgressFinished(startTime, total);
 
         globalAddressMap.addAllReferences();
-        decode(battleOvl, "ServerDisplay_WeatherDamage");
+        decode(unovaLinkOvl, "Menu_Init");
 
         pokes = params.pokes;
         moves = params.moves;
@@ -336,6 +363,8 @@ public class ParagonLiteHandler {
         moveBackgroundsNarc = params.moveBackgroundsNarc;
         moveAnimatedBackgroundsNarc = params.moveAnimatedBackgroundsNarc;
 
+        unovaLinkStrings = params.unovaLinkStrings;
+        
         battleStrings1 = params.battleStrings1;
         battleStrings2 = params.battleStrings2;
         battleStringsPokestar = params.battleStringsPokestar;
@@ -377,6 +406,7 @@ public class ParagonLiteHandler {
         battleServerOvl.save(romHandler);
         trainerAIOvl.save(romHandler);
         storageOvl.save(romHandler);
+        unovaLinkOvl.save(romHandler);
         System.out.printf(" - done, time=%dms\n", System.currentTimeMillis() - startTime);
     }
 
@@ -668,8 +698,112 @@ public class ParagonLiteHandler {
         battleOvl.writeByte(getMoveParamRomAddress + 0x9A, 0x12);
     }
     
-    public void setKeySystem() {
-        readLines("")
+    public void setUnovaLink() {
+        armParser.addGlobalValue("TITLETXT_UnovaLink_KeySystemButton", 69);
+        armParser.addGlobalValue("TITLETXT_UnovaLink_MemoryLinkButton", 70);
+        armParser.addGlobalValue("TITLETXT_UnovaLink_BackButton", 71);
+        armParser.addGlobalValue("TITLETXT_UnovaLink_SubMenuDescriptions", 72);
+        armParser.addGlobalValue("TITLETXT_UnovaLink_MainMenuTitle", 84);
+        armParser.addGlobalValue("TITLETXT_UnovaLink_3dsLinkButton", 162);
+        
+        // Send/Receive Keys is deprecated as all Keys are unlocked from the start
+        unovaLinkOvl.freeCode("KeySystem_SendReceive_Main");
+
+        unovaLinkOvl.freeCode("KeySystem_SendReceive_ReceiveDemo");
+        unovaLinkOvl.freeCode("KeySystem_SendReceive_SendDemo");
+
+        unovaLinkOvl.freeCode("KeySystem_CreateSendReceiveUI");
+
+        unovaLinkOvl.freeCode("KeySystem_CreateReceiveDemoUI");
+        unovaLinkOvl.freeCode("KeySystem_CreateSendDemoUI");
+        unovaLinkOvl.freeCode("KeySystem_CreateSendReceiveYesNoUI");
+
+        unovaLinkOvl.freeCode("KeySystem_UI_CreateSendReceive");
+        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateSendReceive");
+        unovaLinkOvl.freeCode("KeySystem_UI_DestroySendReceive");
+
+        unovaLinkOvl.freeCode("KeySystem_UI_CreateReceiveDemo");
+        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateReceiveDemo");
+        unovaLinkOvl.freeCode("KeySystem_UI_DestroyReceiveDemo");
+        unovaLinkOvl.freeCode("KeySystem_UI_CreateSendDemo");
+        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateSendDemo");
+        unovaLinkOvl.freeCode("KeySystem_UI_DestroySendDemo");
+        unovaLinkOvl.freeCode("KeySystem_UI_CreateSendReceiveYesno");
+        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateSendReceiveYesno");
+        unovaLinkOvl.freeCode("KeySystem_UI_DestroySendReceiveYesno");
+
+        unovaLinkOvl.freeCode("KeySystem_NetCallBack_SendReceiveEnd");
+
+        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive");
+        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive_Receive");
+        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive_Send");
+        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive_YesNo");
+
+        // UI_CreateMainMenu
+        {
+            List<String> lines = readLines("arm9/unovalink/ui_create_main_menu.s");
+            unovaLinkOvl.writeCodeForceInline(lines, "UI_CreateMainMenu", false);
+        }
+
+        // Menu_Init
+        {
+            List<String> lines = readLines("arm9/unovalink/menu_init.s");
+            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Init", true);
+        }
+
+//        // Menu_Exit
+//        {
+//            List<String> lines = readLines("arm9/unovalink/menu_exit.s");
+//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Exit", false);
+//        }
+//        
+//        // Menu_Main
+//        {
+//            List<String> lines = readLines("arm9/unovalink/menu_main.s");
+//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Main", false);
+//        }
+//        
+//        // Menu_Draw
+//        {
+//            List<String> lines = readLines("arm9/unovalink/menu_draw.s");
+//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Draw", false);
+//        }
+//        
+//        // Menu_IsDrawComplete
+//        {
+//            List<String> lines = readLines("arm9/unovalink/menu_is_draw_complete.s");
+//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_IsDrawComplete", true);
+//        }
+//        
+//        // Menu_IsSelected
+//        {
+//            List<String> lines = readLines("arm9/unovalink/menu_is_selected.s");
+//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_IsSelected", true);
+//        }
+//        
+//        // Menu_Reset
+//        {
+//            List<String> lines = readLines("arm9/unovalink/menu_reset.s");
+//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Reset", true);
+//        }
+//        
+//        // Menu_GetParam
+//        {
+//            List<String> lines = readLines("arm9/unovalink/menu_get_param.s");
+//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_GetParam", true);
+//        }
+//        
+//        // Menu_GetCursor
+//        {
+//            List<String> lines = readLines("arm9/unovalink/menu_get_cursor.s");
+//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_GetCursor", true);
+//        }
+//        
+//        // Menu_IsChanging
+//        {
+//            List<String> lines = readLines("arm9/unovalink/menu_is_changing.s");
+//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_IsChanging", true);
+//        }
     }
 
     public void setPokeData() {

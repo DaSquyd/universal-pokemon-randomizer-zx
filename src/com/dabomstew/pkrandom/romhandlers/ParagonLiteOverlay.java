@@ -416,6 +416,17 @@ public class ParagonLiteOverlay {
                 | ((data[offset + 2] & 0xFF) << 16)
                 | ((data[offset + 3] & 0xFF) << 24);
     }
+    
+    public void freeCode(String label) {
+        if (globalAddressMap.getAddressData(this, label) instanceof ParagonLiteAddressMap.CodeAddress codeAddress) {
+            int romAddress = codeAddress.getRomAddress();
+            int funcSize = armParser.getFuncSize(this, romAddress);
+            free(romAddress, funcSize);
+            return;
+        }
+        
+        throw new RuntimeException();
+    }
 
     public int writeCode(List<String> lines, String label) {
         try {
@@ -565,6 +576,15 @@ public class ParagonLiteOverlay {
         } catch (ArmParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void freeData(String label) {
+        if (globalAddressMap.getAddressData(this, label) instanceof ParagonLiteAddressMap.DataAddress dataAddress) {
+            free(dataAddress.getRomAddress(), dataAddress.getSize());
+            return;
+        }
+        
+        throw new RuntimeException();
     }
 
     public int writeData(byte[] bytes, String label) {
