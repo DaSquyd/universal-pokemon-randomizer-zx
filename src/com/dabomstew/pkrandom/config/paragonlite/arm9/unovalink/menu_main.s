@@ -5,9 +5,11 @@
 
     push    {r3-r7, lr}
     mov     r4, r0
+    
+    mov     r0, #FALSE
+    str     r0, [r4, #UnovaLink_MenuWork.isChanging]
+    
     ldr     r0, [r4, #UnovaLink_MenuWork.sequence]
-    mov     r5, #0
-    str     r5, [r4, #UnovaLink_MenuWork.isChanging]
     cmp     r0, #0
     beq     Seq_Selecting
     cmp     r0, #1
@@ -27,7 +29,7 @@ Seq_Selecting:
     mov     r7, r0
     bl      ARM9::GFL_HIDGetNewPressKeys
     mov     r1, #BTN_Up
-    mov     r6, r5
+    mov     r6, #0
     tst     r1, r7
     beq     Label_0x021C0F56
     ldr     r0, =SoundEffect_Hover

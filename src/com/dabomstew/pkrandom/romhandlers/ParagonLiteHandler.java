@@ -706,38 +706,38 @@ public class ParagonLiteHandler {
         armParser.addGlobalValue("TITLETXT_UnovaLink_MainMenuTitle", 84);
         armParser.addGlobalValue("TITLETXT_UnovaLink_3dsLinkButton", 162);
         
-        // Send/Receive Keys is deprecated as all Keys are unlocked from the start
-        unovaLinkOvl.freeCode("KeySystem_SendReceive_Main");
-
-        unovaLinkOvl.freeCode("KeySystem_SendReceive_ReceiveDemo");
-        unovaLinkOvl.freeCode("KeySystem_SendReceive_SendDemo");
-
-        unovaLinkOvl.freeCode("KeySystem_CreateSendReceiveUI");
-
-        unovaLinkOvl.freeCode("KeySystem_CreateReceiveDemoUI");
-        unovaLinkOvl.freeCode("KeySystem_CreateSendDemoUI");
-        unovaLinkOvl.freeCode("KeySystem_CreateSendReceiveYesNoUI");
-
-        unovaLinkOvl.freeCode("KeySystem_UI_CreateSendReceive");
-        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateSendReceive");
-        unovaLinkOvl.freeCode("KeySystem_UI_DestroySendReceive");
-
-        unovaLinkOvl.freeCode("KeySystem_UI_CreateReceiveDemo");
-        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateReceiveDemo");
-        unovaLinkOvl.freeCode("KeySystem_UI_DestroyReceiveDemo");
-        unovaLinkOvl.freeCode("KeySystem_UI_CreateSendDemo");
-        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateSendDemo");
-        unovaLinkOvl.freeCode("KeySystem_UI_DestroySendDemo");
-        unovaLinkOvl.freeCode("KeySystem_UI_CreateSendReceiveYesno");
-        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateSendReceiveYesno");
-        unovaLinkOvl.freeCode("KeySystem_UI_DestroySendReceiveYesno");
-
-        unovaLinkOvl.freeCode("KeySystem_NetCallBack_SendReceiveEnd");
-
-        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive");
-        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive_Receive");
-        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive_Send");
-        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive_YesNo");
+//        // Send/Receive Keys is deprecated as all Keys are unlocked from the start
+//        unovaLinkOvl.freeCode("KeySystem_SendReceive_Main");
+//
+//        unovaLinkOvl.freeCode("KeySystem_SendReceive_ReceiveDemo");
+//        unovaLinkOvl.freeCode("KeySystem_SendReceive_SendDemo");
+//
+//        unovaLinkOvl.freeCode("KeySystem_CreateSendReceiveUI");
+//
+//        unovaLinkOvl.freeCode("KeySystem_CreateReceiveDemoUI");
+//        unovaLinkOvl.freeCode("KeySystem_CreateSendDemoUI");
+//        unovaLinkOvl.freeCode("KeySystem_CreateSendReceiveYesNoUI");
+//
+//        unovaLinkOvl.freeCode("KeySystem_UI_CreateSendReceive");
+//        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateSendReceive");
+//        unovaLinkOvl.freeCode("KeySystem_UI_DestroySendReceive");
+//
+//        unovaLinkOvl.freeCode("KeySystem_UI_CreateReceiveDemo");
+//        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateReceiveDemo");
+//        unovaLinkOvl.freeCode("KeySystem_UI_DestroyReceiveDemo");
+//        unovaLinkOvl.freeCode("KeySystem_UI_CreateSendDemo");
+//        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateSendDemo");
+//        unovaLinkOvl.freeCode("KeySystem_UI_DestroySendDemo");
+//        unovaLinkOvl.freeCode("KeySystem_UI_CreateSendReceiveYesno");
+//        unovaLinkOvl.freeCode("KeySystem_UI_IsEndCreateSendReceiveYesno");
+//        unovaLinkOvl.freeCode("KeySystem_UI_DestroySendReceiveYesno");
+//
+//        unovaLinkOvl.freeCode("KeySystem_NetCallBack_SendReceiveEnd");
+//
+//        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive");
+//        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive_Receive");
+//        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive_Send");
+//        unovaLinkOvl.freeData("Data_KeySystem_UI_SendReceive_YesNo");
 
         // UI_CreateMainMenu
         {
@@ -751,59 +751,59 @@ public class ParagonLiteHandler {
             unovaLinkOvl.writeCodeForceInline(lines, "Menu_Init", true);
         }
 
-//        // Menu_Exit
-//        {
-//            List<String> lines = readLines("arm9/unovalink/menu_exit.s");
-//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Exit", false);
-//        }
-//        
-//        // Menu_Main
-//        {
-//            List<String> lines = readLines("arm9/unovalink/menu_main.s");
-//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Main", false);
-//        }
-//        
-//        // Menu_Draw
-//        {
-//            List<String> lines = readLines("arm9/unovalink/menu_draw.s");
-//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Draw", false);
-//        }
-//        
-//        // Menu_IsDrawComplete
-//        {
-//            List<String> lines = readLines("arm9/unovalink/menu_is_draw_complete.s");
-//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_IsDrawComplete", true);
-//        }
-//        
-//        // Menu_IsSelected
-//        {
-//            List<String> lines = readLines("arm9/unovalink/menu_is_selected.s");
-//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_IsSelected", true);
-//        }
-//        
-//        // Menu_Reset
-//        {
-//            List<String> lines = readLines("arm9/unovalink/menu_reset.s");
-//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Reset", true);
-//        }
-//        
-//        // Menu_GetParam
-//        {
-//            List<String> lines = readLines("arm9/unovalink/menu_get_param.s");
-//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_GetParam", true);
-//        }
-//        
-//        // Menu_GetCursor
-//        {
-//            List<String> lines = readLines("arm9/unovalink/menu_get_cursor.s");
-//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_GetCursor", true);
-//        }
-//        
-//        // Menu_IsChanging
-//        {
-//            List<String> lines = readLines("arm9/unovalink/menu_is_changing.s");
-//            unovaLinkOvl.writeCodeForceInline(lines, "Menu_IsChanging", true);
-//        }
+        // Menu_Exit
+        {
+            List<String> lines = readLines("arm9/unovalink/menu_exit.s");
+            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Exit", false);
+        }
+
+        // Menu_Main
+        {
+            List<String> lines = readLines("arm9/unovalink/menu_main.s");
+            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Main", false);
+        }
+
+        // Menu_Draw
+        {
+            List<String> lines = readLines("arm9/unovalink/menu_draw.s");
+            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Draw", false);
+        }
+
+        // Menu_IsDrawComplete
+        {
+            List<String> lines = readLines("arm9/unovalink/menu_is_draw_complete.s");
+            unovaLinkOvl.writeCodeForceInline(lines, "Menu_IsDrawComplete", true);
+        }
+
+        // Menu_IsSelected
+        {
+            List<String> lines = readLines("arm9/unovalink/menu_is_selected.s");
+            unovaLinkOvl.writeCodeForceInline(lines, "Menu_IsSelected", true);
+        }
+
+        // Menu_Reset
+        {
+            List<String> lines = readLines("arm9/unovalink/menu_reset.s");
+            unovaLinkOvl.writeCodeForceInline(lines, "Menu_Reset", true);
+        }
+
+        // Menu_GetParam
+        {
+            List<String> lines = readLines("arm9/unovalink/menu_get_param.s");
+            unovaLinkOvl.writeCodeForceInline(lines, "Menu_GetParam", true);
+        }
+
+        // Menu_GetCursor
+        {
+            List<String> lines = readLines("arm9/unovalink/menu_get_cursor.s");
+            unovaLinkOvl.writeCodeForceInline(lines, "Menu_GetCursor", true);
+        }
+
+        // Menu_IsChanging
+        {
+            List<String> lines = readLines("arm9/unovalink/menu_is_changing.s");
+            unovaLinkOvl.writeCodeForceInline(lines, "Menu_IsChanging", true);
+        }
     }
 
     public void setPokeData() {

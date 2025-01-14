@@ -50,7 +50,7 @@ public class Gen5Constants {
 
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
-            bsCatchRateOffset = 8, bsStageOffset =9, bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
+            bsCatchRateOffset = 8, bsStageOffset = 9, bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
             bsDarkGrassHeldItemOffset = 16, bsGenderRatioOffset = 18, bsBaseFriendshipOffset = 20, bsGrowthCurveOffset = 21,
             bsAbility1Offset = 24, bsAbility2Offset = 25, bsAbility3Offset = 26, bsFormeOffset = 28,
             bsFormeSpriteOffset = 30, bsFormeCountOffset = 32, bsExpYieldOffset = 34, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;

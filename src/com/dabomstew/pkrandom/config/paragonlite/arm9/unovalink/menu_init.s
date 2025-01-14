@@ -43,7 +43,8 @@
     str     r0, [sp, #S_Work]
     
     mov     r3, r5
-    mov     r2, r0
+    mov     r2, #UnovaLink_MenuWork.menuParam
+    add     r2, r0
     ldr     r1, [sp, #S_ParamSize]
     lsr     r1, #2 ; as 32-bit sized values
     
@@ -118,7 +119,6 @@ ButtonLoop_Start:
     ldrb    r1, [r4, #UnovaLink_MenuParam_Button.x]         ; arg 1
     ldrb    r2, [r4, #UnovaLink_MenuParam_Button.y]         ; arg 2
     ldrb    r3, [r4, #UnovaLink_MenuParam_Button.width]     ; arg 3
-    
     bl      UnovaLink::Text_Init
     str     r0, [r4, #UnovaLink_MenuParam_Button.msgWork]
     ldr     r1, =TextColor
