@@ -1266,7 +1266,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             pkmn.secondaryType = null;
         }
         pkmn.catchRate = rom[offset + Gen3Constants.bsCatchRateOffset] & 0xFF;
-        pkmn.growthCurve = ExpCurve.fromByte(rom[offset + Gen3Constants.bsGrowthCurveOffset]);
+        pkmn.growthRate = ExpCurve.fromByte(rom[offset + Gen3Constants.bsGrowthCurveOffset]);
         // Abilities
         pkmn.ability1 = rom[offset + Gen3Constants.bsAbility1Offset] & 0xFF;
         pkmn.ability2 = rom[offset + Gen3Constants.bsAbility2Offset] & 0xFF;
@@ -1304,7 +1304,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             rom[offset + Gen3Constants.bsSecondaryTypeOffset] = Gen3Constants.typeToByte(pkmn.secondaryType);
         }
         rom[offset + Gen3Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
-        rom[offset + Gen3Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
+        rom[offset + Gen3Constants.bsGrowthCurveOffset] = pkmn.growthRate.toByte();
 
         rom[offset + Gen3Constants.bsAbility1Offset] = (byte) pkmn.ability1;
         if (pkmn.ability2 == 0) {

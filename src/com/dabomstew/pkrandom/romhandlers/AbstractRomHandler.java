@@ -35,7 +35,6 @@ import com.dabomstew.pkrandom.pokemon.*;
 
 import java.io.PrintStream;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public abstract class AbstractRomHandler implements RomHandler {
@@ -9170,7 +9169,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                         }
 
                         // Force same EXP curve (mandatory)
-                        if (pk.growthCurve != fromPK.growthCurve) {
+                        if (pk.growthRate != fromPK.growthRate) {
                             continue;
                         }
 
@@ -9400,7 +9399,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     }
 
                     // Force same EXP curve (mandatory)
-                    if (pk.growthCurve != fromPK.growthCurve) {
+                    if (pk.growthRate != fromPK.growthRate) {
                         continue;
                     }
 
@@ -9812,7 +9811,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (pkmn == null) {
                         continue;
                     }
-                    pkmn.growthCurve = pkmn.isLegendary() ? ExpCurve.SLOW : expCurve;
+                    pkmn.growthRate = pkmn.isLegendary() ? ExpCurve.SLOW : expCurve;
                 }
                 break;
             case STRONG_LEGENDARIES:
@@ -9820,7 +9819,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (pkmn == null) {
                         continue;
                     }
-                    pkmn.growthCurve = pkmn.isStrongLegendary() ? ExpCurve.SLOW : expCurve;
+                    pkmn.growthRate = pkmn.isStrongLegendary() ? ExpCurve.SLOW : expCurve;
                 }
                 break;
             case ALL:
@@ -9828,7 +9827,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     if (pkmn == null) {
                         continue;
                     }
-                    pkmn.growthCurve = expCurve;
+                    pkmn.growthRate = expCurve;
                 }
                 break;
         }

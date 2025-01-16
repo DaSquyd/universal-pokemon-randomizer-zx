@@ -380,12 +380,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     // This ROM
+    private Pokemon[] oldPokes;
     private Pokemon[] pokes;
     private Map<Integer, FormeInfo> formeMappings = new TreeMap<>();
     private List<Pokemon> pokemonList;
     private List<Pokemon> pokemonListInclFormes;
     private List<Move> moves = new ArrayList<>();
-    private RomEntry romEntry;
+    public RomEntry romEntry;
     private byte[] arm9;
     private List<String> abilityNames;
     private List<String> itemNames;
@@ -404,7 +405,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private Map<Integer, Long> actualOverlayCRC32s;
     private Map<String, Long> actualFileCRC32s;
 
-    private NARCArchive pokeNarc, movesNarc, stringsNarc, storyTextNarc, scriptNarc, shopNarc;
+    public NARCArchive pokeNarc, movesNarc, stringsNarc, storyTextNarc, scriptNarc, shopNarc;
 
     @Override
     protected boolean detectNDSRom(String ndsCode, byte version) {
@@ -465,10 +466,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 throw new RandomizerIOException(e);
             }
         }
-        loadPokemonStats();
-        pokemonListInclFormes = Arrays.asList(pokes);
-        pokemonList = Arrays.asList(Arrays.copyOfRange(pokes, 0, Gen5Constants.pokemonCount + 1));
+
         try {
+            loadPokemonStats(this.readNARC(romEntry.getFile("PokemonStats")));
+            pokemonListInclFormes = Arrays.asList(pokes);
+            pokemonList = Arrays.asList(Arrays.copyOfRange(pokes, 0, Gen5Constants.pokemonCount + 1));
             movesNarc = this.readNARC(romEntry.getFile("MoveData"));
             loadMoves(movesNarc, 0);
         } catch (IOException e) {
@@ -509,38 +511,44 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
-    private void loadPokemonStats() {
-        try {
-            pokeNarc = this.readNARC(romEntry.getFile("PokemonStats"));
-            String[] pokeNames = readPokemonNames();
-            int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
-            pokes = new Pokemon[Gen5Constants.pokemonCount + formeCount + 1];
-            for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
-                pokes[i] = new Pokemon();
-                pokes[i].number = i;
-                loadBasicPokeStats(pokes[i], pokeNarc.files.get(i), formeMappings);
-                // Name?
-                pokes[i].name = pokeNames[i];
-            }
-
-            int i = Gen5Constants.pokemonCount + 1;
-            for (int k : formeMappings.keySet()) {
-                pokes[i] = new Pokemon();
-                pokes[i].number = i;
-                loadBasicPokeStats(pokes[i], pokeNarc.files.get(k), formeMappings);
-                FormeInfo fi = formeMappings.get(k);
-                pokes[i].name = pokeNames[fi.baseForme];
-                pokes[i].baseForme = pokes[fi.baseForme];
-                pokes[i].formeNumber = fi.formeNumber;
-                pokes[i].formeSpriteIndex = fi.formeSpriteOffset + Gen5Constants.pokemonCount + Gen5Constants.getNonPokemonBattleSpriteCount(romEntry.romType);
-                pokes[i].formeSuffix = Gen5Constants.getFormeSuffix(k, romEntry.romType);
-                i = i + 1;
-            }
-            populateEvolutions();
-        } catch (IOException e) {
-            throw new RandomizerIOException(e);
+    public Pokemon[] loadPokemonStats(NARCArchive newNarc) {
+        pokeNarc = newNarc;
+        String[] pokeNames = readPokemonNames();
+        int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
+        if (oldPokes == null) {
+            oldPokes = new Pokemon[Gen5Constants.pokemonCount + formeCount + 1];
+            loadPokemonStatsInternal(pokeNames, oldPokes);
         }
 
+        pokes = new Pokemon[Gen5Constants.pokemonCount + formeCount + 1];
+        loadPokemonStatsInternal(pokeNames, pokes);
+        return pokes;
+    }
+
+    private void loadPokemonStatsInternal(String[] pokeNames, Pokemon[] pokes) {
+        for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
+            pokes[i] = new Pokemon();
+            pokes[i].number = i;
+            loadBasicPokeStats(pokes[i], pokeNarc.files.get(i), formeMappings);
+            // Name?
+            pokes[i].name = pokeNames[i];
+        }
+
+        int i = Gen5Constants.pokemonCount + 1;
+        for (int k : formeMappings.keySet()) {
+            pokes[i] = new Pokemon();
+            pokes[i].number = i;
+            loadBasicPokeStats(pokes[i], pokeNarc.files.get(k), formeMappings);
+            FormeInfo fi = formeMappings.get(k);
+            pokes[i].name = pokeNames[fi.baseForme];
+            pokes[i].baseForme = pokes[fi.baseForme];
+            pokes[i].formeNumber = fi.formeNumber;
+            pokes[i].formeSpriteIndex = fi.formeSpriteOffset + Gen5Constants.pokemonCount + Gen5Constants.getNonPokemonBattleSpriteCount(romEntry.romType);
+            pokes[i].formeSuffix = Gen5Constants.getFormeSuffix(k, romEntry.romType);
+            i = i + 1;
+        }
+
+        populateEvolutions(pokes);
     }
 
     public void loadMoves(NARCArchive narc, int startingIndex) {
@@ -572,7 +580,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 move.name = moveNames.get(i);
             else
                 move.name = String.format("#%03d", i);
-            
+
             move.description = moveDescriptions.get(moveDescriptions.size() > i ? i : 0);
             move.number = i;
             move.internalId = i;
@@ -673,7 +681,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         pkmn.speedEVs = (evYield >> 6) & 0xFF;
         pkmn.spatkEVs = (evYield >> 8) & 0xFF;
         pkmn.spdefEVs = (evYield >> 10) & 0xFF;
-        pkmn.noFall = ((evYield >> 12) & 0x01) != 0; // Diglett/Dugtrio
+        pkmn.groundedEntry = ((evYield >> 12) & 0x01) != 0; // Diglett/Dugtrio
 
         // Held Items?
         int item1 = readUnsignedWord(stats, Gen5Constants.bsCommonHeldItemOffset);
@@ -694,12 +702,19 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         pkmn.genderRatio = stats[Gen5Constants.bsGenderRatioOffset] & 0xFF;
         pkmn.baseFriendship = stats[Gen5Constants.bsBaseFriendshipOffset] & 0xFF;
-        pkmn.growthCurve = ExpCurve.fromByte(stats[Gen5Constants.bsGrowthCurveOffset]);
+        pkmn.growthRate = ExpCurve.fromByte((byte) (stats[Gen5Constants.bsGrowthRateOffset] & 0x3F));
 
-        pkmn.ability1 = stats[Gen5Constants.bsAbility1Offset] & 0xFF;
-        pkmn.ability2 = stats[Gen5Constants.bsAbility2Offset] & 0xFF;
-        pkmn.ability3 = stats[Gen5Constants.bsAbility3Offset] & 0xFF;
+        pkmn.eggGroup1 = EggGroup.fromByte((byte) (stats[Gen5Constants.bsEggGroup1Offset] & 0x3F));
+        pkmn.eggGroup2 = EggGroup.fromByte((byte) (stats[Gen5Constants.bsEggGroup2Offset] & 0x3F));
+        if (pkmn.eggGroup1 == pkmn.eggGroup2)
+            pkmn.eggGroup2 = null;
 
+        pkmn.ability1 = (stats[Gen5Constants.bsAbility1Offset] & 0xFF) | ((stats[Gen5Constants.bsAbility1Offset - 3] & 0xC0) << 2);
+        pkmn.ability2 = (stats[Gen5Constants.bsAbility2Offset] & 0xFF) | ((stats[Gen5Constants.bsAbility2Offset - 3] & 0xC0) << 2);
+        pkmn.ability3 = (stats[Gen5Constants.bsAbility3Offset] & 0xFF) | ((stats[Gen5Constants.bsAbility3Offset - 3] & 0xC0) << 2);
+
+        pkmn.isAsymmetric = (stats[Gen5Constants.bsDexColorOffset] & 0x40) != 0;
+        
         pkmn.expYield = readUnsignedWord(stats, Gen5Constants.bsExpYieldOffset);
 
         int formeCount = stats[Gen5Constants.bsFormeCountOffset] & 0xFF;
@@ -914,8 +929,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             stats[Gen5Constants.bsSecondaryTypeOffset] = Gen5Constants.typeToByte(pkmn.secondaryType);
         }
         stats[Gen5Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
-        stats[Gen5Constants.bsBaseFriendshipOffset] = (byte) pkmn.baseFriendship;
-        stats[Gen5Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
+        stats[Gen5Constants.bsGrowthRateOffset] = pkmn.growthRate.toByte();
 
         stats[Gen5Constants.bsStageOffset] = (byte) pkmn.stage;
 
@@ -926,7 +940,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         evYield |= pkmn.speedEVs << 6;
         evYield |= pkmn.spatkEVs << 8;
         evYield |= pkmn.spdefEVs << 10;
-        evYield |= pkmn.noFall ? 0x1000 : 0; // only used for Diglett and Dugtrio
+        evYield |= pkmn.groundedEntry ? 0x1000 : 0; // only used for Diglett and Dugtrio
 
         writeWord(stats, Gen5Constants.bsEVYieldOffset, evYield);
 
@@ -942,6 +956,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
 
         stats[Gen5Constants.bsGenderRatioOffset] = (byte) pkmn.genderRatio;
+        stats[Gen5Constants.bsBaseFriendshipOffset] = (byte) pkmn.baseFriendship;
+        stats[Gen5Constants.bsGrowthRateOffset] = pkmn.growthRate.toByte();
+
+        stats[Gen5Constants.bsEggGroup1Offset] = pkmn.eggGroup1.toByte();
+        stats[Gen5Constants.bsEggGroup2Offset] = (pkmn.eggGroup2 == null ? pkmn.eggGroup1 : pkmn.eggGroup2).toByte();
 
         stats[Gen5Constants.bsAbility1Offset] = (byte) (pkmn.ability1 & 0xFF);
         stats[Gen5Constants.bsAbility1Offset - 3] |= (byte) (((pkmn.ability1 & 0x0300) >> 2) & 0xFF);
@@ -950,6 +969,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         stats[Gen5Constants.bsAbility3Offset] = (byte) (pkmn.ability3 & 0xFF);
         stats[Gen5Constants.bsAbility3Offset - 3] |= (byte) (((pkmn.ability3 & 0x0300) >> 2) & 0xFF);
 
+        stats[Gen5Constants.bsDexColorOffset] &= (byte) ~0x40;
+        stats[Gen5Constants.bsDexColorOffset] |= (byte) (pkmn.isAsymmetric ? 0x40 : 0);
+        
         writeWord(stats, Gen5Constants.bsExpYieldOffset, pkmn.expYield);
 
         if (pkmn.specialForms > 0)
@@ -3791,7 +3813,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return true;
     }
 
-    private void populateEvolutions() {
+    private void populateEvolutions(Pokemon[] pokes) {
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 pkmn.evolutionsFrom.clear();
@@ -5578,7 +5600,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         params.romHandler = this;
         params.romEntry = romEntry;
         params.arm9Data = arm9;
+        params.classicPokes = oldPokes;
         params.pokes = pokes;
+        params.formeMappings = formeMappings;
         params.moves = moves;
 
         String pokemonGraphicsFilename = romEntry.getFile("PokemonGraphics");
@@ -5621,7 +5645,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int itemDescriptionsTextOffset = romEntry.getInt("ItemDescriptionsTextOffset");
 
         params.unovaLinkStrings = getStrings(false, unovaLinkTextOffset);
-        
+
         params.battleStrings1 = getStrings(false, battleTextOffset1);
         params.battleStrings2 = getStrings(false, battleTextOffset2);
         params.battleStringsPokestar = (isWhite2() || isBlack2()) ? getStrings(false, battleTextOffsetPokestar) : null;
@@ -5681,53 +5705,52 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         // Code updates
         paragonLite.tempFixFairyStruggle();
-        paragonLite.setUnovaLink();
-//        paragonLite.setPokeData();
-//        paragonLite.setBoxPreview();
-//        paragonLite.fixChallengeModeLevelBug();
-//        paragonLite.setGetEffectiveWeather();
-//        paragonLite.setWeatherPowerMod();
-////        paragonLite.setTerrains();
-//        paragonLite.setMonoTypeSTAB();
-//        paragonLite.setCalcDamageOffensiveValue();
-//        paragonLite.setCalcDamageDefensiveValue();
-//        paragonLite.setCalcDamage();
-//        paragonLite.setCritRatio();
-//        paragonLite.setStatus();
-//        paragonLite.setStatChangeIntimidateFlag();
-//        paragonLite.setTrapDamage();
-//        paragonLite.setTypeForPlate();
-//        paragonLite.setGemDamageBoost();
-//        paragonLite.setMultiStrikeLoadedDice();
-//        paragonLite.setIsUnselectableMove();
-//        paragonLite.setWeatherDamage();
-//        paragonLite.setShinyRate();
-//        paragonLite.setTrainerShiny();
-//        paragonLite.setGhostEscape();
-//        paragonLite.setCheckNoEffect();
-//        paragonLite.setCallModifyEffectivenessHandler();
-//        paragonLite.setHandlerSimulationDamage();
-//        paragonLite.setScreenPower();
-//        paragonLite.setNewSideStatus();
-//        paragonLite.setBattlePokeCreate();
-//        paragonLite.setMaxSpeedFix();
-//        paragonLite.setDynamicTurnOrder();
-//        paragonLite.setMoves();
-//        paragonLite.setItems();
-//        paragonLite.setAbilities();
-//
-//        paragonLite.setTypeEffectiveness();
-//
+//        paragonLite.setUnovaLink();
+        paragonLite.setPokeData();
+        paragonLite.setBoxPreview();
+        paragonLite.fixChallengeModeLevelBug();
+        paragonLite.setGetEffectiveWeather();
+        paragonLite.setWeatherPowerMod();
+//        paragonLite.setTerrains();
+        paragonLite.setMonoTypeSTAB();
+        paragonLite.setCalcDamageOffensiveValue();
+        paragonLite.setCalcDamageDefensiveValue();
+        paragonLite.setCalcDamage();
+        paragonLite.setCritRatio();
+        paragonLite.setStatus();
+        paragonLite.setStatChangeIntimidateFlag();
+        paragonLite.setTrapDamage();
+        paragonLite.setTypeForPlate();
+        paragonLite.setGemDamageBoost();
+        paragonLite.setMultiStrikeLoadedDice();
+        paragonLite.setIsUnselectableMove();
+        paragonLite.setWeatherDamage();
+        paragonLite.setShinyRate();
+        paragonLite.setTrainerShiny();
+        paragonLite.setGhostEscape();
+        paragonLite.setCheckNoEffect();
+        paragonLite.setCallModifyEffectivenessHandler();
+        paragonLite.setHandlerSimulationDamage();
+        paragonLite.setScreenPower();
+        paragonLite.setNewSideStatus();
+        paragonLite.setBattlePokeCreate();
+        paragonLite.setMaxSpeedFix();
+        paragonLite.setDynamicTurnOrder();
+        paragonLite.setMoves();
+        paragonLite.setItems();
+        paragonLite.setAbilities();
+
+        paragonLite.setTypeEffectiveness();
+
+        paragonLite.setPokemonData();
+
 //        if (debugMode)
-//            paragonLite.setPokemonData();
-//
-////        if (debugMode)
-////            paragonLite.setTrainerAI();
-//
-////        if (debugMode)
-//        paragonLite.setTrainers();
-//
+//            paragonLite.setTrainerAI();
+
 //        if (debugMode)
-//            paragonLite.test();
+        paragonLite.setTrainers();
+
+        if (debugMode)
+            paragonLite.test();
     }
 }

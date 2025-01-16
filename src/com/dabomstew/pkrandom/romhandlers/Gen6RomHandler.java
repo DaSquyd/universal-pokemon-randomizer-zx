@@ -402,7 +402,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
         pkmn.catchRate = stats[Gen6Constants.bsCatchRateOffset] & 0xFF;
         pkmn.baseFriendship = stats[Gen6Constants.bsBaseHappinessOffset] & 0xFF;
-        pkmn.growthCurve = ExpCurve.fromByte(stats[Gen6Constants.bsGrowthCurveOffset]);
+        pkmn.growthRate = ExpCurve.fromByte(stats[Gen6Constants.bsGrowthCurveOffset]);
 
         pkmn.ability1 = stats[Gen6Constants.bsAbility1Offset] & 0xFF;
         pkmn.ability2 = stats[Gen6Constants.bsAbility2Offset] & 0xFF;
@@ -747,7 +747,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
         }
         stats[Gen6Constants.bsCatchRateOffset] = (byte) pkmn.catchRate;
         stats[Gen6Constants.bsBaseHappinessOffset] = (byte) pkmn.baseFriendship;
-        stats[Gen6Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
+        stats[Gen6Constants.bsGrowthCurveOffset] = pkmn.growthRate.toByte();
 
         stats[Gen6Constants.bsAbility1Offset] = (byte) pkmn.ability1;
         stats[Gen6Constants.bsAbility2Offset] = pkmn.ability2 != 0 ? (byte) pkmn.ability2 : (byte) pkmn.ability1;

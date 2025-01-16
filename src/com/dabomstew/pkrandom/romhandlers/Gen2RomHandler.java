@@ -747,7 +747,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
         pkmn.commonHeldItem = rom[offset + Gen2Constants.bsCommonHeldItemOffset] & 0xFF;
         pkmn.rareHeldItem = rom[offset + Gen2Constants.bsRareHeldItemOffset] & 0xFF;
         pkmn.darkGrassHeldItem = -1;
-        pkmn.growthCurve = ExpCurve.fromByte(rom[offset + Gen2Constants.bsGrowthCurveOffset]);
+        pkmn.growthRate = ExpCurve.fromByte(rom[offset + Gen2Constants.bsGrowthCurveOffset]);
         pkmn.picDimensions = rom[offset + Gen2Constants.bsPicDimensionsOffset] & 0xFF;
 
     }
@@ -769,7 +769,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
         rom[offset + Gen2Constants.bsCommonHeldItemOffset] = (byte) pkmn.commonHeldItem;
         rom[offset + Gen2Constants.bsRareHeldItemOffset] = (byte) pkmn.rareHeldItem;
-        rom[offset + Gen2Constants.bsGrowthCurveOffset] = pkmn.growthCurve.toByte();
+        rom[offset + Gen2Constants.bsGrowthCurveOffset] = pkmn.growthRate.toByte();
     }
 
     private String[] readPokemonNames() {

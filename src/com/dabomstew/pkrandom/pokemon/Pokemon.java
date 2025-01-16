@@ -28,7 +28,6 @@ package com.dabomstew.pkrandom.pokemon;
 import com.dabomstew.pkrandom.constants.Gen7Constants;
 import com.dabomstew.pkrandom.constants.GlobalConstants;
 import com.dabomstew.pkrandom.constants.Species;
-import org.openjdk.nashorn.internal.objects.Global;
 
 import java.util.*;
 
@@ -54,7 +53,7 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public int hpEVs, attackEVs, defenseEVs, spatkEVs, spdefEVs, speedEVs;
     
-    public boolean noFall;
+    public boolean groundedEntry;
 
     public int catchRate, baseFriendship, expYield, stage;
 
@@ -66,7 +65,9 @@ public class Pokemon implements Comparable<Pokemon> {
 
     public int callRate;
 
-    public ExpCurve growthCurve;
+    public ExpCurve growthRate;
+    
+    public EggGroup eggGroup1, eggGroup2;
 
     public List<Evolution> evolutionsFrom = new ArrayList<>();
     public List<Evolution> evolutionsTo = new ArrayList<>();
@@ -75,6 +76,8 @@ public class Pokemon implements Comparable<Pokemon> {
     public List<MegaEvolution> megaEvolutionsTo = new ArrayList<>();
 
     protected List<Integer> shuffledStatsOrder;
+    
+    public boolean isAsymmetric;
 
     // A flag to use for things like recursive stats copying.
     // Must not rely on the state of this flag being preserved between calls.

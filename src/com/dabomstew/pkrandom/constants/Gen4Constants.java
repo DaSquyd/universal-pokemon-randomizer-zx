@@ -46,7 +46,8 @@ public class Gen4Constants {
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3, bsSpAtkOffset = 4,
             bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7, bsCatchRateOffset = 8, bsExpYieldOffset = 9,
             bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGenderRatioOffset = 16,
-            bsBaseHappinessOffset = 18, bsGrowthCurveOffset = 19, bsAbility1Offset = 22, bsAbility2Offset = 23, bsTMHMCompatOffset = 28;
+            bsBaseHappinessOffset = 18, bsGrowthRateOffset = 19, bsEggGroup1Offset = 20, bsEggGroup2Offset = 21,
+            bsAbility1Offset = 22, bsAbility2Offset = 23, bsTMHMCompatOffset = 28;
 
     public static final String starterCriesPrefix = "0004000C10BD0000000000000000000000E000000000000000E0000000000200";
 

@@ -7,7 +7,6 @@ import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.arm.ArmDecoder;
 import com.dabomstew.pkrandom.arm.ArmParser;
 import com.dabomstew.pkrandom.arm.exceptions.ArmDecodeException;
-import com.dabomstew.pkrandom.arm.exceptions.ArmParseException;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.newnds.NARCArchive;
 import com.dabomstew.pkrandom.pokemon.*;
@@ -27,7 +26,9 @@ public class ParagonLiteHandler {
 
         byte[] arm9Data;
 
+        Pokemon[] classicPokes;
         Pokemon[] pokes;
+        Map<Integer, FormeInfo> formeMappings;
         List<Move> moves;
 
         NARCArchive pokemonGraphicsNarc;
@@ -40,7 +41,7 @@ public class ParagonLiteHandler {
         NARCArchive moveBackgroundsNarc;
         NARCArchive trainerAIScriptsNarc;
         NARCArchive moveAnimatedBackgroundsNarc;
-        
+
         List<String> unovaLinkStrings;
 
         List<String> battleStrings1;
@@ -64,7 +65,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.ParagonLite;
+    public static Mode mode = Mode.Redux;
 
     Gen5RomHandler romHandler;
 
@@ -84,7 +85,9 @@ public class ParagonLiteHandler {
     ParagonLiteOverlay fieldSaveOvl;
     ParagonLiteOverlay unovaLinkOvl;
 
+    Pokemon[] classicPokes;
     Pokemon[] pokes;
+    Map<Integer, FormeInfo> formeMappings;
     List<Move> moves;
 
     NARCArchive pokemonGraphicsNarc;
@@ -125,19 +128,34 @@ public class ParagonLiteHandler {
     boolean debugMode;
 
     private static class PokeUpdate {
-        int type1;
-        int type2;
-
-        int ability1;
-        int ability2;
-        int ability3;
-
         int hp;
         int attack;
         int defense;
         int spatk;
         int spdef;
         int speed;
+
+        int type1;
+        int type2;
+
+        int catchRate;
+
+        int itemGuaranteed;
+        int itemCommon;
+        int itemRare;
+        int itemDarkGrass;
+        
+        int genderRatio;
+
+        int baseFriendship;
+        int growthRate;
+
+        int eggGroup1;
+        int eggGroup2;
+
+        int ability1;
+        int ability2;
+        int ability3;
 
         int expYield;
 
@@ -159,7 +177,9 @@ public class ParagonLiteHandler {
         boolean hasAbilityUpdate(List<String> oldAbilityNames, List<String> newAbilityNames) {
             return ability1 != 0 || ability2 != 0 || ability3 != 0
                     // Ability name changed
-                    || !oldAbilityNames.get(ability1).equals(newAbilityNames.get(ability1)) || !oldAbilityNames.get(ability2).equals(newAbilityNames.get(ability2)) || !oldAbilityNames.get(ability3).equals(newAbilityNames.get(ability3));
+                    || !oldAbilityNames.get(ability1).equals(newAbilityNames.get(ability1))
+                    || !oldAbilityNames.get(ability2).equals(newAbilityNames.get(ability2))
+                    || !oldAbilityNames.get(ability3).equals(newAbilityNames.get(ability3));
         }
 
         boolean hasStatsUpdate() {
@@ -214,7 +234,7 @@ public class ParagonLiteHandler {
 //            byte[] fieldOvlData = romHandler.readOverlay(fieldOvlNumber);
 //            int fieldOvlAddress = romHandler.getOverlayAddress(fieldOvlNumber);
 //            fieldOvl = new ParagonLiteOverlay(romHandler, fieldOvlNumber, "Field", fieldOvlData, fieldOvlAddress, ParagonLiteOverlay.Insertion.Front, armParser, globalAddressMap);
-            
+
             byte[] uiCommonOvlData = romHandler.readOverlay(uiCommonOvlNumber);
             int uiCommonOvlAddress = romHandler.getOverlayAddress(uiCommonOvlNumber);
             uiCommonOvl = new ParagonLiteOverlay(romHandler, uiCommonOvlNumber, "UICommon", uiCommonOvlData, uiCommonOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
@@ -246,11 +266,11 @@ public class ParagonLiteHandler {
             byte[] storageOvlData = romHandler.readOverlay(storageOvlNumber);
             int storageOvlAddress = romHandler.getOverlayAddress(storageOvlNumber);
             storageOvl = new ParagonLiteOverlay(romHandler, storageOvlNumber, "Storage", storageOvlData, storageOvlAddress, ParagonLiteOverlay.Insertion.Back, armParser, globalAddressMap);
-            
+
             byte[] fieldSaveOvlData = romHandler.readOverlay(fieldSaveOvlNumber);
             int fieldSaveOvlAddress = romHandler.getOverlayAddress(fieldSaveOvlNumber);
             fieldSaveOvl = new ParagonLiteOverlay(romHandler, fieldSaveOvlNumber, "FieldSave", fieldSaveOvlData, fieldSaveOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
-            
+
             byte[] unovaLinkOvlData = romHandler.readOverlay(unovaLinkOvlNumber);
             int unovaLinkOvlAddress = romHandler.getOverlayAddress(unovaLinkOvlNumber);
             unovaLinkOvl = new ParagonLiteOverlay(romHandler, unovaLinkOvlNumber, "UnovaLink", unovaLinkOvlData, unovaLinkOvlAddress, ParagonLiteOverlay.Insertion.Back, armParser, globalAddressMap);
@@ -264,14 +284,14 @@ public class ParagonLiteHandler {
                 trainerAIOvl.addContextOverlays(battleOverlays);
                 arm9.addContextOverlays(battleOverlays);
             }
-            
+
             // Storage Overlays
             {
                 ParagonLiteOverlay[] storageOverlays = new ParagonLiteOverlay[]{arm9, storageOvl};
                 storageOvl.addContextOverlays(storageOverlays);
                 arm9.addContextOverlays(storageOverlays);
             }
-            
+
             // Title Overlays
             {
                 ParagonLiteOverlay[] unovaLinkOverlays = new ParagonLiteOverlay[]{arm9, uiCommonOvl, titleOvl, unovaLinkOvl};
@@ -350,7 +370,9 @@ public class ParagonLiteHandler {
         globalAddressMap.addAllReferences();
         decode(unovaLinkOvl, "Menu_Init");
 
+        classicPokes = params.classicPokes;
         pokes = params.pokes;
+        formeMappings = params.formeMappings;
         moves = params.moves;
 
         pokemonGraphicsNarc = params.pokemonGraphicsNarc;
@@ -364,7 +386,7 @@ public class ParagonLiteHandler {
         moveAnimatedBackgroundsNarc = params.moveAnimatedBackgroundsNarc;
 
         unovaLinkStrings = params.unovaLinkStrings;
-        
+
         battleStrings1 = params.battleStrings1;
         battleStrings2 = params.battleStrings2;
         battleStringsPokestar = params.battleStringsPokestar;
@@ -527,11 +549,11 @@ public class ParagonLiteHandler {
     private void addGlobalBattleTextValueStandard(String namespace, String message) {
         armParser.addGlobalValue(String.format("BTLTXT_%s_%s", namespace, message), Math.max(battleStrings2.size(), battleStringsPokestar.size()));
     }
-    
+
     private void addGlobalBattleTextValueStandardCommon(String namespace, String message) {
         armParser.addGlobalValue(String.format("BTLTXT_Common_%s_%s", namespace, message), Math.max(battleStrings2.size(), battleStringsPokestar.size()));
     }
-    
+
     private void addGlobalBattleTextValueWildFoe(String namespace, String message) {
         armParser.addGlobalValue(String.format("BTLTXT_%s_%s", namespace, message), battleStrings1.size());
     }
@@ -668,7 +690,7 @@ public class ParagonLiteHandler {
         addBattleStringWildFoe("{0}'s {1}\nbegan to glow!", BattleTextVar.PokeNickname, BattleTextVar.ItemName);
     }
 
-    private void setBattleEventStrings2() {        
+    private void setBattleEventStrings2() {
         // Status move prevent item
         addGlobalBattleTextValueStandardCommon("StatusMovePreventItem", "StatusMoveSelected");
         addBattleStringStandard("The effects of the {0}\nprevent status moves from being used!", BattleTextVar.ItemName);
@@ -697,7 +719,7 @@ public class ParagonLiteHandler {
         int getMoveParamRomAddress = globalAddressMap.getRomAddress(battleOvl, "ServerEvent_GetMoveParam");
         battleOvl.writeByte(getMoveParamRomAddress + 0x9A, 0x12);
     }
-    
+
     public void setUnovaLink() {
         armParser.addGlobalValue("TITLETXT_UnovaLink_KeySystemButton", 69);
         armParser.addGlobalValue("TITLETXT_UnovaLink_MemoryLinkButton", 70);
@@ -705,7 +727,7 @@ public class ParagonLiteHandler {
         armParser.addGlobalValue("TITLETXT_UnovaLink_SubMenuDescriptions", 72);
         armParser.addGlobalValue("TITLETXT_UnovaLink_MainMenuTitle", 84);
         armParser.addGlobalValue("TITLETXT_UnovaLink_3dsLinkButton", 162);
-        
+
 //        // Send/Receive Keys is deprecated as all Keys are unlocked from the start
 //        unovaLinkOvl.freeCode("KeySystem_SendReceive_Main");
 //
@@ -1226,7 +1248,7 @@ public class ParagonLiteHandler {
         // Replace hardcoded null values (only used by the pledge moves)
         int pledgeFuncRefAddress = getEventHandlerFuncReferenceAddress(Moves.waterPledge, getMoveListAddress(), getMoveListCount(), Gen5BattleEventType.onDamageProcessingEnd_Hit2);
         int pledgeFuncAddress = battleOvl.readWord(pledgeFuncRefAddress) - 1;
-        int nullId = (Integer)armParser.getGlobalValue("SC_Null");
+        int nullId = (Integer) armParser.getGlobalValue("SC_Null");
         battleOvl.writeByte(pledgeFuncAddress + 0x1C, nullId);
         battleOvl.writeByte(pledgeFuncAddress + 0x80, nullId);
     }
@@ -1437,9 +1459,47 @@ public class ParagonLiteHandler {
     }
 
     public void setPokemonData() {
+        // Gen IX update
+        for (Pokemon poke : classicPokes) {
+            if (poke == null)
+                continue;
+            
+            // Timburr and Stunfisk are the only two Pokémon exempt from the 70 -> 50 change in Gen VIII
+            if (poke.baseFriendship == 70
+                    && poke.number != Species.timburr
+                    && poke.number != Species.stunfisk)
+                poke.baseFriendship = 50;
+
+            // Blissey and Slocking are the only two 3rd stage Pokémon with altered exp yields
+            // All other Pokémon with altered exp yields did not receive stat changes in later generations
+            if (poke.stage == 3
+                    && poke.number != Species.blissey
+                    && poke.number != Species.slaking)
+                poke.expYield = (int) Math.round(poke.bst() * 0.5);
+        }
+        setPokemonDataFromIni(classicPokes, null, "gen9pokes.ini", new double[]{0.2, 0.35, 0.5});
+        
+        switch (mode) {
+            case ParagonLite -> setPokemonDataFromIni(pokes, pokeUpdates, "pokes.ini", new double[]{0.5});
+            case Redux -> setReduxPokemonData();
+            default -> throw new IllegalStateException("Unexpected value: " + mode);
+        }
+        
+        for (Pokemon poke : pokes) {
+            if (poke != null)
+                // TODO: Remove this
+                poke.isAsymmetric = false;
+        }
+    }
+
+    private void setPokemonDataFromIni(Pokemon[] pokes, PokeUpdate[] pokeUpdates, String filename, double[] stageExpMultipliers) {
+        String extension = ".ini";
+        if (!filename.endsWith(extension))
+            filename += extension;
+
         Scanner sc;
         try {
-            sc = new Scanner(FileFunctions.openConfig("paragonlite/pokes.ini"), StandardCharsets.UTF_8);
+            sc = new Scanner(FileFunctions.openConfig("paragonlite/" + filename), StandardCharsets.UTF_8);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -1452,14 +1512,25 @@ public class ParagonLiteHandler {
                 q = q.substring(0, q.indexOf("#")).trim();
             }
 
-            if (q.isEmpty()) continue;
+            if (q.isEmpty())
+                continue;
 
             if (q.startsWith("[") && q.endsWith("]")) {
                 // New poke
                 String numStr = q.substring(1, 4);
+                String nameStr = q.substring(5, q.length() - 1);
+                
                 int num = Integer.parseInt(numStr);
                 poke = pokes[num];
-                pokeUpdate = pokeUpdates[num];
+                int formeSuffixOffset = nameStr.lastIndexOf('-');
+                if (formeSuffixOffset >= nameStr.length() - 3) {
+                    String formeSuffix = nameStr.substring(formeSuffixOffset);
+                    
+                    int pokeNum = Gen5Constants.getFormeBySuffix(num, formeSuffix);
+                    poke = pokes[pokeNum];
+                }
+                
+                pokeUpdate = pokeUpdates != null ? pokeUpdates[num] : null;
                 continue;
             }
 
@@ -1495,12 +1566,7 @@ public class ParagonLiteHandler {
                         newSecondaryType = -1;
                     }
 
-                    pokeUpdate.type1 += newPrimaryType - poke.primaryType.ordinal();
-                    pokeUpdate.type2 += newSecondaryType - (poke.secondaryType == null ? -1 : poke.secondaryType.ordinal());
-
-                    poke.primaryType = Type.values()[newPrimaryType];
-                    poke.secondaryType = newSecondaryType < 0 ? null : Type.values()[newSecondaryType];
-
+                    updatePokeType(poke, pokeUpdate, newPrimaryType, newSecondaryType);
                     break;
                 }
                 case "Stats": {
@@ -1517,27 +1583,15 @@ public class ParagonLiteHandler {
                     int newSpdef = Integer.parseUnsignedInt(statStrs[4].trim());
                     int newSpeed = Integer.parseUnsignedInt(statStrs[5].trim());
 
-                    pokeUpdate.hp += newHp - poke.hp;
-                    pokeUpdate.attack += newAttack - poke.attack;
-                    pokeUpdate.defense += newDefense - poke.defense;
-                    pokeUpdate.spatk += newSpatk - poke.spatk;
-                    pokeUpdate.spdef += newSpdef - poke.spdef;
-                    pokeUpdate.speed += newSpeed - poke.speed;
+                    updatePokeBaseStats(poke, pokeUpdate, newHp, newAttack, newDefense, newSpatk, newSpdef, newSpeed);
 
-                    poke.hp = newHp;
-                    poke.attack = newAttack;
-                    poke.defense = newDefense;
-                    poke.spatk = newSpatk;
-                    poke.spdef = newSpdef;
-                    poke.speed = newSpeed;
+                    double expMultiplier = stageExpMultipliers[Math.min(poke.stage, stageExpMultipliers.length) - 1];
+                    int newExpYield = (int) Math.round(poke.bst() * expMultiplier);
+                    updatePokeExpYield(poke, pokeUpdate, newExpYield);
 
-                    // Standard Exp Yield is 0.45 for stage 3, 0.35 for stage 2, and 0.2 for stage 1
-                    // Our standard is a flat 0.45
-                    int newExpYield = (int) Math.round(poke.bst() * 0.45);
-                    pokeUpdate.expYield += newExpYield - poke.expYield;
-                    poke.expYield = newExpYield;
-
-                    setEVYield(poke, pokeUpdate);
+                    // Only consider this modification if this is the intended update and not "Classic"
+                    if (pokeUpdate != null)
+                        setEVYield(poke, pokeUpdate);
 
                     break;
                 }
@@ -1550,13 +1604,7 @@ public class ParagonLiteHandler {
                         continue;
                     }
 
-                    pokeUpdate.ability1 += newAbility - poke.ability1;
-                    pokeUpdate.ability2 += newAbility - poke.ability2;
-                    pokeUpdate.ability3 += newAbility - poke.ability3;
-
-                    poke.ability1 = newAbility;
-                    poke.ability2 = newAbility;
-                    poke.ability3 = newAbility;
+                    updatePokeAbilities(poke, pokeUpdate, newAbility, newAbility, newAbility);
 
                     break;
                 }
@@ -1578,29 +1626,23 @@ public class ParagonLiteHandler {
                     }
 
                     int newAbility2 = Math.max(0, abilityNames.indexOf(abilityStrs[1]));
-                    if (newAbility2 == 0) {
+                    if (!abilityStrs[1].isEmpty() && newAbility2 == 0) {
                         System.err.println("invalid ability \"" + abilityStrs[1] + "\" on " + poke.name);
                         continue;
                     }
 
                     int newAbility3 = Math.max(0, abilityNames.indexOf(abilityStrs[2]));
-                    if (newAbility3 == 0) {
+                    if (!abilityStrs[2].isEmpty() && newAbility3 == 0) {
                         System.err.println("invalid ability \"" + abilityStrs[2] + "\" on " + poke.name);
                         continue;
                     }
 
-                    pokeUpdate.ability1 += newAbility1 - poke.ability1;
-                    pokeUpdate.ability2 += newAbility2 - poke.ability2;
-                    pokeUpdate.ability3 += newAbility3 - poke.ability3;
-
-                    poke.ability1 = newAbility1;
-                    poke.ability2 = newAbility2;
-                    poke.ability3 = newAbility3;
+                    updatePokeAbilities(poke, pokeUpdate, newAbility1, newAbility2, newAbility3);
 
                     break;
                 }
                 case "EVYield": {
-                    String[] evYieldStrs = value.split(",", 6);
+                    String[] evYieldStrs = value.substring(1, value.length() - 1).split(",", 6);
                     if (evYieldStrs.length < 6) {
                         System.err.println("invalid entry " + q);
                         continue;
@@ -1613,31 +1655,169 @@ public class ParagonLiteHandler {
                     int newSpdefEVs = Integer.parseUnsignedInt(evYieldStrs[4].trim());
                     int newSpeedEVs = Integer.parseUnsignedInt(evYieldStrs[5].trim());
 
-                    pokeUpdate.hpEVs += newHpEVs - poke.hpEVs;
-                    pokeUpdate.attackEVs += newAttackEVs - poke.attackEVs;
-                    pokeUpdate.defenseEVs += newDefenseEVs - poke.defenseEVs;
-                    pokeUpdate.spatkEVs += newSpatkEVs - poke.spatkEVs;
-                    pokeUpdate.spdefEVs += newSpdefEVs - poke.spdefEVs;
-                    pokeUpdate.speedEVs += newSpeedEVs - poke.speedEVs;
-
-                    poke.hpEVs = newHpEVs;
-                    poke.attackEVs = newAttackEVs;
-                    poke.defenseEVs = newDefenseEVs;
-                    poke.spatkEVs = newSpatkEVs;
-                    poke.spdefEVs = newSpdefEVs;
-                    poke.speedEVs = newSpeedEVs;
+                    updatePokeEVYield(poke, pokeUpdate, newHpEVs, newAttackEVs, newDefenseEVs, newSpatkEVs, newSpdefEVs, newSpeedEVs);
 
                     break;
                 }
                 case "ExpYield": {
                     int newExpYield = Integer.parseUnsignedInt(value);
-                    pokeUpdate.expYield += newExpYield - poke.expYield;
-                    poke.expYield = newExpYield;
+                    updatePokeExpYield(poke, pokeUpdate, newExpYield);
+                    break;
+                }
+                case "CatchRate": {
+                    int newCatchRate = Integer.parseUnsignedInt(value);
+                    UpdatePokeCatchRate(poke, pokeUpdate, newCatchRate);
+                    break;
+                }
+                case "EggGroups": {
+                    int newEggGroup1;
+                    int newEggGroup2;
+
+                    if (value.startsWith("[") && value.endsWith("]")) {
+                        String[] eggGroupStrs = value.substring(1, value.length() - 1).split(",", 2);
+                        newEggGroup1 = EggGroup.valueOf(eggGroupStrs[0].trim().toUpperCase()).ordinal();
+                        newEggGroup2 = eggGroupStrs.length == 2 ? EggGroup.valueOf(eggGroupStrs[1].trim().toUpperCase()).ordinal() : -1;
+                    } else {
+                        newEggGroup1 = EggGroup.valueOf(value.toUpperCase()).ordinal();
+                        newEggGroup2 = -1;
+                    }
+
+                    updatePokeEggGroups(poke, pokeUpdate, newEggGroup1, newEggGroup2);
+                    break;
                 }
             }
         }
 
         System.out.println("Set Pokémon data");
+    }
+
+    private void setReduxPokemonData() {
+        try {
+            byte[] levelUpMovesBytes = readBytes("redux_poke_level-up_moves.narc");
+            NARCArchive levelUpMovesNarc = new NARCArchive(levelUpMovesBytes);
+            romHandler.writeNARC(romHandler.romEntry.getFile("PokemonMovesets"), levelUpMovesNarc);
+
+            byte[] evolutionsBytes = readBytes("redux_poke_evolutions.narc");
+            NARCArchive evolutionsNarc = new NARCArchive(evolutionsBytes);
+            romHandler.writeNARC(romHandler.romEntry.getFile("PokemonEvolutions"), evolutionsNarc);
+
+            byte[] personalBytes = readBytes("redux_poke_personal.narc");
+            NARCArchive personalNarc = new NARCArchive(personalBytes);
+
+            PokeUpdate pokeUpdate = new PokeUpdate();
+
+            for (int i = 1; i < pokes.length; ++i) {
+                Pokemon classicPoke = classicPokes[i];
+                Pokemon poke = pokes[i];
+
+                byte[] personal = personalNarc.files.get(i);
+
+                // Base Stats
+                int hp = personal[Gen4Constants.bsHPOffset] & 0xFF;
+                int attack = personal[Gen4Constants.bsAttackOffset] & 0xFF;
+                int defense = personal[Gen4Constants.bsDefenseOffset] & 0xFF;
+                int spatk = personal[Gen4Constants.bsSpAtkOffset] & 0xFF;
+                int spdef = personal[Gen4Constants.bsSpDefOffset] & 0xFF;
+                int speed = personal[Gen4Constants.bsSpeedOffset] & 0xFF;
+                updatePokeBaseStats(poke, pokeUpdate, hp, attack, defense, spatk, spdef, speed);
+
+                // Type
+                int primaryType = personal[Gen5Constants.bsPrimaryTypeOffset] & 0xFF;
+                int secondaryType = personal[Gen5Constants.bsSecondaryTypeOffset] & 0xFF;
+                if (primaryType == secondaryType)
+                    secondaryType = -1;
+                updatePokeType(poke, pokeUpdate, primaryType, secondaryType);
+
+                // Catch Rate
+                int catchRate = personal[Gen5Constants.bsCatchRateOffset] & 0xFF;
+                UpdatePokeCatchRate(poke, pokeUpdate, catchRate);
+                UpdatePokeCatchRate(classicPoke, null, catchRate);
+
+                // EV Yield
+                int hpEVs = personal[Gen5Constants.bsEVYieldOffset] & 0x03;
+                int attackEVs = (personal[Gen5Constants.bsEVYieldOffset] >> 2) & 0x03;
+                int defenseEVs = (personal[Gen5Constants.bsEVYieldOffset] >> 4) & 0x03;
+                int spatkEVs = personal[Gen5Constants.bsEVYieldOffset + 1] & 0x03;
+                int spdefEVs = (personal[Gen5Constants.bsEVYieldOffset + 1] >> 2) & 0x03;
+                int speedEVs = (personal[Gen5Constants.bsEVYieldOffset] >> 6) & 0x03;
+                updatePokeEVYield(poke, pokeUpdate, hpEVs, attackEVs, defenseEVs, spatkEVs, spdefEVs, speedEVs);
+
+                // Grounded Entry
+                poke.groundedEntry = (personal[Gen5Constants.bsEVYieldOffset + 1] >> 4) != 0;
+                classicPoke.groundedEntry = poke.groundedEntry;
+
+                // Items
+                int item1 = readHalf(personal, Gen5Constants.bsCommonHeldItemOffset);
+                int item2 = readHalf(personal, Gen5Constants.bsRareHeldItemOffset);
+                int item3 = readHalf(personal, Gen5Constants.bsDarkGrassHeldItemOffset);
+                updatePokeItems(poke, pokeUpdate, item1, item2, item3);
+                updatePokeItems(classicPoke, null, item1, item2, item3);
+                
+                // Gender Ratio
+                int genderRatio = personal[Gen5Constants.bsGenderRatioOffset] & 0xFF;
+                updatePokeGenderRatio(poke, pokeUpdate, genderRatio);
+                updatePokeGenderRatio(classicPoke, null, genderRatio);
+
+                // Base Friendship
+                int baseFriendship = personal[Gen5Constants.bsBaseFriendshipOffset] & 0xFF;
+                updatePokeBaseFriendship(poke, pokeUpdate, baseFriendship);
+                
+                // Growth Rate
+                int growthRate = personal[Gen5Constants.bsGrowthRateOffset] & 0x3F;
+                updatePokeGrowthRate(poke, pokeUpdate, growthRate);
+                
+                // Egg Groups
+                int eggGroup1 = personal[Gen5Constants.bsEggGroup1Offset] & 0x3F;
+                int eggGroup2 = personal[Gen5Constants.bsEggGroup2Offset] & 0x3F;
+                updatePokeEggGroups(poke, pokeUpdate, eggGroup1, eggGroup2);
+
+                // Abilities
+                int ability1 = (personal[Gen5Constants.bsAbility1Offset] & 0xFF) | ((personal[Gen5Constants.bsAbility1Offset - 3] & 0xC0) << 2);
+                int ability2 = (personal[Gen5Constants.bsAbility2Offset] & 0xFF) | ((personal[Gen5Constants.bsAbility2Offset - 3] & 0xC0) << 2);
+                int ability3 = (personal[Gen5Constants.bsAbility3Offset] & 0xFF) | ((personal[Gen5Constants.bsAbility3Offset - 3] & 0xC0) << 2);
+                updatePokeAbilities(poke, pokeUpdate, ability1, ability2, ability3);
+            }
+
+            var oldPokeNarc = romHandler.pokeNarc;
+            pokes = romHandler.loadPokemonStats(personalNarc);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void updatePokeBaseStats(Pokemon poke, PokeUpdate pokeUpdate, int newHp, int newAttack, int newDefense, int newSpAtk, int newSpDef, int newSpeed) {
+        if (pokeUpdate != null) {
+            pokeUpdate.hp += newHp - poke.hp;
+            pokeUpdate.attack += newAttack - poke.attack;
+            pokeUpdate.defense += newDefense - poke.defense;
+            pokeUpdate.spatk += newSpAtk - poke.spatk;
+            pokeUpdate.spdef += newSpDef - poke.spdef;
+            pokeUpdate.speed += newSpeed - poke.speed;
+        }
+        
+        poke.hp = newHp;
+        poke.attack = newAttack;
+        poke.defense = newDefense;
+        poke.spatk = newSpAtk;
+        poke.spdef = newSpDef;
+        poke.speed = newSpeed;
+    }
+
+    private static void updatePokeType(Pokemon poke, PokeUpdate pokeUpdate, int newPrimaryType, int newSecondaryType) {
+        if (pokeUpdate != null) {
+            pokeUpdate.type1 += newPrimaryType - poke.primaryType.ordinal();
+            pokeUpdate.type2 += newSecondaryType - (poke.secondaryType == null ? -1 : poke.secondaryType.ordinal());
+        }
+        
+        poke.primaryType = Type.values()[newPrimaryType];
+        poke.secondaryType = newSecondaryType < 0 ? null : Type.values()[newSecondaryType];
+    }
+
+    private static void UpdatePokeCatchRate(Pokemon poke, PokeUpdate pokeUpdate, int newCatchRate) {
+        if (pokeUpdate != null)
+            pokeUpdate.catchRate += newCatchRate - poke.catchRate;
+
+        poke.catchRate = newCatchRate;
     }
 
     private static void setEVYield(Pokemon poke, PokeUpdate pokeUpdate) {
@@ -1663,19 +1843,103 @@ public class ParagonLiteHandler {
             ++evs[bestStatIndex];
         }
 
-        pokeUpdate.hpEVs += evs[0] - poke.hpEVs;
-        pokeUpdate.attackEVs += evs[1] - poke.attackEVs;
-        pokeUpdate.defenseEVs += evs[2] - poke.defenseEVs;
-        pokeUpdate.spatkEVs += evs[3] - poke.spatkEVs;
-        pokeUpdate.spdefEVs += evs[4] - poke.spdefEVs;
-        pokeUpdate.speedEVs += evs[5] - poke.speedEVs;
+        updatePokeEVYield(poke, pokeUpdate, evs[0], evs[1], evs[2], evs[3], evs[4], evs[5]);
+    }
 
-        poke.hpEVs = evs[0];
-        poke.attackEVs = evs[1];
-        poke.defenseEVs = evs[2];
-        poke.spatkEVs = evs[3];
-        poke.spdefEVs = evs[4];
-        poke.speedEVs = evs[5];
+    private static void updatePokeEVYield(Pokemon poke, PokeUpdate pokeUpdate, int newHpEVs, int newAttackEVs, int newDefenseEVs, int newSpatkEVs, int newSpdefEVs, int newSpeedEVs) {
+        if (pokeUpdate != null) {
+            pokeUpdate.hpEVs += newHpEVs - poke.hpEVs;
+            pokeUpdate.attackEVs += newAttackEVs - poke.attackEVs;
+            pokeUpdate.defenseEVs += newDefenseEVs - poke.defenseEVs;
+            pokeUpdate.spatkEVs += newSpatkEVs - poke.spatkEVs;
+            pokeUpdate.spdefEVs += newSpdefEVs - poke.spdefEVs;
+            pokeUpdate.speedEVs += newSpeedEVs - poke.speedEVs;
+        }
+        
+        poke.hpEVs = newHpEVs;
+        poke.attackEVs = newAttackEVs;
+        poke.defenseEVs = newDefenseEVs;
+        poke.spatkEVs = newSpatkEVs;
+        poke.spdefEVs = newSpdefEVs;
+        poke.speedEVs = newSpeedEVs;
+    }
+
+    private static void updatePokeItems(Pokemon poke, PokeUpdate pokeUpdate, int newItem1, int newItem2, int newItem3) {
+        if (newItem1 == newItem2) {
+            if (pokeUpdate != null) {
+                pokeUpdate.itemGuaranteed += newItem1 - poke.guaranteedHeldItem;
+                pokeUpdate.itemCommon -= poke.commonHeldItem;
+                pokeUpdate.itemRare -= poke.rareHeldItem;
+                pokeUpdate.itemDarkGrass -= poke.darkGrassHeldItem;
+            }
+
+            poke.guaranteedHeldItem = newItem1;
+            poke.commonHeldItem = 0;
+            poke.rareHeldItem = 0;
+            poke.darkGrassHeldItem = 0;
+        } else {
+            if (pokeUpdate != null) {
+                pokeUpdate.itemGuaranteed -= poke.guaranteedHeldItem;
+                pokeUpdate.itemCommon += newItem1 - poke.commonHeldItem;
+                pokeUpdate.itemRare += newItem2 - poke.rareHeldItem;
+                pokeUpdate.itemDarkGrass += newItem3 - poke.darkGrassHeldItem;
+            }
+            
+            poke.guaranteedHeldItem = 0;
+            poke.commonHeldItem = newItem1;
+            poke.rareHeldItem = newItem2;
+            poke.darkGrassHeldItem = newItem3;
+        }
+    }
+    
+    private static void updatePokeGenderRatio(Pokemon poke, PokeUpdate pokeUpdate, int newGenderRatio) {
+        if (pokeUpdate != null)
+            pokeUpdate.genderRatio += newGenderRatio - poke.genderRatio;
+        
+        poke.genderRatio = newGenderRatio;
+    }
+
+    private static void updatePokeBaseFriendship(Pokemon poke, PokeUpdate pokeUpdate, int newBaseFriendship) {
+        if (pokeUpdate != null)
+            pokeUpdate.baseFriendship += newBaseFriendship - poke.baseFriendship;
+
+        poke.baseFriendship = newBaseFriendship;
+    }
+
+    private static void updatePokeGrowthRate(Pokemon poke, PokeUpdate pokeUpdate, int newGrowthRate) {
+        if (pokeUpdate != null)
+            pokeUpdate.growthRate += newGrowthRate - poke.growthRate.toByte();
+
+        poke.growthRate = ExpCurve.fromByte((byte) newGrowthRate);
+    }
+
+    private static void updatePokeEggGroups(Pokemon poke, PokeUpdate pokeUpdate, int newEggGroup1, int newEggGroup2) {
+        if (pokeUpdate != null) {
+            pokeUpdate.eggGroup1 += newEggGroup1 - poke.eggGroup1.toByte();
+            pokeUpdate.eggGroup2 += newEggGroup2 - (poke.eggGroup2 == null ? -1 : poke.eggGroup2.toByte());
+        }
+
+        poke.eggGroup1 = EggGroup.fromByte((byte) newEggGroup1);
+        poke.eggGroup2 = newEggGroup2 < 0 ? null : EggGroup.fromByte((byte) newEggGroup2);
+    }
+
+    private static void updatePokeAbilities(Pokemon poke, PokeUpdate pokeUpdate, int newAbility1, int newAbility2, int newAbility3) {
+        if (pokeUpdate != null) {
+            pokeUpdate.ability1 += newAbility1 - poke.ability1;
+            pokeUpdate.ability2 += newAbility2 - poke.ability2;
+            pokeUpdate.ability3 += newAbility3 - poke.ability3;
+        }
+        
+        poke.ability1 = newAbility1;
+        poke.ability2 = newAbility2;
+        poke.ability3 = newAbility3;
+    }
+    
+    private static void updatePokeExpYield(Pokemon poke, PokeUpdate pokeUpdate, int newExpYield) {
+        if (pokeUpdate != null)
+            pokeUpdate.expYield += newExpYield - poke.expYield;
+        
+        poke.expYield = newExpYield;
     }
 
     public void setTypeEffectiveness() {
@@ -1923,7 +2187,7 @@ public class ParagonLiteHandler {
         // #263 Dragon's Maw
         Utils.printProgress(totalChanges, ++currentChanges, "Dragon's Maw");
         addDragonsMaw();
-        
+
         // #270 Thermal Exchange
         Utils.printProgress(totalChanges, ++currentChanges, "Thermal Exchange");
         addThermalExchange();
@@ -1941,7 +2205,7 @@ public class ParagonLiteHandler {
         // #277 Wind Power
         Utils.printProgress(totalChanges, ++currentChanges, "Wind Power");
         addWindPower();
-        
+
         // #283 Good as Gold
         Utils.printProgress(totalChanges, ++currentChanges, "Good as Gold");
         addGoodAsGold();
@@ -2051,7 +2315,7 @@ public class ParagonLiteHandler {
         // #521 Contaminate
         Utils.printProgress(totalChanges, ++currentChanges, "Contaminate");
         addContaminate();
-        
+
         // #522 Volcanic Fury
         Utils.printProgress(totalChanges, ++currentChanges, "Volcanic Fury");
         addVolcanicFury();
@@ -2710,7 +2974,7 @@ public class ParagonLiteHandler {
 
         // Name
         abilityNames.set(number, "Tangled Hair");
-        
+
         // Description
         abilityDescriptions.set(number, abilityDescriptions.get(Abilities.gooey));
 
@@ -2770,17 +3034,17 @@ public class ParagonLiteHandler {
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "dragons_maw.s"));
     }
-    
+
     private void addThermalExchange() {
         int number = Abilities.thermalExchange;
-        
+
         // Name
         abilityNames.set(number, "ThermalExchange");
 
         // Description
         String description = "Raises Attack when hit\\xFFFEby a Fire-type move.";
         abilityDescriptions.set(number, description);
-        
+
         // Data
         if (mode == Mode.ParagonLite || mode == Mode.Redux) {
             setAbilityEventHandlers(number,
@@ -2859,7 +3123,7 @@ public class ParagonLiteHandler {
 
         // Description
         abilityDescriptions.set(number, "A body of solid gold makes\\xFFFEit immune to Status moves.");
-        
+
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "good_as_gold_no_effect.s"));
     }
@@ -3355,7 +3619,7 @@ public class ParagonLiteHandler {
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onAddCondition, "volcanic_fury.s"));
     }
-    
+
     private void addHealSpore() {
         int number = ParagonLiteAbilities.healSpore;
 
@@ -4953,7 +5217,7 @@ public class ParagonLiteHandler {
 
         // #011 Vise Grip
         setMoveAuxiliaryAnimation(Moves.viseGrip, "Trap", auxiliaryAnimationScriptIndices);
-        
+
         // #013 Razor Wind
         if (mode == Mode.Redux)
             setMoveAnimations(Moves.razorWind);
@@ -5015,7 +5279,7 @@ public class ParagonLiteHandler {
         // #243 Mirror Coat
         if (mode == Mode.ParagonLite)
             cloneMoveEventHandlers(Moves.mirrorCoat, Moves.eruption);
-        
+
         // #280 Brick Break
         setMoveEventHandlers(Moves.brickBreak,
                 new MoveEventHandler(Gen5BattleEventType.onMoveDamageProcessing1),
@@ -5047,7 +5311,7 @@ public class ParagonLiteHandler {
         // #360 Gyro Ball
         if (mode == Mode.ParagonLite)
             setMoveEventHandlers(Moves.gyroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "gyro_ball.s"));
-        
+
         // #362 Brine
         if (mode == Mode.ParagonLite)
             setMoveEventHandlers(Moves.brine, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "super_effective_vs_steel.s"));
@@ -5511,7 +5775,7 @@ public class ParagonLiteHandler {
 
         // #235 Dragon Scale
         setDragonScale();
-        
+
         // #269 Light Clay
         setLightClay();
 
@@ -5668,10 +5932,10 @@ public class ParagonLiteHandler {
 
         setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onGetDefendingStatValue, "dragon_scale.s"));
     }
-    
+
     void setLightClay() {
         int number = Items.lightClay;
-        
+
         // Updated to work with Aurora Veil
         setItemEventHandlers(number, new ItemEventHandler(Gen5BattleEventType.onCheckSideConditionParam, "light_clay.s"));
     }

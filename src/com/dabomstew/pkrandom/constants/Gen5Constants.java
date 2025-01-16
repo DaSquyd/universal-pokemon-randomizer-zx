@@ -51,9 +51,10 @@ public class Gen5Constants {
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
             bsCatchRateOffset = 8, bsStageOffset = 9, bsEVYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14,
-            bsDarkGrassHeldItemOffset = 16, bsGenderRatioOffset = 18, bsBaseFriendshipOffset = 20, bsGrowthCurveOffset = 21,
+            bsDarkGrassHeldItemOffset = 16, bsGenderRatioOffset = 18, bsBaseFriendshipOffset = 20, bsGrowthRateOffset = 21,
+            bsEggGroup1Offset = 22, bsEggGroup2Offset = 23,
             bsAbility1Offset = 24, bsAbility2Offset = 25, bsAbility3Offset = 26, bsFormeOffset = 28,
-            bsFormeSpriteOffset = 30, bsFormeCountOffset = 32, bsExpYieldOffset = 34, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
+            bsFormeSpriteOffset = 30, bsFormeCountOffset = 32, bsDexColorOffset = 33, bsExpYieldOffset = 34, bsTMHMCompatOffset = 40, bsMTCompatOffset = 60;
 
     public static final byte[] bw1NewStarterScript = {0x24, 0x00, (byte) 0xA7, 0x02, (byte) 0xE7, 0x00, 0x00, 0x00,
             (byte) 0xDE, 0x00, 0x00, 0x00, (byte) 0xF8, 0x01, 0x05, 0x00};
@@ -161,12 +162,26 @@ public class Gen5Constants {
     private static final Map<Integer, Map<Integer, Integer>> absolutePokeNumsByBaseForme = setupAbsolutePokeNumsByBaseForme();
     private static final Map<Integer, Integer> dummyAbsolutePokeNums = setupDummyAbsolutePokeNums();
 
+    public static Integer getFormeBySuffix(int baseForme, String suffix) {
+        Map<Integer, String> suffixes = formeSuffixesByBaseForme.get(baseForme);
+        for (int formNum : suffixes.keySet()) {
+            if (suffixes.getOrDefault(formNum, "").equals(suffix))
+                return getAbsolutePokeNumByBaseForme(baseForme, formNum);
+        }
+        
+        return baseForme;
+    }
+    
     public static String getFormeSuffixByBaseForme(int baseForme, int formNum) {
         return formeSuffixesByBaseForme.getOrDefault(baseForme, dummyFormeSuffixes).getOrDefault(formNum, "");
     }
 
     public static Integer getAbsolutePokeNumByBaseForme(int baseForme, int formNum) {
         return absolutePokeNumsByBaseForme.getOrDefault(baseForme, dummyAbsolutePokeNums).getOrDefault(formNum, baseForme);
+    }
+    
+    public static Integer getAbsolutePokeNumFormeCount(int baseForme) {
+        return absolutePokeNumsByBaseForme.getOrDefault(baseForme, dummyAbsolutePokeNums).size();
     }
 
     private static final List<Integer> bw1IrregularFormes = Arrays.asList(
@@ -821,15 +836,18 @@ public class Gen5Constants {
         map.put(Species.deoxys, deoxysMap);
 
         Map<Integer, String> wormadamMap = new HashMap<>();
+        wormadamMap.put(0, "-P");
         wormadamMap.put(1, "-S");
         wormadamMap.put(2, "-T");
         map.put(Species.wormadam, wormadamMap);
 
         Map<Integer, String> shayminMap = new HashMap<>();
+        shayminMap.put(0, "-L");
         shayminMap.put(1, "-S");
         map.put(Species.shaymin, shayminMap);
 
         Map<Integer, String> giratinaMap = new HashMap<>();
+        giratinaMap.put(0, "-A");
         giratinaMap.put(1, "-O");
         map.put(Species.giratina, giratinaMap);
 
@@ -848,14 +866,17 @@ public class Gen5Constants {
         map.put(Species.castform, castformMap);
 
         Map<Integer, String> basculinMap = new HashMap<>();
+        basculinMap.put(0, "-R");
         basculinMap.put(1, "-B");
         map.put(Species.basculin, basculinMap);
 
         Map<Integer, String> darmanitanMap = new HashMap<>();
+        darmanitanMap.put(0, "-S");
         darmanitanMap.put(1, "-Z");
         map.put(Species.darmanitan, darmanitanMap);
 
         Map<Integer, String> meloettaMap = new HashMap<>();
+        meloettaMap.put(0, "-A");
         meloettaMap.put(1, "-P");
         map.put(Species.meloetta, meloettaMap);
 
@@ -869,14 +890,17 @@ public class Gen5Constants {
         map.put(Species.keldeo, keldeoMap);
 
         Map<Integer, String> tornadusMap = new HashMap<>();
+        tornadusMap.put(0, "-I");
         tornadusMap.put(1, "-T");
         map.put(Species.tornadus, tornadusMap);
 
         Map<Integer, String> thundurusMap = new HashMap<>();
+        thundurusMap.put(0, "-I");
         thundurusMap.put(1, "-T");
         map.put(Species.thundurus, thundurusMap);
 
         Map<Integer, String> landorusMap = new HashMap<>();
+        landorusMap.put(0, "-I");
         landorusMap.put(1, "-T");
         map.put(Species.landorus, landorusMap);
 
@@ -894,25 +918,30 @@ public class Gen5Constants {
         Map<Integer, Map<Integer, Integer>> map = new HashMap<>();
 
         Map<Integer, Integer> deoxysMap = new HashMap<>();
+        deoxysMap.put(0, Species.deoxys);
         deoxysMap.put(1, Species.Gen5Formes.deoxysA);
         deoxysMap.put(2, Species.Gen5Formes.deoxysD);
         deoxysMap.put(3, Species.Gen5Formes.deoxysS);
         map.put(Species.deoxys, deoxysMap);
 
         Map<Integer, Integer> wormadamMap = new HashMap<>();
+        wormadamMap.put(0, Species.wormadam);
         wormadamMap.put(1, Species.Gen5Formes.wormadamS);
         wormadamMap.put(2, Species.Gen5Formes.wormadamT);
         map.put(Species.wormadam, wormadamMap);
 
         Map<Integer, Integer> shayminMap = new HashMap<>();
+        shayminMap.put(0, Species.shaymin);
         shayminMap.put(1, Species.Gen5Formes.shayminS);
         map.put(Species.shaymin, shayminMap);
 
         Map<Integer, Integer> giratinaMap = new HashMap<>();
+        giratinaMap.put(0, Species.giratina);
         giratinaMap.put(1, Species.Gen5Formes.giratinaO);
         map.put(Species.giratina, giratinaMap);
 
         Map<Integer, Integer> rotomMap = new HashMap<>();
+        rotomMap.put(0, Species.rotom);
         rotomMap.put(1, Species.Gen5Formes.rotomH);
         rotomMap.put(2, Species.Gen5Formes.rotomW);
         rotomMap.put(3, Species.Gen5Formes.rotomFr);
@@ -921,41 +950,50 @@ public class Gen5Constants {
         map.put(Species.rotom, rotomMap);
 
         Map<Integer, Integer> castformMap = new HashMap<>();
+        castformMap.put(0, Species.castform);
         castformMap.put(1, Species.Gen5Formes.castformF);
         castformMap.put(2, Species.Gen5Formes.castformW);
         castformMap.put(3, Species.Gen5Formes.castformI);
         map.put(Species.castform, castformMap);
 
         Map<Integer, Integer> basculinMap = new HashMap<>();
+        basculinMap.put(0, Species.basculin);
         basculinMap.put(1, Species.Gen5Formes.basculinB);
         map.put(Species.basculin, basculinMap);
 
         Map<Integer, Integer> darmanitanMap = new HashMap<>();
+        darmanitanMap.put(0, Species.darmanitan);
         darmanitanMap.put(1, Species.Gen5Formes.darmanitanZ);
         map.put(Species.darmanitan, darmanitanMap);
 
         Map<Integer, Integer> meloettaMap = new HashMap<>();
+        meloettaMap.put(0, Species.meloetta);
         meloettaMap.put(1, Species.Gen5Formes.meloettaP);
         map.put(Species.meloetta, meloettaMap);
 
         Map<Integer, Integer> kyuremMap = new HashMap<>();
+        kyuremMap.put(0, Species.kyurem);
         kyuremMap.put(1, Species.Gen5Formes.kyuremW);
         kyuremMap.put(2, Species.Gen5Formes.kyuremB);
         map.put(Species.kyurem, kyuremMap);
 
         Map<Integer, Integer> keldeoMap = new HashMap<>();
+        keldeoMap.put(0, Species.keldeo);
         keldeoMap.put(1, Species.Gen5Formes.keldeoCosmetic1);
         map.put(Species.keldeo, keldeoMap);
 
         Map<Integer, Integer> tornadusMap = new HashMap<>();
+        tornadusMap.put(0, Species.tornadus);
         tornadusMap.put(1, Species.Gen5Formes.tornadusT);
         map.put(Species.tornadus, tornadusMap);
 
         Map<Integer, Integer> thundurusMap = new HashMap<>();
+        thundurusMap.put(0, Species.thundurus);
         thundurusMap.put(1, Species.Gen5Formes.thundurusT);
         map.put(Species.thundurus, thundurusMap);
 
         Map<Integer, Integer> landorusMap = new HashMap<>();
+        landorusMap.put(0, Species.landorus);
         landorusMap.put(1, Species.Gen5Formes.landorusT);
         map.put(Species.landorus, landorusMap);
 
