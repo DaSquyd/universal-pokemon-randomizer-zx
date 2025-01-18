@@ -1484,12 +1484,6 @@ public class ParagonLiteHandler {
             case Redux -> setReduxPokemonData();
             default -> throw new IllegalStateException("Unexpected value: " + mode);
         }
-        
-        for (Pokemon poke : pokes) {
-            if (poke != null)
-                // TODO: Remove this
-                poke.isAsymmetric = false;
-        }
     }
 
     private void setPokemonDataFromIni(Pokemon[] pokes, PokeUpdate[] pokeUpdates, String filename, double[] stageExpMultipliers) {
