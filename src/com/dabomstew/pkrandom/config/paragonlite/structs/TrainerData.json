@@ -1,0 +1,16 @@
+{
+  "flags": 0,
+  "class": 1,
+  "battleStyle": 2,
+  "pokeCount": 3,
+  "item1": 4,
+  "item2": 6,
+  "item3": 8,
+  "item4": 10,
+  "aiFlags": 12,
+  "isHealer": 16,
+  "prizeScale": 17,
+  "rewardItem": 18,
+  "pokeDataSize": 20,
+  "SIZE": 22
+}

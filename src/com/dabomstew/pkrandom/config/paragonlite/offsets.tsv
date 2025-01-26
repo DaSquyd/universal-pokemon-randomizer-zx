@@ -78,6 +78,7 @@ ARM9	IsItemBerry	Code		thumb			0x02026C20	0x02026BF4
 ARM9	GetTrainerData	Code		thumb	0x0202A248	0x0202A230	0x0203050C	0x020304E0
 ARM9	LoadTrainerFile	Code		thumb	0x0202A3C4	0x0202A3AC	0x0203070C	0x020306E0
 ARM9	LoadTrPokeFile	Code		thumb	0x0202A3D4	0x0202A3BC	0x02030750	0x02030724
+ARM9	TrTool_LoadParty	Code		thumb			0x020308EC	0x020308C0
 ARM9	ShooterItem_GetTableIndex	Code		thumb			0x02035970	0x02035944
 ARM9	Title_Proc	Code		thumb			0x02036318	0x020362EC
 ARM9	GFL_HeapAllocate	Code		arm,thumb	0x0203074C	0x02030734	0x0203A228	0x0203A1FC
@@ -781,7 +782,7 @@ UnovaLink	UI_CreateText	Code		thumb			0x021C00FC	0x021C00BC
 UnovaLink	UI_IsEndCreateText	Code		thumb			0x021C0128	0x021C00E8
 UnovaLink	UI_DeleteText	Code		thumb			0x021C0158	0x021C0118
 UnovaLink	Text_Init	Code		thumb			0x021C058C	0x021C054C
-UnovaLink	Text_Exit	Code		thumb			0x021C0644	0x021C0604
+UnovaLink	Text_Destroy	Code		thumb			0x021C0644	0x021C0604
 UnovaLink	Text_Draw	Code		thumb			0x021C0694	0x021C0654
 UnovaLink	Text_Print	Code		thumb			0x021C077C	0x021C073C
 UnovaLink	Text_PrintBuf	Code		thumb			0x021C0798	0x021C0758
@@ -797,16 +798,16 @@ UnovaLink	Text_ChangePalette	Code		thumb			0x021C0A1C	0x021C09DC
 UnovaLink	Text_SetMsgCursor	Code		thumb			0x021C0A80	0x021C0A40
 UnovaLink	Text_CalcPosCore	Code		thumb			0x021C0AA4	0x021C0A64
 UnovaLink	TextSet_Init	Code		thumb			0x021C0B60	0x021C0B20
-UnovaLink	TextSet_Exit	Code		thumb			0x021C0BEC	0x021C0BAC
+UnovaLink	TextSet_Destroy	Code		thumb			0x021C0BEC	0x021C0BAC
 UnovaLink	TextSet_Draw	Code		thumb			0x021C0C14	0x021C0BD4
 UnovaLink	TextSet_IsDrawComplete	Code		thumb			0x021C0C34	0x021C0BF4
 UnovaLink	List_Init	Code		thumb			0x021C0C5C	0x021C0C1C
 UnovaLink	List_InitEx	Code		thumb			0x021C0C80	0x021C0C40
-UnovaLink	List_Exit	Code		thumb			0x021C0D90	0x021C0D50
+UnovaLink	List_Destroy	Code		thumb			0x021C0D90	0x021C0D50
 UnovaLink	List_Main	Code		thumb			0x021C0DC0	0x021C0D80
 UnovaLink	List_Draw	Code		thumb			0x021C0DDC	0x021C0D9C
 UnovaLink	Menu_Init	Code		thumb			0x021C0E14	0x021C0DD4
-UnovaLink	Menu_Exit	Code		thumb			0x021C0F28	0x021C0EE8
+UnovaLink	Menu_Destroy	Code		thumb			0x021C0F28	0x021C0EE8
 UnovaLink	Menu_Main	Code		thumb			0x021C0F50	0x021C0F10
 UnovaLink	Menu_Draw	Code		thumb			0x021C1120	0x021C10E0
 UnovaLink	Menu_IsDrawComplete	Code		thumb			0x021C1180	0x021C1140
@@ -816,7 +817,7 @@ UnovaLink	Menu_GetParam	Code		thumb			0x021C11D8	0x021C1198
 UnovaLink	Menu_GetCursor	Code		thumb			0x021C11DC	0x021C119C
 UnovaLink	Menu_IsChanging	Code		thumb			0x021C11E0	0x021C11A0
 UnovaLink	InitSeq	Code		thumb			0x021C11E4	0x021C11A4
-UnovaLink	ExitSeq	Code		thumb			0x021C122C	0x021C11EC
+UnovaLink	DestroySeq	Code		thumb			0x021C122C	0x021C11EC
 UnovaLink	MainSeq	Code		thumb			0x021C1234	0x021C11F4
 UnovaLink	IsSeqCompleted	Code		thumb			0x021C1250	0x021C1210
 UnovaLink	NextSeq	Code		thumb			0x021C1268	0x021C1228
@@ -825,9 +826,25 @@ UnovaLink	EndSeq	Code		thumb			0x021C12A4	0x021C1264
 UnovaLink	ReturnSeq	Code		thumb			0x021C12B0	0x021C1270
 UnovaLink	SetReserveSeq	Code		thumb			0x021C12C8	0x021C1288
 UnovaLink	NextReserveSeq	Code		thumb			0x021C12E0	0x021C12A0
+UnovaLink	PopSeq	Code		thumb			0x021C12F4	0x021C12B4
+UnovaLink	GetSeq	Code		thumb			0x021C131C	0x021C12DC
+UnovaLink	UI_Init	Code		thumb			0x021C1328	0x021C12E8
+UnovaLink	UI_Destroy	Code		thumb			0x021C134C	0x021C130C
+UnovaLink	UI_Main	Code		thumb			0x021C1354	0x021C1314
+UnovaLink	UI_Create	Code		thumb			0x021C13B8	0x021C1378
+UnovaLink	UI_End	Code		thumb			0x021C13DC	0x021C139C
+UnovaLink	UI_IsFinished	Code		thumb			0x021C13E8	0x021C13A8
+UnovaLink	UI_ForceEnd	Code		thumb			0x021C13FC	0x021C13BC
+UnovaLink	TextObj_Init	Code		thumb			0x021C1418	0x021C13D8
+UnovaLink	TextObj_Delete	Code		thumb			0x021C14AC	0x021C146C
+UnovaLink	TextObj_Print	Code		thumb			0x021C14D0	0x021C1490
+UnovaLink	TextObj_SetColor	Code		thumb			0x021C1530	0x021C14F0
+UnovaLink	TextObj_Draw	Code		thumb			0x021C1534	0x021C14F4
+UnovaLink	TextObj_IsFinishedDrawing	Code		thumb			0x021C155C	0x021C151C
+UnovaLink	TextObj_GetBitmapWork	Code		thumb			0x021C156C	0x021C152C
 UnovaLink	MainPaletteAnim	Code		thumb			0x021C1C68	0x021C1C28
 UnovaLink	KeySystem_Init	Code		thumb			0x021C2B58	0x021C2B18
-UnovaLink	KeySystem_Exit	Code		thumb			0x021C2B9C	0x021C2B5C
+UnovaLink	KeySystem_Destroy	Code		thumb			0x021C2B9C	0x021C2B5C
 UnovaLink	KeySystem_GetKey	Code		thumb			0x021C2BC0	0x021C2B80
 UnovaLink	KeySystem_Main	Code		thumb			0x021C2D14	0x021C2CD4
 UnovaLink	KeySystem_SendReceive_Main	Code		thumb			0x021C2E24	0x021C2DE4
@@ -880,7 +897,7 @@ UnovaLink	KeySystem_KeyData_IsGet	Code		thumb			0x021C4668	0x021C4628
 UnovaLink	KeySystem_KeyData_Merge	Code		thumb			0x021C46C4	0x021C4684
 UnovaLink	KeySystem_PlayerData_Init	Code		thumb			0x021C46F4	0x021C46B4
 UnovaLink	KeySystem_Select_Init	Code		thumb			0x021C4728	0x021C46E8
-UnovaLink	KeySystem_Select_Exit	Code		thumb			0x021C4870	0x021C4830
+UnovaLink	KeySystem_Select_Destroy	Code		thumb			0x021C4870	0x021C4830
 UnovaLink	KeySystem_Select_Main	Code		thumb			0x021C48A4	0x021C4864
 UnovaLink	KeySystem_Select_IsDrawEnd	Code		thumb			0x021C48B0	0x021C4870
 UnovaLink	KeySystem_Select_GetSelect	Code		thumb			0x021C48BC	0x021C487C
@@ -901,7 +918,7 @@ UnovaLink	KeySystem_Msg_GetDoorInfo	Code		thumb			0x021C4CF8	0x021C4CB8
 UnovaLink	KeySystem_Msg_GetLockListInfo	Code		thumb			0x021C4D08	0x021C4CC8
 UnovaLink	KeySystem_Msg_CreateKey	Code		thumb			0x021C4D3C	0x021C4CFC
 UnovaLink	KeySystem_Demo_Init	Code		thumb			0x021C4E08	0x021C4DC8
-UnovaLink	KeySystem_Demo_Exit	Code		thumb			0x021C4EC4	0x021C4E84
+UnovaLink	KeySystem_Demo_Destroy	Code		thumb			0x021C4EC4	0x021C4E84
 UnovaLink	KeySystem_Demo_Start	Code		thumb			0x021C4EFC	0x021C4EBC
 UnovaLink	KeySystem_Demo_Main	Code		thumb			0x021C4F5C	0x021C4F1C
 UnovaLink	KeySystem_Demo_MainModeUnlock	Code		thumb			0x021C4F68	0x021C4F28

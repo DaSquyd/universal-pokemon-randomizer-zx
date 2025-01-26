@@ -368,7 +368,7 @@ public class ParagonLiteHandler {
         Utils.printProgressFinished(startTime, total);
 
         globalAddressMap.addAllReferences();
-        decode(unovaLinkOvl, "Menu_Init");
+        decode(arm9, "TrTool_LoadParty");
 
         classicPokes = params.classicPokes;
         pokes = params.pokes;
@@ -6246,7 +6246,7 @@ public class ParagonLiteHandler {
         int number = ParagonLiteItems.fairyFeather;
 
         setItemName(number, "Fairy Feather", "Fairy Feathers");
-        itemDescriptions.set(number, "An item to be held by a Pokémon.\\xFFFEThis feather, which gleams faintly when hit by\\xFFFElight, boosts the power of the holder's Fairy-type moves.");
+        itemDescriptions.set(number, "An item to be held by a Pokémon. This\\xFFFEfeather, which gleams faintly, boosts\\xFFFEthe power of the holder's Fairy-type moves.");
 
         ItemData itemData = new ItemData(Item.FieldPocket.ITEMS);
         itemData.price = getItemPrice(Items.charcoal);

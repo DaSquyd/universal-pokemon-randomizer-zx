@@ -1,0 +1,14 @@
+{
+  "species": 0,
+  "flags": 2,
+  "nature": 3,
+  "item": 4,
+  "moves": [
+    6,
+    8,
+    10,
+    12
+  ],
+  "evs": 14,
+  "SIZE": 16
+}

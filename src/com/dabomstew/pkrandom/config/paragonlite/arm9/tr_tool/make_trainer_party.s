@@ -1,103 +1,99 @@
-#DEFINE TRUE 1
-#DEFINE FALSE 0
+#define TRUE 1
+#define FALSE 0
 
-#DEFINE DATA                    0x00
-#DEFINE POKE_IVS                0x04
-#DEFINE TR_FLAGS_OFFSET         0x08
-#DEFINE UNKNOWN                 0x0C
-#DEFINE LCG_STATE_LOW           0x10
-#DEFINE LCG_STATE_HIGH          0x14
+#define S_ArgLineNumber         0x00
 
-#DEFINE TRAINER_NUM             0x18
-#DEFINE PARTY_BLOCK             0x1C
-#DEFINE BLOCK_GROUP_ID          0x20
+#define S_ArgHeapId             0x00
+#define S_PokeIVs               0x04
+#define S_TrainerFlagsOffset    0x08
+#define UNKNOWN                 0x0C
+#define S_LcgState_Low          0x10
+#define S_LcgState_High         0x14
 
-#DEFINE TRAINER_FILE            0x24
-#DEFINE TR_POKE_FILE            0x28
-#DEFINE PARTY_POKES             0x2C
+#define S_TrainerNum            0x18
+#define S_PartyPtr              0x1C
+#define S_HeapId                0x20
 
-#DEFINE POOL_SIZE               0x30
+#define S_TrainerData            0x24
+#define S_TrainerPokeData            0x28
+#define PARTY_POKES             0x2C
 
-#DEFINE POKE_SIZE               0x34
-#DEFINE POKE_ITEM_OFFSET        0x38
-#DEFINE POKE_MOVES_OFFSET       0x3C
-#DEFINE POKE_EVS_OFFSET         0x40
-#DEFINE POKE_RANDOM_MODE        0x44
+#define POOL_SIZE               0x30
+
+#define POKE_SIZE               0x34
+#define POKE_ITEM_OFFSET        0x38
+#define POKE_MOVES_OFFSET       0x3C
+#define POKE_EVS_OFFSET         0x40
+#define POKE_RANDOM_MODE        0x44
     
-#DEFINE POKE_INDEX              0x48
-#DEFINE POKE_OFFSET             0x4C
-#DEFINE POKE_ID                 0x50
-#DEFINE POKE_SPECIES            0x54
-#DEFINE POKE_LEVEL              0x58
-#DEFINE POKE_DIFFICULTY         0x5C
-#DEFINE POKE_FLAGS              0x60
-#DEFINE POKE_RANDOM_ID          0x64
+#define POKE_INDEX              0x48
+#define POKE_OFFSET             0x4C
+#define POKE_ID                 0x50
+#define POKE_SPECIES            0x54
+#define POKE_LEVEL              0x58
+#define POKE_DIFFICULTY         0x5C
+#define POKE_FLAGS              0x60
+#define POKE_RANDOM_ID          0x64
 
-#DEFINE SELECTED_POKES          0x68 ; 8 bytes, only first 6 are used (one for each index)
-#DEFINE SELECTED_COUNT          0x70
+#define SELECTED_POKES          0x68 ; 8 bytes, only first 6 are used (one for each index)
+#define SELECTED_COUNT          0x70
 
-#DEFINE CHANNEL                 0x74
+#define CHANNEL                 0x74
 
-#DEFINE BUFFER                  0x78
-#DEFINE BUFFER_MAX_SIZE         32
-#DEFINE BUFFER_SIZE             BUFFER + BUFFER_MAX_SIZE
+#define BUFFER                  0x78
+#define BUFFER_MAX_SIZE         32
+#define BUFFER_SIZE             BUFFER + BUFFER_MAX_SIZE
 
-#DEFINE __MAX__                 BUFFER_SIZE + 4
+#define __MAX__                 BUFFER_SIZE + 4
 
 ; pre-DEFd
-#DEFINE PLAYER_BASE_BLOCK       __MAX__ + 0x18 ; {r3,r4,r5,r6,r7,lr} take up the other 24 bytes
+#define PLAYER_BASE_BLOCK       __MAX__ + 0x18 ; {r3-r7,lr} take up the other 24 bytes
 
     push    {r3-r7, lr}
     sub     sp, #__MAX__
     str     r0, [sp, #TRAINER_ID]
-    str     r1, [sp, #PARTY_BLOCK]
-    str     r2, [sp, #UNKNOWN_R2]
+    str     r1, [sp, #S_PartyPtr]
+    str     r2, [sp, #S_HeapId]
     
-    mov     r0, r1 ; PARTY_BLOCK
+    mov     r0, r1 ; S_PartyPtr
     mov     r1, #6 ; count
     bl      ARM9::PrepareFullPartyBlock
     
-    ldr     r6, =ARM9::Data_tr_tool
-    
-    ldr     r5, =0x023D
-    str     r5, [sp, #DATA]
-    
-    ldr     r2, [sp, #UNKNOWN_R2]
+    ldr     r2, [sp, #S_HeapId]
     ldr     r1, =0x7FFF ; Mask: 01111111_11111111
     and     r2, r1
     
     add     r0, r1, #1 ; 10000000_00000000
     mov     r4, r2
-    orr     r4, r0
+    orr     r4, r0 ; r4 := HeapId | 0x8000
     
-    lsl     r0, r4, #16
-    lsr     r0, #16
-    mov     r1, #20 ; block size
+    ; Allocate trdata file
+    mov     r0, #0
+    str     r0, [sp, #S_ArgLineNumber]
+    mov     r0, r4
+    mov     r1, #Trainer.SIZE
     mov     r2, #0 ; clear block = false
-    mov     r3, r6 ; tr_tool.c
+    ldr     r3, =ARM9::Data_tr_tool
     bl      ARM9::AllocateBlockFromExpHeap
-    str     r0, [sp, #TRAINER_FILE]
-    add     r0, r5, #1
-    str     r0, [sp, #DATA]
+    str     r0, [sp, #S_TrainerData]
     
-    lsl     r0, r4, #16
-    lsr     r0, #16
-    mov     r1, #18
-    lsl     r1, #5 ; block size = 576 (18 * 32)
+    ldrh    r1, [r0, #TrainerData.pokeDataSize]
+    mov     r0, #0
+    str     r0, [sp, #S_ArgLineNumber]
+    mov     r0, r4
     mov     r2, #0 ; clear block = false
-    mov     r3, r6 ; tr_tool.c
+    ldr     r3, =ARM9::Data_tr_tool
     bl      ARM9::AllocateBlockFromExpHeap
-    str     r0, [sp, #TR_POKE_FILE]
+    str     r0, [sp, #S_TrainerPokeData]
     
     bl      ARM9::GetPartyBlockSize ; always returns 220 (36 * 6)
     mov     r1, r0 ; block size
-    add     r0, r5, #2
-    str     r0, [sp, #DATA]
+    mov     r0, #0
+    str     r0, [sp, #S_ArgLineNumber]
     
-    lsl     r0, r4, #16
-    lsr     r0, #16
+    mov     r0, r4
     mov     r2, #0 ; clear block = false
-    mov     r3, r6 ; tr_tool.c
+    ldr     r3, =ARM9::Data_tr_tool
     bl      ARM9::AllocateBlockFromExpHeap
     str     r0, [sp, #PARTY_POKES]
     
@@ -110,14 +106,14 @@
     str     r0, [sp, #SELECTABLE_POKES]
     
     ldr     r0, [sp, #TRAINER_ID]
-    ldr     r1, [sp, #TRAINER_FILE]
+    ldr     r1, [sp, #S_TrainerData]
     bl      ARM9::LoadTrainerFile
     
     ldr     r0, [sp, #TRAINER_ID]
-    ldr     r1, [sp, #TR_POKE_FILE]
+    ldr     r1, [sp, #S_TrainerPokeData]
     bl      ARM9::LoadTrainerPokeFile
     
-    ldr     r0, [sp, #TRAINER_FILE]
+    ldr     r0, [sp, #S_TrainerData]
     ldrb    r0, [r0, #1] ; trainer class
     bl      ARM9::GetTrainerClassGender ; gender is determined by trainer class; 0=male, 1=female
     mov     r1, #120
@@ -125,7 +121,7 @@
     bne     StorePokeFlagOffset
     mov     r1, #136    
 StorePokeFlagOffset:
-    str     r1, [sp, #TR_FLAGS_OFFSET]
+    str     r1, [sp, #S_TrainerFlagsOffset]
     
 
     ; Normally, Trainer Flags are 000000IM where I = custom items and M = custom moves
@@ -134,21 +130,21 @@ StorePokeFlagOffset:
     ;   I: item mode    0=NoItems, 1=Custom, 2=RandomEasy, 3=RandomHard
     ;   E: custom evs
     ;   R: random mode  0=Off, 2=Locked (based solely on TID), 3=Always (random every time)
-    #DEFINE MOVE_MODE_LEVEL 0
-    #DEFINE MOVE_MODE_CUSTOM 1
-    #DEFINE MOVE_MODE_RANDOM 2
-    #DEFINE MOVE_MODE_RANDOM_TMS 3
+    #define MOVE_MODE_LEVEL 0
+    #define MOVE_MODE_CUSTOM 1
+    #define MOVE_MODE_RANDOM 2
+    #define MOVE_MODE_RANDOM_TMS 3
     
-    #DEFINE ITEM_MODE_NONE 0
-    #DEFINE ITEM_MODE_CUSTOM 1
-    #DEFINE ITEM_MODE_RANDOM_EASY 2
-    #DEFINE ITEM_MODE_RANDOM_HARD 3
+    #define ITEM_MODE_NONE 0
+    #define ITEM_MODE_CUSTOM 1
+    #define ITEM_MODE_RANDOM_EASY 2
+    #define ITEM_MODE_RANDOM_HARD 3
     
-    #DEFINE RANDOM_MODE_OFF 0
-    #DEFINE RANDOM_MODE_LOCKED 2
-    #DEFINE RANDOM_MODE_ALWAYS 3
+    #define RANDOM_MODE_OFF 0
+    #define RANDOM_MODE_LOCKED 2
+    #define RANDOM_MODE_ALWAYS 3
 
-    ldr     r0, [sp, #TRAINER_FILE]
+    ldr     r0, [sp, #S_TrainerData]
     ldrb    r5, [r0] ; trainer flags
     mov     r1, #0x08 ; POKE_SIZE
     
@@ -200,18 +196,18 @@ SetUpLCG:
     mov     r0, [sp, #PLAYER_BASE_BLOCK]
     bl      ARM9::JumpToPlayerBaseBlockInfo
     bl      ARM9::GetIDAsUInt
-    ldr     r1, [sp, #TRAINER_NUM]
+    ldr     r1, [sp, #S_TrainerNum]
     add     r0, r1
-    str     r0, [sp, #LCG_STATE_LOW]
+    str     r0, [sp, #S_LcgState_Low]
     mov     r1, #0
-    str     r1, [sp, #LCG_STATE_HIGH]
+    str     r1, [sp, #S_LcgState_High]
     bl      ARM9::SeedLCG
-    str     r0, [sp, #LCG_STATE_LOW]
-    str     r1, [sp, #LCG_STATE_HIGH]
+    str     r0, [sp, #S_LcgState_Low]
+    str     r1, [sp, #S_LcgState_High]
 
 
 SetUpChannelLoop:
-    ldr     r0, [sp, #TRAINER_FILE]
+    ldr     r0, [sp, #S_TrainerData]
     ldrb    r1, [r0, #3]
     str     r1, [sp, #POOL_SIZE]
     mov     r0, #0 ; index
@@ -228,7 +224,7 @@ ChannelLoop_PokeLoopStart:
     ldr     r0, [sp, #POKE_INDEX]
     ldr     r1, [sp, #POKE_SIZE]
     mul     r1, r0
-    ldr     r0, [sp, #TR_POKE_FILE]
+    ldr     r0, [sp, #S_TrainerPokeData]
     add     r1, r0
     ldrb    r0, [r1, #3] ; channel
     ldr     r1, [sp, #CHANNEL]
@@ -258,8 +254,8 @@ ChannelLoop_PokeLoopEnd:
     bne     ChannelLoop_Mersenne
 
 ChannelLoop_LCG:
-    ldr     r0, [sp, #LCG_STATE_LOW]
-    ldr     r1, [sp, #LCG_STATE_HIGH]
+    ldr     r0, [sp, #S_LcgState_Low]
+    ldr     r1, [sp, #S_LcgState_High]
     bl      ARM9::LCG
     mov     r0, r1
     b       ChannelLoop_SelectPoke
@@ -268,7 +264,7 @@ ChannelLoop_Mersenne:
     bl      ARM9::MersenneTwister
     
 ChannelLoop_SelectPoke:
-    ldr     r0, [sp, #TRAINER_FILE]
+    ldr     r0, [sp, #S_TrainerData]
     ldrb    r1, [r0, #3]
 
 ChannelLoopEnd:
@@ -324,7 +320,7 @@ FindLeadsLoopStart:
     ldr     r2, [sp, #POKE_INDEX]
     ldr     r1, [sp, #POKE_SIZE]
     mul     r1, r2
-    ldr     r0, [sp, #TR_POKE_FILE]
+    ldr     r0, [sp, #S_TrainerPokeData]
     add     r1, r0
     ldrb    r0, [r1, #1] ; flags
     lsl     r0, #28
@@ -344,7 +340,7 @@ FindLeadsLoopEnd:
 SelectLeads:
     mov     r3, #0 ; index
     
-    ldr     r0, [sp, #TRAINER_FILE]
+    ldr     r0, [sp, #S_TrainerData]
     ldrb    r0, [r0, #0]
     lsl     r0, #25
     lsr     r0, #30 ; Mask: 01100000
@@ -359,15 +355,15 @@ LoopStart:
     ldr     r0, [sp, #POKE_INDEX]
     ldr     r5, [sp, #POKE_SIZE]
     mul     r5, r0
-    ldr     r0, [sp, #TR_POKE_FILE]
+    ldr     r0, [sp, #S_TrainerPokeData]
     add     r6, r0, r5
     
     ldr     r0, [sp, #BLOCK_GROUP_ID]
-    str     r0, [sp, #DATA]
+    str     r0, [sp, #S_ArgHeapId]
     ldrh    r0, [r6, #4] ; species
     ldrh    r1, [r6, #6] ; form
     ldrb    r2, [r6, #1] ; poke flags
-    add     r3, sp, #TR_FLAGS_OFFSET ; tr_flags*
+    add     r3, sp, #S_TrainerFlagsOffset ; tr_flags*
     bl      ARM9::HandlerTrainerPokeFlags
     
     ldrh    r0, [r6, #4] ; species
@@ -390,7 +386,7 @@ LoopStart:
     mov     r0, [sp, #PLAYER_BASE_BLOCK]
     bl      ARM9::JumpToPlayerBaseBlockInfo
     bl      ARM9::GetIDAsUInt
-    ldr     r1, [sp, #TRAINER_NUM]
+    ldr     r1, [sp, #S_TrainerNum]
     add     r0, r1
     ldr     r1, [r6, #4] ; species
     add     r0, r1
@@ -399,7 +395,7 @@ LoopStart:
     
     mov     r5, #0 ; lcg iteration
     
-    ldr     r0, [sp, #TRAINER_FILE]
+    ldr     r0, [sp, #S_TrainerData]
     ldrb    r7, [r0, #1] ; trainer class
     
     cmp     r7, #0
@@ -409,11 +405,11 @@ SeedLinearCongruential:
     mov     r0, r3 ; seed (low)
     mov     r1, #0 ; seed (high)
     bl      ARM9::SeedLCG
-    str     r0, [sp, #LCG_STATE_LOW]
-    str     r1, [sp, #LCG_STATE_HIGH]
+    str     r0, [sp, #S_LcgState_Low]
+    str     r1, [sp, #S_LcgState_High]
     
 LinearCongruentialEnd:
-    ldr     r0, [sp, #TR_FLAGS_OFFSET]
+    ldr     r0, [sp, #S_TrainerFlagsOffset]
     lsl     r1, r2, #8
     add     r0, r1 ; 0x00RRRRFF, R=rand, F=flags
     str     r0, [sp, #POKE_ID]
@@ -424,10 +420,10 @@ IVs:
     
     
 End:
-    ldr     r0, [sp, #TRAINER_FILE]
+    ldr     r0, [sp, #S_TrainerData]
     bl      ARM9::FreeBlock
     
-    ldr     r0, [sp, #TR_POKE_FILE]
+    ldr     r0, [sp, #S_TrainerPokeData]
     bl      ARM9::FreeBlock
     
     ldr     r0, [sp, #SELECTABLE_POKES]

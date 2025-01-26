@@ -135,6 +135,14 @@ public class ArmParser {
                 "ServerFlow",
                 "SideStatus",
                 "TrainerAIEnv",
+                "TrainerData",
+                "TrainerPokeData_Pooled_Header",
+                "TrainerPokeData_Pooled_Header_Slot",
+                "TrainerPokeData_PooledPoke",
+                "TrainerPokeData_Standard",
+                "TrainerPokeData_Standard_Item",
+                "TrainerPokeData_Standard_ItemMoves",
+                "TrainerPokeData_Standard_Moves",
                 "UnovaLink_MenuParam",
                 "UnovaLink_MenuParam_Button",
                 "UnovaLink_MenuWork",
@@ -147,6 +155,9 @@ public class ArmParser {
             Scanner sc;
             try {
                 InputStream stream = FileFunctions.openConfig(filename);
+                if (stream == null) {
+                    throw new RuntimeException(String.format("Could not find %s", filename));
+                }
                 sc = new Scanner(stream, StandardCharsets.UTF_8);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
