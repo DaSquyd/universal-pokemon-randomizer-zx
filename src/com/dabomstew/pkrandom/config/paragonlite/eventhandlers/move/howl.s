@@ -1,8 +1,10 @@
-#define S_AllyCount 0x00
-#define S_PokeCount 0x04
+#define S_ReadCount 0x00
+#define S_ReadPoke 0x04
+#define S_WritePoke 0x08
+#define StackSize 0x0C
 
-    push    {r3-r4, lr}
-    sub     sp, #0x08
+    push    {r4-r7, lr}
+    sub     sp, #StackSize
     mov     r5, r1
     mov     r4, r2
     
@@ -19,10 +21,16 @@
     mov     r0, r5
     mov     r2, r6
     bl      Battle::Handler_ExpandPokeID
-    str     r0, [sp, #S_AllyCount]
+    str     r0, [sp, #S_ReadCount]
     cmp     r0, #0
-    beq     Return
+    bne     PushWork
     
+; likely singles? this particular expansion always fails in singles/rotation so we need to hard set it to the caller
+    mov     r0, #1
+    str     r0, [sp, #S_ReadCount]
+    strb    r4, [r6]
+    
+PushWork:
     mov     r0, r5
     mov     r1, #HE_ChangeStatStage
     mov     r2, r4
@@ -34,14 +42,14 @@
     strb    r0, [r7, #HandlerParam_ChangeStatStage.amount]
     strb    r0, [r7, #HandlerParam_ChangeStatStage.fMoveAnimation]
     
-    mov     r3, #0
-    str     r3, [sp, #S_PokeCount]
-    cmp     r0, #0
-    bls     PopWork
+    mov     r0, #0
+    str     r0, [sp, #S_ReadPoke]
+    str     r0, [sp, #S_WritePoke]
     
 LoopStart:
     mov     r0, r5
-    ldrb    r1, [r6, r3]
+    ldr     r1, [sp, #S_ReadPoke]
+    ldrb    r1, [r6, r1]
     bl      Battle::GetPoke
     mov     r1, #BPV_EffectiveAbility
     bl      Battle::GetPokeStat
@@ -56,22 +64,25 @@ LoopStart:
     cmp     r0, r1
     beq     LoopEnd
     
-    ldr     r0, [sp, #S_PokeCount]
+    ldr     r0, [sp, #S_WritePoke]
     add     r1, r7, r0
     
-    ldrb    r2, [r6, r3]
+    ldr     r2, [sp, #S_ReadPoke]
+    ldrb    r2, [r6, r2]
     strb    r2, [r1, #HandlerParam_ChangeStatStage.pokeIds[0]]
     
     add     r0, #1
-    str     r0, [sp, #S_PokeCount]
+    str     r0, [sp, #S_WritePoke]
     
 LoopEnd:
-    add     r3, #1
-    ldr     r0, [sp, #S_AllyCount]
-    cmp     r3, r0
+    ldr     r0, [sp, #S_ReadPoke]
+    add     r0, #1
+    str     r0, [sp, #S_ReadPoke]
+    ldr     r1, [sp, #S_ReadCount]
+    cmp     r0, r1
     bcc     LoopStart
     
-    ldr     r0, [sp, #S_PokeCount]
+    ldr     r0, [sp, #S_WritePoke]
     strb    r0, [r7, #HandlerParam_ChangeStatStage.pokeCount]
     
 PopWork:
@@ -80,5 +91,5 @@ PopWork:
     bl      Battle::Handler_PopWork
     
 Return:
-    add     sp, #0x08
-    pop     {r3-r4, pc}
+    add     sp, #StackSize
+    pop     {r4-r7, pc}
