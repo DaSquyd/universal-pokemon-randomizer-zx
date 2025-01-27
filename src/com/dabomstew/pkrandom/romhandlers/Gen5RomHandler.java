@@ -2783,32 +2783,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } else if (tweak == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS) {
             customTypeEffectiveness();
         } else if (tweak == MiscTweak.CUSTOM_NO_EXP) {
-            List<Pokemon> pokes = getPokemonInclFormes();
-
-            for (Pokemon pk : pokes) {
-                if (pk != null)
-                    pk.expYield = 0;
-            }
+            customNoExp();
         } else if (tweak == MiscTweak.CUSTOM_MAX_HAPPINESS) {
-            List<Pokemon> pokes = getPokemonInclFormes();
-
-            for (Pokemon pk : pokes) {
-                if (pk != null)
-                    pk.baseFriendship = 255;
-            }
+            customMaxHappiness();
         } else if (tweak == MiscTweak.CUSTOM_NO_EVS) {
-            List<Pokemon> pokes = getPokemonInclFormes();
-
-            for (Pokemon pk : pokes) {
-                if (pk != null) {
-                    pk.hpEVs = 0;
-                    pk.attackEVs = 0;
-                    pk.defenseEVs = 0;
-                    pk.spatkEVs = 0;
-                    pk.spdefEVs = 0;
-                    pk.speedEVs = 0;
-                }
-            }
+            customNoEVs();
         } else if (tweak == MiscTweak.MODERNIZE_CRIT) {
             modernizeCrit();
         } else if (tweak == MiscTweak.MODERNIZE_GEMS) {
@@ -2953,21 +2932,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             for (int defender = min; defender <= max; defender++) {
                 int offset = typeEffectivenessTableOffset + (attacker * (max + 1)) + defender;
                 int effectivenessInternal = battleOverlay[offset];
-                Effectiveness effectiveness = null;
-                switch (effectivenessInternal) {
-                    case 8:
-                        effectiveness = Effectiveness.DOUBLE;
-                        break;
-                    case 4:
-                        effectiveness = Effectiveness.NEUTRAL;
-                        break;
-                    case 2:
-                        effectiveness = Effectiveness.HALF;
-                        break;
-                    case 0:
-                        effectiveness = Effectiveness.ZERO;
-                        break;
-                }
+                Effectiveness effectiveness = switch (effectivenessInternal) {
+                    case 8 -> Effectiveness.DOUBLE;
+                    case 4 -> Effectiveness.NEUTRAL;
+                    case 2 -> Effectiveness.HALF;
+                    case 0 -> Effectiveness.ZERO;
+                    default -> null;
+                };
                 effectivenessTable[attacker][defender] = effectiveness;
             }
         }
@@ -2983,21 +2954,13 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             for (int defender = min; defender <= max; defender++) {
                 Effectiveness effectiveness = typeEffectivenessTable[attacker][defender];
                 int offset = typeEffectivenessTableOffset + (attacker * (max + 1)) + defender;
-                byte effectivenessInternal = 0;
-                switch (effectiveness) {
-                    case DOUBLE:
-                        effectivenessInternal = 8;
-                        break;
-                    case NEUTRAL:
-                        effectivenessInternal = 4;
-                        break;
-                    case HALF:
-                        effectivenessInternal = 2;
-                        break;
-                    case ZERO:
-                        effectivenessInternal = 0;
-                        break;
-                }
+                byte effectivenessInternal = switch (effectiveness) {
+                    case DOUBLE -> 8;
+                    case NEUTRAL -> 4;
+                    case HALF -> 2;
+                    case ZERO -> 0;
+                    default -> 0;
+                };
                 battleOverlay[offset] = effectivenessInternal;
             }
         }

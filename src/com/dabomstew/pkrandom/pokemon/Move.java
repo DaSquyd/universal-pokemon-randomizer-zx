@@ -119,6 +119,7 @@ public class Move {
     public int internalId = 0;
     public Type type = Type.NORMAL; // 00
     public MoveQualities qualities; // 01
+    public StatChangeMoveType statChangeMoveType = StatChangeMoveType.NONE_OR_UNKNOWN;
     public MoveCategory category = MoveCategory.STATUS; // 02
     public int power = 0; // 03
     public double accuracy = 0; // 04
@@ -181,37 +182,29 @@ public class Move {
     }
 
     public boolean isTrapMove() {
-        return statusType == MoveStatusType.TRAP || effect == MoveEffect.PREVENT_ESCAPE;
+        return statusType == MoveStatusType.TRAP
+                || effect == MoveEffect.DMG_TRAP
+                || effect == MoveEffect.PREVENT_ESCAPE;
     }
 
     public StatChangeMoveType getStatChangeMoveType() {
         if (qualities == null) {
             // TODO: Finish this later for Gen IV
 
-            return StatChangeMoveType.DAMAGE_TARGET;
+            return statChangeMoveType;
         }
 
-        switch (qualities) {
-            case NO_DAMAGE_STAT_CHANGE:
-            case NO_DAMAGE_STAT_CHANGE_STATUS:
-                switch (target) {
-                    case ADJACENT_ALLY:
-                        return StatChangeMoveType.NO_DAMAGE_ALLY;
-                    case PARTY:
-                    case USER:
-                        return StatChangeMoveType.NO_DAMAGE_USER;
-                    case ALL_ON_FIELD:
-                        return StatChangeMoveType.NO_DAMAGE_ALL;
-                    default:
-                        return StatChangeMoveType.NO_DAMAGE_TARGET;
-                }
-            case DAMAGE_TARGET_STAT_CHANGE:
-                return StatChangeMoveType.DAMAGE_TARGET;
-            case DAMAGE_USER_STAT_CHANGE:
-                return StatChangeMoveType.DAMAGE_USER;
-            default:
-                return StatChangeMoveType.NONE_OR_UNKNOWN;
-        }
+        return switch (qualities) {
+            case NO_DAMAGE_STAT_CHANGE, NO_DAMAGE_STAT_CHANGE_STATUS -> switch (target) {
+                case ADJACENT_ALLY -> StatChangeMoveType.NO_DAMAGE_ALLY;
+                case PARTY, USER -> StatChangeMoveType.NO_DAMAGE_USER;
+                case ALL_ON_FIELD -> StatChangeMoveType.NO_DAMAGE_ALL;
+                default -> StatChangeMoveType.NO_DAMAGE_TARGET;
+            };
+            case DAMAGE_TARGET_STAT_CHANGE -> StatChangeMoveType.DAMAGE_TARGET;
+            case DAMAGE_USER_STAT_CHANGE -> StatChangeMoveType.DAMAGE_USER;
+            default -> StatChangeMoveType.NONE_OR_UNKNOWN;
+        };
     }
 
     public boolean hasSpecificStatChange(StatChangeType type, boolean isPositive) {

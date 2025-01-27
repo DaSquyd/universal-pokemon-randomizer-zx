@@ -131,6 +131,8 @@ public enum MoveEffect {
     RAPID_SPIN(129),
     DIRECT_DMG_20(130), // Sonic Boom
     RECOVER_HP_50_WEATHER(132), // Morning Sun, Synthesis, Moonlight
+    SYNTHESIS(133, -1, -1, -1),
+    MOONLIGHT(134, -1, -1, -1),
     HIDDEN_POWER(135),
     RAIN_DANCE(136),
     SUNNY_DAY(137),
@@ -152,6 +154,7 @@ public enum MoveEffect {
     BEAT_UP(154),
     FLY(155),
     DEF_CURL(156),
+    SOFT_BOILED(157, -1, -1, -1), // only in Gen III?
     FAKE_OUT(158),
     UPROAR(159),
     STOCKPILE(160),
@@ -325,7 +328,7 @@ public enum MoveEffect {
     GLACIATE(330),
     FREEZE_SHOCK(331),
     ICE_BURN(332),
-    HURRICANE(337, 333, 333), // TODO: Confirm this for Gen IV
+    HURRICANE(-1, 337, 333, 333), // TODO: Confirm this for Gen IV
     DMG_USER_SPE_DEF_SPD_MINUS_1(334), // V-create
     FUSION_FLARE(335),
     FUSION_BOLT(336),
@@ -445,20 +448,20 @@ public enum MoveEffect {
     POLTERGEIST(463),
     LIFE_DEW(464);
     
-        
-    
-
+    final int gen3;
     final int gen4;
     final int gen5;
     final int gen6;
 
     MoveEffect(int id) {
+        this.gen3 = id;
         this.gen4 = id;
         this.gen5 = id;
         this.gen6 = id;
     }
 
-    MoveEffect(int gen4, int gen5, int gen6) {
+    MoveEffect(int gen3, int gen4, int gen5, int gen6) {
+        this.gen3 = gen3;
         this.gen4 = gen4;
         this.gen5 = gen5;
         this.gen6 = gen6;
@@ -466,6 +469,7 @@ public enum MoveEffect {
 
     public int getIndex(int generation) {
         return switch (generation) {
+            case 3 -> gen3;
             case 4 -> gen4;
             case 5 -> gen5;
             case 6 -> gen6;

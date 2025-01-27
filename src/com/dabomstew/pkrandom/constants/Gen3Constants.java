@@ -30,6 +30,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.dabomstew.pkrandom.pokemon.ItemList;
+import com.dabomstew.pkrandom.pokemon.MoveTarget;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.Type;
 
@@ -71,6 +72,84 @@ public class Gen3Constants {
 
     private static final String runningShoesCheckPrefixRS = "0440002C1DD08620", runningShoesCheckPrefixFRLG = "02200540002D29D0",
             runningShoesCheckPrefixE = "0640002E1BD08C20";
+    
+    private static final String rsStartersPrefix = "150118011B01", frlgStartersPrefix = "010016034004";
+    public static String getStartersPrefix(int romType) {
+        return switch (romType) {
+            case RomType_Ruby, RomType_Sapp, RomType_Em -> rsStartersPrefix;
+            case RomType_FRLG -> frlgStartersPrefix;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+    
+    public static final String pokemonMovesetsPrefix = "04002D009001";
+    public static final int pokemonMovesetsOffset = 520;
+    
+    public static final String eggMovesPrefix = "214E71008200";
+    
+    public static final String pokemonTMHMCompatPrefix = "20073584081EE40020073584081EE400";
+    public static final int pokemonTMHMCompatOffset = -0x08;
+    
+    public static final String pokemonEvolutionsPrefix = "040010000200";
+    public static final int pokemonEvolutionsOffset = -0x28;
+    
+    public static final String starterItemsPrefix = "0022002348F0";
+    
+    private static final String rsTrainerDataPrefix = "000000000000000000020B00CDBBD1D3", frlgTrainerDataPrefix = "FF000000000000BDCCCFCDC200C1C3CC";
+    private static final int rsTrainerDataOffset = -0x20, frlgTrainerDataOffset = 0x00;
+    public static String getTrainerDataPrefix(int romType) {
+        return switch (romType) {
+            case RomType_Ruby, RomType_Sapp, RomType_Em -> rsTrainerDataPrefix;
+            case RomType_FRLG -> frlgTrainerDataPrefix;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+    public static int getTrainerDataOffset(int romType) {
+        return switch (romType) {
+            case RomType_Ruby, RomType_Sapp, RomType_Em -> rsTrainerDataOffset;
+            case RomType_FRLG -> frlgTrainerDataOffset;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+    
+    public static final String trainerClassNamesPrefix = "535400CECCBBC3C8BFCCFF0000535400CECC";
+    
+    public static final String mossdeepStevenTeamOffset = "8F011F2A0200FCFC";
+    
+    private static final String rsMoveDescriptionsPrefix = "C5ADFF00", frlgMoveDescriptionsPrefix = "E7E8D5E8ADFF0000";
+    private static final int rsMoveDescriptionsOffset = 0x04, frlgMoveDescriptionsOffset = 0x08;
+    public static String getMoveDescriptionsPrefix(int romType) {
+        return switch (romType) {
+            case RomType_Ruby, RomType_Sapp, RomType_Em -> rsMoveDescriptionsPrefix;
+            case RomType_FRLG -> frlgMoveDescriptionsPrefix;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+    public static int getMoveDescriptionsOffset(int romType) {
+        return switch (romType) {
+            case RomType_Ruby, RomType_Sapp, RomType_Em -> rsMoveDescriptionsOffset;
+            case RomType_FRLG -> frlgMoveDescriptionsOffset;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+    
+    public static final String tmMovesPrefix = "0801510160015B012E005C0002015301";
+    
+    public static final String moveTutorDataPrefix = "05000E001900";
+
+    private static final String rseItemImagesPrefix = "58B0DA08D0B0DA0884B1DA0854B2DA08", frlgItemImagesPrefix = "2870E808A070E8085471E8082472E808";
+    public static String getItemImagesPrefix(int romType) {
+        return switch (romType) {
+            case RomType_Ruby, RomType_Sapp, RomType_Em -> rseItemImagesPrefix;
+            case RomType_FRLG -> frlgItemImagesPrefix;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+    
+    public static final String tmPalsLocator = "1020000000D65AC61829";
+    public static final int[] tmPalsMap = new int[] {4, 0, 15, 5, 12, 14, 7, 13, 10, 13, 8, 2, 7, 11, 3, 6, 1, 9};
+    
+    public static final String critChanceLocator = "1008040302";
 
     public static final int efrlgPokemonNamesPointer = 0x144, efrlgMoveNamesPointer = 0x148,
             efrlgAbilityNamesPointer = 0x1C0, efrlgItemDataPointer = 0x1C8, efrlgMoveDataPointer = 0x1CC,
@@ -84,7 +163,7 @@ public class Gen3Constants {
 
     public static final int bsHPOffset = 0, bsAttackOffset = 1, bsDefenseOffset = 2, bsSpeedOffset = 3,
             bsSpAtkOffset = 4, bsSpDefOffset = 5, bsPrimaryTypeOffset = 6, bsSecondaryTypeOffset = 7,
-            bsCatchRateOffset = 8, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGenderRatioOffset = 16,
+            bsCatchRateOffset = 8, bsExpYieldOffset = 9, bsEvYieldOffset = 10, bsCommonHeldItemOffset = 12, bsRareHeldItemOffset = 14, bsGenderRatioOffset = 16,
             bsGrowthCurveOffset = 19, bsAbility1Offset = 22, bsAbility2Offset = 23;
 
     public static final int textTerminator = 0xFF, textVariable = 0xFD;
@@ -216,6 +295,32 @@ public class Gen3Constants {
             noDamageAtkAndDefPlusOneEffect = 208, poisonTailEffect = 209, noDamageSpAtkAndSpDefPlusOneEffect = 211,
             noDamageAtkAndSpePlusOneEffect = 212;
 
+    public static MoveTarget byteToMoveTarget(int b) {
+        return switch (b) {
+            case 0 -> MoveTarget.ANY_ADJACENT;
+            case 1 -> MoveTarget.OTHER;
+            case 4 -> MoveTarget.RANDOM_ADJACENT_FOE;
+            case 8 -> MoveTarget.ALL_ADJACENT_FOES;
+            case 16 -> MoveTarget.USER;
+            case 32 -> MoveTarget.ALL_ADJACENT;
+            case 64 -> MoveTarget.HAZARD;
+            default -> throw new IllegalStateException("Unexpected value: " + b);
+        };
+    }
+    
+    public static byte moveTargetToByte(MoveTarget moveTarget) {
+        return switch (moveTarget) {
+            case ANY_ADJACENT -> 0;
+            case OTHER -> 1;
+            case RANDOM_ADJACENT_FOE -> 4;
+            case ALL_ADJACENT_FOES -> 8;
+            case USER -> 16;
+            case ALL_ADJACENT -> 32;
+            case HAZARD -> 64;
+            default -> throw new IllegalStateException("Unexpected value: " + moveTarget);
+        };
+    }
+    
     public static final List<Integer> soundMoves = Arrays.asList(Moves.growl, Moves.roar, Moves.sing, Moves.supersonic,
             Moves.screech, Moves.snore, Moves.uproar, Moves.metalSound, Moves.grassWhistle, Moves.hyperVoice,
             Moves.perishSong, Moves.healBell);
