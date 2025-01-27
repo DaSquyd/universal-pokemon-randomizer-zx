@@ -30,7 +30,7 @@
     str     r0, [sp, #S_ReadCount]
     strb    r4, [r6]
     
-PushWork:
+PushWork:    
     mov     r0, r5
     mov     r1, #HE_ChangeStatStage
     mov     r2, r4
@@ -46,7 +46,7 @@ PushWork:
     str     r0, [sp, #S_ReadPoke]
     str     r0, [sp, #S_WritePoke]
     
-LoopStart:
+LoopStart:    
     mov     r0, r5
     ldr     r1, [sp, #S_ReadPoke]
     ldrb    r1, [r6, r1]
