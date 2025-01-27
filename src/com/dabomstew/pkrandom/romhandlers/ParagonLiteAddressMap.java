@@ -446,7 +446,7 @@ public class ParagonLiteAddressMap {
 
         LabeledAddressInterface labeledAddress = labelMap.get(overlay).get(label);
         if (!(labeledAddress instanceof AddressBase))
-            throw new RuntimeException(String.format("Unknown function \"%s::%s\"", overlay.name, label));
+            return null;
 
         return (AddressBase) labeledAddress;
     }

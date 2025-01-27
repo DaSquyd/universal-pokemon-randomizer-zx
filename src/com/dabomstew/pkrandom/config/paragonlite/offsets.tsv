@@ -78,6 +78,7 @@ ARM9	IsItemBerry	Code		thumb			0x02026C20	0x02026BF4
 ARM9	GetTrainerData	Code		thumb	0x0202A248	0x0202A230	0x0203050C	0x020304E0
 ARM9	LoadTrainerFile	Code		thumb	0x0202A3C4	0x0202A3AC	0x0203070C	0x020306E0
 ARM9	LoadTrPokeFile	Code		thumb	0x0202A3D4	0x0202A3BC	0x02030750	0x02030724
+ARM9	TrTool_LoadTrainer	Code		thumb			0x02030854	0x02030828
 ARM9	TrTool_LoadParty	Code		thumb			0x020308EC	0x020308C0
 ARM9	ShooterItem_GetTableIndex	Code		thumb			0x02035970	0x02035944
 ARM9	Title_Proc	Code		thumb			0x02036318	0x020362EC
@@ -215,6 +216,7 @@ ARM9	GFL_G2DSysReadArcPaletteResource	Code		thumb			0x0204B380	0x0204B354
 ARM9	sys_memset16	Code		arm	0x02082A60	0x02082A48	0x02078650	0x02078624
 ARM9	sys_memset	Code		arm			0x020787D4	0x020787A8
 ARM9	memcpyx	Code		arm			0x0207894C	0x02078920
+ARM9	sprintf	Code		arm			0x02085B7C	0x02085B50
 ARM9	Mod64Signed	Code		arm	0x0209BE64	0x0209BE4C	0x0208D430	0x0208D404
 ARM9	Divide64Signed	Code		arm	0x0209BE74	0x0209BE5C	0x0208D440	0x0208D414
 ARM9	Divide64Unsigned	Code		arm	0x0209C024	0x0209C00C	0x0208D5F0	0x0208D5C4
@@ -289,7 +291,7 @@ Battle	ServerControl_SimpleDamageCore	Code		thumb	0x021C20F0	0x021C20D0	0x021A5B
 Battle	ServerEvent_GetWeather	Code		thumb	0x021C2AD0	0x021C2AB0	0x021A65A0	0x021A6560
 Battle	ServerEvent_GetWeightRatio	Code		thumb			0x021A65E0	0x021A65A0
 Battle	ServerEvent_MoveConditionCheckFail	Code		thumb			0x021A662C	0x021A65EC
-Battle	WazaSerial_Inc	Code		thumb			0x021A693C	0x021A68FC
+Battle	MoveSerial_Inc	Code		thumb			0x021A693C	0x021A68FC
 Battle	ServerControl_MoveStatStageChangeEffectCommon	Code		thumb			0x021A6954	0x021A6914
 Battle	ServerEvent_GetMoveStatChangeValue	Code		thumb			0x021A6A60	0x021A6A20
 Battle	ServerControl_StatStageChangeCore	Code		thumb			0x021A6AF8	0x021A6AB8
@@ -580,7 +582,11 @@ Battle	Unk_21BD6E4	Code		thumb	0x021D7EB0	0x021D7E90	0x021BD6E4	0x021BD6A4
 Battle	DoesBattleStyleRequireTargetSelect	Code		thumb	0x021D7F10	0x021D7EF0	0x021BD758	0x021BD718
 Battle	GetNumPokesOnField	Code		thumb	0x021D7F4C	0x021D7F2C	0x021BD794	0x021BD754
 Battle	Action_GetMoveId	Code		thumb	0x021D8360	0x021D8340	0x021BDBA8	0x021BDB68
+Battle	Action_SetItemParam	Code		thumb	0x021D8378	0x021D8358	0x021BDBC0	0x021BDB80
+Battle	Action_SetSwitchParam	Code		thumb	0x021D83B4	0x021D8394	0x021BDBFC	0x021BDBBC
+Battle	Action_SetSwitchDepleteParam	Code		thumb	0x021D83E4	0x021D83C4	0x021BDC2C	0x021BDBEC
 Battle	Action_IsDeplete	Code		thumb	0x021D8400	0x021D83E0	0x021BDC48	0x021BDC08
+Battle	Action_SetRotateParam	Code		thumb	0x021D841C	0x021D83FC	0x021BDC64	0x021BDC24
 Battle	BattleAction_GetActionType	Code		thumb	0x021D8474	0x021D8454	0x021BDCBC	0x021BDC7C
 Battle	Inst_AbilityEffectListCountCmp	Data	1		0x021D84FE	0x021D84DE	0x021BDD46	0x021BDD06
 Battle	Data_AbilityEffectListAddress	Data	4	*	0x021D8508	0x021D84E8	0x021BDD50	0x021BDD10
@@ -618,8 +624,17 @@ Battle	Data_MoveEffectListAddress4	Data	4	*	0x021E0370	0x021E0350	0x021C5BB8	0x0
 Battle	MoveEvent_RemoveItem	Code		thumb	0x021E03B4	0x021E0394	0x021C5BFC	0x021C5BBC
 Battle	HandlerCommon_CreateSideStatus	Code		thumb	0x021E558C	0x021E556C	0x021CADE4	0x021CADA4
 Battle	HandlerCommon_CheckTargetMonID	Code		thumb	0x021E8618	0x021E85F8	0x021CDE78	0x021CDE38
-Battle	HandlerCommon_CheckIfCannotStealPokeItem	Code		thumb	0x021E8708	0x021E86E8	0x021CDF68	0x021CDF28
+Battle	HandlerCommon_IsPokeLastInTurnOder	Code		thumb	0x021E8644	0x021E8624	0x021CDEA4	0x021CDE64
+Battle	HandlerCommon_IsUnchangeablePokeItem	Code		thumb	0x021E8658	0x021E8638	0x021CDEB8	0x021CDE78
+Battle	HandlerCommon_IsUnchangeableItem	Code		thumb	0x021E86BC	0x021E869C	0x021CDF1C	0x021CDEDC
+Battle	HandlerCommon_IsUnstealableItem_WildPoke	Code		thumb	0x021E86E8	0x021E86C8	0x021CDF48	0x021CDF08
+Battle	HandlerCommon_IsUnstealableItem	Code		thumb	0x021E8708	0x021E86E8	0x021CDF68	0x021CDF28
+Battle	HandlerCommon_MagicCoat_CheckMoveEffect	Code		thumb	0x021E8764	0x021E8744	0x021CDFC4	0x021CDF84
+Battle	HandlerCommon_MagicCoat_Wait	Code		thumb	0x021E87B8	0x021E8798	0x021CE018	0x021CDFD8
+Battle	HandlerCommon_MagicCoat_Reaction	Code		thumb	0x021E8824	0x021E8804	0x021CE084	0x021CE044
 Battle	CommonMultiplyBasePower	Code		thumb	0x021E8880	0x021E8860	0x021CE0E0	0x021CE0A0
+Battle	HandlerCommon_RunCalcSkip	Code		thumb	0x021E8898	0x021E8878	0x021CE0F8	0x021CE0B8
+Battle	HandlerCommon_CheckRunMessage	Code		thumb	0x021E88BC	0x021E889C	0x021CE11C	0x021CE0DC
 Battle	MakeEmptyCondition	Code		thumb	0x021E8938	0x021E8918	0x021CE198	0x021CE158
 Battle	ConditionPtr_GetMode	Code		thumb	0x021E8948	0x021E8928	0x021CE1A8	0x021CE168
 Battle	MakeTurnCondition_Turns	Code		thumb	0x021E8960	0x021E8940	0x021CE1C0	0x021CE180

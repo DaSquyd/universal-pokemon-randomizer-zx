@@ -353,12 +353,54 @@ public class ArmParser {
                 parseLines.add(new ParseLine(lineNumber, String.format("lsl %s, #16", switchRegister1)));
                 parseLines.add(new ParseLine(lineNumber, String.format("asr %s, #16", switchRegister1)));
                 parseLines.add(new ParseLine(lineNumber, String.format("add pc, %s", switchRegister1)));
+                
                 for (int j = i + 1; j < oldParseLines.size(); ++j)
                     parseLines.add(oldParseLines.get(j));
                     
                 --i;
                 continue;
-            } else if (str.endsWith(":")) {
+            } 
+            else if (str.toUpperCase().startsWith("#PRINTF(\"") && str.endsWith("\")")) {
+                String printStr = str.substring(9, str.length() - 2);
+                byte[] printStrBytesWithNewLine = new byte[printStr.length() + 2];
+                byte[] rawPrintStrBytes = printStr.getBytes(StandardCharsets.UTF_8);
+                System.arraycopy(rawPrintStrBytes, 0, printStrBytesWithNewLine, 0, rawPrintStrBytes.length);
+                
+                printStrBytesWithNewLine[printStrBytesWithNewLine.length - 2] = '\n';
+                printStrBytesWithNewLine[printStrBytesWithNewLine.length - 1] = '\0';
+                
+                String bufferLabel = "Data_RAM_StrBuf";
+                ParagonLiteAddressMap.AddressBase bufferAddressData = globalAddressMap.getAddressData(overlay, bufferLabel);
+                if (bufferAddressData == null) {
+                    overlay.writeData(new byte[256], bufferLabel, "");
+                    bufferAddressData = globalAddressMap.getAddressData(overlay, bufferLabel);
+                }
+                
+                String label = String.format("Data_PRINTF_%s", printStr);
+                ParagonLiteAddressMap.AddressBase addressData = globalAddressMap.getAddressData(overlay, label);
+                if (addressData == null) {
+                    overlay.writeData(printStrBytesWithNewLine, label, "");
+                    addressData = globalAddressMap.getAddressData(overlay, label);
+                }
+
+                List<ParseLine> oldParseLines = parseLines;
+                parseLines = new ArrayList<>(parseLines.size() + 7);
+                for (int j = 0; j < i; ++j)
+                    parseLines.add(oldParseLines.get(j));
+                
+                parseLines.add(new ParseLine(lineNumber, String.format("ldr r0, =%d", bufferAddressData.getRamAddress())));
+                parseLines.add(new ParseLine(lineNumber, String.format("ldr r1, =%d", addressData.getRamAddress())));
+                parseLines.add(new ParseLine(lineNumber, "blx ARM9::sprintf"));
+                parseLines.add(new ParseLine(lineNumber, String.format("ldr r0, =%d", bufferAddressData.getRamAddress())));
+                parseLines.add(new ParseLine(lineNumber, "swi 0xFC"));
+
+                for (int j = i + 1; j < oldParseLines.size(); ++j)
+                    parseLines.add(oldParseLines.get(j));
+
+                --i;
+                continue;
+            }
+            else if (str.endsWith(":")) {
                 // Label
                 String labelName = str.substring(0, str.length() - 1).trim();
                 labelAddressMap.put(labelName, currentRamAddress);
@@ -1731,7 +1773,7 @@ public class ArmParser {
 
     // Format 17: software interrupt
     private byte[] format17(int line, String op, String[] args) throws ArmParseException {
-        int value = Integer.parseInt(args[0]);
+        int value = parseValue(line, op, args, args[0]);
         if (value < 0 || value > 255)
             throw new ExpectedNumberException(line, op, args, 0, value, 0, 255);
 
