@@ -14,8 +14,8 @@
 #define S_PartyPtr              0x1C
 #define S_HeapId                0x20
 
-#define S_TrainerData            0x24
-#define S_TrainerPokeData            0x28
+#define S_TrainerData           0x24
+#define S_TrainerPokeData       0x28
 #define PARTY_POKES             0x2C
 
 #define POOL_SIZE               0x30
