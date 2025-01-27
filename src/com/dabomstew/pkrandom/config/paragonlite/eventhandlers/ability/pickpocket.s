@@ -87,7 +87,7 @@ TargetLoop_Start:
     mov     r0, r5
     mov     r1, r4
     mov     r2, r7
-    bl      Battle::HandlerCommon_CheckIfCannotStealPokeItem
+    bl      Battle::HandlerCommon_IsUnstealableItem
     cmp     r0, #FALSE
     bne     TargetLoop_End
     
