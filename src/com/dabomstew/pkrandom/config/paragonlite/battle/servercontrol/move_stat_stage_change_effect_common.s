@@ -34,7 +34,7 @@
     bl      Battle::GetPokeId
     mov     r4, r0
     mov     r0, r6
-    bl      Battle::WazaSerial_Inc
+    bl      Battle::MoveSerial_Inc
     str     r0, [sp, #VAR_MOVE_SERIAL]
     ldr     r0, [sp, #VAR_38]
     ldrh    r0, [r0, #0x00]
