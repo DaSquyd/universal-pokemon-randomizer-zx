@@ -210,6 +210,8 @@ public enum MoveEffect {
     USER_SPA_SPD_PLUS_1(211), // Calm Mind
     USER_ATK_SPE_PLUS_1(212), // Dragon Dance
     CAMOUFLAGE(213),
+
+    // Gen IV+
     ROOST(214),
     GRAVITY(215),
     MIRACLE_EYE(216),

@@ -151,12 +151,17 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
-        int playerAllowedGenerations = (1 << generationOfPokemon()) - 1;
-        int foeAllowedGenerations = (1 << generationOfPokemon()) - 1;
+        int playerAllowedGenerations = 0;
+        int foeAllowedGenerations = 0;
         if (settings != null) {
             playerAllowedGenerations = settings.getWildAllowedGenerations();
             foeAllowedGenerations = settings.getFoeAllowedGenerations();
         }
+        
+        if (playerAllowedGenerations == 0)
+            playerAllowedGenerations = (1 << generationOfPokemon()) - 1;
+        if (foeAllowedGenerations == 0)
+            foeAllowedGenerations = (1 << generationOfPokemon()) - 1;
 
         playerPokemonList = new ArrayList<>();
         foePokemonList = new ArrayList<>();
@@ -759,7 +764,9 @@ public abstract class AbstractRomHandler implements RomHandler {
     @Override
     public Pokemon randomPlayerPokemon() {
         checkPokemonRestrictions();
-        return playerPokemonList.get(this.random.nextInt(playerPokemonList.size()));
+        if (!playerPokemonList.isEmpty())
+            return playerPokemonList.get(this.random.nextInt(playerPokemonList.size()));
+        return mainPokemonList.get(this.random.nextInt(mainPokemonList.size()));
     }
 
     @Override
@@ -1200,6 +1207,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean higherOrEqualSpAtk = Math.round((pk.spatk + 12.5) * 0.9) >= Math.round((pk.attack + 12.5) * 1.1); // minSpAtk >= maxAttack;
 
         long miscTweaks = settings.getCurrentMiscTweaks();
+        boolean isDoubles = settings.isDoubleBattleMode();
         boolean isCustomTypeEffectiveness = (miscTweaks & MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue()) == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
 
         Map<Type, Effectiveness> against = Effectiveness.against(pk.primaryType, pk.secondaryType, generationOfPokemon(), true, isCustomTypeEffectiveness, typeInGame(Type.FAIRY));
@@ -1259,7 +1267,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean weakToDark = pk.hp == 1 || against.get(Type.DARK).ordinal() > Effectiveness.NEUTRAL.ordinal();
 
         boolean isFairy = pk.primaryType == Type.FAIRY || pk.secondaryType == Type.FAIRY;
-        boolean weakToFairy = pk.hp == 1 || against.get(Type.FAIRY).ordinal() > Effectiveness.NEUTRAL.ordinal();
+        boolean weakToFairy = typeInGame(Type.FAIRY) ? (pk.hp == 1 || against.get(Type.FAIRY).ordinal() > Effectiveness.NEUTRAL.ordinal()) : false;
 
         int weaknesses = 0;
         for (Effectiveness e : against.values()) {
@@ -1441,7 +1449,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         for (int tmIdx = 0; tmIdx < tmhmMoves.size(); tmIdx++) {
-            if (!tmhmCompatibility[tmIdx] || !tmhmsAvailable[tmIdx])
+            if (!tmhmCompatibility[tmIdx] || (tmhmsAvailable.length > 0 && !tmhmsAvailable[tmIdx]))
                 continue;
 
             Move m = moves.get(tmhmMoves.get(tmIdx));
@@ -1612,9 +1620,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         boolean hasNormalMoves = !typeGoodDamageMovesLearnt.get(Type.NORMAL).isEmpty() && typeGoodDamageMovesAll.get(Type.NORMAL).size() >= 2;
-
-
-        // TODO: Remake abil learn
+        
 
         // #001 Stench
         if (lowSpeed)
@@ -1633,7 +1639,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.battleArmor);
 
         // #005 Sturdy
-        if (pk.hp == 1)
+        if (generationOfPokemon() < 5 || pk.hp == 1)
             irrelevantAbilities.add(Abilities.sturdy);
 
         // #006 Damp
@@ -1676,7 +1682,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.colorChange);
 
         // #017 Immunity
-        if (isPoison || isSteel || resistsPoison)
+        if (isPoison || isSteel || (isParagonLite && resistsPoison))
             irrelevantAbilities.add(Abilities.immunity);
 
         // #018 Flash Fire
@@ -1724,7 +1730,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.naturalCure);
 
         // #031 Lightning Rod
-        if (isGround || (resistsElectric && !higherOrEqualSpAtk))
+        if (generationOfPokemon() < 5) {
+            if (!isGround || !isDoubles)
+                irrelevantAbilities.add(Abilities.lightningRod);
+        }
+        else if (isGround || (resistsElectric && !higherOrEqualSpAtk))
             irrelevantAbilities.add(Abilities.lightningRod);
 
         // #032 Serene Grace
@@ -1738,13 +1748,16 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.chlorophyll);
 
         // #035 Illuminate
+        if (generationOfPokemon() < 9 && !isParagonLite)
+            irrelevantAbilities.add(Abilities.illuminate);
 
         // #036 Trace
         if (pk.hp == 1)
             irrelevantAbilities.add(Abilities.trace);
 
         // #037 Huge Power
-        double hugePowerAtk = (pk.attack + 12.5) * 1.5 - 12.5;
+        double hugePowerBoost = isParagonLite ? 1.5 : 2.0;
+        double hugePowerAtk = (pk.attack + 12.5) * hugePowerBoost - 12.5;
         if (hugePowerAtk > 130 || pk.bst() - pk.attack + hugePowerAtk > 650 || hugePowerAtk < pk.spatk)
             irrelevantAbilities.add(Abilities.hugePower);
 
@@ -1757,10 +1770,13 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.innerFocus);
 
         // #040 Magma Armor
-        if (isParagonLite)
+        if (isParagonLite) {
             if (pk.hp == 1 || (resistsGround && resistsWater))
                 irrelevantAbilities.add(Abilities.magmaArmor);
-
+        }
+        else
+            irrelevantAbilities.add(Abilities.magmaArmor);
+            
         // #041 Water Veil
         // TODO: Rework
 
@@ -1774,6 +1790,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.rainDish);
 
         // #045 Sand Stream
+        if (!isParagonLite && !isGround && !isRock && !isSteel)
+            irrelevantAbilities.add(Abilities.sandStream);
 
         // #046 Pressure
         irrelevantAbilities.add(Abilities.pressure);
@@ -1809,17 +1827,19 @@ public abstract class AbstractRomHandler implements RomHandler {
         irrelevantAbilities.add(Abilities.truant);
 
         // #055 Hustle
+        if (!isParagonLite)
+            irrelevantAbilities.add(Abilities.hustle);
 
         // #056 Cute Charm
         if (lowPhysBulk)
             irrelevantAbilities.add(Abilities.cuteCharm);
 
         // #057 Plus
-        if (!isParagonLite)
+        if (!isParagonLite || !isDoubles)
             irrelevantAbilities.add(Abilities.plus);
 
         // #058 Minus
-        if (!isParagonLite)
+        if (!isParagonLite || !isDoubles)
             irrelevantAbilities.add(Abilities.minus);
 
         // #059 Forecast
@@ -1881,7 +1901,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         // #073 White Smoke
 
         // #074 Pure Power
-        double purePowerBoostedStat = ((isParagonLite ? pk.attack : pk.spatk) + 12.5) * 1.5 - 12.5;
+        double purePowerBoost = isParagonLite ? 1.5 : 2.0;
+        double purePowerBoostedStat = ((isParagonLite ? pk.attack : pk.spatk) + 12.5) * purePowerBoost - 12.5;
         double purePowerOtherStat = isParagonLite ? pk.attack : pk.spatk;
         if (isParagonLite && (purePowerBoostedStat > 130 || pk.bst() - purePowerOtherStat + purePowerBoostedStat > 650 || purePowerBoostedStat < purePowerOtherStat))
             irrelevantAbilities.add(Abilities.purePower);
@@ -2833,6 +2854,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private boolean isTypeBoostAbilityIrrelevant(Pokemon pk, Type learnType, Type attackType, boolean isCustomTypeEffectiveness, Map<Type, Effectiveness> against,
                                                  Map<Type, Set<Integer>> goodTypeDamagingLearnt, Map<Type, Set<Integer>> goodTypeDamagingAll) {
+        if ((learnType != null && !typeInGame(learnType)) || (attackType != null && !typeInGame(attackType)))
+            return false;
+            
         if (learnType != null && (goodTypeDamagingLearnt.get(learnType).isEmpty() || goodTypeDamagingAll.get(learnType).size() < 2))
             return true;
 
@@ -4136,6 +4160,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         Set<Integer> sandWeakMoves = new HashSet<>();
 
         for (Move move : getMoves()) {
+            if (move == null)
+                continue;
+            
             // Sun
             if (move.type == Type.FIRE || move.effect == MoveEffect.WEATHER_BALL
                     || move.effect == MoveEffect.SOLAR_BEAM || move.effect == MoveEffect.GROWTH || move.effect == MoveEffect.RECOVER_HP_50_WEATHER)
@@ -5843,7 +5870,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMoveAccuracy(moves, Moves.cut, 100);
         updateMovePP(moves, Moves.cut, 10);
         moves.get(Moves.cut).criticalChance = CriticalChance.GUARANTEED;
-        moves.get(Moves.cut).effect = generationOfPokemon() >= 5 ? MoveEffect.DMG_ALWAYS_CRIT : MoveEffect.DMG_INCR_CRIT;
+        moves.get(Moves.cut).effect = generationOfPokemon() >= 5 ? MoveEffect.DMG_ALWAYS_CRIT : MoveEffect.DMG_USER_ATK_PLUS_1;
         switch (generationOfPokemon()) {
             case 2:
             case 3:
@@ -5868,6 +5895,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 027 Rolling Kick
         updateMoveAccuracy(moves, Moves.rollingKick, 95);
+        moves.get(Moves.rollingKick).effect = MoveEffect.DMG_USER_ATK_PLUS_1;
+        moves.get(Moves.rollingKick).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, 1, 100.0);
 
         // 028 Sand Attack
         moves.get(Moves.sandAttack).name = "Sand Attack";
@@ -5921,9 +5950,15 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.hyperBeam).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
         updateMovePower(moves, Moves.hyperBeam, 130);
         updateMoveAccuracy(moves, Moves.hyperBeam, 100);
-        moves.get(Moves.hyperBeam).effect = MoveEffect.DMG_USER_DEF_SPD_MINUS_1;
-        moves.get(Moves.hyperBeam).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
-        moves.get(Moves.hyperBeam).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_DEFENSE, -1, 100);
+        if (generationOfPokemon() < 4) {
+            moves.get(Moves.hyperBeam).effect = MoveEffect.DMG_USER_ATK_DEF_MINUS_1;
+            moves.get(Moves.hyperBeam).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100);
+            moves.get(Moves.hyperBeam).statChanges[1] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
+        } else {
+            moves.get(Moves.hyperBeam).effect = MoveEffect.DMG_USER_DEF_SPD_MINUS_1;
+            moves.get(Moves.hyperBeam).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
+            moves.get(Moves.hyperBeam).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_DEFENSE, -1, 100);
+        }
         moves.get(Moves.hyperBeam).isRechargeMove = false;
         if (generationOfPokemon() >= 4)
             moves.get(Moves.hyperBeam).description = "The target is attacked with a powerful beam. It lowers the user’s Defense and Sp. Def stats.";
@@ -5996,8 +6031,13 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 096 Meditate
         updateMovePP(moves, Moves.meditate, 30);
-        moves.get(Moves.meditate).effect = MoveEffect.USER_ATK_SPA_PLUS_1;
-        moves.get(Moves.meditate).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, 1, 0.0);
+        if (generationOfPokemon() < 5) {
+            moves.get(Moves.meditate).effect = MoveEffect.USER_SPA_PLUS_1;
+            moves.get(Moves.meditate).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, 1, 0.0);
+        } else {
+            moves.get(Moves.meditate).effect = MoveEffect.USER_ATK_SPA_PLUS_1;
+            moves.get(Moves.meditate).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, 1, 0.0);
+        }
         if (generationOfPokemon() >= 4)
             moves.get(Moves.meditate).description = "The user meditates to awaken the power deep within its body and raise its Attack and Sp. Atk stats.";
 
@@ -6151,17 +6191,19 @@ public abstract class AbstractRomHandler implements RomHandler {
             moves.get(Moves.zapCannon).description = "The user fires an electric blast like a cannon. This harshly reduces the user's Sp. Atk stat.";
 
         // 194 Destiny Bond
-        moves.get(Moves.destinyBond).qualities = MoveQualities.NO_DAMAGE_STAT_CHANGE;
-        updateMovePP(moves, Moves.destinyBond, 20);
-        moves.get(Moves.destinyBond).effect = MoveEffect.USER_ATK_DEF_ACC_PLUS_1;
-        moves.get(Moves.destinyBond).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, 1, 0.0);
-        moves.get(Moves.destinyBond).statChanges[1] = new Move.StatChange(StatChangeType.DEFENSE, 1, 0.0);
-        moves.get(Moves.destinyBond).statChanges[2] = new Move.StatChange(StatChangeType.ACCURACY, 1, 0.0);
-        moves.get(Moves.destinyBond).isStolenBySnatch = true;
-        moves.get(Moves.destinyBond).bypassesSubstitute = false;
-        moves.get(Moves.destinyBond).name = "Manifest";
-        if (generationOfPokemon() >= 4)
-            moves.get(Moves.destinyBond).description = "The user manifests itself in a more physical form. This raises its Attack and Defense stats as well as its accuracy.";
+        if (generationOfPokemon() >= 5) {
+            moves.get(Moves.destinyBond).qualities = MoveQualities.NO_DAMAGE_STAT_CHANGE;
+            updateMovePP(moves, Moves.destinyBond, 20);
+            moves.get(Moves.destinyBond).effect = MoveEffect.USER_ATK_DEF_ACC_PLUS_1;
+            moves.get(Moves.destinyBond).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, 1, 0.0);
+            moves.get(Moves.destinyBond).statChanges[1] = new Move.StatChange(StatChangeType.DEFENSE, 1, 0.0);
+            moves.get(Moves.destinyBond).statChanges[2] = new Move.StatChange(StatChangeType.ACCURACY, 1, 0.0);
+            moves.get(Moves.destinyBond).isStolenBySnatch = true;
+            moves.get(Moves.destinyBond).bypassesSubstitute = false;
+            moves.get(Moves.destinyBond).name = "Manifest";
+            if (generationOfPokemon() >= 4)
+                moves.get(Moves.destinyBond).description = "The user manifests itself in a more physical form. This raises its Attack and Defense stats as well as its accuracy.";
+        }
 
         // 196 Icy Wind
         updateMovePower(moves, Moves.icyWind, 60);
@@ -6201,9 +6243,15 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.megahorn).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
         updateMoveAccuracy(moves, Moves.megahorn, 100);
         updateMovePP(moves, Moves.megahorn, 5);
-        moves.get(Moves.megahorn).effect = MoveEffect.DMG_USER_DEF_SPD_MINUS_1;
-        moves.get(Moves.megahorn).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
-        moves.get(Moves.megahorn).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_DEFENSE, -1, 100);
+        if (generationOfPokemon() < 4) {
+            moves.get(Moves.megahorn).effect = MoveEffect.DMG_USER_ATK_DEF_MINUS_1;
+            moves.get(Moves.megahorn).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100);
+            moves.get(Moves.megahorn).statChanges[1] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
+        } else {
+            moves.get(Moves.megahorn).effect = MoveEffect.DMG_USER_DEF_SPD_MINUS_1;
+            moves.get(Moves.megahorn).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
+            moves.get(Moves.megahorn).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_DEFENSE, -1, 100);
+        }
         if (generationOfPokemon() >= 4)
             moves.get(Moves.megahorn).description = "Using its tough and impressive horn, the user rams into the target. It lowers the user’s Defense and Sp. Def stats.";
 
@@ -6419,15 +6467,16 @@ public abstract class AbstractRomHandler implements RomHandler {
             moves.get(Moves.muddyWater).description = "The user attacks by shooting muddy water at the opposing team. It also lowers their Speed stats.";
 
         // 338 Frenzy Plant
-        moves.get(Moves.frenzyPlant).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-        updateMovePower(moves, Moves.frenzyPlant, 120);
-        updateMoveAccuracy(moves, Moves.frenzyPlant, 100);
-        moves.get(Moves.frenzyPlant).effect = MoveEffect.DMG_USER_DEF_SPD_MINUS_1;
-        moves.get(Moves.frenzyPlant).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
-        moves.get(Moves.frenzyPlant).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_DEFENSE, -1, 100);
-        moves.get(Moves.frenzyPlant).isRechargeMove = false;
-        if (generationOfPokemon() >= 4)
+        if (generationOfPokemon() >= 4) {
+            moves.get(Moves.frenzyPlant).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
+            updateMovePower(moves, Moves.frenzyPlant, 120);
+            updateMoveAccuracy(moves, Moves.frenzyPlant, 100);
+            moves.get(Moves.frenzyPlant).effect = MoveEffect.DMG_USER_DEF_SPD_MINUS_1;
+            moves.get(Moves.frenzyPlant).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
+            moves.get(Moves.frenzyPlant).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_DEFENSE, -1, 100);
+            moves.get(Moves.frenzyPlant).isRechargeMove = false;
             moves.get(Moves.frenzyPlant).description = "The user slams the target with an enormous tree. It lowers the user’s Defense and Sp. Def stats.";
+        }
 
         // 340 Bounce
         updateMovePower(moves, Moves.bounce, 95);
@@ -7710,7 +7759,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
         for (int i = 0; i < starterCount; i++) {
             Pokemon pkmn = randomFullyEvolvedPokemon(allowAltFormes);
-            while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || !playerPokemonList.contains(pkmn)) {
+            List<Pokemon> list = playerPokemonList.isEmpty() ? mainPokemonList : playerPokemonList;
+            while (pickedStarters.contains(pkmn) || banned.contains(pkmn) || !list.contains(pkmn)) {
                 pkmn = randomFullyEvolvedPokemon(allowAltFormes);
             }
             pickedStarters.add(pkmn);

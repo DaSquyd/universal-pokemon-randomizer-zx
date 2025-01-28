@@ -72,8 +72,9 @@ public class Gen3Constants {
 
     private static final String runningShoesCheckPrefixRS = "0440002C1DD08620", runningShoesCheckPrefixFRLG = "02200540002D29D0",
             runningShoesCheckPrefixE = "0640002E1BD08C20";
-    
+
     private static final String rsStartersPrefix = "150118011B01", frlgStartersPrefix = "010016034004";
+
     public static String getStartersPrefix(int romType) {
         return switch (romType) {
             case RomType_Ruby, RomType_Sapp, RomType_Em -> rsStartersPrefix;
@@ -81,22 +82,23 @@ public class Gen3Constants {
             default -> throw new IllegalStateException("Unexpected value: " + romType);
         };
     }
-    
+
     public static final String pokemonMovesetsPrefix = "04002D009001";
     public static final int pokemonMovesetsOffset = 520;
-    
+
     public static final String eggMovesPrefix = "214E71008200";
-    
+
     public static final String pokemonTMHMCompatPrefix = "20073584081EE40020073584081EE400";
     public static final int pokemonTMHMCompatOffset = -0x08;
-    
+
     public static final String pokemonEvolutionsPrefix = "040010000200";
     public static final int pokemonEvolutionsOffset = -0x28;
-    
+
     public static final String starterItemsPrefix = "0022002348F0";
-    
+
     private static final String rsTrainerDataPrefix = "000000000000000000020B00CDBBD1D3", frlgTrainerDataPrefix = "FF000000000000BDCCCFCDC200C1C3CC";
     private static final int rsTrainerDataOffset = -0x20, frlgTrainerDataOffset = 0x00;
+
     public static String getTrainerDataPrefix(int romType) {
         return switch (romType) {
             case RomType_Ruby, RomType_Sapp, RomType_Em -> rsTrainerDataPrefix;
@@ -104,6 +106,7 @@ public class Gen3Constants {
             default -> throw new IllegalStateException("Unexpected value: " + romType);
         };
     }
+
     public static int getTrainerDataOffset(int romType) {
         return switch (romType) {
             case RomType_Ruby, RomType_Sapp, RomType_Em -> rsTrainerDataOffset;
@@ -111,13 +114,14 @@ public class Gen3Constants {
             default -> throw new IllegalStateException("Unexpected value: " + romType);
         };
     }
-    
+
     public static final String trainerClassNamesPrefix = "535400CECCBBC3C8BFCCFF0000535400CECC";
-    
+
     public static final String mossdeepStevenTeamOffset = "8F011F2A0200FCFC";
-    
+
     private static final String rsMoveDescriptionsPrefix = "C5ADFF00", frlgMoveDescriptionsPrefix = "E7E8D5E8ADFF0000";
     private static final int rsMoveDescriptionsOffset = 0x04, frlgMoveDescriptionsOffset = 0x08;
+
     public static String getMoveDescriptionsPrefix(int romType) {
         return switch (romType) {
             case RomType_Ruby, RomType_Sapp, RomType_Em -> rsMoveDescriptionsPrefix;
@@ -125,6 +129,7 @@ public class Gen3Constants {
             default -> throw new IllegalStateException("Unexpected value: " + romType);
         };
     }
+
     public static int getMoveDescriptionsOffset(int romType) {
         return switch (romType) {
             case RomType_Ruby, RomType_Sapp, RomType_Em -> rsMoveDescriptionsOffset;
@@ -132,12 +137,13 @@ public class Gen3Constants {
             default -> throw new IllegalStateException("Unexpected value: " + romType);
         };
     }
-    
+
     public static final String tmMovesPrefix = "0801510160015B012E005C0002015301";
-    
+
     public static final String moveTutorDataPrefix = "05000E001900";
 
     private static final String rseItemImagesPrefix = "58B0DA08D0B0DA0884B1DA0854B2DA08", frlgItemImagesPrefix = "2870E808A070E8085471E8082472E808";
+
     public static String getItemImagesPrefix(int romType) {
         return switch (romType) {
             case RomType_Ruby, RomType_Sapp, RomType_Em -> rseItemImagesPrefix;
@@ -145,19 +151,90 @@ public class Gen3Constants {
             default -> throw new IllegalStateException("Unexpected value: " + romType);
         };
     }
-    
+
     public static final String tmPalsLocator = "1020000000D65AC61829";
-    public static final int[] tmPalsMap = new int[] {4, 0, 15, 5, 12, 14, 7, 13, 10, 13, 8, 2, 7, 11, 3, 6, 1, 9};
+    public static final int[] tmPalsMap = new int[]{4, 0, 15, 5, 12, 14, 7, 13, 10, 13, 8, 2, 7, 11, 3, 6, 1, 9};
+
+    private static final String eIntroCryOffsetLocator = "FFFF000027010000";
+    private static final int eIntroCryOffsetOffset = 0x04;
     
-    public static final String critChanceLocator = "1008040302";
+    public static final String moveDataLocator = "000000000000000000000000002800642300000033000000";
+
+    public static String getIntroCryOffsetLocator(int romType) {
+        return switch (romType) {
+//            case RomType_Ruby, RomType_Sapp -> ;
+            case RomType_Em -> eIntroCryOffsetLocator;
+//            case RomType_FRLG -> ;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+
+    public static int getIntroCryOffsetOffset(int romType) {
+        return switch (romType) {
+//            case RomType_Ruby, RomType_Sapp -> ;
+            case RomType_Em -> eIntroCryOffsetOffset;
+//            case RomType_FRLG -> frlgMoveDescriptionsOffset;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+
+    private static final String eIntroSpriteOffsetLocator = "27010000FFFF0000";
+    private static final int eIntroSpriteOffsetOffset = 0x00;
+
+    public static String getIntroSpriteOffsetLocator(int romType) {
+        return switch (romType) {
+//            case RomType_Ruby, RomType_Sapp -> ;
+            case RomType_Em -> eIntroSpriteOffsetLocator;
+//            case RomType_FRLG -> ;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+
+    public static int getIntroSpriteOffsetOffset(int romType) {
+        return switch (romType) {
+//            case RomType_Ruby, RomType_Sapp -> ;
+            case RomType_Em -> eIntroSpriteOffsetOffset;
+//            case RomType_FRLG -> frlgMoveDescriptionsOffset;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+
+    private static final String eTradeTableLocator = "BEC9CECDFF000000";
+    private static final int eTradeTableOffset = 0x00;
+
+    public static String getTradeTableLocator(int romType) {
+        return switch (romType) {
+//            case RomType_Ruby, RomType_Sapp -> ;
+            case RomType_Em -> eTradeTableLocator;
+//            case RomType_FRLG -> ;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+
+    public static int getTradeTableOffset(int romType) {
+        return switch (romType) {
+//            case RomType_Ruby, RomType_Sapp -> ;
+            case RomType_Em -> eTradeTableOffset;
+//            case RomType_FRLG -> frlgMoveDescriptionsOffset;
+            default -> throw new IllegalStateException("Unexpected value: " + romType);
+        };
+    }
+    
+    public static String typeEffectivenessLocator = "0005050008050A0A";
+    
+    public static String runIndoorsTweakLocator = "0840002806D0101CFFF792FE";
+
+    public static final int tempGlobalOffset = 0x30B8;
+    
+    public static final String critChanceLocator = "10000800040003000200";
 
     public static final int efrlgPokemonNamesPointer = 0x144, efrlgMoveNamesPointer = 0x148,
             efrlgAbilityNamesPointer = 0x1C0, efrlgItemDataPointer = 0x1C8, efrlgMoveDataPointer = 0x1CC,
             efrlgPokemonStatsPointer = 0x1BC, efrlgFrontSpritesPointer = 0x128, efrlgPokemonPalettesPointer = 0x130;
 
-    public static final byte[] emptyPokemonSig = new byte[] { 0x32, (byte) 0x96, 0x32, (byte) 0x96, (byte) 0x96, 0x32,
+    public static final byte[] emptyPokemonSig = new byte[]{0x32, (byte) 0x96, 0x32, (byte) 0x96, (byte) 0x96, 0x32,
             0x00, 0x00, 0x03, 0x01, (byte) 0xAA, 0x0A, 0x00, 0x00, 0x00, 0x00, (byte) 0xFF, 0x78, 0x00, 0x00, 0x0F,
-            0x0F, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00 };
+            0x0F, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00};
 
     public static final int baseStatsEntrySize = 0x1C;
 
@@ -253,10 +330,10 @@ public class Gen3Constants {
 
     public static final int emMeteorFallsStevenIndex = 804;
 
-    public static final Map<Integer,List<Integer>> abilityVariations = setupAbilityVariations();
+    public static final Map<Integer, List<Integer>> abilityVariations = setupAbilityVariations();
 
-    private static Map<Integer,List<Integer>> setupAbilityVariations() {
-        Map<Integer,List<Integer>> map = new HashMap<>();
+    private static Map<Integer, List<Integer>> setupAbilityVariations() {
+        Map<Integer, List<Integer>> map = new HashMap<>();
         map.put(Abilities.insomnia, Arrays.asList(Abilities.insomnia, Abilities.vitalSpirit));
         map.put(Abilities.clearBody, Arrays.asList(Abilities.clearBody, Abilities.whiteSmoke));
         map.put(Abilities.hugePower, Arrays.asList(Abilities.hugePower, Abilities.purePower));
@@ -307,7 +384,7 @@ public class Gen3Constants {
             default -> throw new IllegalStateException("Unexpected value: " + b);
         };
     }
-    
+
     public static byte moveTargetToByte(MoveTarget moveTarget) {
         return switch (moveTarget) {
             case ANY_ADJACENT -> 0;
@@ -320,7 +397,7 @@ public class Gen3Constants {
             default -> throw new IllegalStateException("Unexpected value: " + moveTarget);
         };
     }
-    
+
     public static final List<Integer> soundMoves = Arrays.asList(Moves.growl, Moves.roar, Moves.sing, Moves.supersonic,
             Moves.screech, Moves.snore, Moves.uproar, Moves.metalSound, Moves.grassWhistle, Moves.hyperVoice,
             Moves.perishSong, Moves.healBell);
@@ -552,42 +629,42 @@ public class Gen3Constants {
             return 0x09; // ???-type
         }
         switch (type) {
-        case NORMAL:
-            return 0x00;
-        case FIGHTING:
-            return 0x01;
-        case FLYING:
-            return 0x02;
-        case POISON:
-            return 0x03;
-        case GROUND:
-            return 0x04;
-        case ROCK:
-            return 0x05;
-        case BUG:
-            return 0x06;
-        case GHOST:
-            return 0x07;
-        case FIRE:
-            return 0x0A;
-        case WATER:
-            return 0x0B;
-        case GRASS:
-            return 0x0C;
-        case ELECTRIC:
-            return 0x0D;
-        case PSYCHIC:
-            return 0x0E;
-        case ICE:
-            return 0x0F;
-        case DRAGON:
-            return 0x10;
-        case STEEL:
-            return 0x08;
-        case DARK:
-            return 0x11;
-        default:
-            return 0; // normal by default
+            case NORMAL:
+                return 0x00;
+            case FIGHTING:
+                return 0x01;
+            case FLYING:
+                return 0x02;
+            case POISON:
+                return 0x03;
+            case GROUND:
+                return 0x04;
+            case ROCK:
+                return 0x05;
+            case BUG:
+                return 0x06;
+            case GHOST:
+                return 0x07;
+            case FIRE:
+                return 0x0A;
+            case WATER:
+                return 0x0B;
+            case GRASS:
+                return 0x0C;
+            case ELECTRIC:
+                return 0x0D;
+            case PSYCHIC:
+                return 0x0E;
+            case ICE:
+                return 0x0F;
+            case DRAGON:
+                return 0x10;
+            case STEEL:
+                return 0x08;
+            case DARK:
+                return 0x11;
+            default:
+                return 0; // normal by default
         }
     }
 
@@ -643,16 +720,16 @@ public class Gen3Constants {
 
         regularShopItems = new ArrayList<>();
 
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.ultraBall,Gen3Items.pokeBall).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.potion,Gen3Items.revive).boxed().collect(Collectors.toList()));
-        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.superRepel,Gen3Items.repel).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.ultraBall, Gen3Items.pokeBall).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.potion, Gen3Items.revive).boxed().collect(Collectors.toList()));
+        regularShopItems.addAll(IntStream.rangeClosed(Gen3Items.superRepel, Gen3Items.repel).boxed().collect(Collectors.toList()));
 
         opShopItems = new ArrayList<>();
 
         // "Money items" etc
         opShopItems.add(Gen3Items.rareCandy);
-        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.tinyMushroom,Gen3Items.bigMushroom).boxed().collect(Collectors.toList()));
-        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.pearl,Gen3Items.nugget).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.tinyMushroom, Gen3Items.bigMushroom).boxed().collect(Collectors.toList()));
+        opShopItems.addAll(IntStream.rangeClosed(Gen3Items.pearl, Gen3Items.nugget).boxed().collect(Collectors.toList()));
         opShopItems.add(Gen3Items.luckyEgg);
     }
 
@@ -1043,7 +1120,7 @@ public class Gen3Constants {
         }
     }
 
-    public static final Map<Integer,Integer> balancedItemPrices = Stream.of(new Integer[][] {
+    public static final Map<Integer, Integer> balancedItemPrices = Stream.of(new Integer[][]{
             // Skip item index 0. All prices divided by 10
             {Gen3Items.masterBall, 300},
             {Gen3Items.ultraBall, 120},
