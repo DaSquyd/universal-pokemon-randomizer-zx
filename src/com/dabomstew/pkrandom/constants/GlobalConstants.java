@@ -170,10 +170,10 @@ public class GlobalConstants {
     );
 
     public static final List<Integer> noPowerNonStatusMoves = Arrays.asList(
-            /*Moves.guillotine,*/ /*Moves.hornDrill,*/ Moves.sonicBoom, Moves.lowKick, Moves.counter, Moves.seismicToss,
-            /*Moves.dragonRage,*/ /*Moves.fissure,*/ /*Moves.nightShade,*/ Moves.bide, /*Moves.psywave,*/ Moves.superFang,
+            Moves.guillotine, Moves.hornDrill, Moves.sonicBoom, Moves.lowKick, Moves.counter, Moves.seismicToss,
+            Moves.dragonRage, Moves.fissure, Moves.nightShade, Moves.bide, Moves.psywave, Moves.superFang,
             Moves.flail, Moves.revenge, Moves.returnTheMoveNotTheKeyword, Moves.present, Moves.frustration,
-            Moves.magnitude, Moves.mirrorCoat, Moves.beatUp, Moves.spitUp//, /*Moves.sheerCold*/
+            Moves.magnitude, Moves.mirrorCoat, Moves.beatUp, Moves.spitUp, Moves.sheerCold
     );
 
     public static final List<Integer> cannotBeObsoletedMoves = Arrays.asList(

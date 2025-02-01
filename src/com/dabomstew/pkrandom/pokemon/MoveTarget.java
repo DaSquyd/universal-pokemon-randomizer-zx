@@ -14,5 +14,5 @@ public enum MoveTarget {
     FIELD_EFFECT,
     HAZARD,
     USER_AND_ALL_ALLIES,
-    OTHER;
+    OTHER
 }

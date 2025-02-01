@@ -554,7 +554,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 break;
         }
 
-        if (move.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET) {
+        if (move.isDamagingMove()) {
             for (int i = 0; i < move.statChanges.length; i++) {
                 if (move.statChanges[i].type != StatChangeType.NONE) {
                     move.statChanges[i].percentChance = 85 / 256.0;
@@ -622,7 +622,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 break;
         }
 
-        if (move.getStatusMoveType() == StatusMoveType.DAMAGE) {
+        if (move.isDamagingMove()) {
             switch (move.effect.getIndex(generationOfPokemon())) {
                 case Gen1Constants.damageBurn10PercentEffect:
                 case Gen1Constants.damageFreeze10PercentEffect:

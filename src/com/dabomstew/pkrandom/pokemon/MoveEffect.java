@@ -1,114 +1,114 @@
 package com.dabomstew.pkrandom.pokemon;
 
 public enum MoveEffect {
-    DMG(0), // Pound, Mega Punch, Scratch, etc.
-    NO_DMG_SLP(1), // Sing, SLP Powder, Hypnosis, Etc.
-    DMG_PSN(2), // Poison Sting, Smog, Sludge, etc.
-    DMG_RECOVER(3), // Absorb, Mega Drain, Leech Life, etc.
-    DMG_BRN(4), // Fire Punch, Ember, Flamethrower, etc.
-    DMG_FRZ(5), // Ice Punch, Ice Beam, Powder Snow, etc.
-    DMG_PARA(6), // Thunder Punch, Body Slam, Thunder Shock, etc.
-    USER_FAINTS(7), // Self-Destruct, Explosion
+    DMG(0, MoveQualities.DAMAGE), // Pound, Mega Punch, Scratch, etc.
+    NO_DMG_SLP(1, MoveQualities.NO_DAMAGE_STATUS, MoveStatusType.SLEEP), // Sing, SLP Powder, Hypnosis, Etc.
+    DMG_PSN(2, MoveQualities.DAMAGE_TARGET_STATUS, MoveStatusType.POISON), // Poison Sting, Smog, Sludge, etc.
+    DMG_RECOVER(3, MoveQualities.DRAIN_HEALTH), // Absorb, Mega Drain, Leech Life, etc.
+    DMG_BRN(4, MoveQualities.DAMAGE_TARGET_STATUS, MoveStatusType.BURN), // Fire Punch, Ember, Flamethrower, etc.
+    DMG_FRZ(5, MoveQualities.DAMAGE_TARGET_STATUS, MoveStatusType.FREEZE), // Ice Punch, Ice Beam, Powder Snow, etc.
+    DMG_PAR(6, MoveQualities.DAMAGE_TARGET_STATUS, MoveStatusType.PARALYZE), // Thunder Punch, Body Slam, Thunder Shock, etc.
+    EXPLOSION(7, MoveQualities.DAMAGE), // Self-Destruct, Explosion
     DREAM_EATER(8),
     MIRROR_MOVE(9),
-    USER_ATK_PLUS_1(10), // Meditate, Sharpen Howl
-    USER_DEF_PLUS_1(11), // Harden, Withdraw
-    USER_SPE_PLUS_1(12), // UNUSED
-    USER_SPA_PLUS_1(13), // UNUSED
-    USER_SPD_PLUS_1(14), // UNUSED
-    USER_ACC_PLUS_1(15), // UNUSED
-    USER_EVA_PLUS_1(16), // Double Team
-    NEVER_MISSES(17), // Swift, Feint Attack, Shadow Punch, etc.
-    TRGT_ATK_MINUS_1(18), // Growl
-    TRGT_DEF_MINUS_1(19), // Tail Whip, Leer
-    TRGT_SPE_MINUS_1(20), // String Shot (Gen V), Low Sweep, Electro Web
-    TRGT_SPA_MINUS_1(21), // UNUSED
-    TRGT_SPD_MINUS_1(22), // UNUSED
-    TRGT_ACC_MINUS_1(23), // Sand ATK, Smokescreen, etc.
-    TRGT_EVA_MINUS_1(24), // Sweet Scent
+    USER_ATK_PLUS_1(10, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.ATTACK), // Meditate, Sharpen Howl
+    USER_DEF_PLUS_1(11, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.DEFENSE), // Harden, Withdraw
+    USER_SPE_PLUS_1(12, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.SPEED), // UNUSED
+    USER_SPA_PLUS_1(13, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.SPECIAL_ATTACK), // UNUSED
+    USER_SPD_PLUS_1(14, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.SPECIAL_DEFENSE), // UNUSED
+    USER_ACC_PLUS_1(15, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.ACCURACY), // UNUSED
+    USER_EVA_PLUS_1(16, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.EVASION), // Double Team
+    NEVER_MISSES(17, MoveQualities.DAMAGE), // Swift, Feint Attack, Shadow Punch, etc.
+    TRGT_ATK_MINUS_1(18, MoveQualities.NO_DAMAGE_STAT_CHANGE, -1, StatChangeType.ATTACK), // Growl
+    TRGT_DEF_MINUS_1(19, MoveQualities.NO_DAMAGE_STAT_CHANGE, -1, StatChangeType.DEFENSE), // Tail Whip, Leer
+    TRGT_SPE_MINUS_1(20, MoveQualities.NO_DAMAGE_STAT_CHANGE, -1, StatChangeType.SPEED), // String Shot (Gen V), Low Sweep, Electro Web
+    TRGT_SPA_MINUS_1(21, MoveQualities.NO_DAMAGE_STAT_CHANGE, -1, StatChangeType.SPECIAL_ATTACK), // UNUSED
+    TRGT_SPD_MINUS_1(22, MoveQualities.NO_DAMAGE_STAT_CHANGE, -1, StatChangeType.SPECIAL_DEFENSE), // UNUSED
+    TRGT_ACC_MINUS_1(23, MoveQualities.NO_DAMAGE_STAT_CHANGE, -1, StatChangeType.ACCURACY), // Sand Attack, Smokescreen, etc.
+    TRGT_EVA_MINUS_1(24, MoveQualities.NO_DAMAGE_STAT_CHANGE, -1, StatChangeType.EVASION), // Sweet Scent
     HAZE(25),
     BIDE(26),
-    THRASH_ABOUT(27), // Thrash, Petal Dance, Outrage
-    NO_DMG_FORCE_SWITCH(28), // Whirlwind, Roar
-    HIT_2_TO_5_TIMES(29), // Double Slap, Comet Punch, Fury ATK, ec.
+    THRASH_ABOUT(27, MoveQualities.DAMAGE), // Thrash, Petal Dance, Outrage
+    NO_DMG_FORCE_SWITCH(28, MoveQualities.FORCE_SWITCH), // Whirlwind, Roar
+    HIT_2_TO_5_TIMES(29, MoveQualities.DAMAGE), // Double Slap, Comet Punch, Fury Attack, ec.
     CONVERSION(30),
-    DMG_FLINCH(31), // Rolling Kick, Headbutt, Bite, etc.
-    RECOVER_HP_50(32), // Recover, Soft-Boiled, Milk Drink, etc.
-    TOXIC(33),
-    PAY_DAY(34),
+    DMG_FLINCH(31, MoveQualities.DAMAGE), // Rolling Kick, Headbutt, Bite, etc.
+    RECOVER_HP_50(32, MoveQualities.HEAL), // Recover, Soft-Boiled, Milk Drink, etc.
+    TOXIC(33, MoveQualities.NO_DAMAGE_STATUS, MoveStatusType.TOXIC_POISON),
+    PAY_DAY(34, MoveQualities.DAMAGE),
     LIGHT_SCREEN(35),
-    TRI_ATK(36),
+    TRI_ATK(36, MoveQualities.DAMAGE),
     REST(37),
-    OHKO(38), // Guillotine, Horn Drill, Fissure, Sheer Cold
-    RAZOR_WIND(39),
-    DIRECT_HALF(40), // Super Fang
-    DIRECT_40(41), // Dragon Rage
-    DMG_TRAP(42), // Bind, Wrap, Fire Spin, etc.
-    DMG_INCR_CRIT(43), // Karate Chop, Razor Leaf, Crabhammer, etc.
-    HIT_2_TIMES(44), // Double Kick,  Bonemerang, Double Hit, etc.
-    JUMP_KICK(45), // Jump Kick, High Jump Kick
+    OHKO(38, MoveQualities.OHKO), // Guillotine, Horn Drill, Fissure, Sheer Cold
+    RAZOR_WIND(39, MoveQualities.DAMAGE),
+    DIRECT_HALF(40, MoveQualities.DAMAGE), // Super Fang
+    DIRECT_40(41, MoveQualities.DAMAGE), // Dragon Rage
+    DMG_TRAP(42, MoveQualities.DAMAGE), // Bind, Wrap, Fire Spin, etc.
+    DMG_INCR_CRIT(43, MoveQualities.DAMAGE), // Karate Chop, Razor Leaf, Crabhammer, etc.
+    HIT_2_TIMES(44, MoveQualities.DAMAGE), // Double Kick,  Bonemerang, Double Hit, etc.
+    JUMP_KICK(45, MoveQualities.DAMAGE), // Jump Kick, High Jump Kick
     MIST(46),
-    CRIT_RATIO_PLUS_2(47), // Focus Energy
-    DMG_RECOIL_25(48), // Take Down, Submission, Wild Charge
-    NO_DMG_CNF(49), // Supersonic, CNF Ray, Sweet Kiss
-    USER_ATK_PLUS_2(50), // Swords Dance
-    USER_DEF_PLUS_2(51), // Barrier, Acid Armor, Iron DEF
-    USER_SPE_PLUS_2(52), // Agility, Rock Polish
-    USER_SPA_PLUS_2(53), // Nasty Plot
-    USER_SPD_PLUS_2(54), // Amnesia
-    USER_ACC_PLUS_2(55), // Unused
-    USER_EVA_PLUS_2(56), // Unused
+    CRIT_RATIO_PLUS_2(47, MoveQualities.DAMAGE), // Focus Energy
+    DMG_RECOIL_25(48, MoveQualities.DAMAGE), // Take Down, Submission, Wild Charge
+    NO_DMG_CNF(49, MoveQualities.NO_DAMAGE_STATUS, MoveStatusType.CONFUSION), // Supersonic, Confuse Ray, Sweet Kiss
+    USER_ATK_PLUS_2(50, MoveQualities.NO_DAMAGE_STAT_CHANGE, 2, StatChangeType.ATTACK), // Swords Dance
+    USER_DEF_PLUS_2(51, MoveQualities.NO_DAMAGE_STAT_CHANGE, 2, StatChangeType.DEFENSE), // Barrier, Acid Armor, Iron Defense
+    USER_SPE_PLUS_2(52, MoveQualities.NO_DAMAGE_STAT_CHANGE, 2, StatChangeType.SPEED), // Agility, Rock Polish
+    USER_SPA_PLUS_2(53, MoveQualities.NO_DAMAGE_STAT_CHANGE, 2, StatChangeType.SPECIAL_ATTACK), // Nasty Plot
+    USER_SPD_PLUS_2(54, MoveQualities.NO_DAMAGE_STAT_CHANGE, 2, StatChangeType.SPECIAL_DEFENSE), // Amnesia
+    USER_ACC_PLUS_2(55, MoveQualities.NO_DAMAGE_STAT_CHANGE, 2, StatChangeType.ACCURACY), // Unused
+    USER_EVA_PLUS_2(56, MoveQualities.NO_DAMAGE_STAT_CHANGE, 2, StatChangeType.EVASION), // Unused
     TRANSFORM(57),
-    TRGT_ATK_MINUS_2(58), // Charm, Feather Dance
-    TRGT_DEF_MINUS_2(59), // Screech
-    TRGT_SPE_MINUS_2(60), // String Shot (Gen VI+), Cotton Spore, Scary Face
-    TRGT_SPA_MINUS_2(61), // Eerie Impulse
-    TRGT_SPD_MINUS_2(62), // Fake Tears, Metal Sound
-    TRGT_ACC_MINUS_2(63), // UNUSED
-    TRGT_EVA_MINUS_2(64), // UNUSED
+    TRGT_ATK_MINUS_2(58, MoveQualities.NO_DAMAGE_STAT_CHANGE, -2, StatChangeType.ATTACK), // Charm, Feather Dance
+    TRGT_DEF_MINUS_2(59, MoveQualities.NO_DAMAGE_STAT_CHANGE, -2, StatChangeType.DEFENSE), // Screech
+    TRGT_SPE_MINUS_2(60, MoveQualities.NO_DAMAGE_STAT_CHANGE, -2, StatChangeType.SPEED), // String Shot (Gen VI+), Cotton Spore, Scary Face
+    TRGT_SPA_MINUS_2(61, MoveQualities.NO_DAMAGE_STAT_CHANGE, -2, StatChangeType.SPECIAL_ATTACK), // Eerie Impulse
+    TRGT_SPD_MINUS_2(62, MoveQualities.NO_DAMAGE_STAT_CHANGE, -2, StatChangeType.SPECIAL_DEFENSE), // Fake Tears, Metal Sound
+    TRGT_ACC_MINUS_2(63, MoveQualities.NO_DAMAGE_STAT_CHANGE, -2, StatChangeType.ACCURACY), // UNUSED
+    TRGT_EVA_MINUS_2(64, MoveQualities.NO_DAMAGE_STAT_CHANGE, -2, StatChangeType.EVASION), // UNUSED
     REFLECT(65),
-    NO_DMG_POISON(66), // Poison Powder, Poison Gas
-    NO_DMG_PARA(67), // Stun Spore, Thunder Wave, Glare
-    DMG_TRGT_ATK_MINUS_1(68), // Aurora Beam, Play Rough
-    DMG_TRGT_DEF_MINUS_1(69), // Iron Tail, Crunch, Rock Smash, etc.
-    DMG_TRGT_SPE_MINUS_1(70), // Bubble Beam, Constrict, Bubble, etc.
-    DMG_TRGT_SPA_MINUS_1(71), // Mist Ball, Struggle Bug, Snarl, Moon Blast, Mystical Fire
-    DMG_TRGT_SPD_MINUS_1(72), // Acid, Psychic, Shadow Ball, etc.
-    DMG_TRGT_ACC_MINUS_1(73), // Mud-Slap, Octazooka, Muddy Water, etc.
-    DMG_TRGT_EVA_MINUS_1(74), // UNUSED
-    SKY_ATK(75),
-    DMG_CNF(76), // Psybeam, Confusion, Dizzy Punch, etc.
-    HIT_2_TIMES_POISON(77), // Twineedle
-    DMG_DCR_PRIORITY(78), // Vital Throw
+    NO_DMG_PSN(66, MoveQualities.NO_DAMAGE_STATUS, MoveStatusType.POISON), // Poison Powder, Poison Gas
+    NO_DMG_PAR(67, MoveQualities.NO_DAMAGE_STATUS, MoveStatusType.PARALYZE), // Stun Spore, Thunder Wave, Glare
+    DMG_TRGT_ATK_MINUS_1(68, MoveQualities.DAMAGE_TARGET_STAT_CHANGE, -1, StatChangeType.ATTACK), // Aurora Beam, Play Rough
+    DMG_TRGT_DEF_MINUS_1(69, MoveQualities.DAMAGE_TARGET_STAT_CHANGE, -1, StatChangeType.DEFENSE), // Iron Tail, Crunch, Rock Smash, etc.
+    DMG_TRGT_SPE_MINUS_1(70, MoveQualities.DAMAGE_TARGET_STAT_CHANGE, -1, StatChangeType.SPEED), // Bubble Beam, Constrict, Bubble, etc.
+    DMG_TRGT_SPA_MINUS_1(71, MoveQualities.DAMAGE_TARGET_STAT_CHANGE, -1, StatChangeType.SPECIAL_ATTACK), // Mist Ball, Struggle Bug, Snarl, Moon Blast, Mystical Fire
+    DMG_TRGT_SPD_MINUS_1(72, MoveQualities.DAMAGE_TARGET_STAT_CHANGE, -1, StatChangeType.SPECIAL_DEFENSE), // Acid, Psychic, Shadow Ball, etc.
+    DMG_TRGT_ACC_MINUS_1(73, MoveQualities.DAMAGE_TARGET_STAT_CHANGE, -1, StatChangeType.ACCURACY), // Mud-Slap, Octazooka, Muddy Water, etc.
+    DMG_TRGT_EVA_MINUS_1(74, MoveQualities.DAMAGE_TARGET_STAT_CHANGE, -1, StatChangeType.EVASION), // UNUSED
+    SKY_ATTACK(75, MoveQualities.DAMAGE),
+    DMG_CNF(76, MoveQualities.DAMAGE_TARGET_STATUS, MoveStatusType.CONFUSION), // Psybeam, Confusion, Dizzy Punch, etc.
+    HIT_2_TIMES_POISON(77, MoveQualities.DAMAGE_TARGET_STATUS, MoveStatusType.POISON), // Twineedle
+    DMG_DCR_PRIORITY(78, MoveQualities.DAMAGE), // Vital Throw
     SUBSTITUTE(79),
-    DMG_RECHARGE(80), // Hyper Beam, Blast BRN, Hydro Cannon, etc.
-    RAGE(81),
+    DMG_RECHARGE(80, MoveQualities.DAMAGE), // Hyper Beam, Blast Burn, Hydro Cannon, etc.
+    RAGE(81, MoveQualities.DAMAGE),
     MIMIC(82),
     METRONOME(83),
     LEECH_SEED(84),
     SPLASH(85),
     DISABLE(86),
-    DIRECT_DMG_LEVEL(87), // Seismic Toss, Night Shade
-    PSYWAVE(88), // Psywave
+    DIRECT_DMG_LEVEL(87, MoveQualities.DAMAGE), // Seismic Toss, Night Shade
+    PSYWAVE(88, MoveQualities.DAMAGE), // Psywave
     COUNTER(89),
     ENCORE(90),
     PAIN_SPLIT(91),
-    SNORE(92),
+    SNORE(92, MoveQualities.DAMAGE),
     CONVERSION_2(93),
     MIND_READER(94), // Mind Reader, Lock-On
     SKETCH(95),
-    SLP_TALK(97),
+    SLP_TALK(97, MoveQualities.DAMAGE),
     DESTINY_BOND(98),
-    DMG_LOW_HP(99), // Flail, Reversal
+    DMG_LOW_HP(99, MoveQualities.DAMAGE), // Flail, Reversal
     SPITE(100),
-    FALSE_SWIPE(101), // False Swipe, Hold Back
+    FALSE_SWIPE(101, MoveQualities.DAMAGE), // False Swipe, Hold Back
     HEAL_TEAM_STATUS(102), // Heal Bell, Aromatherapy
-    DMG_INCR_PRIO(103), // Quick ATK, Mach Punch, Extreme SPE, etc.
-    TRIPLE_KICK(104),
-    DMG_TAKE_ITEM(105), // Thief, Covet
+    DMG_INCR_PRIO(103, MoveQualities.DAMAGE), // Quick Attaack, Mach Punch, Extreme Speed, etc.
+    TRIPLE_KICK(104, MoveQualities.DAMAGE),
+    DMG_TAKE_ITEM(105, MoveQualities.DAMAGE), // Thief, Covet
     PREVENT_ESCAPE(106), // Spider Web, Mean Look, Block
     NIGHTMARE(107),
-    MINIMIZE(108),
+    MINIMIZE(108, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.EVASION),
     CURSE(109),
     PROTECT(111), // Protect, Detect
     SPIKES(112),
@@ -116,61 +116,61 @@ public enum MoveEffect {
     PERISH_SONG(114),
     SANDSTORM(115),
     ENDURE(116),
-    ROLLOUT(117), // Rollout, Ice Ball
-    SWAGGER(118),
-    FURY_CUTTER(119),
+    ROLLOUT(117, MoveQualities.DAMAGE), // Rollout, Ice Ball
+    SWAGGER(118, MoveQualities.NO_DAMAGE_STAT_CHANGE_STATUS, MoveStatusType.CONFUSION, 2, StatChangeType.ATTACK),
+    FURY_CUTTER(119, MoveQualities.DAMAGE),
     NO_DMG_INF(120), // Attract
-    RETURN(121),
+    RETURN(121, MoveQualities.DAMAGE),
     PRESENT(122),
-    FRUSTRATION(123),
+    FRUSTRATION(123, MoveQualities.DAMAGE),
     SAFEGUARD(124),
-    DMG_BRN_THAW(125), // Flame Wheel, Sacred Fire
-    MAGNITUDE(126),
+    DMG_BRN_THAW(125, MoveQualities.DAMAGE_TARGET_STATUS, MoveStatusType.BURN), // Flame Wheel, Sacred Fire
+    MAGNITUDE(126, MoveQualities.DAMAGE),
     BATON_PASS(127),
-    PURSUIT(128),
-    RAPID_SPIN(129),
-    DIRECT_DMG_20(130), // Sonic Boom
-    RECOVER_HP_50_WEATHER(132), // Morning Sun, Synthesis, Moonlight
+    PURSUIT(128, MoveQualities.DAMAGE),
+    RAPID_SPIN(129, MoveQualities.DAMAGE),
+    DIRECT_DMG_20(130, MoveQualities.DAMAGE), // Sonic Boom
+    RECOVER_HP_50_WEATHER(132, MoveQualities.HEAL), // Morning Sun, Synthesis, Moonlight
     SYNTHESIS(133, -1, -1, -1),
     MOONLIGHT(134, -1, -1, -1),
-    HIDDEN_POWER(135),
+    HIDDEN_POWER(135, MoveQualities.DAMAGE),
     RAIN_DANCE(136),
     SUNNY_DAY(137),
-    DMG_USER_DEF_PLUS_1(138), // Steel Wing
-    DMG_USER_ATK_PLUS_1(139), // Metal Claw, Meteor Mash
-    DMG_ALL_USER_STATS_PLUS_1(140), // Ancient Power, Silver Wind, Ominous Wind
+    DMG_USER_DEF_PLUS_1(138, MoveQualities.DAMAGE_USER_STAT_CHANGE, 1, StatChangeType.DEFENSE), // Steel Wing
+    DMG_USER_ATK_PLUS_1(139, MoveQualities.DAMAGE_USER_STAT_CHANGE, 1, StatChangeType.ATTACK), // Metal Claw, Meteor Mash
+    DMG_ALL_USER_STATS_PLUS_1(140, MoveQualities.DAMAGE_USER_STAT_CHANGE, 1, StatChangeType.ALL), // Ancient Power, Silver Wind, Ominous Wind
     BELLY_DRUM(142),
     PSYCH_UP(143),
     MIRROR_COAT(144),
-    SKULL_BASH(145),
-    TWISTER(146),
-    EARTHQUAKE(147),
-    FUTURE_SIGHT(148), // Future Sight, Doom Desire
-    GUST(149),
-    STOMP(150), // Stomp, Steamroller
-    SOLAR_BEAM(151),
-    THUNDER(152),
+    SKULL_BASH(145, MoveQualities.DAMAGE),
+    TWISTER(146, MoveQualities.DAMAGE),
+    EARTHQUAKE(147, MoveQualities.DAMAGE),
+    FUTURE_SIGHT(148, MoveQualities.DAMAGE), // Future Sight, Doom Desire
+    GUST(149, MoveQualities.DAMAGE),
+    STOMP(150, MoveQualities.DAMAGE), // Stomp, Steamroller
+    SOLAR_BEAM(151, MoveQualities.DAMAGE),
+    THUNDER(152, MoveQualities.DAMAGE),
     TELEPORT(153),
-    BEAT_UP(154),
-    FLY(155),
-    DEF_CURL(156),
+    BEAT_UP(154, MoveQualities.DAMAGE),
+    FLY(155, MoveQualities.DAMAGE),
+    DEFENSE_CURL(156, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.DEFENSE),
     SOFT_BOILED(157, -1, -1, -1), // only in Gen III?
-    FAKE_OUT(158),
-    UPROAR(159),
+    FAKE_OUT(158, MoveQualities.DAMAGE),
+    UPROAR(159, MoveQualities.DAMAGE),
     STOCKPILE(160),
-    SPIT_UP(161),
+    SPIT_UP(161, MoveQualities.DAMAGE),
     SWALLOW(162),
     HAIL(164),
     TORMENT(165),
-    FLATTER(166),
-    NO_DMG_BRN(167),
+    FLATTER(166, MoveQualities.NO_DAMAGE_STAT_CHANGE_STATUS, MoveStatusType.CONFUSION, 1, StatChangeType.SPECIAL_ATTACK),
+    NO_DMG_BRN(167, MoveQualities.NO_DAMAGE_STATUS, MoveStatusType.BURN),
     MEMENTO(168),
-    FACADE(169),
-    FOCUS_PUNCH(170),
-    SMELLING_SALTS(171),
+    FACADE(169, MoveQualities.DAMAGE),
+    FOCUS_PUNCH(170, MoveQualities.DAMAGE),
+    SMELLING_SALTS(171, MoveQualities.DAMAGE),
     FOLLOW_ME(172), // Follow Me, Rage Powder
-    NATURE_POWER(173),
-    CHARGE(174),
+    NATURE_POWER(173, MoveQualities.DAMAGE),
+    CHARGE(174, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.SPECIAL_DEFENSE),
     TAUNT(175),
     HELPING_HAND(176),
     TRICK(177), // Trick, Switcheroo
@@ -178,37 +178,37 @@ public enum MoveEffect {
     WISH(179),
     ASSIST(180),
     INGRAIN(181),
-    DMG_USER_ATK_DEF_MINUS_1(182),
+    DMG_USER_ATK_DEF_MINUS_1(182, MoveQualities.DAMAGE_USER_STAT_CHANGE, -1, StatChangeType.ATTACK, StatChangeType.DEFENSE),
     MAGIC_COAT(183),
     RECYCLE(184),
-    REVENGE(185), // Revenge, Avalanche
-    BRICK_BREAK(186),
+    REVENGE(185, MoveQualities.DAMAGE), // Revenge, Avalanche
+    BRICK_BREAK(186, MoveQualities.DAMAGE),
     NO_DMG_DROWSY(187), // Yawn
-    KNOCK_OFF(188),
+    KNOCK_OFF(188, MoveQualities.DAMAGE),
     ENDEAVOR(189),
-    DMG_HIGH_USER_HP(190), // Eruption, Water Spout
+    DMG_HIGH_USER_HP(190, MoveQualities.DAMAGE), // Eruption, Water Spout
     SKILL_SWAP(191),
     IMPRISON(192),
     REFRESH(193),
     GRUDGE(194),
     SNATCH(195),
-    LOW_KICK(196), // Low Kick, Grass Knot
-    SECRET_POWER(197),
-    DMG_RECOIL_33(198), // Double-Edge, Brave Bird, Wood Hammer
-    NO_DMG_CNF_ALL_ADJACENT(199), // Teeter Dance
-    DMG_BRN_INCR_CRIT(200), // Blaze Kick
+    LOW_KICK(196, MoveQualities.DAMAGE), // Low Kick, Grass Knot
+    SECRET_POWER(197, MoveQualities.DAMAGE),
+    DMG_RECOIL_33(198, MoveQualities.DAMAGE), // Double-Edge, Brave Bird, Wood Hammer
+    NO_DMG_CNF_ALL_ADJACENT(199, MoveQualities.NO_DAMAGE_STATUS, MoveStatusType.CONFUSION), // Teeter Dance
+    DMG_BRN_INCR_CRIT(200, MoveQualities.DAMAGE_TARGET_STATUS, MoveStatusType.BURN), // Blaze Kick
     MUD_SPORT(201),
-    DMG_BAD_POISON(202), // Poison Fang
-    WEATHER_BALL(203),
-    DMG_USER_SPA_MINUS_2(204), // Overheat, Psycho Boost, Draco Meteor, etc.
-    TRGT_ATK_DEF_MINUS_1(205), // Tickle
-    USER_DEF_SPD_PLUS_1(206), // Cosmic Power, Defend Order
-    SKY_UPPERCUT(207),
-    USER_ATK_DEF_PLUS_1(208), // Bulk Up
-    DMG_POISON_INCR_CRIT(209), // Poison Tail, Cross Poison
+    DMG_BAD_POISON(202, MoveQualities.DAMAGE_TARGET_STATUS, MoveStatusType.TOXIC_POISON), // Poison Fang
+    WEATHER_BALL(203, MoveQualities.DAMAGE),
+    DMG_USER_SPA_MINUS_2(204, MoveQualities.DAMAGE_USER_STAT_CHANGE, -2, StatChangeType.SPECIAL_ATTACK), // Overheat, Psycho Boost, Draco Meteor, etc.
+    TRGT_ATK_DEF_MINUS_1(205, MoveQualities.NO_DAMAGE_STAT_CHANGE, -1, StatChangeType.ATTACK, StatChangeType.DEFENSE), // Tickle
+    USER_DEF_SPD_PLUS_1(206, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.DEFENSE, StatChangeType.SPECIAL_DEFENSE), // Cosmic Power, Defend Order
+    SKY_UPPERCUT(207, MoveQualities.DAMAGE),
+    USER_ATK_DEF_PLUS_1(208, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.ATTACK, StatChangeType.DEFENSE), // Bulk Up
+    DMG_PSN_INCR_CRIT(209, MoveQualities.DAMAGE_TARGET_STATUS, MoveStatusType.POISON), // Poison Tail, Cross Poison
     WATER_SPORT(210),
-    USER_SPA_SPD_PLUS_1(211), // Calm Mind
-    USER_ATK_SPE_PLUS_1(212), // Dragon Dance
+    USER_SPA_SPD_PLUS_1(211, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.SPECIAL_ATTACK, StatChangeType.SPECIAL_DEFENSE), // Calm Mind
+    USER_ATK_SPE_PLUS_1(212, MoveQualities.NO_DAMAGE_STAT_CHANGE, 1, StatChangeType.ATTACK, StatChangeType.SPEED), // Dragon Dance
     CAMOUFLAGE(213),
 
     // Gen IV+
@@ -260,7 +260,7 @@ public enum MoveEffect {
     TRICK_ROOM(259),
     BLIZZARD(260),
     WHIRLPOOL(261),
-    DMG_PARA_RECOIL_33(262), // Volt Tackle
+    DMG_PAR_RECOIL_33(262), // Volt Tackle
     BOUNCE(263),
     CAPTIVATE(265),
     STEALTH_ROCK(266),
@@ -272,7 +272,7 @@ public enum MoveEffect {
     GHOST_FORCE(272), // Shadow Force, Phantom Force
     DMG_BRN_FLINCH(273), // Fire Fang
     DMG_FRZ_FLINCH(274), // Ice Fang
-    DMG_PARA_FLINCH(275), // Thunder Fang
+    DMG_PAR_FLINCH(275), // Thunder Fang
     DMG_USER_SPA_PLUS_1(276), // Charge Beam, Fiery Dance
     USER_ATK_ACC_PLUS_1(277), // Hone Claws
     WIDE_GUARD(278),
@@ -455,11 +455,70 @@ public enum MoveEffect {
     final int gen5;
     final int gen6;
 
+    public final MoveQualities qualities;
+    final StatChangeType[] statChangeTypes = new StatChangeType[3];
+    final int statChangeStages;
+    final MoveStatusType status;
+
     MoveEffect(int id) {
         this.gen3 = id;
         this.gen4 = id;
         this.gen5 = id;
         this.gen6 = id;
+        this.qualities = MoveQualities.OTHER;
+        this.statChangeStages = 0;
+        this.status = null;
+    }
+
+    MoveEffect(int id, MoveQualities qualities) {
+        this.gen3 = id;
+        this.gen4 = id;
+        this.gen5 = id;
+        this.gen6 = id;
+        this.qualities = qualities;
+        this.statChangeStages = 0;
+        this.status = null;
+    }
+    
+    MoveEffect(int id, MoveQualities qualities, int statChangeStages, StatChangeType... statChangeTypes) {
+        if (qualities != MoveQualities.NO_DAMAGE_STAT_CHANGE && qualities != MoveQualities.DAMAGE_USER_STAT_CHANGE && qualities != MoveQualities.DAMAGE_TARGET_STAT_CHANGE)
+            throw new RuntimeException();
+        
+        this.gen3 = id;
+        this.gen4 = id;
+        this.gen5 = id;
+        this.gen6 = id;
+        this.qualities = qualities;
+        System.arraycopy(statChangeTypes, 0, this.statChangeTypes, 0, statChangeTypes.length);
+        this.statChangeStages = statChangeStages;
+        this.status = null;
+    }
+    
+    MoveEffect(int id, MoveQualities qualities, MoveStatusType status) {
+        if (qualities != MoveQualities.NO_DAMAGE_STATUS && qualities != MoveQualities.DAMAGE_TARGET_STATUS)
+            throw new RuntimeException();
+        
+        this.gen3 = id;
+        this.gen4 = id;
+        this.gen5 = id;
+        this.gen6 = id;
+        this.qualities = qualities;
+        this.statChangeStages = 0;
+        this.status = status;
+    }
+    
+    MoveEffect(int id, MoveQualities qualities, MoveStatusType status, int statChangeStages, StatChangeType... statChangeTypes) {
+        if (qualities != MoveQualities.NO_DAMAGE_STAT_CHANGE_STATUS)
+            throw new RuntimeException();
+        
+        this.gen3 = id;
+        this.gen4 = id;
+        this.gen5 = id;
+        this.gen6 = id;
+        this.qualities = qualities;
+        this.status = status;
+        System.arraycopy(statChangeTypes, 0, this.statChangeTypes, 0, statChangeTypes.length);
+        this.statChangeStages = statChangeStages;
     }
 
     MoveEffect(int gen3, int gen4, int gen5, int gen6) {
@@ -467,6 +526,9 @@ public enum MoveEffect {
         this.gen4 = gen4;
         this.gen5 = gen5;
         this.gen6 = gen6;
+        this.qualities = null;
+        this.statChangeStages = 0;
+        this.status = null;
     }
 
     public int getIndex(int generation) {
@@ -480,8 +542,60 @@ public enum MoveEffect {
     }
 
     public static MoveEffect fromIndex(int generation, int index) {
-        for (MoveEffect moveEffect: MoveEffect.values()) {
+        for (MoveEffect moveEffect : MoveEffect.values()) {
             if (index == moveEffect.getIndex(generation))
+                return moveEffect;
+        }
+
+        return null;
+    }
+
+    public MoveQualities getQualities() {
+        return qualities;
+    }
+    
+    public MoveStatusType getStatusType() {
+        return status;
+    }
+    
+    public static MoveEffect fromStatus(MoveStatusType status) {
+        for (MoveEffect moveEffect : MoveEffect.values()) {
+            if (moveEffect.status == status)
+                return moveEffect;
+        }
+
+        return null;
+    }
+
+    public Move.StatChange[] getStatChanges() {
+        if (qualities != MoveQualities.NO_DAMAGE_STAT_CHANGE && qualities != MoveQualities.DAMAGE_USER_STAT_CHANGE && qualities != MoveQualities.DAMAGE_TARGET_STAT_CHANGE)
+            return null;
+        
+        Move.StatChange[] statChanges = new Move.StatChange[3];
+        for (int i = 0; i < statChanges.length; i++)
+            statChanges[i] = statChangeTypes[i] != null ? new Move.StatChange(statChangeTypes[i], statChangeStages) : new Move.StatChange();
+        
+        return statChanges;
+    }
+    
+    public static MoveEffect fromStatChange(MoveQualities qualities, int stages, StatChangeType... statChangeTypes) {
+        for (MoveEffect moveEffect : MoveEffect.values()) {
+            if (qualities != moveEffect.qualities)
+                continue;
+            if (stages != moveEffect.statChangeStages)
+                continue;
+            if (statChangeTypes.length != moveEffect.statChangeTypes.length)
+                continue;
+            
+            boolean matches = true;
+            for (int i = 0; i < statChangeTypes.length; i++) {
+                if (statChangeTypes[i] != moveEffect.statChangeTypes[i]) {
+                    matches = false;
+                    break;
+                }
+            }
+            
+            if (matches)
                 return moveEffect;
         }
 

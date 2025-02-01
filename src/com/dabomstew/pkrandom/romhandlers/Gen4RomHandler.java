@@ -803,7 +803,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 break;
         }
 
-        if (move.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET || move.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER) {
+        if (move.isDamagingMove()) {
             for (int i = 0; i < move.statChanges.length; i++) {
                 if (move.statChanges[i].type != StatChangeType.NONE) {
                     move.statChanges[i].percentChance = secondaryEffectChance;
@@ -904,7 +904,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 break;
         }
 
-        if (move.getStatusMoveType() == StatusMoveType.DAMAGE) {
+        if (move.isDamagingMove()) {
             move.statusPercentChance = secondaryEffectChance;
             if (move.statusPercentChance == 0.0) {
                 if (move.number == Moves.chatter) {
@@ -975,7 +975,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 move.isChargeMove = true;
                 break;
 
-            case Gen3Constants.rechargeEffect:
+            case Gen4Constants.rechargeEffect:
                 move.isRechargeMove = true;
                 break;
 

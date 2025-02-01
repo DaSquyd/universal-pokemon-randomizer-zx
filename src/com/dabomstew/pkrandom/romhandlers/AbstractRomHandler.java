@@ -157,7 +157,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             playerAllowedGenerations = settings.getWildAllowedGenerations();
             foeAllowedGenerations = settings.getFoeAllowedGenerations();
         }
-        
+
         if (playerAllowedGenerations == 0)
             playerAllowedGenerations = (1 << generationOfPokemon()) - 1;
         if (foeAllowedGenerations == 0)
@@ -1620,7 +1620,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         boolean hasNormalMoves = !typeGoodDamageMovesLearnt.get(Type.NORMAL).isEmpty() && typeGoodDamageMovesAll.get(Type.NORMAL).size() >= 2;
-        
+
 
         // #001 Stench
         if (lowSpeed)
@@ -1733,8 +1733,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (generationOfPokemon() < 5) {
             if (!isGround || !isDoubles)
                 irrelevantAbilities.add(Abilities.lightningRod);
-        }
-        else if (isGround || (resistsElectric && !higherOrEqualSpAtk))
+        } else if (isGround || (resistsElectric && !higherOrEqualSpAtk))
             irrelevantAbilities.add(Abilities.lightningRod);
 
         // #032 Serene Grace
@@ -1773,10 +1772,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (isParagonLite) {
             if (pk.hp == 1 || (resistsGround && resistsWater))
                 irrelevantAbilities.add(Abilities.magmaArmor);
-        }
-        else
+        } else
             irrelevantAbilities.add(Abilities.magmaArmor);
-            
+
         // #041 Water Veil
         // TODO: Rework
 
@@ -2856,7 +2854,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                                                  Map<Type, Set<Integer>> goodTypeDamagingLearnt, Map<Type, Set<Integer>> goodTypeDamagingAll) {
         if ((learnType != null && !typeInGame(learnType)) || (attackType != null && !typeInGame(attackType)))
             return false;
-            
+
         if (learnType != null && (goodTypeDamagingLearnt.get(learnType).isEmpty() || goodTypeDamagingAll.get(learnType).size() < 2))
             return true;
 
@@ -4162,7 +4160,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Move move : getMoves()) {
             if (move == null)
                 continue;
-            
+
             // Sun
             if (move.type == Type.FIRE || move.effect == MoveEffect.WEATHER_BALL
                     || move.effect == MoveEffect.SOLAR_BEAM || move.effect == MoveEffect.GROWTH || move.effect == MoveEffect.RECOVER_HP_50_WEATHER)
@@ -4693,7 +4691,8 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 List<Move> movesAtLevel = getMoveSelectionPoolAtLevel(tp, isCyclicEvolutions);
 
-                movesAtLevel = trimMoveList(tp, movesAtLevel, doubleBattleMode);
+                boolean isDouble = doubleBattleMode || t.battleType == Trainer.BattleType.DoubleBattle || t.battleType == Trainer.BattleType.TripleBattle;
+                movesAtLevel = trimMoveList(tp, movesAtLevel, isDouble);
 
                 if (movesAtLevel.isEmpty()) {
                     continue;
@@ -5036,7 +5035,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             return new ArrayList<>();
         }
 
-        List<Move> obsoletedMoves = getObsoleteMoves(movesAtLevel);
+        List<Move> obsoletedMoves = getObsoleteMoves(movesAtLevel, doubleBattleMode);
 
         // Remove obsoleted moves
 
@@ -5058,7 +5057,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Move> requiresOtherMove = movesAtLevel
                 .stream()
                 .filter(mv -> GlobalConstants.requiresOtherMove.contains(mv.number))
-                .collect(Collectors.toList());
+                .toList();
 
         for (Move dependentMove : requiresOtherMove) {
             if (MoveSynergy.requiresOtherMove(dependentMove, movesAtLevel).isEmpty()) {
@@ -5105,105 +5104,20 @@ public abstract class AbstractRomHandler implements RomHandler {
         return movesAtLevel;
     }
 
-    private List<Move> getObsoleteMoves(List<Move> movesAtLevel) {
+    private List<Move> getObsoleteMoves(List<Move> movesAtLevel, boolean doubleBattleMode) {
         List<Move> obsoletedMoves = new ArrayList<>();
         for (Move mv : movesAtLevel) {
-            if (GlobalConstants.cannotObsoleteMoves.contains(mv.number)) {
+            if (GlobalConstants.cannotObsoleteMoves.contains(mv.number))
                 continue;
+            
+            List<Move> obsoleteThis = movesAtLevel
+                    .stream()
+                    .filter(mv2 -> mv.makesObsolete(mv2, doubleBattleMode))
+                    .toList();
+            for (Move obsoleted : obsoleteThis) {
+//                System.out.println(obsoleted.name + " obsoleted by " + mv.name);
             }
-            if (mv.power > 0) {
-                List<Move> obsoleteThis = movesAtLevel
-                        .stream()
-                        .filter(mv2 -> !GlobalConstants.cannotBeObsoletedMoves.contains(mv2.number) &&
-                                mv.type == mv2.type &&
-                                ((((mv.getStatChangeMoveType() == mv2.getStatChangeMoveType() &&
-                                        mv.statChanges[0].equals(mv2.statChanges[0])) ||
-                                        (mv2.getStatChangeMoveType() == StatChangeMoveType.NONE_OR_UNKNOWN &&
-                                                mv.hasBeneficialStatChange())) &&
-                                        mv.getAbsorbPercent() >= mv2.getAbsorbPercent() &&
-                                        !mv.isChargeMove &&
-                                        !mv.isRechargeMove) ||
-                                        mv2.power * mv2.getHitCount(generationOfPokemon()) <= 30) &&
-                                mv.accuracy >= mv2.accuracy &&
-                                mv.category == mv2.category &&
-                                mv.priority >= mv2.priority &&
-                                mv2.power > 0 &&
-                                mv.power * mv.getHitCount(generationOfPokemon()) > mv2.power * mv2.getHitCount(generationOfPokemon()))
-                        .collect(Collectors.toList());
-                for (Move obsoleted : obsoleteThis) {
-                    //System.out.println(obsoleted.name + " obsoleted by " + mv.name);
-                }
-                obsoletedMoves.addAll(obsoleteThis);
-            } else if (mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_USER ||
-                    mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_TARGET) {
-                List<Move> obsoleteThis = new ArrayList<>();
-                List<Move.StatChange> statChanges1 = new ArrayList<>();
-                for (Move.StatChange sc : mv.statChanges) {
-                    if (sc.type != StatChangeType.NONE) {
-                        statChanges1.add(sc);
-                    }
-                }
-                for (Move mv2 : movesAtLevel
-                        .stream()
-                        .filter(otherMv -> !otherMv.equals(mv) &&
-                                otherMv.power <= 0 &&
-                                otherMv.getStatChangeMoveType() == mv.getStatChangeMoveType() &&
-                                (otherMv.statusType == mv.statusType ||
-                                        otherMv.statusType == MoveStatusType.NONE))
-                        .collect(Collectors.toList())) {
-                    List<Move.StatChange> statChanges2 = new ArrayList<>();
-                    for (Move.StatChange sc : mv2.statChanges) {
-                        if (sc.type != StatChangeType.NONE) {
-                            statChanges2.add(sc);
-                        }
-                    }
-                    if (statChanges2.size() > statChanges1.size()) {
-                        continue;
-                    }
-                    List<Move.StatChange> statChanges1Filtered = statChanges1
-                            .stream()
-                            .filter(sc -> !statChanges2.contains(sc))
-                            .collect(Collectors.toList());
-                    statChanges2.removeAll(statChanges1);
-                    if (!statChanges1Filtered.isEmpty() && statChanges2.isEmpty()) {
-                        if (!GlobalConstants.cannotBeObsoletedMoves.contains(mv2.number)) {
-                            obsoleteThis.add(mv2);
-                        }
-                        continue;
-                    }
-                    if (statChanges1Filtered.isEmpty() && statChanges2.isEmpty()) {
-                        continue;
-                    }
-                    boolean maybeBetter = false;
-                    for (Move.StatChange sc1 : statChanges1Filtered) {
-                        boolean canStillBeBetter = false;
-                        for (Move.StatChange sc2 : statChanges2) {
-                            if (sc1.type == sc2.type) {
-                                canStillBeBetter = true;
-                                if ((mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_USER && sc1.stages > sc2.stages) ||
-                                        (mv.getStatChangeMoveType() == StatChangeMoveType.NO_DAMAGE_TARGET && sc1.stages < sc2.stages)) {
-                                    maybeBetter = true;
-                                } else {
-                                    canStillBeBetter = false;
-                                }
-                            }
-                        }
-                        if (!canStillBeBetter) {
-                            maybeBetter = false;
-                            break;
-                        }
-                    }
-                    if (maybeBetter) {
-                        if (!GlobalConstants.cannotBeObsoletedMoves.contains(mv2.number)) {
-                            obsoleteThis.add(mv2);
-                        }
-                    }
-                }
-                for (Move obsoleted : obsoleteThis) {
-                    //System.out.println(obsoleted.name + " obsoleted by " + mv.name);
-                }
-                obsoletedMoves.addAll(obsoleteThis);
-            }
+            obsoletedMoves.addAll(obsoleteThis);
         }
 
         return obsoletedMoves.stream().distinct().collect(Collectors.toList());
@@ -5554,6 +5468,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             // Pin Missile 25 Power, 95% Accuracy
             updateMovePower(moves, Moves.pinMissile, 25);
             updateMoveAccuracy(moves, Moves.pinMissile, 95);
+            // Roar 101% acc
+            updateMoveAccuracy(moves, Moves.roar, Move.getPerfectAccuracy());
             // Flamethrower 90 Power
             updateMovePower(moves, Moves.flamethrower, 90);
             // Hydro Pump 110 Power
@@ -5816,16 +5732,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Move> moves = this.getMoves();
 
         // 003 Double Slap
-        if (generationOfPokemon() >= 3)
+        if (generationOfPokemon() >= 4)
             moves.get(Moves.doubleSlap).name = "Double Slap";
         if (typeInGame(Type.FAIRY))
             updateMoveType(moves, Moves.doubleSlap, Type.FAIRY);
+        updateMovePower(moves, Moves.doubleSlap, 20);
         updateMoveAccuracy(moves, Moves.doubleSlap, 100);
 
         // 004 Comet Punch
         if (typeInGame(Type.FAIRY))
             updateMoveType(moves, Moves.cometPunch, Type.FAIRY);
-        updateMovePower(moves, Moves.cometPunch, 20);
+        updateMovePower(moves, Moves.cometPunch, 25);
         updateMoveAccuracy(moves, Moves.cometPunch, 100);
 
         // 005 Mega Punch
@@ -5837,40 +5754,35 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePower(moves, Moves.payDay, 60);
 
         // 011 Vise Grip
-        if (generationOfPokemon() <= 8)
+        if (generationOfPokemon() >= 4 && generationOfPokemon() <= 8)
             moves.get(Moves.viseGrip).name = "Vise Grip";
 
-//        // 012 Guillotine
-//        updateMoveType(moves, Moves.guillotine, Type.STEEL);
-//        moves.get(Moves.guillotine).qualities = MoveQualities.DAMAGE;
-//        updateMovePower(moves, Moves.guillotine, 100);
-//        updateMoveAccuracy(moves, Moves.guillotine, Move.getPerfectAccuracy(MoveCategory.PHYSICAL, generationOfPokemon()));
-//        updateMovePP(moves, Moves.guillotine, 10);
-//        moves.get(Moves.guillotine).priority = -1;
-//        moves.get(Moves.guillotine).effect = MoveEffect.DMG_DCR_PRIORITY;
-//        moves.get(Moves.guillotine).description = moves.get(Moves.vitalThrow).description;
+        // 012 Guillotine
+        if (generationOfPokemon() <= 3) {
+            updateMoveType(moves, Moves.guillotine, Type.STEEL);
+            moves.get(Moves.guillotine).qualities = MoveQualities.DAMAGE;
+            updateMovePower(moves, Moves.guillotine, 90);
+            updateMoveAccuracy(moves, Moves.guillotine, Move.getPerfectAccuracy());
+            updateMovePP(moves, Moves.guillotine, 10);
+            moves.get(Moves.guillotine).priority = -1;
+            moves.get(Moves.guillotine).effect = MoveEffect.DMG_DCR_PRIORITY;
+            moves.get(Moves.guillotine).description = moves.get(Moves.vitalThrow).description;
+        }
 
 //        // 013 Razor Wind
-//        moves.get(Moves.razorWind).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-//        updateMovePower(moves, Moves.razorWind, 140);
-//        updateMoveAccuracy(moves, Moves.razorWind, 90);
-//        updateMovePP(moves, Moves.razorWind, 5);
-//        moves.get(Moves.razorWind).criticalChance = generationOfPokemon() < 5 ? CriticalChance.NONE : CriticalChance.NORMAL;
-//        moves.get(Moves.razorWind).effect = MoveEffect.DMG_USER_SPA_MINUS_2;
-//        moves.get(Moves.razorWind).target = MoveTarget.ANY_ADJACENT;
-//        moves.get(Moves.razorWind).statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
-//        moves.get(Moves.razorWind).statChanges[0].stages = -2;
-//        moves.get(Moves.razorWind).statChanges[0].percentChance = 100;
-//        moves.get(Moves.razorWind).isChargeMove = false;
-//        moves.get(Moves.razorWind).description = moves.get(Moves.overheat).description;
+        updateMovePower(moves, Moves.razorWind, 130);
+        updateMoveAccuracy(moves, Moves.razorWind, 100);
+        
+        // 014 Swords Dance
+        updateMoveType(moves, Moves.swordsDance, Type.STEEL);
 
         // 015 Cut
         updateMoveType(moves, Moves.cut, Type.GRASS);
-        updateMovePower(moves, Moves.cut, generationOfPokemon() >= 5 ? moves.get(Moves.stormThrow).power : 45); // May be different due to crit settings
+        updateMovePower(moves, Moves.cut, generationOfPokemon() >= 5 ? moves.get(Moves.stormThrow).power : 70); // May be different due to crit settings
         updateMoveAccuracy(moves, Moves.cut, 100);
         updateMovePP(moves, Moves.cut, 10);
-        moves.get(Moves.cut).criticalChance = CriticalChance.GUARANTEED;
-        moves.get(Moves.cut).effect = generationOfPokemon() >= 5 ? MoveEffect.DMG_ALWAYS_CRIT : MoveEffect.DMG_USER_ATK_PLUS_1;
+        moves.get(Moves.cut).criticalChance = generationOfPokemon() >= 5 ? CriticalChance.GUARANTEED : CriticalChance.INCREASED;
+        moves.get(Moves.cut).effect = generationOfPokemon() >= 5 ? MoveEffect.DMG_ALWAYS_CRIT : MoveEffect.DMG_INCR_CRIT;
         switch (generationOfPokemon()) {
             case 2:
             case 3:
@@ -5886,43 +5798,83 @@ public abstract class AbstractRomHandler implements RomHandler {
                 break;
         }
 
-//        // 017 Tail Whip
-//        if (typeInGame(Type.FAIRY))
-//            updateMoveType(moves, Moves.tailWhip, Type.FAIRY);
-
+        // 017 Wing Attack
+        updateMovePower(moves, Moves.wingAttack, 25);
+        updateMovePP(moves, Moves.wingAttack, 30);
+        moves.get(Moves.wingAttack).effect = MoveEffect.HIT_2_TO_5_TIMES;
+        
         // 019 Fly
         updateMoveAccuracy(moves, Moves.fly, 100);
 
+        // 020 Bind
+        updateMovePower(moves, Moves.bind, 35);
+        updateMoveAccuracy(moves, Moves.bind, 100);
+        
+        // 021 Slam
+        updateMoveAccuracy(moves, Moves.slam, 95);
+        
+        // 026 Jump Kick
+        updateMovePower(moves, Moves.jumpKick, 90);
+        
         // 027 Rolling Kick
-        updateMoveAccuracy(moves, Moves.rollingKick, 95);
+        updateMovePower(moves, Moves.rollingKick, 50);
+        updateMoveAccuracy(moves, Moves.rollingKick, 100);
         moves.get(Moves.rollingKick).effect = MoveEffect.DMG_USER_ATK_PLUS_1;
         moves.get(Moves.rollingKick).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, 1, 100.0);
 
         // 028 Sand Attack
-        moves.get(Moves.sandAttack).name = "Sand Attack";
+        if (generationOfPokemon() >= 4)
+            moves.get(Moves.sandAttack).name = "Sand Attack";
 
         // 031 Fury Attack
         updateMoveType(moves, Moves.furyAttack, Type.DARK);
+        updateMovePower(moves, Moves.furyAttack, 25);
         updateMoveAccuracy(moves, Moves.furyAttack, 100);
+        updateMovePP(moves, Moves.furyAttack, 10);
 
-//        // 032 Horn Drill
-//        moves.get(Moves.hornDrill).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-//        updateMovePower(moves, Moves.hornDrill, 130);
-//        updateMoveAccuracy(moves, Moves.hornDrill, 100);
-//        moves.get(Moves.hornDrill).effect = MoveEffect.DMG_USER_DEF_SPD_MINUS_1;
-//        moves.get(Moves.hornDrill).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100.0);
-//        moves.get(Moves.hornDrill).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_DEFENSE, -1, 100.0);
-//        moves.get(Moves.hornDrill).description = "The user stabs the target with a horn that rotates like a drill. It lowers the user's Defense and Sp. Def stats.";
+        // 032 Horn Drill
+        moves.get(Moves.hornDrill).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
+        updateMovePower(moves, Moves.hornDrill, 130);
+        updateMoveAccuracy(moves, Moves.hornDrill, 100);
+        moves.get(Moves.hornDrill).effect = MoveEffect.DMG_USER_ATK_DEF_MINUS_1;
+        moves.get(Moves.hornDrill).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100.0);
+        moves.get(Moves.hornDrill).statChanges[1] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100.0);
+        moves.get(Moves.hornDrill).description = "The user stabs the target with a horn that rotates like a drill. It lowers the user's Defense and Sp. Def stats.";
 
+        // 035 Wrap
+        updateMovePower(moves, Moves.wrap, 35);
+        updateMoveAccuracy(moves, Moves.wrap, 100);
+        
+        // 036 Take Down
+        updateMovePower(moves, Moves.takeDown, 80);
+        updateMoveAccuracy(moves, Moves.takeDown, 100);
+        
+        // 037 Thrash
+        updateMovePower(moves, Moves.thrash, 100);
+        
+        // 038 Double-Edge
+        updateMovePower(moves, Moves.doubleEdge, 100);
+        
+        // 040 Poison Sting
+        updateMovePower(moves, Moves.poisonSting, 30);
+        updateMoveAccuracy(moves, Moves.poisonSting, 100);
+        
         // 042 Pin Missile
         updateMoveAccuracy(moves, Moves.pinMissile, 100);
 
+        // 043 Leer
+        moves.get(Moves.leer).priority = 1;
+
+        // 045 Growl
+        moves.get(Moves.growl).priority = 1;
+
         // 049 Sonic Boom
-        if (generationOfPokemon() <= 5)
+        if (generationOfPokemon() >= 4 && generationOfPokemon() <= 5)
             moves.get(Moves.sonicBoom).name = "Sonic Boom";
 
         // 051 Acid
-        moves.get(Moves.acid).name = "Corrosion";
+        if (generationOfPokemon() >= 4)
+            moves.get(Moves.acid).name = "Corrosion";
         updateMovePower(moves, Moves.acid, 30);
         moves.get(Moves.acid).statChanges[0].percentChance = 100.0;
         if (generationOfPokemon() >= 4)
@@ -5931,13 +5883,22 @@ public abstract class AbstractRomHandler implements RomHandler {
                     .replace("may also lower", "also lowers");
 
         // 057 Surf
+        updateMovePower(moves, Moves.surf, 75);
+        updateMoveAccuracy(moves, Moves.surf, 95);
         moves.get(Moves.surf).target = MoveTarget.ALL_ADJACENT_FOES;
-        moves.get(Moves.surf).accuracy = 90;
 
+        // 058 Ice Beam
+        updateMovePower(moves, Moves.iceBeam, 80);
+        
+        // 059 Blizzard
+        updateMovePower(moves, Moves.blizzard, 100);
+        updateMoveAccuracy(moves, Moves.blizzard, 75);
+        
         // 061 Bubble Beam
-        if (generationOfPokemon() >= 3)
+        if (generationOfPokemon() >= 4)
             moves.get(Moves.bubbleBeam).name = "Bubble Beam";
-
+        moves.get(Moves.bubbleBeam).statChanges[0].percentChance = 100.0;
+        
         // 062 Aurora Beam
         updateMovePower(moves, Moves.auroraBeam, 70);
         moves.get(Moves.auroraBeam).statChanges[0].percentChance = 100.0;
@@ -5963,9 +5924,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (generationOfPokemon() >= 4)
             moves.get(Moves.hyperBeam).description = "The target is attacked with a powerful beam. It lowers the user’s Defense and Sp. Def stats.";
 
-        // 065 Drill Peck
-        updateMovePower(moves, Moves.drillPeck, 85);
-
         // 066 Submission
         if (generationOfPokemon() >= 6 || !typeInGame(Type.FAIRY)) {
             updateMovePower(moves, Moves.submission, 70);
@@ -5989,11 +5947,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMoveAccuracy(moves, Moves.leechSeed, 100);
 
         // 075 Razor Leaf
+        updateMovePower(moves, Moves.razorLeaf, 60);
         if (!doubles)
             updateMoveAccuracy(moves, Moves.razorLeaf, 100);
 
         // 076 Solar Beam
-        if (generationOfPokemon() <= 5)
+        updateMovePower(moves, Moves.solarBeam, 110);
+        if (generationOfPokemon() >= 4 && generationOfPokemon() <= 5)
             moves.get(Moves.solarBeam).name = "Solar Beam";
 
         // 077 Poison Powder
@@ -6001,14 +5961,17 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 078 Stun Spore
         updateMoveAccuracy(moves, Moves.stunSpore, 100);
+        
+        // 080 Petal Dance
+        updateMovePower(moves, Moves.petalDance, 100);
 
-//        // 082 Dragon Rage
-//        moves.get(Moves.dragonRage).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
-//        updateMovePower(moves, Moves.dragonRage, 60);
-//        updateMovePP(moves, Moves.dragonRage, 15);
-//        moves.get(Moves.dragonRage).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
-//        moves.get(Moves.dragonRage).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100.0);
-//        moves.get(Moves.dragonRage).description = "This attack hits the target with a shock wave of pure rage. It also lowers the target's Attack stat.";
+        // 082 Dragon Rage
+        moves.get(Moves.dragonRage).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+        updateMovePower(moves, Moves.dragonRage, 60);
+        updateMovePP(moves, Moves.dragonRage, 15);
+        moves.get(Moves.dragonRage).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
+        moves.get(Moves.dragonRage).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100.0);
+        moves.get(Moves.dragonRage).description = "This attack hits the target with a shock wave of pure rage. It also lowers the target's Attack stat.";
 
         // 083 Fire Spin
         updateMoveAccuracy(moves, Moves.fireSpin, 100);
@@ -6020,14 +5983,17 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePower(moves, Moves.rockThrow, 55);
         updateMoveAccuracy(moves, Moves.rockThrow, 95);
 
-//        // 090 Fissure
-//        moves.get(Moves.fissure).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-//        updateMovePower(moves, Moves.fissure, 120);
-//        updateMoveAccuracy(moves, Moves.fissure, 100);
-//        moves.get(Moves.fissure).effect = MoveEffect.DMG_USER_ATK_DEF_MINUS_1;
-//        moves.get(Moves.fissure).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100.0);
-//        moves.get(Moves.fissure).statChanges[1] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100.0);
-//        moves.get(Moves.fissure).description = "The user opens up a fissure in the ground and drops the target in. It also lowers the user's Attack and Defense.";
+        // 089 Earthquake
+        updateMovePower(moves, Moves.earthquake, 80);
+        
+        // 090 Fissure
+        moves.get(Moves.fissure).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
+        updateMovePower(moves, Moves.fissure, 130);
+        updateMoveAccuracy(moves, Moves.fissure, 100);
+        moves.get(Moves.fissure).effect = MoveEffect.DMG_USER_ATK_DEF_MINUS_1;
+        moves.get(Moves.fissure).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100.0);
+        moves.get(Moves.fissure).statChanges[1] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100.0);
+        moves.get(Moves.fissure).description = "The user opens up a fissure in the ground and drops the target in. It also lowers the user's Attack and Defense.";
 
         // 096 Meditate
         updateMovePP(moves, Moves.meditate, 30);
@@ -6041,13 +6007,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (generationOfPokemon() >= 4)
             moves.get(Moves.meditate).description = "The user meditates to awaken the power deep within its body and raise its Attack and Sp. Atk stats.";
 
-//        // 101 Night Shade
-//        moves.get(Moves.nightShade).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-//        updateMovePower(moves, Moves.nightShade, 50);
-//        updateMovePP(moves, Moves.nightShade, 10);
-//        moves.get(Moves.nightShade).effect = MoveEffect.DMG_USER_SPA_PLUS_1;
-//        moves.get(Moves.nightShade).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, 1, 100.0);
-//        moves.get(Moves.nightShade).description = "The user makes the target see a frightening mirage. It inflicts damage matching the user’s level and raises the user's Sp. Atk stat.";
+        // 101 Night Shade
+        moves.get(Moves.nightShade).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
+        updateMovePower(moves, Moves.nightShade, 70);
+        updateMovePP(moves, Moves.nightShade, 10);
+        moves.get(Moves.nightShade).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
+        moves.get(Moves.nightShade).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100.0);
+        moves.get(Moves.nightShade).description = "The user makes the target see a frightening mirage. It also lowers the target's Attack stat.";
 
         // 103 Screech
         updateMoveAccuracy(moves, Moves.screech, 100);
@@ -6055,24 +6021,27 @@ public abstract class AbstractRomHandler implements RomHandler {
         // 104 Double Team
         updateMovePP(moves, Moves.doubleTeam, 30);
         moves.get(Moves.doubleTeam).effect = MoveEffect.USER_SPE_PLUS_2;
-        moves.get(Moves.doubleTeam).statChanges[0] = new Move.StatChange(StatChangeType.SPEED, 1, 0.0);
+        moves.get(Moves.doubleTeam).statChanges[0] = new Move.StatChange(StatChangeType.SPEED, 2);
         if (generationOfPokemon() >= 4)
             moves.get(Moves.doubleTeam).description = removeLineBreaks(moves.get(Moves.doubleTeam).description).replace("evasiveness", "Speed stat");
 
+        // 106 Harden
+        moves.get(Moves.harden).priority = 1;
+        
         // 107 Minimize
         moves.get(Moves.minimize).statChanges[0].stages = 1;
 
         // 108 Smokescreen
-        if (generationOfPokemon() <= 5)
+        if (generationOfPokemon() >= 4 && generationOfPokemon() <= 5)
             moves.get(Moves.smokescreen).name = "Smokescreen";
 
         // 120 Self-Destruct
-        if (generationOfPokemon() <= 5)
+        if (generationOfPokemon() >= 4 && generationOfPokemon() <= 5)
             moves.get(Moves.selfDestruct).name = "Self-Destruct";
 
         // 121 Egg Bomb
         updateMoveCategory(moves, Moves.eggBomb, MoveCategory.SPECIAL);
-        updateMovePower(moves, Moves.eggBomb, 110);
+        updateMovePower(moves, Moves.eggBomb, 95);
         updateMoveAccuracy(moves, Moves.eggBomb, 90);
         // TODO: This doesn't work (at least in Gen V) :(
         // moves.get(Moves.eggBomb).effect = MoveEffect.PHYSICAL_DMG;
@@ -6090,16 +6059,27 @@ public abstract class AbstractRomHandler implements RomHandler {
             moves.get(Moves.smog).description = "The target is attacked with a discharge of filthy gases. It also poisons the target.";
 
         // 124 Sludge
-        updateMovePower(moves, Moves.sludge, 70);
+        moves.get(Moves.sludge).statusPercentChance = 50;
 
         // 125 Bone Club
         updateMoveAccuracy(moves, Moves.boneClub, 100);
+        
+        // 126 Fire Blast
+        updateMovePower(moves, Moves.fireBlast, 100);
 
+        // 127 Waterfall
+        updateMovePower(moves, Moves.waterfall, 85);
+        updateMoveAccuracy(moves, Moves.waterfall, 95);
+        
         // 128 Clamp
         updateMoveAccuracy(moves, Moves.clamp, 100);
 
+        // 130 Skull Bash
+        updateMovePower(moves, Moves.skullBash, 120);
+        
         // 131 Spike Cannon
         updateMoveType(moves, Moves.spikeCannon, Type.STEEL);
+        updateMovePower(moves, Moves.spikeCannon, 25);
 
         // 134 Kinesis
         moves.get(Moves.kinesis).qualities = MoveQualities.NO_DAMAGE_STATUS;
@@ -6111,10 +6091,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             moves.get(Moves.kinesis).description = "The user distracts the target by bending a spoon which causes confusion.";
 
         // 135 Soft-Boiled
-        if (generationOfPokemon() <= 2)
-            moves.get(Moves.softBoiled).name = "SoftBoiled";
-        else
+        if (generationOfPokemon() >= 4)
             moves.get(Moves.softBoiled).name = "Soft-Boiled";
+        
+        // 136 High Jump Kick
+        updateMovePower(moves, Moves.highJumpKick, 110);
 
         // 139 Poison Gas
         if (!doubles)
@@ -6122,35 +6103,64 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 140 Barrage
         updateMovePower(moves, Moves.barrage, 25);
-        updateMoveAccuracy(moves, Moves.barrage, 95);
+        updateMoveAccuracy(moves, Moves.barrage, 100);
+        
+        // 141 Leech Life
+        updateMovePower(moves, Moves.leechLife, 70);
+        
+        // 143 Sky Attack
+        updateMovePower(moves, Moves.skyAttack, 120);
+        updateMoveAccuracy(moves, Moves.skyAttack, 100);
+        
+        // 149 Psywave
+        moves.get(Moves.psywave).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+        updateMovePower(moves, Moves.psywave, 70);
+        moves.get(Moves.psywave).effect = MoveEffect.DMG_TRGT_SPA_MINUS_1;
+        moves.get(Moves.psywave).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, -1, 100.0);
 
         // 151 Acid Armor
-        updateMoveType(moves, Moves.acidArmor, Type.WATER);
-        moves.get(Moves.acidArmor).name = "Liquefy";
-
+        if (generationOfPokemon() >= 4) {
+            moves.get(Moves.acidArmor).name = "Liquefy";
+            updateMoveType(moves, Moves.acidArmor, Type.WATER);
+        }
+        
+        // 152 Crabhammer
+        updateMovePower(moves, Moves.crabhammer, 90);
+        
         // 154 Fury Swipes
         updateMovePower(moves, Moves.furySwipes, 20);
         updateMoveAccuracy(moves, Moves.furySwipes, 100);
 
+        // 155 Bonemerang
+        updateMovePower(moves, Moves.bonemerang, 45);
+        updateMoveAccuracy(moves, Moves.bonemerang, generationOfPokemon() >= 5 ? 95 : 90);
+        
+        // 157 Rock Slide
         if (!doubles)
             updateMoveAccuracy(moves, Moves.rockSlide, 95);
+        moves.get(Moves.rockSlide).flinchPercentChance = 10.0;
 
         // 158 Hyper Fang
+        updateMoveAccuracy(moves, Moves.hyperFang, 100);
         moves.get(Moves.hyperFang).flinchPercentChance = 30.0;
 
         // 162 Super Fang
-        updateMoveAccuracy(moves, Moves.superFang, 95);
+        updateMoveAccuracy(moves, Moves.superFang, 100);
 
         // Gen II
         if (generationOfPokemon() < 2)
             return;
 
         // 167 Triple Kick
-        updateMoveAccuracy(moves, Moves.tripleKick, 95);
+        updateMoveAccuracy(moves, Moves.tripleKick, 100);
 
         // 172 Flame Wheel
         moves.get(Moves.flameWheel).statusPercentChance = 50.0;
-
+        
+        // 177 Aeroblast
+        updateMovePower(moves, Moves.aeroblast, 90);
+        updateMoveAccuracy(moves, Moves.aeroblast, 90);
+        
         // 185 Feint Attack
         moves.get(Moves.feintAttack).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
         updateMovePower(moves, Moves.feintAttack, 65);
@@ -6158,13 +6168,14 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePP(moves, Moves.feintAttack, 15);
         moves.get(Moves.feintAttack).effect = MoveEffect.DMG_TRGT_DEF_MINUS_1;
         moves.get(Moves.feintAttack).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100.0);
-        if (generationOfPokemon() >= 3)
-            moves.get(Moves.feintAttack).name = "FeintAttack";
-        else
+        if (generationOfPokemon() >= 4) {
             moves.get(Moves.feintAttack).name = "Feint Attack";
-        if (generationOfPokemon() >= 4)
             moves.get(Moves.feintAttack).description = "The user approaches the target disarmingly, then throws a sucker punch. It also lowers the target's Defense stat.";
-
+        }
+        
+        // 188 Sludge Bomb
+        updateMovePower(moves, Moves.sludgeBomb, 80);
+        
         // 189 Mud-Slap
         updateMovePower(moves, Moves.mudSlap, 40);
         moves.get(Moves.mudSlap).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -2, 100.0);
@@ -6172,17 +6183,27 @@ public abstract class AbstractRomHandler implements RomHandler {
             moves.get(Moves.mudSlap).description = "The user hurls mud in the target to inflict damage and harshly lower its Attack stat.";
 
         // 190 Octazooka
-        updateMovePower(moves, Moves.octazooka, 75);
-        updateMoveAccuracy(moves, Moves.octazooka, 100);
-        moves.get(Moves.octazooka).effect = MoveEffect.DMG_TRGT_SPA_MINUS_1;
-        moves.get(Moves.octazooka).statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
+        if (generationOfPokemon() >= 5) {
+            updateMovePower(moves, Moves.octazooka, 75);
+            updateMoveAccuracy(moves, Moves.octazooka, 100);
+            moves.get(Moves.octazooka).effect = MoveEffect.DMG_TRGT_SPA_MINUS_1;
+            moves.get(Moves.octazooka).statChanges[0].type = StatChangeType.SPECIAL_ATTACK;
+        } else {
+            updateMovePower(moves, Moves.octazooka, 70);
+            updateMoveAccuracy(moves, Moves.octazooka, 95);
+            moves.get(Moves.octazooka).qualities = MoveQualities.DAMAGE_TARGET_STATUS;
+            moves.get(Moves.octazooka).statusType = MoveStatusType.BURN;
+            moves.get(Moves.octazooka).statusPercentChance = 30;
+            moves.get(Moves.octazooka).effect = MoveEffect.DMG_BRN_THAW;
+            moves.get(Moves.octazooka).statChanges[0] = new Move.StatChange();
+        }
         if (generationOfPokemon() >= 4)
             moves.get(Moves.octazooka).description = "The user attacks by spraying ink in the target's face or eyes. It also lowers the target's Sp. Atk stat.";
 
         // 192 Zap Cannon
         moves.get(Moves.zapCannon).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-        updateMovePower(moves, Moves.zapCannon, 130);
-        updateMoveAccuracy(moves, Moves.zapCannon, 90);
+        updateMovePower(moves, Moves.zapCannon, 110);
+        updateMoveAccuracy(moves, Moves.zapCannon, 95);
         moves.get(Moves.zapCannon).statusType = MoveStatusType.NONE;
         moves.get(Moves.zapCannon).statusPercentChance = 0.0;
         moves.get(Moves.zapCannon).effect = MoveEffect.DMG_USER_SPA_MINUS_2;
@@ -6205,24 +6226,49 @@ public abstract class AbstractRomHandler implements RomHandler {
                 moves.get(Moves.destinyBond).description = "The user manifests itself in a more physical form. This raises its Attack and Defense stats as well as its accuracy.";
         }
 
-        // 196 Icy Wind
-        updateMovePower(moves, Moves.icyWind, 60);
-
         // 198 Bone Rush
         updateMoveAccuracy(moves, Moves.boneRush, 100);
 
+        // 200 Outrage
+        updateMovePower(moves, Moves.outrage, 55);
+        moves.get(Moves.outrage).priority = moves.get(Moves.revenge).priority;
+        moves.get(Moves.outrage).effect = MoveEffect.REVENGE;
+        moves.get(Moves.outrage).target = MoveTarget.ANY_ADJACENT;
+        
+        // 202 Giga Drain
+        updateMovePower(moves, Moves.gigaDrain, 70);
+        
         // 205 Rollout
-        updateMoveAccuracy(moves, Moves.rollout, 95);
-
+        if (generationOfPokemon() >= 5) {
+            moves.get(Moves.rollout).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
+            updateMovePower(moves, Moves.rollout, 50);
+            updateMoveAccuracy(moves, Moves.rollout, 100);
+            moves.get(Moves.rollout).effect = MoveEffect.DMG_USER_SPE_PLUS_1;
+            moves.get(Moves.rollout).statChanges[0] = new Move.StatChange(StatChangeType.SPEED, 1, 100.0);
+        } else {
+            moves.get(Moves.rollout).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+            updateMovePower(moves, Moves.rollout, 65);
+            updateMoveAccuracy(moves, Moves.rollout, 100);
+            moves.get(Moves.rollout).effect = MoveEffect.DMG_TRGT_SPE_MINUS_1;
+            moves.get(Moves.rollout).statChanges[0] = new Move.StatChange(StatChangeType.SPEED, -1, 100.0);
+        }
+        
         // 210 Fury Cutter
-        updateMovePower(moves, Moves.furyCutter, 50);
-        updateMoveAccuracy(moves, Moves.furyCutter, 100);
-        updateMovePP(moves, Moves.furyCutter, 10);
-        moves.get(Moves.furyCutter).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-        moves.get(Moves.furyCutter).effect = MoveEffect.DMG_USER_ATK_PLUS_1;
-        moves.get(Moves.furyCutter).statChanges[0].type = StatChangeType.ATTACK;
-        moves.get(Moves.furyCutter).statChanges[0].stages = 1;
-        moves.get(Moves.furyCutter).statChanges[0].percentChance = 100.0;
+        if (generationOfPokemon() >= 5) {
+            updateMovePower(moves, Moves.furyCutter, 50);
+            updateMoveAccuracy(moves, Moves.furyCutter, 100);
+            updateMovePP(moves, Moves.furyCutter, 10);
+            moves.get(Moves.furyCutter).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
+            moves.get(Moves.furyCutter).effect = MoveEffect.DMG_USER_ATK_PLUS_1;
+            moves.get(Moves.furyCutter).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, 1, 100.0);
+        } else {
+            updateMovePower(moves, Moves.furyCutter, 65);
+            updateMoveAccuracy(moves, Moves.furyCutter, 100);
+            updateMovePP(moves, Moves.furyCutter, 10);
+            moves.get(Moves.furyCutter).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+            moves.get(Moves.furyCutter).effect = MoveEffect.DMG_TRGT_DEF_MINUS_1;
+            moves.get(Moves.furyCutter).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100.0);
+        }
         if (generationOfPokemon() >= 4)
             moves.get(Moves.furyCutter).description = "The target is slashed with scythes or claws. It also raises the user's Attack stat.";
 
@@ -6232,45 +6278,41 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (generationOfPokemon() >= 4)
             moves.get(Moves.steelWing).description = "The target is hit with wings of steel. It also raises the user's Defense stat.";
 
-//        // 219 Safeguard
-//        if (typeInGame(Type.FAIRY))
-//            updateMoveType(moves, Moves.safeguard, Type.FAIRY);
+        // 219 Safeguard
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.safeguard, Type.FAIRY);
 
         // 220 Pain Split
         updateMoveType(moves, Moves.painSplit, Type.GHOST);
+        
+        // 221 Sacred Fire
+        updateMovePower(moves, Moves.sacredFire, 90);
+        moves.get(Moves.steelWing).statusPercentChance = 30.0;
+        
+        // 223 Dynamic Punch
+        updateMovePower(moves, Moves.dynamicPunch, 90);
 
         // 224 Megahorn
-        moves.get(Moves.megahorn).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
         updateMoveAccuracy(moves, Moves.megahorn, 100);
-        updateMovePP(moves, Moves.megahorn, 5);
-        if (generationOfPokemon() < 4) {
-            moves.get(Moves.megahorn).effect = MoveEffect.DMG_USER_ATK_DEF_MINUS_1;
-            moves.get(Moves.megahorn).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100);
-            moves.get(Moves.megahorn).statChanges[1] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
-        } else {
-            moves.get(Moves.megahorn).effect = MoveEffect.DMG_USER_DEF_SPD_MINUS_1;
-            moves.get(Moves.megahorn).statChanges[0] = new Move.StatChange(StatChangeType.DEFENSE, -1, 100);
-            moves.get(Moves.megahorn).statChanges[1] = new Move.StatChange(StatChangeType.SPECIAL_DEFENSE, -1, 100);
-        }
-        if (generationOfPokemon() >= 4)
-            moves.get(Moves.megahorn).description = "Using its tough and impressive horn, the user rams into the target. It lowers the user’s Defense and Sp. Def stats.";
 
         // 225 Dragon Breath
         updateMovePower(moves, Moves.dragonBreath, 70);
 
-//        // 227 Encore
-//        if (typeInGame(Type.FAIRY))
-//            updateMoveType(moves, Moves.encore, Type.FAIRY);
+        // 227 Encore
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.encore, Type.FAIRY);
 
+        // 229 Rapid Spin
+        moves.get(Moves.rapidSpin).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+        updateMovePower(moves, Moves.rapidSpin, 65);
+        moves.get(Moves.rapidSpin).effect = MoveEffect.DMG_TRGT_SPE_MINUS_1;
+        moves.get(Moves.rapidSpin).statChanges[0] = new Move.StatChange(StatChangeType.SPEED, -1, 100.0);
+        
         // 231 Iron Tail
-        updateMovePower(moves, Moves.ironTail, 65);
-        updateMoveAccuracy(moves, Moves.ironTail, 100);
-        moves.get(Moves.ironTail).statChanges[0].percentChance = 100.0;
-        if (generationOfPokemon() >= 4)
-            moves.get(Moves.ironTail).description = "The target is slammed with a steel-hard tail. It also lowers the target's Defense stat.";
+        updateMovePower(moves, Moves.ironTail, 85);
+        updateMoveAccuracy(moves, Moves.ironTail, 90);
 
         // 232 Metal Claw
-        updateMovePower(moves, Moves.metalClaw, 60);
         updateMoveAccuracy(moves, Moves.metalClaw, 100);
         updateMovePP(moves, Moves.metalClaw, 10);
         moves.get(Moves.metalClaw).statChanges[0].percentChance = 100.0;
@@ -6278,14 +6320,22 @@ public abstract class AbstractRomHandler implements RomHandler {
             moves.get(Moves.metalClaw).description = "The target is raked with steel claws. It also raises the user's Attack stat.";
 
         // 233 Vital Throw
-        updateMovePower(moves, Moves.vitalThrow, 100);
+        updateMovePower(moves, Moves.vitalThrow, 90);
 
+        // 238 Cross Chop
+        updateMovePower(moves, Moves.crossChop, 90);
+        
         // 239 Twister
+        moves.get(Moves.twister).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+        updateMovePower(moves, Moves.twister, 55);
         if (doubles) {
-            updateMovePower(moves, Moves.twister, 75);
             updateMoveAccuracy(moves, Moves.twister, 90);
+        } else {
+            updateMoveAccuracy(moves, Moves.twister, 95);
         }
-        moves.get(Moves.twister).flinchPercentChance = 30.0;
+        moves.get(Moves.twister).flinchPercentChance = 0.0;
+        moves.get(Moves.twister).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
+        moves.get(Moves.twister).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100.0);
 
 //        // 243 Mirror Coat
 //        updateMoveType(moves, Moves.mirrorCoat, Type.STEEL);
@@ -6301,6 +6351,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (typeInGame(Type.FAIRY))
             updateMoveType(moves, Moves.psychUp, Type.FAIRY);
 
+        // 245 Extreme Speed
+        updateMovePower(moves, Moves.extremeSpeed, 70);
+        
         // 249 Rock Smash
         if (generationOfPokemon() == 6) {
             updateMovePower(moves, Moves.rockSmash, 75);
@@ -6320,13 +6373,16 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (generationOfPokemon() < 3)
             return;
 
+        // 257 Heat Wave
+        updateMovePower(moves, Moves.heatWave, 75);
+        
         // 260 Flatter
         if (typeInGame(Type.FAIRY))
             updateMoveType(moves, Moves.flatter, Type.FAIRY);
 
         // 261 Will-O-Wisp
-        updateMoveAccuracy(moves, Moves.willOWisp, 100);
         updateMoveType(moves, Moves.willOWisp, Type.GHOST);
+        updateMoveAccuracy(moves, Moves.willOWisp, 100);
 
         // 262 Memento
         if (generationOfPokemon() == 5) {
@@ -6345,44 +6401,59 @@ public abstract class AbstractRomHandler implements RomHandler {
                 moves.get(Moves.memento).description = "The user reveals a dark energy and damages the target. It also lowers the target's Attack stat.";
         }
 
-//        // 266 Follow Me
-//        if (typeInGame(Type.FAIRY))
-//            updateMoveType(moves, Moves.followMe, Type.FAIRY);
+        // 264 Focus Punch
+        updateMovePower(moves, Moves.focusPunch, 130);
+        
+        // 266 Follow Me
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.followMe, Type.FAIRY);
 
-//        // 270 Helping Hand
-//        if (typeInGame(Type.FAIRY))
-//            updateMoveType(moves, Moves.helpingHand, Type.FAIRY);
+        // 270 Helping Hand
+        if (typeInGame(Type.FAIRY))
+            updateMoveType(moves, Moves.helpingHand, Type.FAIRY);
 
         // 273 Wish
         if (typeInGame(Type.FAIRY))
             updateMoveType(moves, Moves.wish, Type.FAIRY);
 
+        // 276 Superpower
+        updateMovePower(moves, Moves.superpower, 110);
+        moves.get(Moves.lusterPurge).statChanges[1] = new Move.StatChange();
+
+        // 279 Revenge
+        updateMoveType(moves, Moves.revenge, Type.DARK);
+        updateMovePower(moves, Moves.revenge, 55);
+        
+        // 284 Eruption
+        updateMovePower(moves, Moves.eruption, 100);
+        
         // 292 Arm Thrust
         updateMovePower(moves, Moves.armThrust, 25);
 
         // 295 Luster Purge
-        if (generationOfPokemon() >= 6 || !typeInGame(Type.FAIRY)) {
-            updateMovePower(moves, Moves.lusterPurge, 65);
-            updateMovePP(moves, Moves.lusterPurge, 10);
-            moves.get(Moves.lusterPurge).statChanges[0].percentChance = 100.0;
-            if (generationOfPokemon() >= 4)
-                moves.get(Moves.lusterPurge).description = "The user lets loose a damaging burst of light. It also lowers the target's Sp. Def stat.";
-        }
+        updateMovePower(moves, Moves.lusterPurge, 65);
+        updateMovePP(moves, Moves.lusterPurge, 10);
+        moves.get(Moves.lusterPurge).statChanges[0].percentChance = 100.0;
+        if (generationOfPokemon() >= 4)
+            moves.get(Moves.lusterPurge).description = "The user lets loose a damaging burst of light. It also lowers the target's Sp. Def stat.";
 
         // 296 Mist Ball
-        if (generationOfPokemon() >= 6 || !typeInGame(Type.FAIRY)) {
-            updateMovePower(moves, Moves.mistBall, 75);
-            updateMovePP(moves, Moves.mistBall, 10);
-            moves.get(Moves.mistBall).statChanges[0].percentChance = 100.0;
-            if (generationOfPokemon() >= 4)
-                moves.get(Moves.mistBall).description = "A mistlike flurry of down envelops and damages the target. It also lowers the target's Sp. Atk.";
-        }
+        updateMovePower(moves, Moves.mistBall, 75);
+        updateMovePP(moves, Moves.mistBall, 10);
+        moves.get(Moves.mistBall).statChanges[0].percentChance = 100.0;
+        if (generationOfPokemon() >= 4)
+            moves.get(Moves.mistBall).description = "A mistlike flurry of down envelops and damages the target. It also lowers the target's Sp. Atk.";
 
         // 299 Blaze Kick
+        updateMovePower(moves, Moves.blazeKick, 80);
         updateMoveAccuracy(moves, Moves.blazeKick, 95);
 
-        // 300 Ice Ball
-        updateMoveAccuracy(moves, Moves.iceBall, 95);
+        // 301 Ice Ball
+        moves.get(Moves.iceBall).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+        updateMovePower(moves, Moves.iceBall, 65);
+        updateMoveAccuracy(moves, Moves.iceBall, 100);
+        moves.get(Moves.iceBall).effect = MoveEffect.DMG_TRGT_SPE_MINUS_1;
+        moves.get(Moves.iceBall).statChanges[0] = new Move.StatChange(StatChangeType.SPEED, -1, 100.0);
 
         // 304 Hyper Voice
         moves.get(Moves.hyperVoice).flinchPercentChance = 10.0;
@@ -6395,7 +6466,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 308 Hydro Cannon
         moves.get(Moves.hydroCannon).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-        updateMovePower(moves, Moves.hydroCannon, 120);
+        updateMovePower(moves, Moves.hydroCannon, 110);
         updateMoveAccuracy(moves, Moves.hydroCannon, 100);
         moves.get(Moves.hydroCannon).effect = MoveEffect.DMG_USER_SPA_MINUS_2;
         moves.get(Moves.hydroCannon).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, -1, 100);
@@ -6405,7 +6476,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // 310 Astonish
         // TODO Test this in gen 6... doesn't work in Gen V!
-        if (generationOfPokemon() != 5) {
+        if (generationOfPokemon() <= 5) {
             updateMovePower(moves, Moves.astonish, 40);
             updateMovePP(moves, Moves.astonish, 10);
             moves.get(Moves.astonish).priority = 3;
@@ -6414,14 +6485,12 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (generationOfPokemon() >= 4)
                 moves.get(Moves.astonish).description = "An attack that hits first and makes the target flinch. It only works the first turn the user is in battle.";
         }
-
-        // 314 Air Cutter
-        updateMovePower(moves, Moves.airCutter, 75);
-        updateMoveAccuracy(moves, Moves.airCutter, 100);
-        updateMovePP(moves, Moves.airCutter, 15);
-
+        
+        // 315 Overheat
+        updateMovePower(moves, Moves.overheat, 110);
+        updateMoveAccuracy(moves, Moves.overheat, 95);
+        
         // 317 Rock Tomb
-        updateMovePower(moves, Moves.rockTomb, 65);
         updateMoveAccuracy(moves, Moves.rockTomb, 100);
 
         // 319 Metal Sound
@@ -6431,8 +6500,16 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (typeInGame(Type.FAIRY))
             updateMoveType(moves, Moves.tickle, Type.FAIRY);
 
+        // 323 Water Spout
+        updateMovePower(moves, Moves.waterSport, 100);
+        
         // 324 Signal Beam
-        moves.get(Moves.signalBeam).statusPercentChance = 30.0;
+        moves.get(Moves.signalBeam).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+        updateMovePower(moves, Moves.signalBeam, 70);
+        moves.get(Moves.signalBeam).statusType = MoveStatusType.NONE;
+        moves.get(Moves.signalBeam).statusPercentChance = 0.0;
+        moves.get(Moves.signalBeam).effect = MoveEffect.DMG_TRGT_ATK_MINUS_1;
+        moves.get(Moves.signalBeam).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -1, 100.0);
 
         // 325 Shadow Punch
         updateMovePower(moves, Moves.shadowPunch, 75);
@@ -6442,27 +6519,26 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.extrasensory).flinchPercentChance = 30.0;
 
         // 327 Sky Uppercut
-        updateMovePower(moves, Moves.skyUppercut, 80);
+        updateMovePower(moves, Moves.skyUppercut, 75);
         updateMoveAccuracy(moves, Moves.skyUppercut, 100);
 
         // 328 Sand Tomb
         updateMoveAccuracy(moves, Moves.sandTomb, 100);
 
-//        // 329 Sheer Cold
-//        moves.get(Moves.sheerCold).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
-//        updateMovePower(moves, Moves.sheerCold, 130);
-//        updateMoveAccuracy(moves, Moves.sheerCold, 90);
-//        moves.get(Moves.sheerCold).effect = MoveEffect.DMG_USER_SPA_MINUS_2;
-//        moves.get(Moves.sheerCold).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, -2, 100.0);
-//        moves.get(Moves.sheerCold).description = "The target is attacked with a blast of absolute-zero cold. This harshly reduces the user's Sp. Atk stat.";
+        // 329 Sheer Cold
+        moves.get(Moves.sheerCold).qualities = MoveQualities.DAMAGE_USER_STAT_CHANGE;
+        updateMovePower(moves, Moves.sheerCold, 110);
+        updateMoveAccuracy(moves, Moves.sheerCold, 95);
+        moves.get(Moves.sheerCold).effect = MoveEffect.DMG_USER_SPA_MINUS_2;
+        moves.get(Moves.sheerCold).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, -2, 100.0);
+        moves.get(Moves.sheerCold).description = "The target is attacked with a blast of absolute-zero cold. This harshly reduces the user's Sp. Atk stat.";
 
         // 330 Muddy Water
-        if (doubles)
-            updateMovePower(moves, Moves.muddyWater, 65);
+        updateMovePower(moves, Moves.muddyWater, 55);
         updateMoveAccuracy(moves, Moves.muddyWater, 95);
+        updateMovePP(moves, Moves.muddyWater, 15);
         moves.get(Moves.muddyWater).effect = MoveEffect.DMG_TRGT_SPE_MINUS_1;
-        moves.get(Moves.muddyWater).statChanges[0].type = StatChangeType.SPEED;
-        moves.get(Moves.muddyWater).statChanges[0].percentChance = 100.0;
+        moves.get(Moves.muddyWater).statChanges[0] = new Move.StatChange(StatChangeType.SPEED, -1, 100.0);
         if (generationOfPokemon() >= 4)
             moves.get(Moves.muddyWater).description = "The user attacks by shooting muddy water at the opposing team. It also lowers their Speed stats.";
 
@@ -6479,7 +6555,6 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // 340 Bounce
-        updateMovePower(moves, Moves.bounce, 95);
         updateMoveAccuracy(moves, Moves.bounce, 100);
 
         // 341 Mud Shot
@@ -6490,11 +6565,28 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMovePower(moves, Moves.poisonTail, 60);
         moves.get(Moves.poisonTail).statusPercentChance = 30;
 
+        // 344 Volt Tackle
+        updateMovePower(moves, Moves.voltTackle, 100);
+        
+        // 348 Leaf Blade
+        updateMovePower(moves, Moves.leafBlade, 70);
+        
         // 350 Rock Blast
         updateMoveAccuracy(moves, Moves.rockBlast, 100);
 
+        // 352 Water Pulse
+        moves.get(Moves.waterPulse).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
+        moves.get(Moves.waterPulse).statusType = MoveStatusType.NONE;
+        moves.get(Moves.waterPulse).statusPercentChance = 0.0;
+        moves.get(Moves.waterPulse).effect = MoveEffect.DMG_TRGT_SPA_MINUS_1;
+        moves.get(Moves.waterPulse).statChanges[0] = new Move.StatChange(StatChangeType.SPECIAL_ATTACK, -1, 100.0);
+        
+        // 353 Doom Desire
+        updateMovePower(moves, Moves.doomDesire, 120);
+        
         // 354 Psycho Boost
-        updateMovePower(moves, Moves.psychoBoost, 130);
+        updateMovePower(moves, Moves.psychoBoost, 110);
+        updateMoveAccuracy(moves, Moves.psychoBoost, 95);
 
         // Gen IV
         if (generationOfPokemon() < 4)
@@ -8517,7 +8609,8 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private boolean isBannedRandomMove(Settings settings, Move mv) {
-        if ((settings.isNoCounter() && mv.isCounterMove()))
+        // TODO: Temp Destiny Bond; need to make this its own thing?
+        if ((settings.isNoCounter() && (mv.isCounterMove() || mv.effect == MoveEffect.DESTINY_BOND)))
             return true;
         if (settings.isNoSelfDestruct() && mv.isExplosionMove())
             return true;
@@ -8525,9 +8618,9 @@ public abstract class AbstractRomHandler implements RomHandler {
             return true;
         if (settings.isNoDirectDamageMoves() && mv.isDirectDamageMove())
             return true;
-        if (settings.isNoMetronome() && mv.number == Moves.metronome)
+        if (settings.isNoMetronome() && mv.effect == MoveEffect.METRONOME)
             return true;
-        if (settings.isNoMagnitude() && mv.number == Moves.magnitude)
+        if (settings.isNoMagnitude() && mv.effect == MoveEffect.MAGNITUDE)
             return true;
         if (settings.isNoOHKOMoves() && mv.isOHKOMove())
             return true;

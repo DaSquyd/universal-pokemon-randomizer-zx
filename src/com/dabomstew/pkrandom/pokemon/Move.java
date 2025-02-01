@@ -47,6 +47,12 @@ public class Move {
             percentChance = 0.0;
         }
 
+        public StatChange(StatChangeType type, int stages) {
+            this.type = type;
+            this.stages = stages;
+            this.percentChance = 0.0;
+        }
+
         public StatChange(StatChangeType type, int stages, double percentChance) {
             this.type = type;
             this.stages = stages;
@@ -119,7 +125,6 @@ public class Move {
     public int internalId = 0;
     public Type type = Type.NORMAL; // 00
     public MoveQualities qualities; // 01
-    public StatChangeMoveType statChangeMoveType = StatChangeMoveType.NONE_OR_UNKNOWN;
     public MoveCategory category = MoveCategory.STATUS; // 02
     public int power = 0; // 03
     public double accuracy = 0; // 04
@@ -174,7 +179,7 @@ public class Move {
             this.statChanges[i].type = StatChangeType.NONE;
         }
     }
-    
+
     public String getDisplayName() {
         if (name.length() > 15)
             return name.replace(" ", "");
@@ -187,26 +192,6 @@ public class Move {
                 || effect == MoveEffect.PREVENT_ESCAPE;
     }
 
-    public StatChangeMoveType getStatChangeMoveType() {
-        if (qualities == null) {
-            // TODO: Finish this later for Gen IV
-
-            return statChangeMoveType;
-        }
-
-        return switch (qualities) {
-            case NO_DAMAGE_STAT_CHANGE, NO_DAMAGE_STAT_CHANGE_STATUS -> switch (target) {
-                case ADJACENT_ALLY -> StatChangeMoveType.NO_DAMAGE_ALLY;
-                case PARTY, USER -> StatChangeMoveType.NO_DAMAGE_USER;
-                case ALL_ON_FIELD -> StatChangeMoveType.NO_DAMAGE_ALL;
-                default -> StatChangeMoveType.NO_DAMAGE_TARGET;
-            };
-            case DAMAGE_TARGET_STAT_CHANGE -> StatChangeMoveType.DAMAGE_TARGET;
-            case DAMAGE_USER_STAT_CHANGE -> StatChangeMoveType.DAMAGE_USER;
-            default -> StatChangeMoveType.NONE_OR_UNKNOWN;
-        };
-    }
-
     public boolean hasSpecificStatChange(StatChangeType type, boolean isPositive) {
         for (StatChange sc : this.statChanges) {
             if (sc.type == type && (isPositive ^ sc.stages < 0)) {
@@ -216,9 +201,43 @@ public class Move {
         return false;
     }
 
+    public boolean isFoeTargeted() {
+        switch (target) {
+            case ANY_ADJACENT, ADJACENT_FOE, ALL_ADJACENT, ALL_ADJACENT_FOES, ALL_ON_FIELD, RANDOM_ADJACENT_FOE -> {
+                return true;
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
+
     public boolean hasBeneficialStatChange() {
-        return (getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET && statChanges[0].stages < 0) ||
-                getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER && statChanges[0].stages > 0;
+        switch (target) {
+            case ANY_ADJACENT, ADJACENT_FOE, ALL_ADJACENT, ALL_ADJACENT_FOES, ALL_ON_FIELD, RANDOM_ADJACENT_FOE -> {
+                return statChanges[0].stages < 0;
+            }
+            case USER_OR_ALLY, ADJACENT_ALLY, PARTY, USER -> {
+                return statChanges[0].stages > 0;
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
+
+    public boolean hasDetrimentalStatChange() {
+        switch (target) {
+            case ANY_ADJACENT, ADJACENT_FOE, ALL_ADJACENT, ALL_ADJACENT_FOES, ALL_ON_FIELD, RANDOM_ADJACENT_FOE -> {
+                return statChanges[0].stages > 0;
+            }
+            case USER_OR_ALLY, ADJACENT_ALLY, PARTY, USER -> {
+                return statChanges[0].stages < 0;
+            }
+            default -> {
+                return false;
+            }
+        }
     }
 
     public boolean hasPerfectAccuracy() {
@@ -234,7 +253,7 @@ public class Move {
     }
 
     public boolean isExplosionMove() {
-        return effect == MoveEffect.USER_FAINTS;
+        return effect == MoveEffect.EXPLOSION;
     }
 
     public boolean isDirectDamageMove() {
@@ -254,27 +273,13 @@ public class Move {
         if (power * getHitCount(generation) < 20)
             return false;
 
-        switch (effect) {
-            case DREAM_EATER:
-            case SNORE:
-            case FALSE_SWIPE:
-            case FUTURE_SIGHT:
-            case FAKE_OUT:
-            case FOCUS_PUNCH:
-            case FEINT:
-            case LAST_RESORT:
-            case SUCKER_PUNCH:
-            case RAGE:
-            case ROLLOUT:
-            case SYNCHRONOISE:
-                // case SHELL_TRAP; TODO
-            case FOUL_PLAY:
-            case SPIT_UP:
-            case OHKO:
-                return false;
-        }
+        return switch (effect) {
+            // case SHELL_TRAP; TODO
+            case DREAM_EATER, SNORE, FALSE_SWIPE, FUTURE_SIGHT, FAKE_OUT, FOCUS_PUNCH, FEINT, LAST_RESORT, SUCKER_PUNCH, RAGE, ROLLOUT, SYNCHRONOISE, FOUL_PLAY, SPIT_UP, OHKO ->
+                    false;
+            default -> true;
+        };
 
-        return true;
     }
 
     public double getHitCount(int generation) {
@@ -287,21 +292,29 @@ public class Move {
         };
     }
 
-    public StatusMoveType getStatusMoveType() {
-        if (qualities == null) {
-            // TODO: Finish this later for Gen IV
+    public boolean isDamagingMove() {
+        if (power > 0)
+            return true;
 
+        if (category != null)
             return switch (category) {
-                case PHYSICAL, SPECIAL -> StatusMoveType.DAMAGE;
-                case STATUS -> StatusMoveType.NO_DAMAGE;
+                case PHYSICAL, SPECIAL -> true;
+                case STATUS -> false;
             };
-        }
 
-        return switch (qualities) {
-            case NO_DAMAGE_STATUS -> StatusMoveType.NO_DAMAGE;
-            case DAMAGE_TARGET_STATUS -> StatusMoveType.DAMAGE;
-            default -> StatusMoveType.NONE_OR_UNKNOWN;
-        };
+        if (qualities != null)
+            return switch (qualities) {
+                case DAMAGE, DAMAGE_TARGET_STATUS, DAMAGE_TARGET_STAT_CHANGE, DAMAGE_USER_STAT_CHANGE, DRAIN_HEALTH, OHKO -> true;
+                case NO_DAMAGE_STATUS, NO_DAMAGE_STAT_CHANGE, HEAL, NO_DAMAGE_STAT_CHANGE_STATUS, FIELD_EFFECT, TEAM_EFFECT, FORCE_SWITCH, OTHER -> false;
+            };
+
+        if (effect.qualities != null)
+            return switch (effect.qualities) {
+                case DAMAGE, DAMAGE_TARGET_STATUS, DAMAGE_TARGET_STAT_CHANGE, DAMAGE_USER_STAT_CHANGE, DRAIN_HEALTH, OHKO -> true;
+                case NO_DAMAGE_STATUS, NO_DAMAGE_STAT_CHANGE, HEAL, NO_DAMAGE_STAT_CHANGE_STATUS, FIELD_EFFECT, TEAM_EFFECT, FORCE_SWITCH, OTHER -> false;
+            };
+
+        return false;
     }
 
     public boolean isGoodDamaging(int generation) {
@@ -326,7 +339,7 @@ public class Move {
         // TODO: Add in explicit moves
         return qualities == MoveQualities.DAMAGE_TARGET_STATUS || qualities == MoveQualities.DAMAGE_TARGET_STAT_CHANGE || flinchPercentChance > 0;
     }
-    
+
     public boolean isAbsorbMove() {
         return qualities == MoveQualities.DRAIN_HEALTH && recoil > 0;
     }
@@ -337,5 +350,183 @@ public class Move {
 
     public String toString() {
         return String.format("#%d %s - Type: %s, Power: %d, Acc: %d%%, PP: %d, Priority: %+d, Effect: %s", number, name, type, power, Math.round(accuracy), pp, priority, effect);
+    }
+
+    public boolean makesObsolete(Move other, boolean doubleBattleMode) {
+        if (this == other)
+            return false;
+
+        switch (qualities) {
+            case DAMAGE ->  {
+                if (other.qualities != MoveQualities.DAMAGE || effect != other.effect)
+                    return false;
+            }
+            case NO_DAMAGE_STATUS, NO_DAMAGE_STAT_CHANGE, NO_DAMAGE_STAT_CHANGE_STATUS, OHKO, FIELD_EFFECT, TEAM_EFFECT, FORCE_SWITCH -> {
+                if (qualities != other.qualities)
+                    return false;
+            }
+            case DAMAGE_TARGET_STATUS, DAMAGE_TARGET_STAT_CHANGE, DAMAGE_USER_STAT_CHANGE, DRAIN_HEALTH -> {
+                if (other.qualities != MoveQualities.DAMAGE && qualities != other.qualities)
+                    return false;
+                
+                if (other.qualities == MoveQualities.DAMAGE && effect != other.effect)
+                    return false;
+            }
+            case HEAL -> {
+                if (qualities != other.qualities || effect != other.effect)
+                    return false;
+            }
+            case OTHER -> {
+                return false;
+            }
+        }
+
+        // Incomparable
+        if (type != other.type)
+            return false;
+
+        // Incomparable
+        if (category != other.category)
+            return false;
+
+        // Incomparable
+        if ((power > 1) != (other.power > 1))
+            return false;
+
+        // Incomparable
+        if (minHits != other.minHits || maxHits != other.maxHits)
+            return false;
+
+        // Incomparable
+        if (statusType != other.statusType)
+            return false;
+        
+        // Incomparable
+        if (isTrapMove() != other.isTrapMove())
+            return false;
+
+        // Incomparable
+        if (isOHKOMove() != other.isOHKOMove())
+            return false;
+
+        // Incomparable
+        if (isChargeMove != other.isChargeMove)
+            return false;
+
+        // Incomparable
+        if (isRechargeMove != other.isRechargeMove)
+            return false;
+
+        double tempPower = power;
+        double otherTempPower = other.power;
+        
+        if (doubleBattleMode) {
+            tempPower *= target == MoveTarget.ALL_ADJACENT_FOES || target == MoveTarget.ALL_ADJACENT || target == MoveTarget.ALL_ON_FIELD ? 0.75 : 1.0;
+            otherTempPower *= other.target == MoveTarget.ALL_ADJACENT_FOES || other.target == MoveTarget.ALL_ADJACENT || other.target == MoveTarget.ALL_ON_FIELD ? 0.75 : 1.0;
+            
+            switch (other.target) {
+                // Other is single-foe target
+                case ANY_ADJACENT, ADJACENT_FOE -> {
+                    if (target == MoveTarget.ALL_ADJACENT_FOES) {
+                        if (tempPower < otherTempPower)
+                            return false;
+                    }
+                }
+                default -> {
+                    if (target != other.target)
+                        return false;
+
+                    if (tempPower < otherTempPower)
+                        return false;
+                }
+            }
+        } else if (isFoeTargeted() != other.isFoeTargeted()) {
+            return false;
+        } else if (tempPower < otherTempPower) {
+            return false;
+        }
+
+        // Worse
+        if (accuracy < other.accuracy)
+            return false;
+
+        // Worse
+        if (priority < other.priority)
+            return false;
+
+        // Worse
+        if (statusPercentChance < other.statusPercentChance)
+            return false;
+
+        // Worse
+        if (criticalChance.ordinal() < other.criticalChance.ordinal())
+            return false;
+
+        // Worse
+        if (flinchPercentChance < other.flinchPercentChance)
+            return false;
+
+        if (hasDetrimentalStatChange() && !other.hasDetrimentalStatChange())
+            return false;
+
+        if (!hasBeneficialStatChange() && other.hasBeneficialStatChange())
+            return false;
+        
+        // Worse (other has stat boost that we don't or better for what we do have
+        for (StatChange otherStatChange : other.statChanges) {
+            if (otherStatChange.type == StatChangeType.NONE)
+                continue;
+
+            boolean has = false;
+            for (StatChange statChange : statChanges) {
+                if (statChange.type == StatChangeType.NONE || statChange.type != otherStatChange.type)
+                    continue;
+
+                has = true;
+
+                if (Math.abs(statChange.stages) < Math.abs(otherStatChange.stages))
+                    return false;
+
+                if (statChange.percentChance < otherStatChange.percentChance)
+                    return false;
+            }
+
+            if (!has)
+                return false;
+        }
+
+        // Main success condition
+        if (tempPower > otherTempPower
+                || accuracy > other.accuracy
+                || priority > other.priority
+                || statusPercentChance > other.statusPercentChance
+                || criticalChance.ordinal() > other.criticalChance.ordinal()
+                || flinchPercentChance > other.flinchPercentChance)
+            return true;
+
+        for (StatChange statChange : statChanges) {
+            if (statChange.type == StatChangeType.NONE)
+                continue;
+            
+            boolean has = false;
+            for (StatChange otherStatChange : other.statChanges) {
+                if (statChange.type != otherStatChange.type)
+                    continue;
+
+                has = true;
+
+                if (Math.abs(statChange.stages) > Math.abs(otherStatChange.stages))
+                    return true;
+
+                if (statChange.percentChance > otherStatChange.percentChance)
+                    return true;
+            }
+
+            if (!has)
+                return true;
+        }
+
+        // Effectively the same move
+        return false;
     }
 }

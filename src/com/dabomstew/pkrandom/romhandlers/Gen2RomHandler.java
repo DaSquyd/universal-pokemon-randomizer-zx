@@ -582,7 +582,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 break;
         }
 
-        if (move.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_TARGET || move.getStatChangeMoveType() == StatChangeMoveType.DAMAGE_USER) {
+        if (move.isDamagingMove()) {
             for (int i = 0; i < move.statChanges.length; i++) {
                 if (move.statChanges[i].type != StatChangeType.NONE) {
                     move.statChanges[i].percentChance = secondaryEffectChance;
@@ -652,7 +652,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 break;
         }
 
-        if (move.getStatusMoveType() == StatusMoveType.DAMAGE) {
+        if (move.isDamagingMove()) {
             move.statusPercentChance = secondaryEffectChance;
             if (move.statusPercentChance == 0.0) {
                 move.statusPercentChance = 100.0;
