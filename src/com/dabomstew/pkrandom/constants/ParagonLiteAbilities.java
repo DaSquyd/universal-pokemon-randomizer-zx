@@ -26,8 +26,6 @@ package com.dabomstew.pkrandom.constants;
 import java.util.Set;
 
 public class ParagonLiteAbilities {
-
-    public static final int xrayVision = Abilities.frisk;
     public static final int herbivore = Abilities.sapSipper;
 
     public static final int heavyWing = 500;
@@ -55,8 +53,9 @@ public class ParagonLiteAbilities {
     public static final int volcanicFury = 522;
     public static final int pastoralAroma = 523;
     public static final int healSpore = 524;
+    public static final int xrayVision = 525;
 
-    public static final int MAX = healSpore;
+    public static final int MAX = xrayVision;
     
     public static Set<Integer> allowedAbilities = Set.of(
 //            Abilities.aromaVeil, // 165
@@ -165,6 +164,7 @@ public class ParagonLiteAbilities {
             contaminate, // 521
             volcanicFury, // 522
 //            pastoralAroma, // 523
-            healSpore // 524
+            healSpore, // 524
+            xrayVision // 525
     );
 }

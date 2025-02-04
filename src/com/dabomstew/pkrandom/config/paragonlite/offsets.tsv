@@ -277,6 +277,7 @@ Battle	ServerControl_IsGuaranteedHit	Code		thumb			0x021A2E0C	0x021A2DCC
 Battle	ServerControl_CheckNoEffect	Code		thumb			0x021A2F94	0x021A2F54
 Battle	ServerControl_CheckNoEffectCore	Code		thumb			0x021A31D0	0x021A3190
 Battle	ServerControl_MoveExeCheck1	Code		thumb	0x021C003C	0x021C001C	0x021A3B00	0x021A3AC0
+Battle	ServerControl_CheckConfusionHit	Code		thumb	0x021C033C	0x021C031C	0x021A3E00	0x021A3DC0
 Battle	ServerControl_CheckMoveExeFreezeThaw	Code		thumb	0x021C0424	0x021C0404	0x021A3EE8	0x021A3EA8
 Battle	ServerDisplay_MoveExecuteFailMessage	Code		thumb	0x021C0540	0x021C0520	0x021A4004	0x021A3FC4
 Battle	ServerControl_DamageRoot	Code		thumb	0x021C093C	0x021C091C	0x021A4400	0x021A43C0
@@ -351,6 +352,7 @@ Battle	ServerEvent_MoveStatStageChangeApplied	Code		thumb			0x021AB400	0x021AB3C
 Battle	ServerEvent_NotifyAirLock	Code		thumb			0x021AB750	0x021AB710
 Battle	GetPoke	Code		thumb	0x021C7D14	0x021C7CF4	0x021AB874	0x021AB834
 Battle	Handler_GetExistFrontPokePos	Code		thumb	0x021C7D20	0x021C7D00	0x021AB880	0x021AB840
+Battle	Handler_GetAllEnemyFrontPokeIds	Code		thumb	0x021C7D74	0x021C7D54	0x021AB8D4	0x021AB894
 Battle	Handler_SimulationEffectivenessCore	Code		thumb	0x021C7DCC	0x021C7DAC	0x021AB92C	0x021AB8EC
 Battle	Handler_SimulationDamage	Code		thumb	0x021C7E34	0x021C7E14	0x021AB994	0x021AB954
 Battle	Handler_IsSimulationMode	Code		thumb	0x021C7EE4	0x021C7EC4	0x021ABA44	0x021ABA04

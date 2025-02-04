@@ -65,7 +65,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.Redux;
+    public static Mode mode = Mode.ParagonLite;
 
     Gen5RomHandler romHandler;
 
@@ -655,6 +655,12 @@ public class ParagonLiteHandler {
         addGlobalBattleTextValueWildFoe("RipTide", "Activate");
         addBattleStringWildFoe("{0} generated a\nstrong current for its team!", BattleTextVar.PokeNickname);
 
+        // #512 X-ray Vision
+        addGlobalBattleTextValueWildFoe("XrayVision", "Activate");
+        addBattleStringWildFoe("{0} scanned its\ntarget and found one {0}!", BattleTextVar.PokeNickname, BattleTextVar.ItemName);
+
+        // MOVES
+
         // #564 Sticky Web
         addGlobalBattleTextValueWildFoe("StickyWeb", "Enter");
         addBattleStringWildFoe("{0} was caught\nin a sticky web!", BattleTextVar.PokeNickname);
@@ -662,9 +668,6 @@ public class ParagonLiteHandler {
         // #596 Spiky Shield
         addGlobalBattleTextValueWildFoe("SpikyShield", "Activate");
         addBattleStringWildFoe("{0} was hurt\nby Spiky Shield!", BattleTextVar.PokeNickname);
-
-
-        // MOVES
 
         // #800 Meteor Beam
         addGlobalBattleTextValueWildFoe("MeteorBeam", "Charge");
@@ -711,6 +714,10 @@ public class ParagonLiteHandler {
         addGlobalBattleTextValueStandard("AuroraVeil", "Disappeared");
         addBattleStringStandard("Your team's\nAurora Veil disappeared!");
         addBattleStringStandard("The opposing team's\nAurora Veil disappeared!");
+    }
+    
+    public void setDebugFlag() {
+        armParser.addGlobalValue("DEBUG", true);
     }
 
     public void tempFixFairyStruggle() {
@@ -963,10 +970,9 @@ public class ParagonLiteHandler {
         List<String> effectMainUpdateConditionLines = readLines("effect_main_update_condition.s");
         battleLevelOvl.writeCodeForceInline(effectMainUpdateConditionLines, "EffectMain_UpdateCondition", true);
 
-        // Replaces Freeze with Frostbite
-
-//        int burnColorEffect = BattleLevelOvl.readUnsignedHalfword(0x021E6A80 + 2 * 5);
-//        BattleLevelOvl.writeHalfword(0x021E6A80 + 2 * 2, burnColorEffect);
+        //////////////////////////////////////
+        /// Replaces Freeze with Frostbite ///
+        //////////////////////////////////////
 
         // Skips the move fail check for being frozen
         int moveExeCheck1FreezeRomAddress = globalAddressMap.getRomAddress(battleOvl, "ServerControl_MoveExeCheck1");
@@ -987,9 +993,17 @@ public class ParagonLiteHandler {
 
         setUISprite(12, "condition_badges.bmp", conditionBadgesSpriteParams);
 
-        // Paralysis Speed 25% -> 50%
+        //////////////////////////////////
+        /// Paralysis Speed 25% -> 50% ///
+        //////////////////////////////////
         int calculateSpeedRomAddress = globalAddressMap.getRomAddress(battleOvl, "ServerEvent_CalculateSpeed");
         battleOvl.writeByte(calculateSpeedRomAddress + 0x80, 50);
+
+        ///////////////////////////////////////
+        /// Confusion hit chance 50% -> 33% ///
+        ///////////////////////////////////////
+        int checkConfusionHitRomAddress = globalAddressMap.getRomAddress(battleOvl, "ServerControl_CheckConfusionHit");
+        battleOvl.writeByte(checkConfusionHitRomAddress + 0x74, 33);
     }
 
     public void setStatChangeIntimidateFlag() {
@@ -2317,6 +2331,10 @@ public class ParagonLiteHandler {
         // #524 Heal Spore
         Utils.printProgress(totalChanges, ++currentChanges, "Heal Spore");
         addHealSpore();
+        
+        // #525 X-ray Vision
+        Utils.printProgress(totalChanges, ++currentChanges, "X-ray Vision");
+        addXrayVision();
 
 
         // OLD ABILITIES
@@ -2504,10 +2522,6 @@ public class ParagonLiteHandler {
         // #117 Snow Warning (+ no hail damage)
         Utils.printProgress(totalChanges, ++currentChanges, "Snow Warning");
         setSnowWarning();
-
-        // #119 Frisk -> X-ray Vision
-        Utils.printProgress(totalChanges, ++currentChanges, "X-ray Vision");
-        setXrayVision();
 
         // #122 Flower Gift
         Utils.printProgress(totalChanges, ++currentChanges, "Flower Gift");
@@ -3632,6 +3646,24 @@ public class ParagonLiteHandler {
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "heal_spore.s"));
     }
 
+    private void addXrayVision() {
+        int number = ParagonLiteAbilities.xrayVision;
+
+        // Name
+        abilityNames.set(number, "X-ray Vision");
+
+        // Explanation
+        if (abilityExplanations != null) {
+            String explanation = abilityExplanations.get(Abilities.frisk).replace("Frisk", "X-ray Vision");
+            abilityExplanations.set(number, explanation);
+        }
+        
+        // Data
+        setAbilityEventHandlers(number,
+                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "x-ray_vision.s"),
+                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "x-ray_vision.s"));
+    }
+
     private void setDamp() {
         int number = Abilities.damp;
 
@@ -4303,26 +4335,6 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
                 new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
                 new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction, "snow_warning_no_damage.s"));
-    }
-
-    private void setXrayVision() {
-        if (mode != Mode.ParagonLite)
-            return;
-
-        int number = ParagonLiteAbilities.xrayVision;
-
-        // Name
-        abilityNames.set(number, "X-ray Vision");
-
-        // Explanation
-        if (abilityExplanations != null) {
-            String explanation = abilityExplanations.get(Abilities.frisk).replace("Frisk", "X-ray Vision");
-            abilityExplanations.set(number, explanation);
-        }
-
-        battleStrings1.set(439, "\uF000Ă\\x0001\\x0000 scanned its\\xFFFEtarget and found one \uF000ĉ\\x0001\\x0001!");
-        battleStrings1.set(440, "The wild \uF000Ă\\x0001\\x0000 scanned its\\xFFFEtarget and found one \uF000ĉ\\x0001\\x0001!");
-        battleStrings1.set(441, "The foe's \uF000Ă\\x0001\\x0000 scanned its\\xFFFEtarget and found one \uF000ĉ\\x0001\\x0001!");
     }
 
     private void setFlowerGift() {
