@@ -5883,8 +5883,12 @@ public abstract class AbstractRomHandler implements RomHandler {
                     .replace("may also lower", "also lowers");
 
         // 057 Surf
-        updateMovePower(moves, Moves.surf, 75);
-        updateMoveAccuracy(moves, Moves.surf, 95);
+        if (doubles) {
+            updateMovePower(moves, Moves.surf, 75);
+            updateMoveAccuracy(moves, Moves.surf, 95);
+        } else {
+            updateMovePower(moves, Moves.surf, 80);
+        }
         moves.get(Moves.surf).target = MoveTarget.ALL_ADJACENT_FOES;
 
         // 058 Ice Beam
@@ -6501,7 +6505,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             updateMoveType(moves, Moves.tickle, Type.FAIRY);
 
         // 323 Water Spout
-        updateMovePower(moves, Moves.waterSport, 100);
+        updateMovePower(moves, Moves.waterSpout, 100);
         
         // 324 Signal Beam
         moves.get(Moves.signalBeam).qualities = MoveQualities.DAMAGE_TARGET_STAT_CHANGE;
