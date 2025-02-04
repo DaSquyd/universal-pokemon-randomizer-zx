@@ -579,14 +579,16 @@ public class ParagonLiteHandler {
         addGlobalBattleTextValueWildFoe("Common", "SpeedNotLowered");
         addBattleStringWildFoe("{0}'s Speed\nwas not lowered!", BattleTextVar.PokeNickname);
 
-        // Polluted Terrain damage
-        addGlobalBattleTextValueWildFoe("PollutedTerrain", "Hurt");
-        addBattleStringWildFoe("{0} was hurt\nby the polluted terrain!", BattleTextVar.PokeNickname);
+        if (mode == Mode.ParagonLite) {
+            // Polluted Terrain damage
+            addGlobalBattleTextValueWildFoe("PollutedTerrain", "Hurt");
+            addBattleStringWildFoe("{0} was hurt\nby the polluted terrain!", BattleTextVar.PokeNickname);
 
-        // Haunted Terrain damage
-        addGlobalBattleTextValueWildFoe("HauntedTerrain", "Hurt");
-        addBattleStringWildFoe("{0} was hurt\nby the haunted terrain!", BattleTextVar.PokeNickname);
-
+            // Haunted Terrain damage
+            addGlobalBattleTextValueWildFoe("HauntedTerrain", "Hurt");
+            addBattleStringWildFoe("{0} was hurt\nby the haunted terrain!", BattleTextVar.PokeNickname);
+        }
+        
         // #023 Shadow Tag
         addGlobalBattleTextValueWildFoe("ShadowTag", "Activate");
         switch (mode) {
