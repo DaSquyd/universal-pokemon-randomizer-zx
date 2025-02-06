@@ -1,8 +1,8 @@
 {
   "species": 0,
-  "flags": 2,
+  "formGenderAbility": 2,
   "nature": 3,
-  "item": 4,
+  "heldItem": 4,
   "moves": [
     6,
     8,
