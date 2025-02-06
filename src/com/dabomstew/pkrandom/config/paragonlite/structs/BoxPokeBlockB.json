@@ -7,5 +7,6 @@
   "genderAndForme": 24,
   "nature": 25,
   "hiddenAbilityAndNPoke": 26,
-  "unknown1C": 28
+  "ivOverwriteModes": 28,
+  "unused": 30
 }

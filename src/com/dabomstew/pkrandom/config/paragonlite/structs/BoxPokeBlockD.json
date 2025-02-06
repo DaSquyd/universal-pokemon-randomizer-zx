@@ -12,6 +12,6 @@
   "pokeBall": 27,
   "metLevelAndOTGender": 28,
   "catchTerrainTileType": 29,
-  "unknown1E": 30,
-  "pokeStarFame": 31
+  "hgssBallData": 30,
+  "pokestarFame": 31
 }
