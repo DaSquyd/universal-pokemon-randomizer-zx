@@ -1900,7 +1900,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // #074 Pure Power
         double purePowerBoost = isParagonLite ? 1.5 : 2.0;
-        double purePowerBoostedStat = ((isParagonLite ? pk.attack : pk.spatk) + 12.5) * purePowerBoost - 12.5;
+        double purePowerBoostedStat = ((isParagonLite ? pk.spatk : pk.attack) + 12.5) * purePowerBoost - 12.5;
         double purePowerOtherStat = isParagonLite ? pk.attack : pk.spatk;
         if (isParagonLite && (purePowerBoostedStat > 130 || pk.bst() - purePowerOtherStat + purePowerBoostedStat > 650 || purePowerBoostedStat < purePowerOtherStat))
             irrelevantAbilities.add(Abilities.purePower);
