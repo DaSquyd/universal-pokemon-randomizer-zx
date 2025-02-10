@@ -1709,6 +1709,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     tr.pokemon.add(thisPoke);
                 }
             }
+            
+            // TODO: Make this configurable
+            for (var trPoke : tr.pokemon) {
+                trPoke.level = 50;
+            }
+            
             theTrainers.add(tr);
         }
 
@@ -4030,7 +4036,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         available |= MiscTweak.CUSTOM_POKEMON_STATS.getValue();
         available |= MiscTweak.CUSTOM_POKEMON_TYPES.getValue();
         available |= MiscTweak.CUSTOM_MOVE_CHANGES.getValue();
-//        available |= MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
+        available |= MiscTweak.CUSTOM_TYPE_EFFECTIVENESS.getValue();
         available |= MiscTweak.CUSTOM_NO_EXP.getValue();
         available |= MiscTweak.CUSTOM_MAX_HAPPINESS.getValue();
         available |= MiscTweak.CUSTOM_NO_EVS.getValue();
@@ -4220,8 +4226,11 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
         
         // Modifications
         for (TypeRelationship relationship : typeEffectivenessTable) {
-            if (relationship.attacker == Type.GRASS && relationship.defender == Type.ROCK)
-                relationship.effectiveness = Effectiveness.HALF;
+            if (relationship.attacker != Type.GRASS || relationship.defender != Type.ROCK)
+                continue;
+            
+            relationship.effectiveness = Effectiveness.HALF;
+            break;
         }
         
         writeTypeEffectivenessTable(typeEffectivenessTable);
@@ -4308,7 +4317,6 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 case DOUBLE -> 20;
                 case NEUTRAL -> 10;
                 case HALF -> 5;
-                case ZERO -> 0;
                 default -> 0;
             };
             rom[currentOffset + 2] = effectivenessInternal;
