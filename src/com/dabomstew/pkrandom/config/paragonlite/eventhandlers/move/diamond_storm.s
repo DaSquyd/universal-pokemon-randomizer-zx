@@ -9,7 +9,7 @@
     
     bl      Battle::GetPoke
     mov     r1, #BPV_EffectiveAbility
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     cmp     r0, #125 ; Sheer Force
     beq     Return
     

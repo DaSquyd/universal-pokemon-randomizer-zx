@@ -109,7 +109,7 @@ UseCritStat:
 GetStat:
     mov     r0, r6
     mov     r1, r4
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     
 CallModifyStatValueHandlers:
     mov     r4, r0

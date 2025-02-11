@@ -1,0 +1,29 @@
+{
+  "battleStyleBit": 0,
+  "battleStyleSize": 3,
+  "battleStyleMask": 3,
+  
+  "isHealerBit": 2,
+  "isHealerSize": 1,
+  "isHealerMask": 1,
+
+  "hasItemBit": 3,
+  "hasItemSize": 1,
+  "hasItemMask": 1,
+  
+  "hasMovesBit": 4,
+  "hasMovesSize": 1,
+  "hasMovesMask": 1,
+  
+  "hasNatureBit": 5,
+  "hasNatureSize": 1,
+  "hasNatureMask": 1,
+  
+  "hasIVsEVsBit": 6,
+  "hasIVsEVsSize": 1,
+  "hasIVsEVsMask": 1,
+  
+  "isPooledBit": 7,
+  "isPooledSize": 1,
+  "isPooledMask": 1
+}

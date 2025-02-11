@@ -1,0 +1,15 @@
+{
+  "ivBit": 0,
+  "ivSize": 5,
+  "ivMask": 31,
+  
+  "natureBit": 5,
+  "natureSize": 5,
+  "natureMask": 31,
+  
+  "evFlagBit": 10,
+  "evFlagSize": 6,
+  "evFlagMask": 63,
+  
+  "SIZE": 2
+}

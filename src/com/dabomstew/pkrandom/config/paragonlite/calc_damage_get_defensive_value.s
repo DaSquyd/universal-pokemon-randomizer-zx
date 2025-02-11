@@ -130,7 +130,7 @@ UseCritStat:
 GetStat:
     mov     r0, r5
     mov     r1, r4
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     
 CheckWeather:
     lsl     r0, #16

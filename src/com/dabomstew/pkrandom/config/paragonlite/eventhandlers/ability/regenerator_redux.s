@@ -27,11 +27,11 @@
     
     mov     r0, r6
     mov     r1, #0x0E ; total HP
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     str     r0, [sp, #0x00]
     mov     r0, r6
     mov     r1, #0x0D ; current HP
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     ldr     r1, [sp, #0x00]
     sub     r0, r1, r0
     cmp     r4, r0

@@ -117,7 +117,7 @@ BaseDamage:
     ; level
     ldr     r0, [sp, #SP_ATTACKING_MON]
     mov     r1, #BPV_Level
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     mov     r2, r0 ; r2 := level
     ldr     r0, [sp, #SP_POWER]
     ldr     r1, [sp, #SP_OFFENSIVE_VALUE]
@@ -225,7 +225,7 @@ CheckSpecial:
     ; Superconductor
     ldr     r0, [sp, #SP_ATTACKING_MON]
     mov     r1, #BPV_EffectiveAbility
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     mov     r1, #(516 >> 2)
     lsl     r1, #2 ; Superconductor
     cmp     r0, r1
@@ -247,7 +247,7 @@ CheckPhysical:
     ; Guts
     ldr     r0, [sp, #SP_ATTACKING_MON]
     mov     r1, #BPV_EffectiveAbility
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     cmp     r0, #62 ; Guts
     beq     ZeroHandle
     

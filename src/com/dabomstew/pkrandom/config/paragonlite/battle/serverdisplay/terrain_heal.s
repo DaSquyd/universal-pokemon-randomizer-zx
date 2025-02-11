@@ -74,7 +74,7 @@ ProcessHeal:
     
     mov     r0, r6
     mov     r1, #BPV_CurrentHP
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     cmp     r0, r4
     bgt     SimpleHeal
     

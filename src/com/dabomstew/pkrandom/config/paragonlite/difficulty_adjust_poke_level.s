@@ -66,7 +66,7 @@ PokeLoopStart:
     mov     r6, r0
     mov     r1, #0x9E ; level
     mov     r2, #0
-    bl      ARM9::GetPokeStat
+    bl      ARM9::Poke_GetParam
     lsl     r0, #16
     lsr     r0, #16
     
@@ -78,7 +78,7 @@ PokeLoopStart:
 SetLevel:
     mov     r0, r6
     mov     r1, #0x9E ; level
-    bl      ARM9::SetPokeStat
+    bl      ARM9::Poke_SetParam
     
     mov     r0, r6
     bl      ARM9::UpdateAllPokeStats

@@ -128,6 +128,7 @@ public class ArmParser {
                 "HandlerParam_SetAnimation",
                 "HandlerParam_SetTurnFlag",
                 "HandlerParam_SwapItem",
+                "LCG_Context",
                 "MainModule",
                 "MoveParam",
                 "PartyPoke",
@@ -136,13 +137,12 @@ public class ArmParser {
                 "SideStatus",
                 "TrainerAIEnv",
                 "TrainerData",
-                "TrainerPokeData_Pooled_Header",
-                "TrainerPokeData_Pooled_Header_Slot",
-                "TrainerPokeData_PooledPoke",
-                "TrainerPokeData_Standard",
-                "TrainerPokeData_Standard_Item",
-                "TrainerPokeData_Standard_ItemMoves",
-                "TrainerPokeData_Standard_Moves",
+                "TrainerData_Flags",
+                "TrainerPoke",
+                "TrainerPoke_BasicFlags",
+                "TrainerPoke_Header",
+                "TrainerPoke_Header_Flags",
+                "TrainerPoke_StatModifiers",
                 "UnovaLink_MenuParam",
                 "UnovaLink_MenuParam_Button",
                 "UnovaLink_MenuWork",
@@ -241,6 +241,9 @@ public class ArmParser {
 
         List<Byte> bytes = new ArrayList<>();
 
+        Object debugGlobalValue = getGlobalValue("DEBUG");
+        boolean isDebug = debugGlobalValue instanceof Boolean && (boolean) debugGlobalValue;
+        
         size = 0;
         labelAddressMap.clear();
         dataRamAddressMap.clear();
@@ -359,45 +362,191 @@ public class ArmParser {
                     
                 --i;
                 continue;
-            } 
-            else if (str.toUpperCase().startsWith("#PRINTF(\"") && str.endsWith("\")")) {
-                String printStr = str.substring(9, str.length() - 2);
-                byte[] printStrBytesWithNewLine = new byte[printStr.length() + 2];
-                byte[] rawPrintStrBytes = printStr.getBytes(StandardCharsets.UTF_8);
-                System.arraycopy(rawPrintStrBytes, 0, printStrBytesWithNewLine, 0, rawPrintStrBytes.length);
-                
-                printStrBytesWithNewLine[printStrBytesWithNewLine.length - 2] = '\n';
-                printStrBytesWithNewLine[printStrBytesWithNewLine.length - 1] = '\0';
-                
-                String bufferLabel = "Data_RAM_StrBuf";
-                ParagonLiteAddressMap.AddressBase bufferAddressData = globalAddressMap.getAddressData(overlay, bufferLabel);
-                if (bufferAddressData == null) {
-                    overlay.writeData(new byte[256], bufferLabel, "");
-                    bufferAddressData = globalAddressMap.getAddressData(overlay, bufferLabel);
+            }
+            else if (str.toUpperCase().startsWith("#PRINTF(") && str.endsWith(")")) {
+                if (isDebug) {
+                    String[] printStrArgs = str.substring(8, str.length() - 1).split(",");
+                    if (printStrArgs.length == 0)
+                        throw new ArmParseException(lineNumber, str, "printf did not contain any arguments");
+                    
+                    for (int j = 0; j < printStrArgs.length; ++j)
+                        printStrArgs[j] = printStrArgs[j].trim();
+
+                    String printStrMsg = printStrArgs[0].trim();
+                    if (!printStrMsg.startsWith("\"") || printStrMsg.endsWith("\""))
+                        throw new ArmParseException(lineNumber, str, "first argument of printf must be a string");
+                    
+                    printStrMsg = str.substring(1, printStrMsg.length() - 1); // remove outer quotes
+                    
+                    byte[] printStrMsgBytesWithNewLine = new byte[printStrMsg.length() + 2];
+                    byte[] rawPrintStrBytes = printStrMsg.getBytes(StandardCharsets.UTF_8);
+                    System.arraycopy(rawPrintStrBytes, 0, printStrMsgBytesWithNewLine, 0, rawPrintStrBytes.length);
+
+                    printStrMsgBytesWithNewLine[printStrMsgBytesWithNewLine.length - 2] = '\n';
+                    printStrMsgBytesWithNewLine[printStrMsgBytesWithNewLine.length - 1] = '\0';
+
+                    String bufferLabel = "Data_RAM_StrBuf";
+                    ParagonLiteAddressMap.AddressBase bufferAddressData = globalAddressMap.getAddressData(overlay, bufferLabel);
+                    if (bufferAddressData == null) {
+                        overlay.writeData(new byte[256], bufferLabel, "");
+                        bufferAddressData = globalAddressMap.getAddressData(overlay, bufferLabel);
+                    }
+
+                    String label = String.format("Data_PRINTF_%s", printStrMsg);
+                    ParagonLiteAddressMap.AddressBase addressData = globalAddressMap.getAddressData(overlay, label);
+                    if (addressData == null) {
+                        overlay.writeData(printStrMsgBytesWithNewLine, label, "");
+                        addressData = globalAddressMap.getAddressData(overlay, label);
+                    }
+                    
+                    int baseNewLines = 7;
+                    
+                    List<ParseLine> lowPrintStrLines = new ArrayList<>();
+
+                    if (printStrArgs.length > 32)
+                        throw new ArmParseException(lineNumber, str, "Cannot support 32 args");
+
+                    boolean usesRegister0 = false;
+                    for (int j = 3; j < printStrArgs.length; ++j) {
+                        String printStrArg = printStrArgs[j];
+
+                        // we won't know if this triggers until we run the next loop
+                        if (parseRegister(printStrArg) > -1)
+                            continue;
+                        
+                        // otherwise, using the stack always requires r0
+                        lowPrintStrLines.add(new ParseLine(lineNumber, "mov r8, r0"));
+                        usesRegister0 = true;
+                        break;
+                    }
+                    
+                    int usedArgsBitFlags = 0;
+                    for (int j = 1; j < printStrArgs.length; ++j) {
+                        int targetRegister = j + 1;
+                        int stackOffset = (j - 3) * 4;
+                        String printStrArg = printStrArgs[j];
+                        int argRegister = parseRegister(printStrArg);
+
+                        if (argRegister == -1 || argRegister > 3 || argRegister == 1)
+                            continue;
+                        
+                        // this doesn't matter if the replaced register is already used
+                        if (targetRegister <= argRegister)
+                            continue;
+                        
+                        int mask = 1 << argRegister;
+                        if ((usedArgsBitFlags & mask) != 0) {
+                            if (!usesRegister0 && argRegister != 0 && stackOffset >= 0 && ((usedArgsBitFlags & 1) == 0)) {
+                                lowPrintStrLines.add(new ParseLine(lineNumber, "mov r8, r0"));
+                                usesRegister0 = true;
+                            }
+                            
+                            lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, r%d", 8 + argRegister, argRegister)));
+                        }
+                            
+                        usedArgsBitFlags |= mask;
+                    }
+                    
+                    for (int j = 1; j < printStrArgs.length; ++j) {
+                        int targetRegister = j + 1;
+                        int stackOffset = (j - 3) * 4;
+                        
+                        String printStrArg = printStrArgs[j];
+                        int argRegister = parseRegister(printStrArg);
+                        if (argRegister > -1) {
+                            if (stackOffset < 0) {
+                                if ((usedArgsBitFlags & (1 << argRegister)) != 0)
+                                    lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, r%d", targetRegister, 8 + argRegister)));
+                                else if (targetRegister != argRegister)
+                                    lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, %s", targetRegister, printStrArg)));
+                            } else {
+                                if ((usedArgsBitFlags & (1 << argRegister)) != 0) {
+                                    lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r0, r%d", 8 + argRegister)));
+                                    lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", stackOffset)));
+                                } else
+                                    lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str %s, [sp, #%d]", printStrArg, stackOffset)));
+                            }
+                            
+                            continue;
+                        }
+                        
+                        if (printStrArg.startsWith("[") && printStrArg.endsWith("]")) {
+                            if (stackOffset < 0)
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("ldr r%d, %s", targetRegister, printStrArg)));
+                            else {
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("ldr r0, %s", printStrArg)));
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", stackOffset)));
+                            }
+                            
+                            continue;
+                        }
+                        
+                        int printStrArgValue = parseValue(lineNumber, str, printStrArg);
+                        if (printStrArgValue >= 0 && printStrArgValue <= 255) {
+                            if (stackOffset < 0)
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, #%d", targetRegister, printStrArgValue)));
+                            else {
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r0, #%d", printStrArgValue)));
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", stackOffset)));
+                            }
+
+                            continue;
+                        }
+                        
+                        boolean resolvedCondensedValue = false;
+                        for (int shift = 1; shift < 32; ++shift) {
+                            int condensedValue = printStrArgValue >>> shift;
+                            if (condensedValue << shift != printStrArgValue)
+                                 break;
+                            
+                            if (condensedValue > 255)
+                                continue;
+
+                            if (stackOffset < 0) {
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, #%d", targetRegister, condensedValue)));
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("lsl r%d, #%d", targetRegister, shift)));
+                            } else {
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r0, #%d", condensedValue)));
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("lsl r0, #%d", shift)));
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", stackOffset)));
+                            }
+                            
+                            resolvedCondensedValue = true;
+                            break;
+                        }
+                        
+                        if (resolvedCondensedValue)
+                            continue;
+                        
+                        if (stackOffset < 0)
+                            lowPrintStrLines.add(new ParseLine(lineNumber, String.format("ldr r%d, =%d", targetRegister, printStrArgValue)));
+                        else {
+                            lowPrintStrLines.add(new ParseLine(lineNumber, String.format("ldr r0, =%d", printStrArgValue)));
+                            lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", stackOffset)));
+                        }
+                    }
+                    
+                    List<ParseLine> oldParseLines = parseLines;
+                    parseLines = new ArrayList<>(parseLines.size() + baseNewLines + lowPrintStrLines.size());
+                    for (int j = 0; j < i; ++j)
+                        parseLines.add(oldParseLines.get(j));
+
+                    parseLines.addAll(lowPrintStrLines);
+                    
+                    parseLines.add(new ParseLine(lineNumber, String.format("ldr r0, =%d", bufferAddressData.getRamAddress())));
+                    parseLines.add(new ParseLine(lineNumber, String.format("ldr r1, =%d", addressData.getRamAddress())));
+                    parseLines.add(new ParseLine(lineNumber, "blx ARM9::sprintf"));
+                    parseLines.add(new ParseLine(lineNumber, String.format("ldr r0, =%d", bufferAddressData.getRamAddress())));
+                    parseLines.add(new ParseLine(lineNumber, "swi 0xFC"));
+
+                    for (int j = i + 1; j < oldParseLines.size(); ++j)
+                        parseLines.add(oldParseLines.get(j));
+
+                    --i;
+                } else {
+                    parseLines.get(i).str = "";
                 }
-                
-                String label = String.format("Data_PRINTF_%s", printStr);
-                ParagonLiteAddressMap.AddressBase addressData = globalAddressMap.getAddressData(overlay, label);
-                if (addressData == null) {
-                    overlay.writeData(printStrBytesWithNewLine, label, "");
-                    addressData = globalAddressMap.getAddressData(overlay, label);
-                }
 
-                List<ParseLine> oldParseLines = parseLines;
-                parseLines = new ArrayList<>(parseLines.size() + 7);
-                for (int j = 0; j < i; ++j)
-                    parseLines.add(oldParseLines.get(j));
-                
-                parseLines.add(new ParseLine(lineNumber, String.format("ldr r0, =%d", bufferAddressData.getRamAddress())));
-                parseLines.add(new ParseLine(lineNumber, String.format("ldr r1, =%d", addressData.getRamAddress())));
-                parseLines.add(new ParseLine(lineNumber, "blx ARM9::sprintf"));
-                parseLines.add(new ParseLine(lineNumber, String.format("ldr r0, =%d", bufferAddressData.getRamAddress())));
-                parseLines.add(new ParseLine(lineNumber, "swi 0xFC"));
-
-                for (int j = i + 1; j < oldParseLines.size(); ++j)
-                    parseLines.add(oldParseLines.get(j));
-
-                --i;
                 continue;
             }
             else if (str.endsWith(":")) {

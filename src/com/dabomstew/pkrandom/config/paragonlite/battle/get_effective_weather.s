@@ -7,7 +7,7 @@
     
     mov     r0, r4
     mov     r1, #BPV_EffectiveAbility
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     mov     r6, r0
     
 #if PARAGONLITE

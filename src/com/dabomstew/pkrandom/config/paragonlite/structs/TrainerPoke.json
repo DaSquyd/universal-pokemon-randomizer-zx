@@ -1,0 +1,10 @@
+{
+  "species": 0,
+  "basicFlags": 2,
+  "level": 3,
+
+  "BASE_SIZE": 4,
+  "STAT_MODIFIERS_SIZE": 2,
+  "ITEM_SIZE": 2,
+  "MOVES_SIZE": 8
+}

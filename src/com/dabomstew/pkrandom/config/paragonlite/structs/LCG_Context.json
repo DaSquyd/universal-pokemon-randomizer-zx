@@ -1,0 +1,10 @@
+{
+  "x_low": 0,
+  "x_high": 4,
+  "multiplier_low": 8,
+  "multiplier_high": 12,
+  "increment_low": 16,
+  "increment_high": 20,
+  
+  "SIZE": 24
+}

@@ -1,0 +1,15 @@
+{
+  "formBit": 0,
+  "formSize": 5,
+  "formMask": 31,
+  
+  "genderBit": 5,
+  "genderSize": 1,
+  "genderMask": 1,
+  
+  "abilityBit": 6,
+  "abilitySize": 2,
+  "abilityMask": 3,
+  
+  "SIZE": 1
+}

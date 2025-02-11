@@ -28,7 +28,7 @@
 ; Get current health
     mov     r0, r6
     mov     r1, #0x0D
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     
 ; Branch if current hp > target
     cmp     r0, r5

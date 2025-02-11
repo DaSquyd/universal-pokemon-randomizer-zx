@@ -36,7 +36,7 @@
 CheckRunAway:
     mov     r0, r6
     mov     r1, #ABILITY_STAT
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     cmp     r0, #RUN_AWAY
     bne     CheckAllForTrap
     
@@ -79,7 +79,7 @@ LoopStart:
     bl      Battle::PokeCon_GetPoke
     mov     r1, #ABILITY_STAT
     str     r0, [sp, #POKE]
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     lsl     r0, #16
     lsr     r4, r0, #16
     ldr     r0, [sp, #POKE]

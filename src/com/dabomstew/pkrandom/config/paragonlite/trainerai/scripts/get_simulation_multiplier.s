@@ -26,14 +26,14 @@
     add     r0, #TRAINER_AI_ENV_DEFENDER
     ldr     r0, [r0]
     mov     r1, #VALUE_CURRENT_HP
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     str     r0, [sp, #CURRENT_HP]
     
     mov     r0, r4 ; r4 := *trainerAIEnv
     add     r0, #TRAINER_AI_ENV_DEFENDER
     ldr     r0, [r0]
     mov     r1, #VALUE_MAX_HP
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     str     r0, [sp, #MAX_HP]
     
     mov     r0, r4 ; r4 := *trainerAIEnv

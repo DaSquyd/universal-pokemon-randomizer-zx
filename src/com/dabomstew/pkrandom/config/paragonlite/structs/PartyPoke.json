@@ -9,5 +9,7 @@
   "speed": 150,
   "spatk": 152,
   "spdef": 154,
-  "mail": 156
+  "mail": 156,
+  
+  "SIZE": 220
 }

@@ -51,7 +51,7 @@ ReturnZero:
 ReturnTrue:
     mov     r0, r4
     mov     r1, #BPV_MaxHP
-    bl      Battle::GetPokeStat
+    bl      Battle::Poke_GetParam
     lsr     r0, #4
     bne     Return ; max between 1/16 HP and 1
     
