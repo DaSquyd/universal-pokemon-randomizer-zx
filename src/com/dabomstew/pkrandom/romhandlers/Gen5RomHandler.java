@@ -120,6 +120,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
     }
 
+    private int mainNumTrainers = 0;
+    
     private static List<RomEntry> roms;
 
     private static boolean isChallengeMode = false;
@@ -382,6 +384,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     // This ROM
     private Pokemon[] oldPokes;
     private Pokemon[] pokes;
+    private Pokemon[] oldPokestarPokes;
+    private Pokemon[] pokestarPokes;
     private Map<Integer, FormeInfo> formeMappings = new TreeMap<>();
     private List<Pokemon> pokemonList;
     private List<Pokemon> pokemonListInclFormes;
@@ -517,21 +521,32 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int formeCount = Gen5Constants.getFormeCount(romEntry.romType);
         if (oldPokes == null) {
             oldPokes = new Pokemon[Gen5Constants.pokemonCount + formeCount + 1];
-            loadPokemonStatsInternal(pokeNames, oldPokes);
+            oldPokestarPokes = new Pokemon[Gen5Constants.pokestarPokemonCount];
+            loadPokemonStatsInternal(pokeNames, oldPokes, oldPokestarPokes);
         }
 
         pokes = new Pokemon[Gen5Constants.pokemonCount + formeCount + 1];
-        loadPokemonStatsInternal(pokeNames, pokes);
+        pokestarPokes = new Pokemon[Gen5Constants.pokestarPokemonCount];
+        loadPokemonStatsInternal(pokeNames, pokes, pokestarPokes);
         return pokes;
     }
 
-    private void loadPokemonStatsInternal(String[] pokeNames, Pokemon[] pokes) {
+    private void loadPokemonStatsInternal(String[] pokeNames, Pokemon[] pokes, Pokemon[] pokestarPokes) {
         for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
             pokes[i] = new Pokemon();
             pokes[i].number = i;
             loadBasicPokeStats(pokes[i], pokeNarc.files.get(i), formeMappings);
             // Name?
             pokes[i].name = pokeNames[i];
+        }
+        
+        for (int i = 0; i < Gen5Constants.pokestarPokemonCount; i++) {
+            int speciesId = Gen5Constants.pokestarPokemonOffset + i;
+            pokestarPokes[i] = new Pokemon();
+            pokestarPokes[i].number = speciesId;
+            loadBasicPokeStats(pokestarPokes[i], pokeNarc.files.get(speciesId), null);
+            // Name?
+            pokestarPokes[i].name = pokeNames[speciesId];
         }
 
         int i = Gen5Constants.pokemonCount + 1;
@@ -744,9 +759,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private String[] readPokemonNames() {
-        String[] pokeNames = new String[Gen5Constants.pokemonCount + 1];
         List<String> nameList = getStrings(false, romEntry.getInt("PokemonNamesTextOffset"));
-        for (int i = 1; i <= Gen5Constants.pokemonCount; i++) {
+        String[] pokeNames = new String[nameList.size()];
+        for (int i = 1; i < nameList.size(); i++) {
             pokeNames[i] = nameList.get(i);
         }
         return pokeNames;
@@ -1554,125 +1569,27 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public List<Trainer> getTrainers() {
+        return getTrainers(null, null);
+    }
+
+    public List<Trainer> getTrainers(NARCArchive trDataNarc, NARCArchive trPokeNarc) {        
+        List<String> tclasses = this.getTrainerClassNames();
+        List<String> tnames = this.getTrainerNames();
+
         boolean setOriginalDoubleTrainers = originalDoubleTrainers.isEmpty();
-
-        int partyFlagsOffset = 0x00;
-        int trainerClassOffset = 0x01;
-        int battleTypeOffset = 0x02;
-        int pokeCountOffset = 0x03;
-        int itemsOffset = 0x04;
-        int aiFlagsOffset = 0x0C;
-        int isHealerFlagOffset = 0x10;
-
-        int channelsOffset = 0x14;
 
         List<Trainer> allTrainers = new ArrayList<>();
         try {
-            NARCArchive trainers = this.readNARC(romEntry.getFile("TrainerData"));
-            NARCArchive trpokes = this.readNARC(romEntry.getFile("TrainerPokemon"));
-            int trainernum = trainers.files.size();
-            List<String> tclasses = this.getTrainerClassNames();
-            List<String> tnames = this.getTrainerNames();
-            for (int i = 1; i < trainernum; i++) {
-                // Trainer entries are 20 bytes
-                // Team flags; 1 byte; 0x01 = custom moves, 0x02 = held item
-                // Class; 1 byte
-                // Battle Mode; 1 byte; 0=single, 1=double, 2=triple, 3=rotation
-                // Number of pokemon in team; 1 byte
-                // Items; 2 bytes each, 4 item slots
-                // AI Flags; 2 byte
-                // 2 bytes not used
-                // Healer; 1 byte; 0x01 means they will heal player's pokes after defeat.
-                // Victory Money; 1 byte; The money given out after defeat =
-                //         4 * this value * highest level poke in party
-                // Victory Item; 2 bytes; The item given out after defeat (e.g. berries)
-                byte[] trainer = trainers.files.get(i);
+            if (trDataNarc == null)
+                trDataNarc = this.readNARC(romEntry.getFile("TrainerData"));
+            
+            if (trPokeNarc == null)
+                trPokeNarc = this.readNARC(romEntry.getFile("TrainerPokemon"));
 
-                boolean plMode = trainer.length == 0x16;
-
-                byte[] trpoke = trpokes.files.get(i);
-                Trainer tr = new Trainer();
-                tr.partyFlags = trainer[partyFlagsOffset] & 0xFF;
-                tr.index = i;
-                tr.trainerclass = trainer[trainerClassOffset] & 0xFF;
-                tr.battleType = Trainer.BattleType.values()[trainer[battleTypeOffset]];
-
-                // TODO
-                int pokeCount;
-                if (plMode) {
-                    int channels = readUnsignedWord(trainer, channelsOffset);
-                    tr.partyChannels[0] = (byte) (channels & 0x07);
-                    tr.partyChannels[1] = (byte) ((channels >> 3) & 0x07);
-                    tr.partyChannels[2] = (byte) ((channels >> 6) & 0x07);
-                    tr.partyChannels[3] = (byte) ((channels >> 9) & 0x03);
-                    tr.partyChannels[4] = (byte) ((channels >> 11) & 0x03);
-                    tr.partyChannels[5] = (byte) ((channels >> 13) & 0x01);
-                    pokeCount = trainer[pokeCountOffset] & 0xFF;
-                } else {
-                    tr.partyChannels[0] = (byte) (trainer[pokeCountOffset] & 0xFF); // default to storing all Pokémon in Channel A
-                    pokeCount = tr.partyChannels[0];
-                }
-
-                for (int j = 0; j < 4; ++j)
-                    tr.items[j] = readUnsignedWord(trainer, itemsOffset + j * 2);
-
-                tr.aiFlags = readLong(trainer, aiFlagsOffset);
-
-                tr.isHealer = trainer[isHealerFlagOffset] != 0;
-
-                tr.rewardMoneyScale = trainer[0x11];
-                tr.rewardItem = trainer.length >= 20 ? readUnsignedWord(trainer, 0x12) : 0;
-
-                tr.fullDisplayName = tclasses.get(tr.trainerclass) + " " + tnames.get(i - 1);
-                if (trainer[2] == 1 && setOriginalDoubleTrainers) {
-                    originalDoubleTrainers.add(i);
-                }
-                tr.battleType = Trainer.BattleType.values()[trainer[2]];
-
-                int pokeOffs = 0;
-                for (int poke = 0; poke < pokeCount; poke++) {
-                    // Structure is
-                    // IV SB LV LV SP SP FRM FRM
-                    // (HI HI)
-                    // (M1 M1 M2 M2 M3 M3 M4 M4)
-                    // where SB = 0 0 Ab Ab 0 0 Fm Ml
-                    // IV is a "difficulty" level between 0 and 255 to represent 0 to 31 IVs.
-                    //     These IVs affect all attributes. For the vanilla games, the
-                    //     vast majority of trainers have 0 IVs; Elite Four members will
-                    //     have 30 IVs.
-                    // Ab Ab = ability number, 0 for random
-                    // Fm = 1 for forced female
-                    // Ml = 1 for forced male
-                    // There's also a trainer flag to force gender, but
-                    // this allows fixed teams with mixed genders.
-
-                    int difficulty = trpoke[pokeOffs] & 0xFF;
-                    int level = readUnsignedWord(trpoke, pokeOffs + 2);
-                    int species = readUnsignedWord(trpoke, pokeOffs + 4);
-                    int formnum = readUnsignedWord(trpoke, pokeOffs + 6);
-                    TrainerPokemon tpk = new TrainerPokemon();
-                    tpk.level = level;
-                    tpk.pokemon = pokes[species];
-                    tpk.IVs = (difficulty) * 31 / 255;
-                    int abilityAndFlag = trpoke[pokeOffs + 1];
-                    tpk.abilitySlot = (abilityAndFlag >>> 4) & 0xF;
-                    tpk.forcedGenderFlag = (abilityAndFlag & 0xF);
-                    tpk.forme = formnum;
-                    tpk.formeSuffix = Gen5Constants.getFormeSuffixByBaseForme(species, formnum);
-                    pokeOffs += 8;
-                    if (tr.pokemonHaveItems()) {
-                        tpk.heldItem = readUnsignedWord(trpoke, pokeOffs);
-                        pokeOffs += 2;
-                    }
-                    if (tr.pokemonHaveCustomMoves()) {
-                        for (int move = 0; move < 4; move++) {
-                            tpk.moves[move] = readUnsignedWord(trpoke, pokeOffs + (move * 2));
-                        }
-                        pokeOffs += 8;
-                    }
-                    tr.pokemon.add(tpk);
-                }
-                allTrainers.add(tr);
+            mainNumTrainers = trDataNarc.files.size();
+            for (int i = 1; i < mainNumTrainers; i++) {
+                Trainer trainer = getTrainerFromData(i, trDataNarc.files.get(i), trPokeNarc.files.get(i), tclasses, tnames, setOriginalDoubleTrainers);
+                allTrainers.add(trainer);
             }
             if (romEntry.romType == Gen5Constants.Type_BW) {
                 Gen5Constants.tagTrainersBW(allTrainers);
@@ -1702,7 +1619,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             for (int move = 0; move < 4; move++) {
                                 tpk.moves[move] = readUnsignedWord(pkmndata, 2 + (move * 2));
                             }
-                            tr.pokemon.add(tpk);
+                            tr.getStandardPokePool().add(tpk);
                             currentFile++;
                         }
                         allTrainers.add(tr);
@@ -1715,6 +1632,244 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             throw new RandomizerIOException(ex);
         }
         return allTrainers;
+    }
+    
+    private Trainer getTrainerFromData(int number, byte[] trDataBytes, byte[] trPokeBytes, List<String> tclasses, List<String> tnames, boolean setOriginalDoubleTrainers) {
+        int partyFlagsOffset = 0x00;
+        int trainerClassOffset = 0x01;
+        int battleTypeOffset = 0x02;
+        int pokeCountOffset = 0x03;
+        int itemsOffset = 0x04;
+        int aiFlagsOffset = 0x0C;
+        int isHealerFlagOffset = 0x10;
+        int payoutScaleOffset = 0x11;
+        int rewardItemOffset = 0x12;
+
+        // ParagonLite mode is determined by the "signature" byte in the TrainerData
+        boolean plMode = (trDataBytes[partyFlagsOffset] & 0x04) != 0;
+        if (plMode)
+            return getParagonLiteTrainerFromData(number, trDataBytes, trPokeBytes, tclasses, tnames, setOriginalDoubleTrainers);
+
+        Trainer tr = new Trainer();
+        tr.index = number;
+        tr.partyFlags = trDataBytes[partyFlagsOffset] & 0xFF;
+        tr.trainerclass = trDataBytes[trainerClassOffset] & 0xFF;
+        int battleType = trDataBytes[battleTypeOffset];
+        tr.battleType = Trainer.BattleType.values()[battleType];
+
+        for (int i = 0; i < 4; ++i)
+            tr.items[i] = readUnsignedWord(trDataBytes, itemsOffset + i * 2);
+
+        tr.aiFlags = readLong(trDataBytes, aiFlagsOffset);
+
+        tr.isHealer = trDataBytes[isHealerFlagOffset] != 0;
+
+        tr.payoutScale = trDataBytes[payoutScaleOffset];
+        tr.rewardItem = trDataBytes.length >= 20 ? readUnsignedWord(trDataBytes, rewardItemOffset) : 0;
+
+        tr.fullDisplayName = tclasses.get(tr.trainerclass) + " " + tnames.get(number - 1);
+
+        tr.battleType = Trainer.BattleType.values()[trDataBytes[battleTypeOffset]];
+        if (tr.battleType == Trainer.BattleType.DoubleBattle && setOriginalDoubleTrainers)
+            originalDoubleTrainers.add(number);
+
+        int partyCount = trDataBytes[pokeCountOffset] & 0xFF;
+        
+        int pokeOffs = 0;
+        var party = tr.getStandardPokePool();
+        for (int poke = 0; poke < partyCount; poke++) {
+            // Structure is
+            // IV SB LV LV SP SP FRM FRM
+            // (HI HI)
+            // (M1 M1 M2 M2 M3 M3 M4 M4)
+            // where SB = 0 0 Ab Ab 0 0 Fm Ml
+            // IV is a "difficulty" level between 0 and 255 to represent 0 to 31 IVs.
+            //     These IVs affect all attributes. For the vanilla games, the
+            //     vast majority of trDataNarc have 0 IVs; Elite Four members will
+            //     have 30 IVs.
+            // Ab Ab = ability number, 0 for random
+            // Fm = 1 for forced female
+            // Ml = 1 for forced male
+            // There's also a trainer flag to force gender, but
+            // this allows fixed teams with mixed genders.
+
+            int difficulty = trPokeBytes[pokeOffs] & 0xFF;
+            int level = readUnsignedWord(trPokeBytes, pokeOffs + 2);
+            int species = readUnsignedWord(trPokeBytes, pokeOffs + 4);
+            int formnum = readUnsignedWord(trPokeBytes, pokeOffs + 6);
+            TrainerPokemon tpk = new TrainerPokemon();
+            tpk.level = level;
+            tpk.pokemon = species > Gen5Constants.pokemonCount ? pokestarPokes[species - Gen5Constants.pokestarPokemonOffset] : pokes[species];
+            tpk.IVs = (difficulty) * 31 / 255;
+            int abilityAndFlag = trPokeBytes[pokeOffs + 1];
+            tpk.abilitySlot = (abilityAndFlag >>> 4) & 0xF;
+            tpk.forcedGenderFlag = (abilityAndFlag & 0xF);
+            tpk.forme = formnum;
+            tpk.formeSuffix = Gen5Constants.getFormeSuffixByBaseForme(species, formnum);
+            pokeOffs += 8;
+            if (tr.pokemonHaveItems()) {
+                tpk.heldItem = readUnsignedWord(trPokeBytes, pokeOffs);
+                pokeOffs += 2;
+            }
+            if (tr.pokemonHaveCustomMoves()) {
+                for (int move = 0; move < 4; move++) {
+                    tpk.moves[move] = readUnsignedWord(trPokeBytes, pokeOffs + (move * 2));
+                }
+                pokeOffs += 8;
+            }
+            party.add(tpk);
+        }
+        
+        return tr;
+    }
+
+    private Trainer getParagonLiteTrainerFromData(int number, byte[] trDataBytes, byte[] trPokeBytes, List<String> tclasses, List<String> tnames, boolean setOriginalDoubleTrainers) {
+        int flagsOffset = 0x00;
+        int trainerClassOffset = 0x02;
+        int partySizeOffset = 0x03;
+        int itemsOffset = 0x04;
+        int aiFlagsOffset = 0x0C;
+        int pokeCountOffset = 0x10;
+        int payoutScaleOffset = 0x11;
+        int rewardItemOffset = 0x12;
+
+        Trainer tr = new Trainer();
+        tr.index = number;
+        int flags = readUnsignedWord(trDataBytes, flagsOffset);
+
+        tr.battleType = Trainer.BattleType.values()[flags & 0x03];
+        if (tr.battleType == Trainer.BattleType.DoubleBattle && setOriginalDoubleTrainers)
+            originalDoubleTrainers.add(number);
+        
+        tr.isHealer = (flags & 0x0008) != 0;
+        tr.setPokemonHaveCustomMoves((flags & 0x0010) != 0);
+        tr.setPokemonHaveItems((flags & 0x0020) != 0);
+        tr.pokesHaveNatures = (flags & 0x0040) != 0;
+        tr.pokesHaveIVsEVs = (flags & 0x0080) != 0;
+        tr.ppMax = (flags & 0x0100) != 0;
+        tr.isPooled = (flags & 0x8000) != 0;
+        tr.plMode = true;
+        
+        tr.trainerclass = trDataBytes[trainerClassOffset] & 0xFF;
+
+        for (int i = 0; i < 4; ++i)
+            tr.items[i] = readUnsignedWord(trDataBytes, itemsOffset + i * 2);
+
+        tr.aiFlags = readLong(trDataBytes, aiFlagsOffset);
+
+        tr.payoutScale = trDataBytes[payoutScaleOffset];
+        tr.rewardItem = trDataBytes.length >= 20 ? readUnsignedWord(trDataBytes, rewardItemOffset) : 0;
+
+        tr.fullDisplayName = tclasses.get(tr.trainerclass) + " " + tnames.get(number - 1);
+
+        int pokeDataSize = 4;
+        int statModifiersOffset = -1;
+        int itemOffset = -1;
+        int movesOffset = -1;
+        
+        if (tr.pokesHaveNatures || tr.pokesHaveIVsEVs) {
+            statModifiersOffset = pokeDataSize;
+            pokeDataSize += 2;
+        }
+        
+        if (tr.pokemonHaveItems()) {
+            itemOffset = pokeDataSize;
+            pokeDataSize += 2;
+        
+        }
+        
+        if (tr.pokemonHaveCustomMoves()) {
+            movesOffset = pokeDataSize;
+            pokeDataSize += 8;
+        }
+
+        int pokeCount = trDataBytes[pokeCountOffset] & 0xFF;
+        
+        if (!tr.isPooled) {
+            var standardPool = tr.getStandardPokePool();
+            for (int i = 0; i < pokeCount; ++i) {
+                int pokeOffset = i * pokeDataSize;
+                TrainerPokemon poke = getParagonLiteTrainerPoke(trPokeBytes, pokeOffset, statModifiersOffset, itemOffset, movesOffset);
+                standardPool.add(poke);
+            }
+            
+            return tr;
+        }
+        
+        int headerSlotSize = 2;
+        int headerSlotCount = 6;
+        int headerPoolIndiciesOffset = headerSlotSize * headerSlotCount;
+        int headerPoolIndicesSize = 1;
+        int headerPoolIndiciesCount = 6;
+        int headerFlagsOffset = headerPoolIndiciesOffset + headerPoolIndicesSize * headerPoolIndiciesCount;
+        int headerFlagsSize = 2;
+        int headerSize = headerFlagsOffset + headerFlagsSize;
+
+        int partySize = trDataBytes[partySizeOffset] & 0xFF;
+        for (int i = 0; i < partySize; ++i) {
+            Trainer.PoolId poolId = Trainer.PoolId.values()[trPokeBytes[i * headerSlotSize] & 0x07];
+            int iv = (trPokeBytes[i * headerSlotSize] & 0xF8) >> 3;
+            int level = trPokeBytes[i * headerSlotSize + 1] & 0xFF;
+            tr.partySlots.add(new Trainer.PartySlot(poolId, iv, level));
+        }
+        
+        int count = 0;
+        for (int poolId = 0; poolId < 6; ++poolId) {
+            int numPokesInPool = trPokeBytes[headerPoolIndiciesOffset + poolId * headerPoolIndicesSize] & 0xFF;
+
+            List<TrainerPokemon> pool = new ArrayList<>(numPokesInPool);
+            for (int poolPokeId = 0; poolPokeId < numPokesInPool; ++poolPokeId) {
+                int pokeOffset = headerSize + pokeDataSize * (count + poolPokeId);
+                TrainerPokemon poke = getParagonLiteTrainerPoke(trPokeBytes, pokeOffset, statModifiersOffset, itemOffset, movesOffset);
+                pool.add(poke);
+            }
+            tr.pools.add(pool);
+            
+            count += numPokesInPool;
+        }
+        
+        
+        
+        return tr;
+    }
+    
+    private TrainerPokemon getParagonLiteTrainerPoke(byte[] trPokeBytes, int offset, int statModifiersOffset, int itemOffset, int movesOffset) {
+        int speciesOffset = 0x00;
+        int basicFlagsOffset = 0x02;
+        int levelOffset = 0x03;
+
+        TrainerPokemon tpk = new TrainerPokemon();
+        
+        int species = readUnsignedWord(trPokeBytes, offset + speciesOffset);
+        int forme = trPokeBytes[offset + basicFlagsOffset] & 0x1F;
+        int gender = (trPokeBytes[offset + basicFlagsOffset] >> 5) & 0x01;
+        int ability = (trPokeBytes[offset + basicFlagsOffset] >> 6) & 0x03;
+        int level = trPokeBytes[offset + levelOffset] & 0xFF;
+        
+        tpk.level = level;
+        tpk.pokemon = species > Gen5Constants.pokemonCount ? pokestarPokes[species - Gen5Constants.pokestarPokemonOffset] : pokes[species];
+        tpk.forme = forme;
+        tpk.formeSuffix = Gen5Constants.getFormeSuffixByBaseForme(species, forme);
+        tpk.abilitySlot = ability;
+        tpk.forcedGenderFlag = gender;
+        
+        if (statModifiersOffset > 0) {
+            int statModifiers = readUnsignedWord(trPokeBytes, offset + statModifiersOffset);
+            tpk.IVs = statModifiers & 0x1F;
+            tpk.nature = (byte) ((statModifiers >> 5) & 0x1F);
+            tpk.evFlags = (byte) ((statModifiers >> 10) & 0x3F);
+        }
+        
+        if (itemOffset > 0)
+            tpk.heldItem = readUnsignedWord(trPokeBytes, offset + itemOffset);
+        
+        if (movesOffset > 0) {
+            for (int move = 0; move < 4; move++) {
+                tpk.moves[move] = readUnsignedWord(trPokeBytes, offset + movesOffset + move * 2);
+            }
+        }
+        
+        return tpk;
     }
 
     public boolean isWhite() {
@@ -1782,105 +1937,24 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart, boolean isParagonLite) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
-            NARCArchive trainers = this.readNARC(romEntry.getFile("TrainerData"));
+            NARCArchive trainers = new NARCArchive();
             NARCArchive trpokes = new NARCArchive();
             // Get current movesets in case we need to reset them for certain
             // trainer mons.
             Map<Integer, List<MoveLearnt>> movesets = this.getMovesLearnt();
-            // empty entry
-            trpokes.files.add(new byte[]{0, 0, 0, 0, 0, 0, 0, 0});
-            int trainernum = trainers.files.size();
-            for (int i = 1; i < trainernum; i++) {
-                byte[] trainer = Arrays.copyOf(trainers.files.get(i), 0x16);
+            // empty entries
+            trainers.files.add(new byte[20]);
+            trpokes.files.add(new byte[isParagonLite ? 4 : 8]);
+            for (int i = 1; i < mainNumTrainers; i++) {
                 Trainer tr = allTrainers.next();
-                boolean setToDoubleBattle = doubleBattleMode && !tr.skipImportant() && tr.battleType == Trainer.BattleType.SingleBattle;
-                // preserve original poketype for held item & moves
-                trainer[0x00] = (byte) tr.partyFlags;
-                trainer[0x01] = (byte) tr.trainerclass;
-
-                if (setToDoubleBattle)
-                    tr.battleType = Trainer.BattleType.DoubleBattle;
-                trainer[0x02] = (byte) tr.battleType.ordinal();
-
-                int numPokes = tr.pokemon.size();
-                trainer[0x03] = (byte) numPokes;
-
-                for (int j = 0; j < 4; ++j)
-                    writeWord(trainer, 0x04 + j * 2, tr.items[j]);
-
-                writeLong(trainer, 0x0C, tr.aiFlags);
-                if (allSmart)
-                    trainer[0x0C] |= (byte) 0x07; // Make all trainers "smart"
-                if (setToDoubleBattle)
-                    trainer[0x0C] |= (byte) 0x80; // Flag that needs to be set for trainers not to attack their own pokes
-
-                trainer[0x10] = (byte) (tr.isHealer ? 1 : 0);
-                trainer[0x11] = tr.rewardMoneyScale;
-                writeWord(trainer, 0x12, tr.rewardItem);
-
-                // Validate channels
-                for (int j = 0; j < 6; ++j) {
-                    byte size = tr.partyChannels[j];
-                    if (size < 0 || size > 6 - j)
-                        throw new RuntimeException(String.format("Channel %c had invalid size %d on trainer %s", j + 'A', size, tr));
-                }
-
-                int channels = 0;
-                channels |= tr.partyChannels[0] & 0x07;
-                channels |= (tr.partyChannels[1] & 0x07) << 3;
-                channels |= (tr.partyChannels[2] & 0x07) << 6;
-                channels |= (tr.partyChannels[3] & 0x03) << 9;
-                channels |= (tr.partyChannels[4] & 0x03) << 11;
-                channels |= (tr.partyChannels[5] & 0x01) << 13;
-
-                writeWord(trainer, 0x14, channels);
-
-                int bytesNeeded = 8 * numPokes;
-                if (tr.pokemonHaveCustomMoves()) {
-                    bytesNeeded += 8 * numPokes;
-                }
-                if (tr.pokemonHaveItems()) {
-                    bytesNeeded += 2 * numPokes;
-                }
-                byte[] trpoke = new byte[bytesNeeded];
-                int pokeOffs = 0;
-                Iterator<TrainerPokemon> tpokes = tr.pokemon.iterator();
-                for (int poke = 0; poke < numPokes; poke++) {
-                    TrainerPokemon tp = tpokes.next();
-                    // Add 1 to offset integer division truncation
-                    int difficulty = Math.min(255, 1 + (tp.IVs * 255) / 31);
-                    trpoke[pokeOffs] = (byte) difficulty;
-                    trpoke[pokeOffs + 1] = (byte) ((tp.abilitySlot << 4) | tp.forcedGenderFlag);
-                    writeWord(trpoke, pokeOffs + 2, tp.level);
-                    writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
-                    writeWord(trpoke, pokeOffs + 6, tp.forme);
-
-                    // no form info, so no byte 6/7
-                    pokeOffs += 8;
-                    if (tr.pokemonHaveItems()) {
-                        writeWord(trpoke, pokeOffs, tp.heldItem);
-                        pokeOffs += 2;
-                    }
-                    if (tr.pokemonHaveCustomMoves()) {
-                        if (tp.resetMoves) {
-                            int[] pokeMoves = RomFunctions.getMovesAtLevel(getAltFormeOfPokemon(tp.pokemon, tp.forme).number, movesets, tp.level);
-                            for (int m = 0; m < 4; m++) {
-                                writeWord(trpoke, pokeOffs + m * 2, pokeMoves[m]);
-                            }
-                        } else {
-                            writeWord(trpoke, pokeOffs, tp.moves[0]);
-                            writeWord(trpoke, pokeOffs + 2, tp.moves[1]);
-                            writeWord(trpoke, pokeOffs + 4, tp.moves[2]);
-                            writeWord(trpoke, pokeOffs + 6, tp.moves[3]);
-                        }
-                        pokeOffs += 8;
-                    }
-                }
-
-                trainers.files.set(i, trainer);
+                
+                byte[] trainer = makeTrainerData(tr, doubleBattleMode, allSmart, isParagonLite || tr.plMode);
+                byte[] trpoke = makeTrainerPoke(tr, movesets, isParagonLite);
+                
+                trainers.files.add(trainer);
                 trpokes.files.add(trpoke);
             }
 
@@ -1967,7 +2041,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 } else {
                     throw new RandomizationException("Double Battle Mode not supported for this game");
                 }
-
             }
 
             // Deal with PWT
@@ -1975,8 +2048,11 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 NARCArchive driftveil = this.readNARC(romEntry.getFile("DriftveilPokemon"));
                 int currentFile = 1;
                 for (int trno = 0; trno < 17; trno++) {
+                    if (!allTrainers.hasNext())
+                        break;
+                    
                     Trainer tr = allTrainers.next();
-                    Iterator<TrainerPokemon> tpks = tr.pokemon.iterator();
+                    Iterator<TrainerPokemon> tpks = tr.getStandardPokePool().iterator();
                     int pokemonNum = 6;
                     if (trno < 2) {
                         pokemonNum = 3;
@@ -2007,6 +2083,232 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } catch (IOException ex) {
             throw new RandomizerIOException(ex);
         }
+    }
+
+    private byte[] makeTrainerData(Trainer tr, boolean doubleBattleMode, boolean allSmart, boolean isParagonLite) {
+        if (isParagonLite || tr.plMode)
+            return makeParagonTrainerData(tr, doubleBattleMode, allSmart);
+        
+        byte[] trainer = new byte[20];
+
+        boolean setToDoubleBattle = doubleBattleMode && !tr.skipImportant() && tr.battleType == Trainer.BattleType.SingleBattle;
+        // preserve original poketype for held item & moves
+        trainer[0x00] = (byte) tr.partyFlags;
+        trainer[0x01] = (byte) tr.trainerclass;
+
+        if (setToDoubleBattle)
+            tr.battleType = Trainer.BattleType.DoubleBattle;
+        trainer[0x02] = (byte) tr.battleType.ordinal();
+
+        int numPokes = tr.getStandardPokePool().size();
+        trainer[0x03] = (byte) numPokes;
+
+        for (int j = 0; j < 4; ++j)
+            writeWord(trainer, 0x04 + j * 2, tr.items[j]);
+
+        writeLong(trainer, 0x0C, tr.aiFlags);
+        if (allSmart)
+            trainer[0x0C] |= (byte) 0x07; // Make all trainers "smart"
+        if (setToDoubleBattle)
+            trainer[0x0C] |= (byte) 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+
+        trainer[0x10] = (byte) (tr.isHealer ? 1 : 0);
+        trainer[0x11] = tr.payoutScale;
+        writeWord(trainer, 0x12, tr.rewardItem);
+        
+        return trainer;
+    }
+    
+    private byte[] makeParagonTrainerData(Trainer tr, boolean doubleBattleMode, boolean allSmart) {
+        byte[] trainer = new byte[20];
+
+        boolean setToDoubleBattle = doubleBattleMode && !tr.skipImportant() && tr.battleType == Trainer.BattleType.SingleBattle;
+        
+        int flags = 0;
+        flags |= tr.battleType == null ? 0x00 : tr.battleType.ordinal() & 0x03;
+        flags |= 0x04; // signature
+        flags |= tr.isHealer ? 0x0008 : 0x00;
+        flags |= tr.pokemonHaveCustomMoves() ? 0x0010 : 0x00;
+        flags |= tr.pokemonHaveItems() ? 0x0020 : 0x00;
+        flags |= tr.pokesHaveNatures ? 0x0040 : 0x00;
+        flags |= tr.pokesHaveIVsEVs ? 0x0080 : 0x00;
+        flags |= tr.ppMax ? 0x0100 : 0x00;
+        flags |= tr.isPooled ? 0x8000 : 0x00;
+        writeWord(trainer, 0x00, flags);
+        
+        trainer[0x02] = (byte) tr.trainerclass;
+        
+        trainer[0x03] = (byte) tr.getPartySize();
+
+        for (int j = 0; j < 4; ++j)
+            writeWord(trainer, 0x04 + j * 2, tr.items[j]);
+
+        writeLong(trainer, 0x0C, tr.aiFlags);
+        if (allSmart)
+            trainer[0x0C] |= (byte) 0x07; // Make all trainers "smart"
+        if (setToDoubleBattle)
+            trainer[0x0C] |= (byte) 0x80; // Flag that needs to be set for trainers not to attack their own pokes
+
+        trainer[0x10] = (byte) tr.getTotalPokes();
+
+        trainer[0x11] = tr.payoutScale;
+        writeWord(trainer, 0x12, tr.rewardItem);
+        
+        return trainer;
+    }
+
+    private byte[] makeTrainerPoke(Trainer tr, Map<Integer, List<MoveLearnt>> movesets, boolean isParagonLite) {
+        if (isParagonLite)
+            return makeParagonLiteTrainerPoke(tr, movesets);
+        
+        int numPokes = tr.getStandardPokePool().size();
+        
+        int bytesNeeded = 8 * numPokes;
+        if (tr.pokemonHaveCustomMoves()) {
+            bytesNeeded += 8 * numPokes;
+        }
+        if (tr.pokemonHaveItems()) {
+            bytesNeeded += 2 * numPokes;
+        }
+        
+        byte[] trpoke = new byte[bytesNeeded];
+        int pokeOffs = 0;
+        Iterator<TrainerPokemon> tpokes = tr.getStandardPokePool().iterator();
+        for (int poke = 0; poke < numPokes; poke++) {
+            TrainerPokemon tp = tpokes.next();
+            // Add 1 to offset integer division truncation
+            int difficulty = Math.min(255, 1 + (tp.IVs * 255) / 31);
+            trpoke[pokeOffs] = (byte) difficulty;
+            trpoke[pokeOffs + 1] = (byte) ((tp.abilitySlot << 4) | tp.forcedGenderFlag);
+            writeWord(trpoke, pokeOffs + 2, tp.level);
+            writeWord(trpoke, pokeOffs + 4, tp.pokemon.number);
+            writeWord(trpoke, pokeOffs + 6, tp.forme);
+
+            // no form info, so no byte 6/7
+            pokeOffs += 8;
+            if (tr.pokemonHaveItems()) {
+                writeWord(trpoke, pokeOffs, tp.heldItem);
+                pokeOffs += 2;
+            }
+            if (tr.pokemonHaveCustomMoves()) {
+                if (tp.resetMoves) {
+                    int[] pokeMoves = RomFunctions.getMovesAtLevel(getAltFormeOfPokemon(tp.pokemon, tp.forme).number, movesets, tp.level);
+                    for (int m = 0; m < 4; m++) {
+                        writeWord(trpoke, pokeOffs + m * 2, pokeMoves[m]);
+                    }
+                } else {
+                    writeWord(trpoke, pokeOffs, tp.moves[0]);
+                    writeWord(trpoke, pokeOffs + 2, tp.moves[1]);
+                    writeWord(trpoke, pokeOffs + 4, tp.moves[2]);
+                    writeWord(trpoke, pokeOffs + 6, tp.moves[3]);
+                }
+                pokeOffs += 8;
+            }
+        }
+        
+        return trpoke;
+    }
+    
+    private byte[] makeParagonLiteTrainerPoke(Trainer tr, Map<Integer, List<MoveLearnt>> movesets) {
+        int numPokes = tr.getTotalPokes();
+
+        int bytesNeeded = 4 * numPokes;
+        
+        if (tr.isPooled)
+            bytesNeeded += 20;
+        
+        if (tr.pokesHaveNatures || tr.pokesHaveIVsEVs)
+            bytesNeeded += 2 * numPokes;
+        
+        if (tr.pokemonHaveItems())
+            bytesNeeded += 2 * numPokes;
+        
+        if (tr.pokemonHaveCustomMoves())
+            bytesNeeded += 8 * numPokes;
+
+        byte[] trpoke = new byte[bytesNeeded];
+
+        int pokeOffs = 0;
+        
+        // header
+        if (tr.isPooled) {
+
+            if (tr.partySlots.size() > 6)
+                throw new RuntimeException("too many slots");
+
+            if (tr.pools.size() > 6)
+                throw new RuntimeException("too many pools");
+            
+            // slots
+            int headerOffset = 0;
+            for (Trainer.PartySlot partySlot : tr.partySlots) {
+                writeWord(trpoke, headerOffset, partySlot.toPacked());
+                headerOffset += 2;
+            }
+            
+            // pool sizes
+            headerOffset = 0x0C;
+            for (List<TrainerPokemon> pool : tr.pools) {
+                trpoke[headerOffset++] = (byte) pool.size();
+            }
+
+            headerOffset = 0x0C;
+            int flags = 0;
+            flags |= tr.uniqueSpecies ? 0x01 : 0x00;
+            flags |= tr.uniqueItems ? 0x02 : 0x00;
+            writeWord(trpoke, headerOffset, flags);
+
+            pokeOffs = 0x14;
+        }
+        
+        Iterator<TrainerPokemon> tpokes = tr.getAllPokesInPools().iterator();
+        for (int poke = 0; poke < numPokes; poke++) {
+            TrainerPokemon tp = tpokes.next();
+            
+            writeWord(trpoke, pokeOffs, tp.pokemon.number);
+            int baseFlags = 0;
+            baseFlags |= tp.forme & 0x1F;
+            baseFlags |= (tp.forcedGenderFlag & 0x01) << 5;
+            baseFlags |= (tp.abilitySlot & 0x03) << 6;
+            trpoke[pokeOffs + 2] = (byte) baseFlags;
+            
+            trpoke[pokeOffs + 3] = (byte) tp.level;
+
+            pokeOffs += 4;
+            if (tr.pokesHaveNatures || tr.pokesHaveIVsEVs) {
+                int statModifiers = 0;
+                statModifiers |= tp.IVs & 0x1F;
+                statModifiers |= (tp.nature & 0x1F) << 5;
+                statModifiers |= (tp.evFlags & 0x3F) << 10;
+                writeWord(trpoke, pokeOffs, statModifiers);
+                pokeOffs += 2;
+            }
+            
+            if (tr.pokemonHaveItems()) {
+                writeWord(trpoke, pokeOffs, tp.heldItem);
+                pokeOffs += 2;
+            }
+            
+            if (tr.pokemonHaveCustomMoves()) {
+                if (tp.resetMoves) {
+                    if (tr.isPooled)
+                        throw new RuntimeException("This should never be pooled!");
+                    
+                    int[] pokeMoves = RomFunctions.getMovesAtLevel(getAltFormeOfPokemon(tp.pokemon, tp.forme).number, movesets, tp.level);
+                    for (int m = 0; m < 4; m++) {
+                        writeWord(trpoke, pokeOffs + m * 2, pokeMoves[m]);
+                    }
+                } else {
+                    writeWord(trpoke, pokeOffs, tp.moves[0]);
+                    writeWord(trpoke, pokeOffs + 2, tp.moves[1]);
+                    writeWord(trpoke, pokeOffs + 4, tp.moves[2]);
+                    writeWord(trpoke, pokeOffs + 6, tp.moves[3]);
+                }
+                pokeOffs += 8;
+            }
+        }
+
+        return trpoke;
     }
 
     @Override
@@ -5714,7 +6016,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 //            paragonLite.setTrainerAI();
 
 //        if (debugMode)
-        paragonLite.setTrainers();
+        paragonLite.setTrainerData();
 
 //        if (debugMode)
 //            paragonLite.test();

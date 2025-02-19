@@ -41,7 +41,7 @@ public class Gen5Constants {
 
     public static final int arm9Offset = 0x02004000;
 
-    public static final int pokemonCount = 649, moveCount = 559;
+    public static final int pokemonCount = 649, pokestarPokemonCount = 33, pokestarPokemonOffset = 652, moveCount = 559;
     private static final int bw1FormeCount = 18, bw2FormeCount = 24;
     private static final int bw1formeOffset = 0, bw2formeOffset = 35;
 

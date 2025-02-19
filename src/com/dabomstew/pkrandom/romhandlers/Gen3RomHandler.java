@@ -1671,7 +1671,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     thisPoke.IVs = ((readWord(pointerToPokes + poke * 8) & 0xFF) * 31) / 255;
                     thisPoke.level = readWord(pointerToPokes + poke * 8 + 2);
                     thisPoke.pokemon = pokesInternal[readWord(pointerToPokes + poke * 8 + 4)];
-                    tr.pokemon.add(thisPoke);
+                    tr.getStandardPokePool().add(thisPoke);
                 }
             } else if (pokeDataType == 2) {
                 // blocks of 8 bytes
@@ -1681,7 +1681,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     thisPoke.level = readWord(pointerToPokes + poke * 8 + 2);
                     thisPoke.pokemon = pokesInternal[readWord(pointerToPokes + poke * 8 + 4)];
                     thisPoke.heldItem = readWord(pointerToPokes + poke * 8 + 6);
-                    tr.pokemon.add(thisPoke);
+                    tr.getStandardPokePool().add(thisPoke);
                 }
             } else if (pokeDataType == 1) {
                 // blocks of 16 bytes
@@ -1693,7 +1693,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     for (int move = 0; move < 4; move++) {
                         thisPoke.moves[move] = readWord(pointerToPokes + poke * 16 + 6 + (move*2));
                     }
-                    tr.pokemon.add(thisPoke);
+                    tr.getStandardPokePool().add(thisPoke);
                 }
             } else if (pokeDataType == 3) {
                 // blocks of 16 bytes
@@ -1706,12 +1706,12 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                     for (int move = 0; move < 4; move++) {
                         thisPoke.moves[move] = readWord(pointerToPokes + poke * 16 + 8 + (move*2));
                     }
-                    tr.pokemon.add(thisPoke);
+                    tr.getStandardPokePool().add(thisPoke);
                 }
             }
             
             // TODO: Make this configurable
-            for (var trPoke : tr.pokemon) {
+            for (var trPoke : tr.getStandardPokePool()) {
                 trPoke.level = 50;
             }
             
@@ -1742,7 +1742,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 for (int move = 0; move < 4; move++) {
                     thisPoke.moves[move] = readWord(currentOffset + 12 + (move * 2));
                 }
-                mossdeepSteven.pokemon.add(thisPoke);
+                mossdeepSteven.getStandardPokePool().add(thisPoke);
             }
 
             theTrainers.add(mossdeepSteven);
@@ -1781,7 +1781,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart, boolean isParagonLite) {
         int amount = romEntry.getValue("TrainerCount");
         int entryLen = romEntry.getValue("TrainerEntrySize");
         Iterator<Trainer> theTrainers = trainerData.iterator();
@@ -1797,7 +1797,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
             // Do we need to repoint this trainer's data?
             int oldPokeType = rom[trOffset] & 0xFF;
             int oldPokeCount = rom[trOffset + (entryLen - 8)] & 0xFF;
-            int newPokeCount = tr.pokemon.size();
+            int newPokeCount = tr.getStandardPokePool().size();
             int newDataSize = newPokeCount * ((tr.partyFlags & 1) == 1 ? 16 : 8);
             int oldDataSize = oldPokeCount * ((oldPokeType & 1) == 1 ? 16 : 8);
 
@@ -1823,7 +1823,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                 pointerToPokes = readPointer(trOffset + (entryLen - 4));
             }
 
-            Iterator<TrainerPokemon> pokes = tr.pokemon.iterator();
+            Iterator<TrainerPokemon> pokes = tr.getStandardPokePool().iterator();
 
             // Write out Pokemon data!
             if (tr.pokemonHaveCustomMoves()) {
@@ -1877,7 +1877,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
             for (int i = 0; i < 3; i++) {
                 int currentOffset = globalMossdeepStevenTeamOffset + (i * 20);
-                TrainerPokemon tp = mossdeepSteven.pokemon.get(i);
+                TrainerPokemon tp = mossdeepSteven.getStandardPokePool().get(i);
                 writeWord(currentOffset, pokedexToInternal[tp.pokemon.number]);
                 rom[currentOffset + 2] = (byte)tp.IVs;
                 rom[currentOffset + 3] = (byte)tp.level;
@@ -4092,7 +4092,8 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         effPer = (int) statChanges[0].percentChance;
                 }
                 String effStr = effPer <= 0 || effPer >= 100 ? move.effect.toString() : String.format("%s (%d%%)", move.effect.toString(), effPer);
-                System.out.printf("#%03d | %-12s | %-8s | %3s | %3s%% | %2d | %+d | %s%n", move.internalId, move.name, move.type.toString(), bpStr, accStr, move.pp, move.priority, effStr);
+                String priorityStr = move.priority > 0 ? String.format("%+d", move.priority) : "  ";
+                System.out.printf("#%03d | %-12s | %-8s | %3s | %3s%% | %2d | %s | %s%n", move.internalId, move.name, move.type.toString(), bpStr, accStr, move.pp, priorityStr, effStr);
             }
         } else if (tweak == MiscTweak.CUSTOM_TYPE_EFFECTIVENESS) {
             customTypeEffectiveness();

@@ -1,8 +1,7 @@
 {
-  "class": 0,
-  "flags": 1,
-  "partySize": 2,
-  "pokeCount": 3,
+  "flags": 0,
+  "class": 2,
+  "partySize": 3,
   "items": [
     4,
     6,
@@ -10,7 +9,7 @@
     10
   ],
   "aiFlags": 12,
-  "padding": 16,
+  "pokeCount": 16,
   "payoutScale": 17,
   "rewardItem": 18,
   "SIZE": 20

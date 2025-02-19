@@ -2,28 +2,27 @@
   "battleStyleBit": 0,
   "battleStyleSize": 3,
   "battleStyleMask": 3,
-  
-  "isHealerBit": 2,
-  "isHealerSize": 1,
-  "isHealerMask": 1,
 
-  "hasItemBit": 3,
+  "signatureBit": 2,
+  
+  "isHealerBit": 3,
+  "isHealerSize": 1,
+
+  "hasItemBit": 4,
   "hasItemSize": 1,
-  "hasItemMask": 1,
   
-  "hasMovesBit": 4,
+  "hasMovesBit": 5,
   "hasMovesSize": 1,
-  "hasMovesMask": 1,
   
-  "hasNatureBit": 5,
+  "hasNatureBit": 6,
   "hasNatureSize": 1,
-  "hasNatureMask": 1,
   
-  "hasIVsEVsBit": 6,
+  "hasIVsEVsBit": 7,
   "hasIVsEVsSize": 1,
-  "hasIVsEVsMask": 1,
   
-  "isPooledBit": 7,
-  "isPooledSize": 1,
-  "isPooledMask": 1
+  "hasMaxPPBit": 8,
+  "hasMaxPPSize": 1,
+  
+  "isPooledBit": 15,
+  "isPooledSize": 1
 }

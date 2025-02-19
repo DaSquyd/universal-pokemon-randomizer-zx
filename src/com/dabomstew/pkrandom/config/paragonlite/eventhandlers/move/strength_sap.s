@@ -22,7 +22,7 @@
     
     mov     r0, r6
     mov     r1, #BPV_AttackStat
-    bl      Battle::Poke_GetParam
+    bl      Battle::GetPokeStat
     mov     r7, r0
     
     mov     r0, r5

@@ -50,35 +50,38 @@
     
 CheckPokesHaveStatModifiers:
     ldr     r0, [sp, #S_TrainerDataPtr]
-    bl      ARM9::Trainer_PokesHaveStatModifiers
+    bl      ARM9::TrTool_PokesHaveStatModifiers
     cmp     r0, #FALSE
     beq     CheckPokesHaveItems
     
     #printf("Pokes have stat modifiers flag")
     
-    strb    r7, [sp, #(S_DataOffsets + 0x00)]
+    add     r0, sp, #S_DataOffsets
+    strb    r7, [r0, #0x00]
     add     r7, #TrainerPoke.STAT_MODIFIERS_SIZE
     
 CheckPokesHaveItems:
     ldr     r0, [sp, #S_TrainerDataPtr]
-    bl      ARM9::Trainer_PokesHaveItems
+    bl      ARM9::TrTool_PokesHaveItems
     cmp     r0, #FALSE
     beq     CheckPokesHaveMoves
     
     #printf("Pokes have items flag")
     
-    strb    r7, [sp, #(S_DataOffsets + 0x01)]
+    add     r0, sp, #S_DataOffsets
+    strb    r7, [r0, #0x01]
     add     r7, #TrainerPoke.ITEM_SIZE
     
 CheckPokesHaveMoves:
     ldr     r0, [sp, #S_TrainerDataPtr]
-    bl      ARM9::Trainer_PokesHaveMoves
+    bl      ARM9::TrTool_PokesHaveMoves
     cmp     r0, #FALSE
     beq     RandomSetup
     
     #printf("Pokes have moves flag")
     
-    strb    r7, [sp, #(S_DataOffsets + 0x02)]
+    add     r0, sp, #S_DataOffsets
+    strb    r7, [r0, #0x02]
     add     r7, #TrainerPoke.MOVES_SIZE
     
 RandomSetup:
@@ -103,22 +106,22 @@ RandomSetup_Finish:
 ; iterate through each poke
 MainLoop_Setup:
     mov     r0, #0
-    str     r0, [sp, #S_PokeIndex)
+    str     r0, [sp, #S_PokeIndex]
     
 MainLoop_Start:
-    #printf("\tPoke %d...", [sp, #S_PokeIndex])
+    #printf("\tPoke %d...", ldr [sp, #S_PokeIndex])
     
     ldr     r0, [sp, #S_PokeIndex]
     mul     r0, r7 ; r0 := size * index
     
-    ldr     r1, [sp, #ARG_trainerPokePtr]
+    ldr     r1, [sp, #ARG_TrainerPokePtr]
     add     r6, r1, r0
     
     mov     r0, r6
     mov     r1, r7
     ldr     r2, [sp, #S_PlayerId]
     ldr     r3, [sp, #S_TrainerId]
-    bl      ARM9::Trainer_MakePokeFromData
+    bl      ARM9::TrTool_MakePokeFromData
     
 MainLoop_AddToParty:
     ldr     r0, [sp, #S_PartyPtr]
@@ -129,7 +132,7 @@ MainLoop_End:
     ldr     r0, [sp, #S_PokeIndex]
     add     r0, #1
     str     r0, [sp, #S_PokeIndex]
-    mov     r1, [sp, #S_TrainerDataPtr]
+    ldr     r1, [sp, #S_TrainerDataPtr]
     ldrb    r1, [r1, #TrainerData.partySize]
     cmp     r0, r1
     bcc     MainLoop_Start

@@ -142,6 +142,7 @@ public class NewRandomizerGUI {
     private JCheckBox pmsNoMetronomeCheckBox;
     private JCheckBox pmsNoMagnitudeCheckBox;
     private JCheckBox pmsNoOHKOMovesCheckBox;
+    private JCheckBox pmsNoTrappingMovesCheckBox;
     private JSlider pmsGuaranteedLevel1MovesSlider;
     private JSlider pmsForceGoodDamagingSlider;
     private JCheckBox tpRivalCarriesStarterCheckBox;
@@ -505,6 +506,7 @@ public class NewRandomizerGUI {
         pmsNoMetronomeCheckBox.addActionListener(e -> enableOrDisableSubControls());
         pmsNoMagnitudeCheckBox.addActionListener(e -> enableOrDisableSubControls());
         pmsNoOHKOMovesCheckBox.addActionListener(e -> enableOrDisableSubControls());
+        pmsNoTrappingMovesCheckBox.addActionListener(e -> enableOrDisableSubControls());
         tpForceFullyEvolvedAtCheckBox.addActionListener(e -> enableOrDisableSubControls());
         tpPercentageLevelModifierCheckBox.addActionListener(e -> enableOrDisableSubControls());
         tpEliteFourUniquePokemonCheckBox.addActionListener(e -> enableOrDisableSubControls());
@@ -1626,6 +1628,7 @@ public class NewRandomizerGUI {
         pmsNoMetronomeCheckBox.setSelected(settings.isNoMetronome());
         pmsNoMagnitudeCheckBox.setSelected(settings.isNoMagnitude());
         pmsNoOHKOMovesCheckBox.setSelected(settings.isNoOHKOMoves());
+        pmsNoTrappingMovesCheckBox.setSelected(settings.isNoTrappingMoves());
         pmsForceGoodDamagingSlider.setValue(settings.getMovesetsGoodDamagingPercent());
         pmsNoGameBreakingMovesCheckBox.setSelected(settings.isBlockBrokenMovesetMoves());
         pmsEvolutionMovesCheckBox.setSelected(settings.isEvolutionMovesForAll());
@@ -1893,6 +1896,7 @@ public class NewRandomizerGUI {
         settings.setNoMetronome(pmsNoMetronomeCheckBox.isSelected());
         settings.setNoMagnitude(pmsNoMagnitudeCheckBox.isSelected());
         settings.setNoOHKOMoves(pmsNoOHKOMovesCheckBox.isSelected());
+        settings.setNoTrappingMoves(pmsNoTrappingMovesCheckBox.isSelected());
         settings.setMovesetsGoodDamagingPercent(pmsForceGoodDamagingSlider.getValue());
         settings.setBlockBrokenMovesetMoves(pmsNoGameBreakingMovesCheckBox.isSelected());
         settings.setEvolutionMovesForAll(pmsEvolutionMovesCheckBox.isVisible() &&
@@ -2456,6 +2460,9 @@ public class NewRandomizerGUI {
         pmsNoOHKOMovesCheckBox.setVisible(true);
         pmsNoOHKOMovesCheckBox.setEnabled(false);
         pmsNoOHKOMovesCheckBox.setSelected(false);
+        pmsNoTrappingMovesCheckBox.setVisible(true);
+        pmsNoTrappingMovesCheckBox.setEnabled(false);
+        pmsNoTrappingMovesCheckBox.setSelected(false);
         pmsGuaranteedLevel1MovesSlider.setVisible(true);
         pmsGuaranteedLevel1MovesSlider.setEnabled(false);
         pmsGuaranteedLevel1MovesSlider.setValue(pmsGuaranteedLevel1MovesSlider.getMinimum());
@@ -3613,6 +3620,8 @@ public class NewRandomizerGUI {
             pmsNoMagnitudeCheckBox.setSelected(false);
             pmsNoOHKOMovesCheckBox.setEnabled(false);
             pmsNoOHKOMovesCheckBox.setSelected(false);
+            pmsNoTrappingMovesCheckBox.setEnabled(false);
+            pmsNoTrappingMovesCheckBox.setSelected(false);
             pmsReorderDamagingMovesCheckBox.setEnabled(false);
             pmsReorderDamagingMovesCheckBox.setSelected(false);
             pmsNoGameBreakingMovesCheckBox.setEnabled(false);
@@ -3629,6 +3638,7 @@ public class NewRandomizerGUI {
             pmsNoMetronomeCheckBox.setEnabled(true);
             pmsNoMagnitudeCheckBox.setEnabled(true);
             pmsNoOHKOMovesCheckBox.setEnabled(true);
+            pmsNoTrappingMovesCheckBox.setEnabled(true);
             pmsReorderDamagingMovesCheckBox.setEnabled(true);
             pmsNoGameBreakingMovesCheckBox.setEnabled(true);
             pmsEvolutionMovesCheckBox.setEnabled(true);

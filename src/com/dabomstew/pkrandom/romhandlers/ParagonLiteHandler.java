@@ -65,7 +65,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.ParagonLite;
+    public static Mode mode = Mode.Redux;
 
     Gen5RomHandler romHandler;
 
@@ -84,6 +84,8 @@ public class ParagonLiteHandler {
     ParagonLiteOverlay storageOvl;
     ParagonLiteOverlay fieldSaveOvl;
     ParagonLiteOverlay unovaLinkOvl;
+    ParagonLiteOverlay scriptPWTOvl;
+    ParagonLiteOverlay pwtBattleOvl;
 
     Pokemon[] classicPokes;
     Pokemon[] pokes;
@@ -215,6 +217,8 @@ public class ParagonLiteHandler {
         int storageOvlNumber = romEntry.getInt("PCOvlNumber");
         int fieldSaveOvlNumber = romEntry.getInt("FieldSaveOvlNumber");
         int unovaLinkOvlNumber = romEntry.getInt("UnovaLinkOvlNumber");
+        int scriptPWTOvlNumber = romEntry.getInt("ScriptPWTOvlNumber");
+        int PWTBattleOvlNumber = romEntry.getInt("PWTBattleOvlNumber");
 
         globalAddressMap = new ParagonLiteAddressMap();
         armParser = new ArmParser(globalAddressMap);
@@ -275,6 +279,24 @@ public class ParagonLiteHandler {
             int unovaLinkOvlAddress = romHandler.getOverlayAddress(unovaLinkOvlNumber);
             unovaLinkOvl = new ParagonLiteOverlay(romHandler, unovaLinkOvlNumber, "UnovaLink", unovaLinkOvlData, unovaLinkOvlAddress, ParagonLiteOverlay.Insertion.Back, armParser, globalAddressMap);
 
+            byte[] scriptPWTOvlData = romHandler.readOverlay(scriptPWTOvlNumber);
+            int scriptPWTOvlAddress = romHandler.getOverlayAddress(scriptPWTOvlNumber);
+            scriptPWTOvl = new ParagonLiteOverlay(romHandler, scriptPWTOvlNumber, "Script_PWT", scriptPWTOvlData, scriptPWTOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
+            
+            byte[] pwtBattleOvlData = romHandler.readOverlay(PWTBattleOvlNumber);
+            int pwtBattleOvlAddress = romHandler.getOverlayAddress(PWTBattleOvlNumber);
+            pwtBattleOvl = new ParagonLiteOverlay(romHandler, PWTBattleOvlNumber, "PWT_Battle", pwtBattleOvlData, pwtBattleOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
+            
+//            // Search all overlays
+//            for (int i = 0; i < 343; i++) {
+//                byte[] ovl = romHandler.readOverlay(i);
+//                int offset = romHandler.find(ovl, "F8 B5 82 B0 06 1C 15 48 1D 1C 00 90 08 A8 0F 1C");
+//                if (offset < 0)
+//                    continue;
+//                
+//                System.out.printf("found: ovl_%03d @ 0x%08X%n", i, offset);
+//            }
+            
             // Battle Overlays
             {
                 ParagonLiteOverlay[] battleOverlays = new ParagonLiteOverlay[]{arm9, battleOvl, battleLevelOvl, battleServerOvl, trainerAIOvl};
@@ -298,6 +320,13 @@ public class ParagonLiteHandler {
                 titleOvl.addContextOverlays(unovaLinkOverlays);
                 unovaLinkOvl.addContextOverlays(unovaLinkOverlays);
                 arm9.addContextOverlays(unovaLinkOverlays);
+            }
+            
+            // PWT Overlays
+            {
+                ParagonLiteOverlay[] pwtOverlays = new ParagonLiteOverlay[]{arm9, scriptPWTOvl, pwtBattleOvl};
+                scriptPWTOvl.addContextOverlays(pwtOverlays);
+                pwtBattleOvl.addContextOverlays(pwtOverlays);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -2035,11 +2064,75 @@ public class ParagonLiteHandler {
         System.out.println("Set trainer AI scripts");
     }
 
-    public void setTrainers() {
+    public void setTrainerData() {
 //        arm9.writeCode(readLines("lcg.s"), "LCG");
 //        arm9.writeCode(readLines("lcg_seed.s"), "SeedLCG");
 
-        arm9.writeCodeForceInline(readLines("get_trainer_data.s"), "GetTrainerData", false);
+        // TrainerPoke_GetGenderAbilityByte
+        arm9.writeCode(readLines("arm9/tr_tool/poke_get_gender_ability_byte.s"), "TrainerPoke_GetGenderAbilityByte");
+        
+        // TrTool_GetParam
+        // Refs: TrainerPoke_GetGenderAbilityByte
+        arm9.writeCodeForceInline(readLines("arm9/tr_tool/get_param.s"), "TrTool_GetParam", false);
+
+        // TrTool_GetPokeDataSize
+        arm9.writeCode(readLines("arm9/tr_tool/get_poke_data_size.s"), "TrTool_GetPokeDataSize");
+        
+        // TrTool_GetPokeFileSize
+        // Refs: TrTool_GetPokeDataSize
+        arm9.writeCode(readLines("arm9/tr_tool/get_poke_file_size.s"), "TrTool_GetPokeFileSize");
+        
+        // TrTool_IsPooled
+        arm9.writeCode(readLines("arm9/tr_tool/is_pooled.s"), "TrTool_IsPooled");
+        
+        // TrTool_PokesHaveStatModifiers
+        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_stat_modifiers.s"), "TrTool_PokesHaveStatModifiers");
+        
+        // TrTool_PokesHaveItems
+        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_items.s"), "TrTool_PokesHaveItems");
+        
+        // TrTool_PokesHaveMoves
+        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_moves.s"), "TrTool_PokesHaveMoves");
+        
+        // TrTool_PokesHaveNatures
+        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_natures.s"), "TrTool_PokesHaveNatures");
+        
+        // TrainerPoke_GetFormId
+        arm9.writeCode(readLines("arm9/tr_tool/poke_get_form_id.s"), "TrainerPoke_GetFormId");
+        
+        // TrTool_MakePokeFromData
+        // Refs: TrainerPoke_GetGenderAbilityByte, TrTool_PokesHaveNatures, TrainerPoke_GetFormId
+        arm9.writeCode(readLines("arm9/tr_tool/loadparty/make_poke_from_data.s"), "TrTool_MakePokeFromData");
+        
+        // TrTool_LoadParty_Standard
+        // Refs: TrTool_PokesHaveStatModifiers, TrTool_PokesHaveItems, TrTool_PokesHaveMoves, TrTool_MakePokeFromData
+        arm9.writeCode(readLines("arm9/tr_tool/loadparty/standard.s"), "TrTool_LoadParty_Standard");
+        
+        // TrTool_LoadParty_Pooled
+        arm9.writeCode(readLines("arm9/tr_tool/loadparty/pooled.s"), "TrTool_LoadParty_Pooled");
+        
+        // Refs: TrTool_GetPokeFileSize, TrTool_IsPooled, TrTool_LoadParty_Standard, TrTool_LoadParty_Pooled
+        // we are ultimately replacing TrTool_LoadParty with this, but we add separately for naming purposes
+        arm9.writeCode(readLines("arm9/tr_tool/loadparty/core.s"), "TrTool_LoadParty_Core");
+        
+        // Refs: TrTool_LoadParty_Core
+        pwtBattleOvl.writeCodeForceInline(readLines("pwt_battle/trainer_party_setup.s"), "TrainerPartySetup", true);
+
+        // TODO: Why isn't this working???
+//        // Free the unused version
+//        arm9.freeCode("TrTool_LoadParty");
+
+        byte[] trainerDataBytes = readBytes("redux_trainer_data.narc");
+        byte[] trainerPokeBytes = readBytes("redux_trainer_poke.narc");
+        try {
+            NARCArchive trainerDataNarc = new NARCArchive(trainerDataBytes);
+            NARCArchive trainerPokeNarc = new NARCArchive(trainerPokeBytes);
+            
+            var trainers = romHandler.getTrainers(trainerDataNarc, trainerPokeNarc);
+            romHandler.setTrainers(trainers, false, false, true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         System.out.println("Set trainers");
     }
@@ -2047,7 +2140,7 @@ public class ParagonLiteHandler {
     public void setAbilities() {
         registerAbilityEffects();
 
-        int abilityListAdditions = 51;
+        int abilityListAdditions = 52;
 
         // Move AbilityList
         relocateAbilityListRamAddress(abilityListAdditions);
@@ -6549,44 +6642,44 @@ public class ParagonLiteHandler {
         List<Trainer> trainers = romHandler.getTrainers();
 //        romHandler.setTrainers(trainers, true, true);
 
-        for (Trainer tr : trainers) {
-            if (tr.pokemon.isEmpty())
-                continue;
-
-            tr.setPokemonHaveCustomMoves(true);
-            tr.setPokemonHaveItems(true);
-
-            // Poke 1
-            {
-                TrainerPokemon poke1 = tr.pokemon.get(0);
-                poke1.pokemon = romHandler.getPokemon().get(Species.cofagrigus);
-                pokes[poke1.pokemon.number].ability1 = Abilities.goodAsGold;
-                poke1.abilitySlot = 1;
-                poke1.level = 53;
-                poke1.moves = new int[]{Moves.haze, Moves.meanLook, Moves.hex, 0};
-                poke1.heldItem = Items.sitrusBerry;
-                poke1.IVs = 0;
-            }
-
-//            // Poke 2
+//        for (Trainer tr : trainers) {
+//            if (tr.pokemon.isEmpty())
+//                continue;
+//
+//            tr.setPokemonHaveCustomMoves(true);
+//            tr.setPokemonHaveItems(true);
+//
+//            // Poke 1
 //            {
-//                if (tr.pokemon.size() < 2)
-//                    tr.pokemon.add(tr.pokemon.get(0).copy());
-//                TrainerPokemon poke2 = tr.pokemon.get(1);
-//                poke2.pokemon = romHandler.getPokemon().get(Species.cresselia);
-//                pokes[poke2.pokemon.number].ability1 = Abilities.illuminate;
-//                poke2.abilitySlot = 1;
-//                poke2.level = 16;
-//                poke2.moves = new int[]{Moves.gust, Moves.flowerTrick, Moves.silverWind, Moves.mistBall};
-//                poke2.IVs = 0;
-//                poke2.heldItem = Items.sitrusBerry;
+//                TrainerPokemon poke1 = tr.pokemon.get(0);
+//                poke1.pokemon = romHandler.getPokemon().get(Species.cofagrigus);
+//                pokes[poke1.pokemon.number].ability1 = Abilities.goodAsGold;
+//                poke1.abilitySlot = 1;
+//                poke1.level = 53;
+//                poke1.moves = new int[]{Moves.haze, Moves.meanLook, Moves.hex, 0};
+//                poke1.heldItem = Items.sitrusBerry;
+//                poke1.IVs = 0;
 //            }
-
-//            if (tr.pokemon.size() < 3)
-//                tr.pokemon.add(poke1.copy());
-        }
-
-        romHandler.setTrainers(trainers, false, true);
+//
+////            // Poke 2
+////            {
+////                if (tr.pokemon.size() < 2)
+////                    tr.pokemon.add(tr.pokemon.get(0).copy());
+////                TrainerPokemon poke2 = tr.pokemon.get(1);
+////                poke2.pokemon = romHandler.getPokemon().get(Species.cresselia);
+////                pokes[poke2.pokemon.number].ability1 = Abilities.illuminate;
+////                poke2.abilitySlot = 1;
+////                poke2.level = 16;
+////                poke2.moves = new int[]{Moves.gust, Moves.flowerTrick, Moves.silverWind, Moves.mistBall};
+////                poke2.IVs = 0;
+////                poke2.heldItem = Items.sitrusBerry;
+////            }
+//
+////            if (tr.pokemon.size() < 3)
+////                tr.pokemon.add(poke1.copy());
+//        }
+//
+//        romHandler.setTrainers(trainers, false, true);
 
         // Set debug AI Flag
 //        for (Trainer tr : trainers) {

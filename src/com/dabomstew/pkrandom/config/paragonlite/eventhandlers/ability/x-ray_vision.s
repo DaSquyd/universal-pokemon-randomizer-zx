@@ -49,7 +49,7 @@ CheckItemCount:
     beq     Return
     
     mov     r0, r4
-    bl      BattleRandom
+    bl      Battle::Random
     lsl     r5, r0, #1 ; item offset
     
     mov     r0, r7

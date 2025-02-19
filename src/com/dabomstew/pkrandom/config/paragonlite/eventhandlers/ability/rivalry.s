@@ -21,14 +21,14 @@
 ; Get Gender of Pokémon 1
     MOV     R0, R4
     MOV     R1, #18 ; gender
-    BL      Battle::Poke_GetParam
+    BL      Battle::GetPokeStat
     LSL     R0, R0, #24
     LSR     R4, R0, #24
     
 ; Get Gender of Pokémon 2
     MOV     R0, R5
     MOV     R1, #18 ; gender
-    BL      Battle::Poke_GetParam
+    BL      Battle::GetPokeStat
     LSL     R0, R0, #24
     LSR     R0, R0, #24
     

@@ -1289,7 +1289,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                         TrainerPokemon tpk = new TrainerPokemon();
                         tpk.level = rom[offs] & 0xFF;
                         tpk.pokemon = pokes[pokeRBYToNumTable[rom[offs + 1] & 0xFF]];
-                        tr.pokemon.add(tpk);
+                        tr.getStandardPokePool().add(tpk);
                         offs += 2;
                     }
                 } else {
@@ -1299,7 +1299,7 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                         TrainerPokemon tpk = new TrainerPokemon();
                         tpk.level = dataType;
                         tpk.pokemon = pokes[pokeRBYToNumTable[rom[offs] & 0xFF]];
-                        tr.pokemon.add(tpk);
+                        tr.getStandardPokePool().add(tpk);
                         offs++;
                     }
                 }
@@ -1326,7 +1326,8 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
         return new ArrayList<>();
     }
 
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
+    @Override
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart, boolean isParagonLite) {
         int traineroffset = romEntry.getValue("TrainerDataTableOffset");
         int traineramount = Gen1Constants.trainerClassCount;
         int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
@@ -1346,11 +1347,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                 if (tr.trainerclass != i) {
                     System.err.println("Trainer mismatch: " + tr.name);
                 }
-                Iterator<TrainerPokemon> tPokes = tr.pokemon.iterator();
+                Iterator<TrainerPokemon> tPokes = tr.getStandardPokePool().iterator();
                 // Write their pokemon based on poketype
                 if (tr.partyFlags == 0) {
                     // Regular trainer
-                    int fixedLevel = tr.pokemon.get(0).level;
+                    int fixedLevel = tr.getStandardPokePool().get(0).level;
                     rom[offs] = (byte) fixedLevel;
                     offs++;
                     while (tPokes.hasNext()) {

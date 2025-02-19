@@ -92,7 +92,7 @@ ProcessDamage:
     
     mov     r0, r6
     mov     r1, #BPV_CurrentHP
-    bl      Battle::Poke_GetParam
+    bl      Battle::GetPokeStat
     cmp     r0, r4
     bgt     SimpleDamage
     

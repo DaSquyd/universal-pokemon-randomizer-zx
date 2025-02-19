@@ -162,6 +162,7 @@ public class Settings {
     private boolean noMetronome;
     private boolean noMagnitude;
     private boolean noOHKOMoves;
+    private boolean noTrappingMoves;
     private boolean blockBrokenMovesetMoves;
     private boolean evolutionMovesForAll;
 
@@ -602,7 +603,7 @@ public class Settings {
         out.write(eliteFourUniquePokemonNumber | ((minimumCatchRateLevel - 1) << 3));
 
         // 51 custom move stuff
-        out.write(makeByteSelected(noCounter, noSelfDestruct, noRechargeMoves, noDirectDamageMoves, noMetronome, noMagnitude, noOHKOMoves));
+        out.write(makeByteSelected(noCounter, noSelfDestruct, noRechargeMoves, noDirectDamageMoves, noMetronome, noMagnitude, noOHKOMoves, noTrappingMoves));
 
         // 52 - 55: misc tweaks part 2
         try {
@@ -915,6 +916,7 @@ public class Settings {
         settings.setNoMetronome(restoreState(data[51], 4));
         settings.setNoMagnitude(restoreState(data[51], 5));
         settings.setNoOHKOMoves(restoreState(data[51], 6));
+        settings.setNoTrappingMoves(restoreState(data[51], 7));
         
         settings.setStarterAllowedGenerations(FileFunctions.read2ByteInt(data, 56));
         settings.setFoeAllowedGenerations(FileFunctions.read2ByteInt(data, 58));
@@ -1623,6 +1625,14 @@ public class Settings {
 
     public void setNoOHKOMoves(boolean noOHKOMoves) {
         this.noOHKOMoves = noOHKOMoves;
+    }
+
+    public boolean isNoTrappingMoves() {
+        return noTrappingMoves;
+    }
+
+    public void setNoTrappingMoves(boolean noTrappingMoves) {
+        this.noTrappingMoves = noTrappingMoves;
     }
 
     public boolean isBlockBrokenMovesetMoves() {

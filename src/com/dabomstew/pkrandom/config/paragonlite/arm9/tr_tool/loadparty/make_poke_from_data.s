@@ -68,14 +68,15 @@
     add     r3, sp, #ARG_TeamRand ; return value
     bl      ARM9::TrTool_GetRandomPersonal
 
-    #printf("\t\tTeam Rand: %d", [sp, #ARG_TeamRand])
+    #printf("\t\tTeam Rand: %d", ldr [sp, #ARG_TeamRand])
     
     mov     r0, #0
     str     r0, [sp, #S_PokeRand]
     str     r0, [sp, #S_IVs]
     
 CheckPokesHaveStatModifiers:
-    ldrb    r1, [sp, #(ARG_DataOffsets + 0x00)] ; statModifiers
+    add     r1, sp, #ARG_DataOffsets
+    ldrb    r1, [r1, #0x00] ; statModifiers
     cmp     r1, #0
     beq     AddLevelToRand
     
@@ -95,13 +96,13 @@ AddSpeciesToRand:
     add     r0, r1
     
 AddTrainerIdToRand:
-    ldrb    r1, [sp, #S_TrainerId]
+    ldr     r1, [sp, #S_TrainerId]
     add     r0, r1
     
 ; this is a major difference compared to vanilla...
 ; we randomize using the player's trainer ID to keep each run unique
 AddPlayerIdToRand:
-    ldrb    r1, [sp, #S_PlayerId]
+    ldr     r1, [sp, #S_PlayerId]
     add     r0, r1
     ldr     r5, [sp, #ARG_TrainerDataPtr]
     ldrb    r5, [r5, #TrainerData.class] ; r5 := trainerClass
@@ -154,7 +155,8 @@ MakeCompactIVs:
     bl      ARM9::PokeTool_SetupEx
     
 CheckPokeHasStatModifiers:
-    ldrb    r4, [sp, #(ARG_DataOffsets + 0x00)] ; stat modifiers offset
+    add     r4, sp, #ARG_DataOffsets
+    ldrb    r4, [r4, #0x00] ; stat modifiers offset
     cmp     r4, #0
     beq     CheckPokeHasItem
     
@@ -190,7 +192,7 @@ GetEVsPerStat:
     bls     SetEVsPerStat ; max of 252 per stat
     mov     r0, #252
     
-SetEVsPerStat
+SetEVsPerStat:
     str     r0, [sp, #S_EVsPerStat]
     
     mov     r0, #0 ; stat
@@ -209,9 +211,9 @@ SetEVsLoop:
     ldr     r2, [sp, #S_EVsPerStat]
     bl      ARM9::Poke_SetParam
     
-    #printf("\t\tSet EVs of stat %d to %d", [sp, #S_EVsIndex], [sp, #S_EVsPerStat])
+    #printf("\t\tSet EVs of stat %d to %d", ldr [sp, #S_EVsIndex], ldr [sp, #S_EVsPerStat])
     
-SetEVsLoop:
+SetEVsLoop_End:
     ldr     r0, [sp, #S_EVsIndex]
     add     r0, #1
     str     r0, [sp, #S_EVsIndex]
@@ -221,7 +223,7 @@ SetEVsLoop:
 CheckHasNature:
     ; Nature (confirm first that we have natures)
     ldr     r0, [sp, #ARG_TrainerDataPtr]
-    bl      ARM9::Trainer_PokesHaveNatures
+    bl      ARM9::TrTool_PokesHaveNatures
     cmp     r0, #FALSE
     beq     CheckPokeHasItem
     
@@ -234,33 +236,44 @@ CheckHasNature:
     
 #if DEBUG
     ldrh    r0, [r6, r4]
-    lsl     r0, #(32 - (TrainerPoke_StatModifiers.natureBit + TrainerPoke_StatModifiers.natureSize))
-    lsr     r0, #(32 - TrainerPoke_StatModifiers.natureSize)
+    #read_bits(r0, TrainerPoke_StatModifiers.natureBit, TrainerPoke_StatModifiers.natureSize)
     #printf("\t\tSet Nature to %d", r0)
 #endif
 
 CheckPokeHasItem:
-    ldrb    r4, [sp, #(ARG_DataOffsets + 0x01)] ; item offset
+    add     r4, sp, #ARG_DataOffsets
+    ldrb    r4, [r4, #0x01] ; item offset
     cmp     r4, #0
     beq     CheckPokeHasMoves
     
-    ldrh    r2, [r6, r0]
     ldr     r0, [sp, #ARG_TempPokePtr]
     mov     r1, #PF_Item
+    ldrh    r2, [r6, r4]
     bl      ARM9::Poke_SetParam
     
-    #printf("\t\tSet item to %d", [r6, r4])
+    #printf("\t\tSet item to %d", ldrh [r6, r4])
     
 CheckPokeHasMoves:
-    ldrb    r4, [sp, #(ARG_DataOffsets + 0x02)] ; moves offset
+    add     r4, sp, #ARG_DataOffsets
+    ldrb    r4, [r4, #0x02] ; moves offset
     cmp     r4, #0
     beq     FinishSetup
     
-    ; TODO
+    mov     r5, #0 ; iteration
+MovesLoop_Start:
+    mov     r1, #PF_Move1
+    add     r1, r5
+    ldrh    r2, [r6, r4]
+    bl      ARM9::Poke_SetParam
+    
+    add     r4, #2
+    add     r5, #1
+    cmp     r5, #4
+    bcc     MovesLoop_Start
     
 FinishSetup:
     mov     r0, r6
-    bl      ARM9::Poke_GetFormId
+    bl      ARM9::TrainerPoke_GetFormId
     mov     r2, r0
     ldr     r0, [sp, #S_TrainerId]
     ldr     r1, [sp, #ARG_TempPokePtr]

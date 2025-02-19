@@ -318,9 +318,13 @@ public class Move {
     }
 
     public boolean isGoodDamaging(int generation) {
+        if (recoil > 0 || effect == MoveEffect.JUMP_KICK || effect == MoveEffect.FLY || effect == MoveEffect.THRASH_ABOUT || isChargeMove || isRechargeMove)
+            return false;
+        
         double hitCount = getHitCount(generation);
         double acc = hasPerfectAccuracy() ? 1.0 : accuracy / 100.0;
         double damage = power * hitCount * acc;
+        // TODO
 //        if (effect == MoveEffect.TRIPLE_KICK)
 //            damage += (10 * acc) + (20 * acc * acc); // 2nd and 3rd hit additional damages
 

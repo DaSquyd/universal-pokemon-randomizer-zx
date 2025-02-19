@@ -80,9 +80,9 @@ ARM9	WCharsNCopy	Code		thumb	0x0201F438	0x0201F420	0x02024B00	0x02024AD4
 ARM9	Item_GetIndex	Code		thumb			0x0202669C	0x02026670
 ARM9	Item_GetData	Code		thumb	0x02020F50	0x02020F34	0x0202676C	0x02026740
 ARM9	IsItemBerry	Code		thumb			0x02026C20	0x02026BF4
-ARM9	GetTrainerData	Code		thumb	0x0202A248	0x0202A230	0x0203050C	0x020304E0
-ARM9	LoadTrainerDataFile	Code		thumb	0x0202A3C4	0x0202A3AC	0x0203070C	0x020306E0
-ARM9	LoadTrainerPokeFile	Code		thumb	0x0202A3D4	0x0202A3BC	0x02030750	0x02030724
+ARM9	TrTool_GetParam	Code		thumb	0x0202A248	0x0202A230	0x0203050C	0x020304E0
+ARM9	TrTool_LoadTrainerData	Code		thumb	0x0202A3C4	0x0202A3AC	0x0203070C	0x020306E0
+ARM9	TrTool_LoadTrainerPoke	Code		thumb	0x0202A3D4	0x0202A3BC	0x02030750	0x02030724
 ARM9	TrainerClass_GetGender	Code		thumb			0x02030760	0x02030734
 ARM9	TrTool_LoadTrainer	Code		thumb			0x02030854	0x02030828
 ARM9	TrTool_LoadParty	Code		thumb			0x020308EC	0x020308C0
@@ -772,6 +772,12 @@ BattleServer	Data_MoldBreakerIgnoredAbilities	Data	112		0x0689E450	0x0689E450	0x
 BattleServer	SideStatuses	Data	448		0x0689E7E0	0x0689E7E0	0x0689E960	0x0689E960
 Local	Encounter_CreateWildPoke	Code		thumb			0x021A0E00	0x021A0DC0
 Local	Encounter_GenPID	Code		thumb			0x021A1548	0x021A1508
+PWT_Battle	SetDownloadedParty	Code		thumb	--	--	0x021F016C	0x021F012C
+PWT_Battle	GetRivalTrainerId	Code		thumb	--	--	0x021F0260	0x021F0220
+PWT_Battle	SetRomParty	Code		thumb	--	--	0x021F03A4	0x021F0364
+PWT_Battle	TrainerPartySetup	Code		thumb	--	--	0x021F040C	0x021F03CC
+Script_PWT	GetTournamentId	Code		thumb	--	--	0x021E5CE4	0x021E5CA4
+Script_PWT	GetMaxPartySize	Code		thumb	--	--	0x021E5DBC	0x021E5D7C
 Storage	MakeBox2Main	Code		thumb	0x021DEDF8	0x021DEDD8	0x021BF060	0x021BF020
 Storage	DisplayPreview	Code		thumb	0x021DEF80	0x021DEF60	0x021BF1E8	0x021BF1A8
 Storage	Unk_21BF3A4	Code		thumb			0x021BF3A4	0x021BF364

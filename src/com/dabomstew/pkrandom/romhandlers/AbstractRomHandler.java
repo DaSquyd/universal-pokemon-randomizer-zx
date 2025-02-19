@@ -1623,7 +1623,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
 
         // #001 Stench
-        if (lowSpeed)
+        if (generationOfPokemon() < 5 || lowSpeed)
             irrelevantAbilities.add(Abilities.stench);
 
         // #002 Drizzle
@@ -3815,7 +3815,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     private void applyLevelModifierToTrainerPokemon(Trainer trainer, int levelModifier) {
         if (levelModifier != 0) {
-            for (TrainerPokemon tp : trainer.pokemon) {
+            for (TrainerPokemon tp : trainer.getAllPokesInPools()) {
                 tp.level = Math.min(100, (int) Math.round(tp.level * (1 + levelModifier / 100.0)));
             }
         }
@@ -4014,7 +4014,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
-            List<TrainerPokemon> trainerPokemonList = new ArrayList<>(t.pokemon);
+            List<TrainerPokemon> trainerPokemonList = new ArrayList<>(t.getStandardPokePool());
 
             // Elite Four Unique Pokemon related
             boolean eliteFourTrackPokemon = false;
@@ -4123,7 +4123,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
 
         // Save it all up
-        this.setTrainers(currentTrainers, false, allSmart);
+        this.setTrainers(currentTrainers, false, allSmart, false);
     }
 
     @Override
@@ -4279,7 +4279,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (highestLevelOnly) {
                 int maxLevel = -1;
                 TrainerPokemon highestLevelPoke = null;
-                for (TrainerPokemon tp : t.pokemon) {
+                for (TrainerPokemon tp : t.getStandardPokePool()) {
                     if (tp.level > maxLevel) {
                         highestLevelPoke = tp;
                         maxLevel = tp.level;
@@ -4300,7 +4300,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                     baseWeatherFrequencies.put(w, 0.0);
                 }
 
-                for (TrainerPokemon tp : t.pokemon) {
+                for (TrainerPokemon tp : t.getStandardPokePool()) {
 
                     Pokemon forme = getAltFormeOfPokemon(tp.pokemon, tp.forme);
 
@@ -4353,10 +4353,10 @@ public abstract class AbstractRomHandler implements RomHandler {
 
                 for (Weather w : Weather.values()) {
                     double frequency = baseWeatherFrequencies.getOrDefault(w, 0.0);
-                    baseWeatherFrequencies.put(w, Math.max(0.0, frequency / t.pokemon.size()));
+                    baseWeatherFrequencies.put(w, Math.max(0.0, frequency / t.getStandardPokePool().size()));
                 }
 
-                for (TrainerPokemon tp : t.pokemon) {
+                for (TrainerPokemon tp : t.getStandardPokePool()) {
                     if (tp.resetMoves) {
                         Pokemon altForme = getAltFormeOfPokemon(tp.pokemon, tp.forme);
                         tp.moves = RomFunctions.getMovesAtLevel(altForme.number, movesets, tp.level);
@@ -4369,7 +4369,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.setTrainers(currentTrainers, false, allSmart);
+        this.setTrainers(currentTrainers, false, allSmart, false);
     }
 
     private void randomizeHeldItem(TrainerPokemon tp, Settings settings, List<Move> moves, int[] moveset, Map<RomHandler.Weather, Double> weatherFrequencies) {
@@ -4402,7 +4402,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> currentTrainers = this.getTrainers();
         rivalCarriesStarterUpdate(currentTrainers, "RIVAL", isORAS ? 0 : 1);
         rivalCarriesStarterUpdate(currentTrainers, "FRIEND", 2);
-        this.setTrainers(currentTrainers, false, smart);
+        this.setTrainers(currentTrainers, false, smart, false);
     }
 
     @Override
@@ -4418,7 +4418,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         checkPokemonRestrictions();
         List<Trainer> currentTrainers = this.getTrainers();
         for (Trainer t : currentTrainers) {
-            for (TrainerPokemon tp : t.pokemon) {
+            for (TrainerPokemon tp : t.getStandardPokePool()) {
                 if (tp.level >= minLevel) {
                     Pokemon newPokemon = fullyEvolve(tp.pokemon, t.index);
                     if (newPokemon != tp.pokemon) {
@@ -4430,7 +4430,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        this.setTrainers(currentTrainers, false, allSmart);
+        this.setTrainers(currentTrainers, false, allSmart, false);
     }
 
     @Override
@@ -4442,7 +4442,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Trainer t : currentTrainers) {
             applyLevelModifierToTrainerPokemon(t, levelModifier);
         }
-        this.setTrainers(currentTrainers, false, allSmart);
+        this.setTrainers(currentTrainers, false, allSmart, false);
     }
 
     @Override
@@ -4472,17 +4472,17 @@ public abstract class AbstractRomHandler implements RomHandler {
             int additional = additionalBoss == 1 ? 1 : 2;
 
             Trainer tr = currentTrainers.get(551);
-            for (TrainerPokemon tpk : tr.pokemon) {
+            for (TrainerPokemon tpk : tr.getStandardPokePool()) {
                 tpk.level = 44;
                 tpk.strength = 160;
                 tpk.IVs = 19;
             }
 
-            int oldNum = tr.pokemon.size();
+            int oldNum = tr.getStandardPokePool().size();
             for (int i = 0; i < additional; ++i) {
-                TrainerPokemon tpk = tr.pokemon.get(i + i % oldNum).copy();
+                TrainerPokemon tpk = tr.getStandardPokePool().get(i + i % oldNum).copy();
                 tpk.level = 42;
-                tr.pokemon.add(i, tpk);
+                tr.getStandardPokePool().add(i, tpk);
             }
         }
 
@@ -4505,14 +4505,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             List<TrainerPokemon> potentialPokes = new ArrayList<>();
 
             // First pass: find lowest level
-            for (TrainerPokemon tpk : t.pokemon) {
+            for (TrainerPokemon tpk : t.getStandardPokePool()) {
                 if (tpk.level < lowest) {
                     lowest = tpk.level;
                 }
             }
 
             // Second pass: find all Pokemon at lowest level
-            for (TrainerPokemon tpk : t.pokemon) {
+            for (TrainerPokemon tpk : t.getStandardPokePool()) {
                 if (tpk.level == lowest) {
                     potentialPokes.add(tpk);
                 }
@@ -4523,20 +4523,20 @@ public abstract class AbstractRomHandler implements RomHandler {
             // six Pokemon and have a 6v12 battle
             int maxPokemon = t.multiBattleStatus != Trainer.MultiBattleStatus.NEVER ? 3 : 6;
             for (int i = 0; i < additional; i++) {
-                if (t.pokemon.size() >= maxPokemon) break;
+                if (t.getStandardPokePool().size() >= maxPokemon) break;
 
                 // We want to preserve the original last Pokemon because the order is sometimes used to
                 // determine the rival's starter
-                int secondToLastIndex = t.pokemon.size() - 1;
+                int secondToLastIndex = t.getStandardPokePool().size() - 1;
                 TrainerPokemon newPokemon = potentialPokes.get(i % potentialPokes.size()).copy();
 
                 // Clear out the held item because we only want one Pokemon with a mega stone if we're
                 // swapping mega evolvables
                 newPokemon.heldItem = 0;
-                t.pokemon.add(secondToLastIndex, newPokemon);
+                t.getStandardPokePool().add(secondToLastIndex, newPokemon);
             }
         }
-        this.setTrainers(currentTrainers, false, allSmart);
+        this.setTrainers(currentTrainers, false, allSmart, false);
     }
 
     @Override
@@ -4545,12 +4545,12 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         List<Trainer> currentTrainers = this.getTrainers();
         for (Trainer t : currentTrainers) {
-            if (t.pokemon.size() != 1 || t.multiBattleStatus == Trainer.MultiBattleStatus.ALWAYS || this.trainerShouldNotGetBuffs(t)) {
+            if (t.getStandardPokePool().size() != 1 || t.multiBattleStatus == Trainer.MultiBattleStatus.ALWAYS || this.trainerShouldNotGetBuffs(t)) {
                 continue;
             }
-            t.pokemon.add(t.pokemon.get(0).copy());
+            t.getStandardPokePool().add(t.getStandardPokePool().get(0).copy());
         }
-        this.setTrainers(currentTrainers, true, allSmart);
+        this.setTrainers(currentTrainers, true, allSmart, false);
     }
 
     private Map<Integer, List<MoveLearnt>> allLevelUpMoves;
@@ -4686,7 +4686,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Trainer t : trainers) {
             t.setPokemonHaveCustomMoves(true);
 
-            for (TrainerPokemon tp : t.pokemon) {
+            for (TrainerPokemon tp : t.getStandardPokePool()) {
                 tp.resetMoves = false;
 
                 List<Move> movesAtLevel = getMoveSelectionPoolAtLevel(tp, isCyclicEvolutions);
@@ -4999,7 +4999,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
         }
-        setTrainers(trainers, false, allSmart);
+        setTrainers(trainers, false, allSmart, false);
     }
 
     private List<Move> trimMoveList(TrainerPokemon tp, List<Move> movesAtLevel, boolean doubleBattleMode) {
@@ -6185,7 +6185,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         moves.get(Moves.mudSlap).statChanges[0] = new Move.StatChange(StatChangeType.ATTACK, -2, 100.0);
         if (generationOfPokemon() >= 4)
             moves.get(Moves.mudSlap).description = "The user hurls mud in the target to inflict damage and harshly lower its Attack stat.";
-
+        
         // 190 Octazooka
         if (generationOfPokemon() >= 5) {
             updateMovePower(moves, Moves.octazooka, 75);
@@ -6389,7 +6389,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         updateMoveAccuracy(moves, Moves.willOWisp, 100);
 
         // 262 Memento
-        if (generationOfPokemon() == 5) {
+        if (generationOfPokemon() <= 5) {
             // There's a bug where this only seems to work in Gen V...
             // Tested in ORAS, there's a cosmetic bug where HP bar doesn't visually drop
 
@@ -7667,12 +7667,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Trainer> trainers = this.getTrainers();
 
         for (Trainer t : trainers) {
-            for (TrainerPokemon tpk : t.pokemon) {
+            for (TrainerPokemon tpk : t.getStandardPokePool()) {
                 tpk.resetMoves = true;
             }
         }
 
-        this.setTrainers(trainers, false, false);
+        this.setTrainers(trainers, false, false, false);
 
         // tms
         List<Integer> tmMoves = this.getTMMoves();
@@ -8316,10 +8316,38 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // Force a certain amount of good damaging moves depending on the percentage
         int goodDamagingLeft = (int) Math.round(goodDamagingPercentage * (tmCount - preservedFieldMoveCount));
+        
+        // TODO: Make this configurable
+        // Force at least 2 of every type to have a good damaging TM move
+        Map<Type, List<Move>> typeToGoodDamagingMoves = new HashMap<>();        
+        for (Move mv : usableDamagingMoves) {            
+            if (mv.type == null)
+                continue;
+            
+            if (!typeToGoodDamagingMoves.containsKey(mv.type))
+                typeToGoodDamagingMoves.put(mv.type, new ArrayList<>());
+
+            List<Move> typeMoves = typeToGoodDamagingMoves.get(mv.type);
+            typeMoves.add(mv);
+        }
+        
+        int minNumPerType = 2;
+        for (Type type : typeToGoodDamagingMoves.keySet()) {
+            List<Move> moves = typeToGoodDamagingMoves.get(type);
+
+            for (int i = 0; i < minNumPerType && !moves.isEmpty(); i++) {
+                Move chosenMove = moves.get(random.nextInt(moves.size()));
+                pickedMoves.add(chosenMove.number);
+                moves.remove(chosenMove);
+                usableMoves.remove(chosenMove);
+                usableDamagingMoves.remove(chosenMove);
+                goodDamagingLeft--;
+            }
+        }
 
         for (int i = 0; i < tmCount - preservedFieldMoveCount; i++) {
             Move chosenMove;
-            if (goodDamagingLeft > 0 && usableDamagingMoves.size() > 0) {
+            if (goodDamagingLeft > 0 && !usableDamagingMoves.isEmpty()) {
                 chosenMove = usableDamagingMoves.get(random.nextInt(usableDamagingMoves.size()));
             } else {
                 chosenMove = usableMoves.get(random.nextInt(usableMoves.size()));
@@ -8627,6 +8655,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (settings.isNoMagnitude() && mv.effect == MoveEffect.MAGNITUDE)
             return true;
         if (settings.isNoOHKOMoves() && mv.isOHKOMove())
+            return true;
+        if (settings.isNoTrappingMoves() && mv.isTrapMove())
             return true;
 
         return false;
@@ -10685,12 +10715,13 @@ public abstract class AbstractRomHandler implements RomHandler {
                 // If it's tagged the same we can assume it's the same team
                 // just the opposite gender or something like that...
                 // So no need to check other trainers with same tag.
-                int highestLevel = t.pokemon.get(0).level;
-                int trainerPkmnCount = t.pokemon.size();
+                List<TrainerPokemon> pokes = t.getAllPokesInPools();
+                int highestLevel = pokes.get(0).level;
+                int trainerPkmnCount = pokes.size();
                 for (int i = 1; i < trainerPkmnCount; i++) {
                     int levelBonus = (i == trainerPkmnCount - 1) ? 2 : 0;
-                    if (t.pokemon.get(i).level + levelBonus > highestLevel) {
-                        highestLevel = t.pokemon.get(i).level;
+                    if (pokes.get(i).level + levelBonus > highestLevel) {
+                        highestLevel = pokes.get(i).level;
                     }
                 }
                 return highestLevel;
@@ -10703,20 +10734,22 @@ public abstract class AbstractRomHandler implements RomHandler {
         for (Trainer t : currentTrainers) {
             if (t.tag != null && t.tag.equals(tag)) {
 
+                List<TrainerPokemon> pokes = t.getAllPokesInPools();
+                
                 // Bingo
-                TrainerPokemon bestPoke = t.pokemon.get(0);
+                TrainerPokemon bestPoke = pokes.get(0);
 
                 if (t.forceStarterPosition >= 0) {
-                    bestPoke = t.pokemon.get(t.forceStarterPosition);
+                    bestPoke = pokes.get(t.forceStarterPosition);
                 } else {
                     // Change the highest level pokemon, not the last.
                     // BUT: last gets +2 lvl priority (effectively +1)
                     // same as above, equal priority = earlier wins
-                    int trainerPkmnCount = t.pokemon.size();
+                    int trainerPkmnCount = pokes.size();
                     for (int i = 1; i < trainerPkmnCount; i++) {
                         int levelBonus = (i == trainerPkmnCount - 1) ? 2 : 0;
-                        if (t.pokemon.get(i).level + levelBonus > bestPoke.level) {
-                            bestPoke = t.pokemon.get(i);
+                        if (pokes.get(i).level + levelBonus > bestPoke.level) {
+                            bestPoke = pokes.get(i);
                         }
                     }
                 }
@@ -11462,7 +11495,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     @Override
     public List<Integer> getGameBreakingMoves() {
-        return Arrays.asList(Moves.sonicBoom, Moves.dragonRage, Moves.sketch);
+        return Arrays.asList(/*Moves.sonicBoom, Moves.dragonRage,*/ Moves.sketch);
     }
 
     @Override

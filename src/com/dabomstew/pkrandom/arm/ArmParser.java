@@ -142,6 +142,7 @@ public class ArmParser {
                 "TrainerPoke_BasicFlags",
                 "TrainerPoke_Header",
                 "TrainerPoke_Header_Flags",
+                "TrainerPoke_Header_Slot",
                 "TrainerPoke_StatModifiers",
                 "UnovaLink_MenuParam",
                 "UnovaLink_MenuParam_Button",
@@ -242,7 +243,7 @@ public class ArmParser {
         List<Byte> bytes = new ArrayList<>();
 
         Object debugGlobalValue = getGlobalValue("DEBUG");
-        boolean isDebug = debugGlobalValue instanceof Boolean && (boolean) debugGlobalValue;
+        boolean isDebug = debugGlobalValue instanceof Integer && (int) debugGlobalValue == 1;
         
         size = 0;
         labelAddressMap.clear();
@@ -362,10 +363,53 @@ public class ArmParser {
                     
                 --i;
                 continue;
-            }
-            else if (str.toUpperCase().startsWith("#PRINTF(") && str.endsWith(")")) {
+            } else if (str.toUpperCase().startsWith("READ_BITS(") && str.endsWith(")")) {
+                String[] strArgs = str.substring(8, str.length() - 1).split(",");
+                if (strArgs.length < 3 || strArgs.length > 4)
+                    throw new ArmParseException(lineNumber, str, "incorrect number of arguments for READ_BITS(); expected 3 or 4");
+                
+                if (strArgs.length == 3)
+                    strArgs = new String[]{strArgs[0], strArgs[0], strArgs[1], strArgs[2]};
+                
+                int rd = parseRegister(strArgs[0]);
+                int rs = parseRegister(strArgs[1]);
+                int bitOffset = parseValue(lineNumber, str, strArgs[2]);
+                int bitLength = parseValue(lineNumber, str, strArgs[3]);
+                int leftShift = 32 - (bitOffset + bitLength);
+                int rightShift = 32 - bitLength;
+                
+                List<ParseLine> oldParseLines = parseLines;
+                parseLines = new ArrayList<>(parseLines.size() + 2);
+                for (int j = 0; j < i; ++j)
+                    parseLines.add(oldParseLines.get(j));
+
+                parseLines.add(new ParseLine(lineNumber, String.format("lsl r%d, r%d, #%d", rd, rs, leftShift)));
+                parseLines.add(new ParseLine(lineNumber, String.format("lsr r%d, #%d", rd, rightShift)));
+                
+                for (int j = i + 1; j < oldParseLines.size(); ++j)
+                    parseLines.add(oldParseLines.get(j));
+
+                --i;
+            } else if (str.toUpperCase().startsWith("#PRINTF(") && str.endsWith(")")) {
                 if (isDebug) {
                     String[] printStrArgs = str.substring(8, str.length() - 1).split(",");
+                    List<String> tempPrintStrArgs = new ArrayList<>(printStrArgs.length);
+                    for (String tempPrintStrArg : printStrArgs) {
+                        if (tempPrintStrArg.indexOf(']') > -1) {
+                            int lastIndex = tempPrintStrArgs.size() - 1;
+                            String lastArg = tempPrintStrArgs.get(lastIndex);
+                            lastArg = String.format("%s, %s", lastArg, tempPrintStrArg);
+                            tempPrintStrArgs.set(lastIndex, lastArg);
+                            continue;
+                        }
+
+                        tempPrintStrArgs.add(tempPrintStrArg);
+                    }
+                    printStrArgs = new String[tempPrintStrArgs.size()];
+                    for (int j = 0; j < tempPrintStrArgs.size(); ++j)
+                        printStrArgs[j] = tempPrintStrArgs.get(j);
+                    
+                    
                     if (printStrArgs.length == 0)
                         throw new ArmParseException(lineNumber, str, "printf did not contain any arguments");
                     
@@ -373,10 +417,10 @@ public class ArmParser {
                         printStrArgs[j] = printStrArgs[j].trim();
 
                     String printStrMsg = printStrArgs[0].trim();
-                    if (!printStrMsg.startsWith("\"") || printStrMsg.endsWith("\""))
+                    if (!printStrMsg.startsWith("\"") || !printStrMsg.endsWith("\""))
                         throw new ArmParseException(lineNumber, str, "first argument of printf must be a string");
                     
-                    printStrMsg = str.substring(1, printStrMsg.length() - 1); // remove outer quotes
+                    printStrMsg = printStrMsg.substring(1, printStrMsg.length() - 1); // remove outer quotes
                     
                     byte[] printStrMsgBytesWithNewLine = new byte[printStrMsg.length() + 2];
                     byte[] rawPrintStrBytes = printStrMsg.getBytes(StandardCharsets.UTF_8);
@@ -470,11 +514,14 @@ public class ArmParser {
                             continue;
                         }
                         
-                        if (printStrArg.startsWith("[") && printStrArg.endsWith("]")) {
+                        int openBracketIndex = printStrArg.indexOf('[');
+                        if (openBracketIndex > -1 && printStrArg.endsWith("]")) {
+                            String printStrLoadOpCode = printStrArg.substring(0, openBracketIndex).trim();
+                            String printStrLoadParams = printStrArg.substring(openBracketIndex).trim();
                             if (stackOffset < 0)
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("ldr r%d, %s", targetRegister, printStrArg)));
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("%s r%d, %s", printStrLoadOpCode, targetRegister, printStrLoadParams)));
                             else {
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("ldr r0, %s", printStrArg)));
+                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("%s r0, %s", printStrLoadOpCode, printStrLoadParams)));
                                 lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", stackOffset)));
                             }
                             

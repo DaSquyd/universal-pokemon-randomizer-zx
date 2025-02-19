@@ -1184,7 +1184,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                         }
                         offs += 4;
                     }
-                    tr.pokemon.add(tp);
+                    tr.getStandardPokePool().add(tp);
                 }
                 allTrainers.add(tr);
                 offs++;
@@ -1212,7 +1212,7 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart, boolean isParagonLite) {
         int traineroffset = romEntry.getValue("TrainerDataTableOffset");
         int traineramount = romEntry.getValue("TrainerClassAmount");
         int[] trainerclasslimits = romEntry.arrayEntries.get("TrainerDataClassCounts");
@@ -1242,8 +1242,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                 offs += trnamelen + 1;
                 // Write out new trainer data
                 rom[offs++] = (byte) tr.partyFlags;
-                Iterator<TrainerPokemon> tPokes = tr.pokemon.iterator();
-                for (int tpnum = 0; tpnum < tr.pokemon.size(); tpnum++) {
+                Iterator<TrainerPokemon> tPokes = tr.getStandardPokePool().iterator();
+                for (int tpnum = 0; tpnum < tr.getStandardPokePool().size(); tpnum++) {
                     TrainerPokemon tp = tPokes.next();
                     rom[offs] = (byte) tp.level;
                     rom[offs + 1] = (byte) tp.pokemon.number;

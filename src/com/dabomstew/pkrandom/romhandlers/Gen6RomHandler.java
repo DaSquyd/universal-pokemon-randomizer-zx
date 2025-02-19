@@ -2020,7 +2020,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                         }
                         pokeOffs += 8;
                     }
-                    tr.pokemon.add(tpk);
+                    tr.getStandardPokePool().add(tpk);
                 }
                 allTrainers.add(tr);
             }
@@ -2053,7 +2053,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart, boolean isParagonLite) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         boolean isORAS = romEntry.romType == Gen6Constants.Type_ORAS;
         try {
@@ -2074,7 +2074,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 } else {
                     trainer[0] = (byte) tr.partyFlags;
                 }
-                int numPokes = tr.pokemon.size();
+                int numPokes = tr.getStandardPokePool().size();
                 trainer[offset+3] = (byte) numPokes;
 
                 if (doubleBattleMode) {
@@ -2098,7 +2098,7 @@ public class Gen6RomHandler extends Abstract3DSRomHandler {
                 }
                 byte[] trpoke = new byte[bytesNeeded];
                 int pokeOffs = 0;
-                Iterator<TrainerPokemon> tpokes = tr.pokemon.iterator();
+                Iterator<TrainerPokemon> tpokes = tr.getStandardPokePool().iterator();
                 for (int poke = 0; poke < numPokes; poke++) {
                     TrainerPokemon tp = tpokes.next();
                     byte abilityAndFlag = (byte)((tp.abilitySlot << 4) | tp.forcedGenderFlag);

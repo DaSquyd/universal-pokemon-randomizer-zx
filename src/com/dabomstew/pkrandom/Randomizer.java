@@ -526,9 +526,11 @@ public class Randomizer {
 
         List<Trainer> trainers = romHandler.getTrainers();
         for (Trainer t : trainers) {
-            for (TrainerPokemon tpk : t.pokemon) {
+            if (t.isPooled)
+                continue;
+            
+            for (TrainerPokemon tpk : t.getStandardPokePool())
                 checkValue = addToCV(checkValue, tpk.level, tpk.pokemon.number);
-            }
         }
 
         // Static Pokemon
@@ -1172,7 +1174,7 @@ public class Randomizer {
             String[] itemNames = romHandler.getItemNames();
             if (logTrainerMovesets) {
                 log.println();
-                for (TrainerPokemon tpk : t.pokemon) {
+                for (TrainerPokemon tpk : t.getStandardPokePool()) {
                     List<Move> moves = romHandler.getMoves();
                     log.printf(tpk.toString(), itemNames[tpk.heldItem]);
                     log.print(", Ability: " + romHandler.abilityName(romHandler.getAbilityForTrainerPokemon(tpk)));
@@ -1192,7 +1194,7 @@ public class Randomizer {
             } else {
                 log.print(" - ");
                 boolean first = true;
-                for (TrainerPokemon tpk : t.pokemon) {
+                for (TrainerPokemon tpk : t.getStandardPokePool()) {
                     if (!first) {
                         log.print(", ");
                     }

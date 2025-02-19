@@ -1,6 +1,6 @@
 ; r0: trainerDataPtr
 
-    ldrb    r1, [r0, #TrainerData.flags]
+    ldrh    r1, [r0, #TrainerData.flags]
     mov     r0, #TrainerPoke.BASE_SIZE
     
 CheckHasMoves:

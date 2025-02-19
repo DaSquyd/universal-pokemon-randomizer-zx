@@ -251,7 +251,7 @@ public interface RomHandler {
 
     List<Integer> getEliteFourTrainers(boolean isChallengeMode);
 
-    void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart);
+    void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart, boolean isParagonLite);
 
     void randomizeTrainerPokes(Settings settings);
 

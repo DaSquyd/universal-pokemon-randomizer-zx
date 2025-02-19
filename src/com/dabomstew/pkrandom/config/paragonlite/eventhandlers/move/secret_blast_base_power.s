@@ -21,7 +21,7 @@
     mov     r0, r5
     bl      Battle::GetPoke
     mov     r1, #BPV_Level
-    bl      Battle::Poke_GetParam
+    bl      Battle::GetPokeStat
     
     mov     r1, #OUT_MAX
     cmp     r0, #IN_MAX

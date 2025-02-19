@@ -46,6 +46,7 @@ public class TrainerPokemon {
     public byte spatkEVs;
     public byte spdefEVs;
     public byte speedEVs;
+    public byte evFlags;
     public int IVs;
     // In gens 3-5, there is a byte or word that corresponds
     // to the IVs a trainer's pokemon has. In X/Y, this byte
@@ -97,6 +98,7 @@ public class TrainerPokemon {
         tpk.spatkEVs = spatkEVs;
         tpk.spdefEVs = spdefEVs;
         tpk.speedEVs = speedEVs;
+        tpk.evFlags = evFlags;
         tpk.strength = strength;
         tpk.heldItem = heldItem;
         tpk.abilitySlot = abilitySlot;

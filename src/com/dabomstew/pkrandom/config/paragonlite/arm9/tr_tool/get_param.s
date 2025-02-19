@@ -1,5 +1,5 @@
 #define S_TrainerData 0x00
-#define STACK_SIZE (Math.trunc((TrainerData.SIZE + 3) / 4) * 4)
+#define STACK_SIZE (Math.floor((TrainerData.SIZE + 3) / 4) * 4)
 
 ; r0: trainerId
 ; r1: param
@@ -13,7 +13,7 @@
     
     add     r4, sp, #S_TrainerData
     mov     r1, r4
-    bl      ARM9::LoadTrainerFile
+    bl      ARM9::TrTool_LoadTrainerData
     
     #switch r0 r5
     #case Flags
@@ -24,17 +24,18 @@
     #case AIFlags
     #case IsHealer
     #case PayoutScale
-    #case PrizeItem
+    #case RewardItem
     #case HasMoves
     #case HasItems
     #case HasNature
     #case HasIVsEVs
+    #case HasMaxPP
     #case IsPooled
     #case PokeCount
     
     
 Flags:
-    ldrb    r0, [r4, #TrainerData.flags]
+    ldrh    r0, [r4, #TrainerData.flags]
     b       Return
     
     
@@ -44,7 +45,7 @@ Class:
     
     
 BattleStyle:
-    ldrb    r0, [r4, #TrainerData.flags]
+    ldrh    r0, [r4, #TrainerData.flags]
     mov     r1, #TrainerData_Flags.battleStyleMask
     and     r0, r1
     b       Return
@@ -69,9 +70,8 @@ AIFlags:
     
     
 IsHealer:
-    ldrb    r0, [r4, #TrainerData.flags]
-    lsl     r0, #(32 - (TrainerData_Flags.isHealerBit + TrainerData_Flags.isHealerSize))
-    lsr     r0, #(32 - TrainerData_Flags.isHealerSize)
+    ldrh    r0, [r4, #TrainerData.flags]
+    #read_bits(r0, #TrainerData_Flags.isHealerBit, 1)
     b       Return
     
     
@@ -80,43 +80,44 @@ PayoutScale:
     b       Return
     
     
-PrizeItem:
-    ldrh    r0, [r4, #TrainerData.prizeItem]
+RewardItem:
+    ldrh    r0, [r4, #TrainerData.rewardItem]
     b       Return
     
     
 HasMoves:
-    ldrb    r0, [r4, #TrainerData.flags]
-    lsl     r0, #(32 - (TrainerData_Flags.hasMovesBit + TrainerData_Flags.hasMovesSize))
-    lsr     r0, #(32 - TrainerData_Flags.hasMovesSize)
+    ldrh    r0, [r4, #TrainerData.flags]
+    #read_bits(r0, #TrainerData_Flags.hasMovesBit, 1)
     b       Return
     
     
 HasItems:
-    ldrb    r0, [r4, #TrainerData.flags]
-    lsl     r0, #(32 - (TrainerData_Flags.hasItemsBit + TrainerData_Flags.hasItemsSize))
-    lsr     r0, #(32 - TrainerData_Flags.hasItemsSize)
+    ldrh    r0, [r4, #TrainerData.flags]
+    #read_bits(r0, #TrainerData_Flags.hasItemsBit, 1)
     b       Return
     
     
 HasNature:
-    ldrb    r0, [r4, #TrainerData.flags]
-    lsl     r0, #(32 - (TrainerData_Flags.hasNatureBit + TrainerData_Flags.hasNatureSize))
-    lsr     r0, #(32 - TrainerData_Flags.hasNatureSize)
+    ldrh    r0, [r4, #TrainerData.flags]
+    #read_bits(r0, #TrainerData_Flags.hasNatureBit, 1)
     b       Return
     
     
 HasIVsEVs:
-    ldrb    r0, [r4, #TrainerData.flags]
-    lsl     r0, #(32 - (TrainerData_Flags.hasIVsEVsBit + TrainerData_Flags.hasIVsEVsSize))
-    lsr     r0, #(32 - TrainerData_Flags.hasIVsEVsSize)
+    ldrh    r0, [r4, #TrainerData.flags]
+    #read_bits(r0, #TrainerData_Flags.hasIVsEVsBit, 1)
+    b       Return
+    
+    
+HasMaxPP:
+    ldrh    r0, [r4, #TrainerData.flags]
+    #read_bits(r0, #TrainerData_Flags.hasMaxPPBit, 1)
     b       Return
     
     
 IsPooled:
-    ldrb    r0, [r4, #TrainerData.flags]
-    lsl     r0, #(32 - (TrainerData_Flags.isPooledBit + TrainerData_Flags.isPooledSize))
-    lsr     r0, #(32 - TrainerData_Flags.isPooledSize)
+    ldrh    r0, [r4, #TrainerData.flags]
+    #read_bits(r0, #TrainerData_Flags.isPooledBit, 1)
     b       Return
     
     

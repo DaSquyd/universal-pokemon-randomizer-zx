@@ -2894,7 +2894,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     if (romEntry.romType != Gen4Constants.Type_DP) {
                         pokeOffs += 2;
                     }
-                    tr.pokemon.add(tpk);
+                    tr.getStandardPokePool().add(tpk);
                 }
                 allTrainers.add(tr);
             }
@@ -2930,7 +2930,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart, boolean isParagonLite) {
         if (romEntry.romType == Gen4Constants.Type_HGSS) {
             fixAbilitySlotValuesForHGSS(trainerData);
         }
@@ -2951,7 +2951,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 Trainer tr = allTrainers.next();
                 // preserve original poketype
                 trainer[0] = (byte) tr.partyFlags;
-                int numPokes = tr.pokemon.size();
+                int numPokes = tr.getStandardPokePool().size();
                 trainer[3] = (byte) numPokes;
 
                 if (doubleBattleMode) {
@@ -2984,7 +2984,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
                 byte[] trpoke = new byte[bytesNeeded];
                 int pokeOffs = 0;
-                Iterator<TrainerPokemon> tpokes = tr.pokemon.iterator();
+                Iterator<TrainerPokemon> tpokes = tr.getStandardPokePool().iterator();
                 for (int poke = 0; poke < numPokes; poke++) {
                     TrainerPokemon tp = tpokes.next();
                     int ability = tp.abilitySlot << 4;
@@ -3112,10 +3112,10 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
     // the moment; if that changes, then this should be moved there instead.
     private void fixAbilitySlotValuesForHGSS(List<Trainer> trainers) {
         for (Trainer tr : trainers) {
-            if (tr.pokemon.size() > 0) {
-                TrainerPokemon lastPokemon = tr.pokemon.get(tr.pokemon.size() - 1);
+            if (!tr.getStandardPokePool().isEmpty()) {
+                TrainerPokemon lastPokemon = tr.getStandardPokePool().get(tr.getStandardPokePool().size() - 1);
                 int lastAbilitySlot = lastPokemon.abilitySlot;
-                for (int i = 0; i < tr.pokemon.size(); i++) {
+                for (int i = 0; i < tr.getStandardPokePool().size(); i++) {
                     // HGSS has a nasty bug where if a single Pokemon with an abilitySlot of 2
                     // appears on the trainer's team, then all Pokemon that appear after it in
                     // the trpoke data will *also* use their second ability in-game, regardless
@@ -3125,7 +3125,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                     // Trainer's team uses the same abilitySlot. The choice to copy the last
                     // Pokemon's abilitySlot is arbitrary, but allows us to avoid any special-
                     // casing involving the rival's starter, since it always appears last.
-                    tr.pokemon.get(i).abilitySlot = lastAbilitySlot;
+                    tr.getStandardPokePool().get(i).abilitySlot = lastAbilitySlot;
                 }
             }
         }

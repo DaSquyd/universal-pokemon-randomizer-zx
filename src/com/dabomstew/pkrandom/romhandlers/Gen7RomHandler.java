@@ -1609,7 +1609,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                     tpk.level = level;
                     if (romEntry.romType == Gen7Constants.Type_USUM) {
                         if (i == 78) {
-                            if (poke == 3 && tpk.level == 16 && tr.pokemon.get(0).level == 16) {
+                            if (poke == 3 && tpk.level == 16 && tr.getStandardPokePool().get(0).level == 16) {
                                 tpk.level = 14;
                             }
                         }
@@ -1626,7 +1626,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                         tpk.moves[move] = readWord(trpoke, pokeOffs + (move*2));
                     }
                     pokeOffs += 8;
-                    tr.pokemon.add(tpk);
+                    tr.getStandardPokePool().add(tpk);
                 }
                 allTrainers.add(tr);
             }
@@ -1655,7 +1655,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
     }
 
     @Override
-    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart) {
+    public void setTrainers(List<Trainer> trainerData, boolean doubleBattleMode, boolean allSmart, boolean isParagonLite) {
         Iterator<Trainer> allTrainers = trainerData.iterator();
         try {
             GARCArchive trainers = this.readGARC(romEntry.getFile("TrainerData"),true);
@@ -1669,7 +1669,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 Trainer tr = allTrainers.next();
                 int offset = 0;
                 trainer[13] = (byte) tr.partyFlags;
-                int numPokes = tr.pokemon.size();
+                int numPokes = tr.getStandardPokePool().size();
                 trainer[offset+3] = (byte) numPokes;
 
                 if (doubleBattleMode) {
@@ -1687,7 +1687,7 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
                 int bytesNeeded = 32 * numPokes;
                 byte[] trpoke = new byte[bytesNeeded];
                 int pokeOffs = 0;
-                Iterator<TrainerPokemon> tpokes = tr.pokemon.iterator();
+                Iterator<TrainerPokemon> tpokes = tr.getStandardPokePool().iterator();
                 for (int poke = 0; poke < numPokes; poke++) {
                     TrainerPokemon tp = tpokes.next();
                     byte abilityAndFlag = (byte)((tp.abilitySlot << 4) | tp.forcedGenderFlag);
@@ -1755,9 +1755,9 @@ public class Gen7RomHandler extends Abstract3DSRomHandler {
             // same boost entry. First, figure out all the unique Pokemon in her party. We avoid using a Set here
             // in order to preserve the original ordering; we want to make sure to boost the *first* five Pokemon
             List<Pokemon> uniquePokemon = new ArrayList<>();
-            for (int i = 0; i < beastLusamine.pokemon.size(); i++) {
-                if (!uniquePokemon.contains(beastLusamine.pokemon.get(i).pokemon)) {
-                    uniquePokemon.add(beastLusamine.pokemon.get(i).pokemon);
+            for (int i = 0; i < beastLusamine.getStandardPokePool().size(); i++) {
+                if (!uniquePokemon.contains(beastLusamine.getStandardPokePool().get(i).pokemon)) {
+                    uniquePokemon.add(beastLusamine.getStandardPokePool().get(i).pokemon);
                 }
             }
             int numberOfBoostEntries = Math.min(uniquePokemon.size(), 5);

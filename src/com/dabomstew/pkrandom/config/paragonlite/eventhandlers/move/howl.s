@@ -52,7 +52,7 @@ LoopStart:
     ldrb    r1, [r6, r1]
     bl      Battle::GetPoke
     mov     r1, #BPV_EffectiveAbility
-    bl      Battle::Poke_GetParam
+    bl      Battle::GetPokeStat
     ; TODO: make this not work as dumb as this
     mov     r1, #43 ; soundproof
     cmp     r0, r1
