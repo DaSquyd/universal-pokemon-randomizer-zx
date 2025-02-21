@@ -27,7 +27,8 @@
     mov     r6, r2
     mov     r7, r3
     
-    #printf("Loading Trainer %d", r5)
+    #printf("ARM9::TrTool_LoadParty_Core (LR=0x%08X)", lr)
+    #printf("Loading Trainer with id %d", r5)
     
     ; get playerId
     ldr     r0, [sp, #S_GameDataPtr]
@@ -78,7 +79,6 @@
     str     r0, [sp, #S_TrainerPokePtr]
     
 #if DEBUG
-    ; a repeat of the above, but there's not much else to do
     ldr     r0, [sp, #S_TrainerDataPtr]
     bl      ARM9::TrTool_GetPokeFileSize
     #printf("TrainerPoke size: %d", r0)

@@ -38,7 +38,7 @@ Rom:
     
 Rom_Rival:
     ldr     r0, [sp, #S_GameSystemWork]
-    bl      PWT_Battle::GetRivalTrainerId
+    bl      PWTBattle::GetRivalTrainerId
     mov     r1, r0
     ldr     r0, [sp, #S_GameSystemWork] ; This part is new!
     mov     r2, #(0x13C0 >> 6)
@@ -61,7 +61,7 @@ Rom_OtherTrainer:
     mov     r1, r5 ; arg1 = pwtTrainer
     mov     r3, r7 ; arg3 = maxPartySize
     str     r6, [sp, #S_ArgHeapLowId]
-    bl      PWT_Battle::SetRomParty
+    bl      PWTBattle::SetRomParty
     
     add     sp, #0x08
     pop     {r3-r7, pc}
@@ -78,7 +78,7 @@ Download:
     #read_bits(r2, 6, 2) ; arg2 = pwtTrainer->downloadTrainerId
     mov     r3, r7 ; arg3 = maxPartySize
     str     r6, [sp, #S_ArgHeapLowId] ; arg4 = heapLowId
-    bl      PWT_Battle::SetDownloadedParty
+    bl      PWTBattle::SetDownloadedParty
     
 
 Return:

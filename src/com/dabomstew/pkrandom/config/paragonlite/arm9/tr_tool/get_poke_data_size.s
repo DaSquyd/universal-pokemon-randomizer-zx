@@ -1,25 +1,40 @@
 ; r0: trainerDataPtr
 
-    ldrh    r1, [r0, #TrainerData.flags]
-    mov     r0, #TrainerPoke.BASE_SIZE
+    push    {r4-r5, lr}
+    mov     r4, r0
+    
+    #printf("    ARM9::TrTool_GetPokeDataSize (LR=0x%08X)", lr)
+    
+    ldrh    r5, [r4, #TrainerData.flags]
+    #printf("        flags=0x%04X", r5)
+    
+    mov     r4, #TrainerPoke.BASE_SIZE
     
 CheckHasMoves:
-    mov     r2, #(1 << TrainerData_Flags.hasMovesBit)
-    tst     r1, r2
+    #printf("        check has moves... (size=%d)", r4)
+    mov     r0, #(1 << TrainerData_Flags.hasMovesBit)
+    tst     r5, r0
     beq     CheckHasItem
-    add     r0, #TrainerPoke.MOVES_SIZE
+    add     r4, #TrainerPoke.MOVES_SIZE
+    #printf("        has moves (size=%d)", r4)
 
 CheckHasItem:
-    mov     r2, #(1 << TrainerData_Flags.hasItemsBit)
-    tst     r1, r2
+    #printf("        check has item... (size=%d)", r4)
+    mov     r0, #(1 << TrainerData_Flags.hasItemBit)
+    tst     r5, r0
     beq     CheckHasStatModifiers
-    add     r0, #TrainerPoke.ITEM_SIZE
+    add     r4, #TrainerPoke.ITEM_SIZE
+    #printf("        has item (size=%d)", r4)
     
 CheckHasStatModifiers:
-    mov     r2, #((1 << TrainerData_Flags.hasNatureBit) | (1 << TrainerData_Flags.hasIVsEVsBit))
-    tst     r1, r2
+    #printf("        check stat modifiers... (size=%d)", r4)
+    mov     r0, #((1 << TrainerData_Flags.hasNatureBit) | (1 << TrainerData_Flags.hasIVsEVsBit))
+    tst     r5, r0
     beq     Return
-    add     r0, #TrainerPoke.STAT_MODIFIERS_SIZE
+    add     r4, #TrainerPoke.STAT_MODIFIERS_SIZE
+    #printf("        has stat modifiers (size=%d)", r4)
     
 Return:
-    bx      lr
+    #printf("        final size = %d", r4)
+    mov     r0, r4
+    pop     {r4-r5, pc}

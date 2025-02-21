@@ -1,6 +1,6 @@
 {
   "battleStyleBit": 0,
-  "battleStyleSize": 3,
+  "battleStyleSize": 2,
   "battleStyleMask": 3,
 
   "signatureBit": 2,
@@ -8,11 +8,11 @@
   "isHealerBit": 3,
   "isHealerSize": 1,
 
-  "hasItemBit": 4,
-  "hasItemSize": 1,
-  
-  "hasMovesBit": 5,
+  "hasMovesBit": 4,
   "hasMovesSize": 1,
+
+  "hasItemBit": 5,
+  "hasItemSize": 1,
   
   "hasNatureBit": 6,
   "hasNatureSize": 1,

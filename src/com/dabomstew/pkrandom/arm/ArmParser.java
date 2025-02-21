@@ -363,13 +363,16 @@ public class ArmParser {
                     
                 --i;
                 continue;
-            } else if (str.toUpperCase().startsWith("READ_BITS(") && str.endsWith(")")) {
-                String[] strArgs = str.substring(8, str.length() - 1).split(",");
+            } else if (str.toUpperCase().startsWith("#READ_BITS(") && str.endsWith(")")) {
+                String[] strArgs = str.substring(11, str.length() - 1).split(",");
                 if (strArgs.length < 3 || strArgs.length > 4)
                     throw new ArmParseException(lineNumber, str, "incorrect number of arguments for READ_BITS(); expected 3 or 4");
                 
                 if (strArgs.length == 3)
                     strArgs = new String[]{strArgs[0], strArgs[0], strArgs[1], strArgs[2]};
+                
+                for (int j = 0; j < strArgs.length; ++j)
+                    strArgs[j] = strArgs[j].trim();
                 
                 int rd = parseRegister(strArgs[0]);
                 int rs = parseRegister(strArgs[1]);
@@ -390,6 +393,7 @@ public class ArmParser {
                     parseLines.add(oldParseLines.get(j));
 
                 --i;
+                continue;
             } else if (str.toUpperCase().startsWith("#PRINTF(") && str.endsWith(")")) {
                 if (isDebug) {
                     String[] printStrArgs = str.substring(8, str.length() - 1).split(",");
@@ -465,6 +469,7 @@ public class ArmParser {
                     }
                     
                     int usedArgsBitFlags = 0;
+                    int usedArgsAgainBitFlags = 0;
                     for (int j = 1; j < printStrArgs.length; ++j) {
                         int targetRegister = j + 1;
                         int stackOffset = (j - 3) * 4;
@@ -486,6 +491,7 @@ public class ArmParser {
                             }
                             
                             lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, r%d", 8 + argRegister, argRegister)));
+                            usedArgsAgainBitFlags |= mask;
                         }
                             
                         usedArgsBitFlags |= mask;
@@ -499,9 +505,9 @@ public class ArmParser {
                         int argRegister = parseRegister(printStrArg);
                         if (argRegister > -1) {
                             if (stackOffset < 0) {
-                                if ((usedArgsBitFlags & (1 << argRegister)) != 0)
+                                if ((usedArgsAgainBitFlags & (1 << argRegister)) != 0)
                                     lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, r%d", targetRegister, 8 + argRegister)));
-                                else if (targetRegister != argRegister)
+                                else if ((usedArgsBitFlags & (1 << argRegister)) != 0 || targetRegister != argRegister)
                                     lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, %s", targetRegister, printStrArg)));
                             } else {
                                 if ((usedArgsBitFlags & (1 << argRegister)) != 0) {

@@ -10,7 +10,7 @@
 
 Label_0x021BF074:
     ldr     r0, =0x0FE6
-    ldr     r3, =Storage::Box2_Main_C
+    ldr     r3, =StorageSystem::Box2_Main_C
     str     r0, [sp, #0x00]
     mov     r0, #76
     mov     r1, #28

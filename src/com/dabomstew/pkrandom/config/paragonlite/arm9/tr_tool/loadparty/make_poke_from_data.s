@@ -1,11 +1,11 @@
-; r0 trainerPokePtr
-; r1 trainerPokeDataSize
-; r2 playerId
-; r3 trainerId
-; arg0 heapId
-; arg4 dataOffsets
-; arg8 teamRand
-; argC trainerDataPtr
+; r0    trainerPokePtr
+; r1    trainerPokeDataSize
+; r2    playerId
+; r3    trainerId
+; arg0  heapId
+; arg4  dataOffsets
+; arg8  teamRand
+; argC  trainerDataPtr
 ; arg10 tempPokePtr
 
 ; TrTool_GetRandomPersonal args
@@ -56,6 +56,9 @@
     str     r2, [sp, #S_PlayerId]
     str     r3, [sp, #S_TrainerId]
 
+    #printf("    ARM9::TrTool_MakePokeFromData (LR=0x%08X)", lr)
+
+    mov     r0, r6
     bl      ARM9::TrainerPoke_GetGenderAbilityByte ; byte value where lower 4 bits are gender and upper 4 bits are ability
     str     r0, [sp, #S_GenderAbilityByte]
     mov     r2, r0
@@ -68,7 +71,10 @@
     add     r3, sp, #ARG_TeamRand ; return value
     bl      ARM9::TrTool_GetRandomPersonal
 
-    #printf("\t\tTeam Rand: %d", ldr [sp, #ARG_TeamRand])
+    #printf("        teamRand=%d", ldr [sp, #ARG_TeamRand])
+    #printf("        species=%d", ldrh [r6, #TrainerPoke.species])
+    #printf("        basicFlags=0x%02X", ldrb [r6, #TrainerPoke.basicFlags])
+    #printf("        level=%d", ldrb [r6, #TrainerPoke.level])
     
     mov     r0, #0
     str     r0, [sp, #S_PokeRand]
@@ -82,8 +88,7 @@ CheckPokesHaveStatModifiers:
     
 AddIVsToRand:
     ldrb    r1, [r6, r1]
-    lsl     r1, #(32 - (TrainerPoke_StatModifiers.ivSize + TrainerPoke_StatModifiers.ivBit))
-    lsr     r1, #(32 - TrainerPoke_StatModifiers.ivSize)
+    #read_bits(r1, #TrainerPoke_StatModifiers.ivBit, #TrainerPoke_StatModifiers.ivSize)
     str     r1, [sp, #S_IVs]
     add     r0, r1
     
@@ -155,15 +160,22 @@ MakeCompactIVs:
     bl      ARM9::PokeTool_SetupEx
     
 CheckPokeHasStatModifiers:
+    #printf("        check poke has stat modifiers")
     add     r4, sp, #ARG_DataOffsets
     ldrb    r4, [r4, #0x00] ; stat modifiers offset
     cmp     r4, #0
     beq     CheckPokeHasItem
     
-    ; EV spread
+    ; EV spread    
     ldrh    r0, [r6, r4]
-    lsr     r0, #TrainerPoke_StatModifiers.evFlagBit
+    #read_bits(r0, #TrainerPoke_StatModifiers.evFlagBit, #TrainerPoke_StatModifiers.evFlagSize)
     str     r0, [sp, #S_EVBits]
+    
+#if DEBUG
+    #printf("            evFlags=0x%02X", r0)
+    str     r0, [sp, #S_EVBits]
+#endif
+    
     mov     r1, #0 ; count
     mov     r3, #0 ; stat
     
@@ -194,6 +206,7 @@ GetEVsPerStat:
     
 SetEVsPerStat:
     str     r0, [sp, #S_EVsPerStat]
+    #printf("            evsPerStat=%d", r0)
     
     mov     r0, #0 ; stat
     str     r0, [sp, #S_EVsIndex]
@@ -211,7 +224,7 @@ SetEVsLoop:
     ldr     r2, [sp, #S_EVsPerStat]
     bl      ARM9::Poke_SetParam
     
-    #printf("\t\tSet EVs of stat %d to %d", ldr [sp, #S_EVsIndex], ldr [sp, #S_EVsPerStat])
+    #printf("            set EVs of stat %d to %d", ldr [sp, #S_EVsIndex], ldr [sp, #S_EVsPerStat])
     
 SetEVsLoop_End:
     ldr     r0, [sp, #S_EVsIndex]
@@ -221,6 +234,8 @@ SetEVsLoop_End:
     bcc     SetEVsLoop
     
 CheckHasNature:
+    #printf("            check has nature")
+    
     ; Nature (confirm first that we have natures)
     ldr     r0, [sp, #ARG_TrainerDataPtr]
     bl      ARM9::TrTool_PokesHaveNatures
@@ -237,10 +252,11 @@ CheckHasNature:
 #if DEBUG
     ldrh    r0, [r6, r4]
     #read_bits(r0, TrainerPoke_StatModifiers.natureBit, TrainerPoke_StatModifiers.natureSize)
-    #printf("\t\tSet Nature to %d", r0)
+    #printf("                Set Nature to %d", r0)
 #endif
 
 CheckPokeHasItem:
+    #printf("        check poke has item")
     add     r4, sp, #ARG_DataOffsets
     ldrb    r4, [r4, #0x01] ; item offset
     cmp     r4, #0
@@ -251,9 +267,10 @@ CheckPokeHasItem:
     ldrh    r2, [r6, r4]
     bl      ARM9::Poke_SetParam
     
-    #printf("\t\tSet item to %d", ldrh [r6, r4])
+    #printf("            Set item to %d", ldrh [r6, r4])
     
 CheckPokeHasMoves:
+    #printf("        check poke has moves")
     add     r4, sp, #ARG_DataOffsets
     ldrb    r4, [r4, #0x02] ; moves offset
     cmp     r4, #0
@@ -266,12 +283,15 @@ MovesLoop_Start:
     ldrh    r2, [r6, r4]
     bl      ARM9::Poke_SetParam
     
-    add     r4, #2
     add     r5, #1
+    #printf("            move%d set to %d", r5, ldrh [r6, r4])
+    
+    add     r4, #2
     cmp     r5, #4
     bcc     MovesLoop_Start
     
 FinishSetup:
+    #printf("        finishing setup")
     mov     r0, r6
     bl      ARM9::TrainerPoke_GetFormId
     mov     r2, r0

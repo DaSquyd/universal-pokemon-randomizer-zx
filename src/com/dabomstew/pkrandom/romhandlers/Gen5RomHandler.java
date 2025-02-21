@@ -5968,8 +5968,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private static void processParagonLiteHandler(ParagonLiteHandler paragonLite, boolean debugMode) {
         paragonLite.setBattleEventStrings();
 
-        if (debugMode)
-            paragonLite.setDebugFlag();
+        paragonLite.setDebugFlag(debugMode);
         
         // Code updates
         paragonLite.tempFixFairyStruggle();

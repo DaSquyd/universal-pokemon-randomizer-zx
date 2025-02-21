@@ -21,7 +21,10 @@ ARM9	VM_LoadScript	Code		thumb	0x0201127C	0x0201127C	0x02015910	0x02015910
 ARM9	VM_GetEnv	Code		thumb	0x02012134	0x02012134	0x020159DC	0x020159DC
 ARM9	Script_ReadArg	Code		thumb	0x0201134C	0x0201134C	0x02015A04	0x02015A04
 ARM9	GameData_GetPlayerState	Code		thumb			0x0201736C	0x0201736C
-ARM9	GameData_GetSaveControlWork	Code		thumb	--	--	0x02017934	0x02017934
+ARM9	GameData_GetSeason	Code		thumb			0x020173AC	0x020173AC
+ARM9	GameData_GetSaveControlWork	Code		thumb			0x02017934	0x02017934
+ARM9	BattleSetup_CreateTrainerData	Code		thumb			0x02017E04	0x02017E04
+ARM9	BattleSetup_LoadTrainer	Code		thumb			0x02017E54	0x02017E54
 ARM9	Difficulty_AdjustPokeLevel	Code		thumb	--	--	0x020185D0	0x020185D0
 ARM9	GetDifficultyLevelChange	Code		thumb	--	--	0x02018D08	0x02018CDC
 ARM9	Unk_2019B14	Code		thumb	0x02014C24	0x02014C08	0x02019B14	0x02019AE8
@@ -48,7 +51,8 @@ ARM9	IsPokeNicknamed	Code		thumb	0x02019AD8	0x02019ABC	0x0201ED74	0x0201ED48
 ARM9	GetTypeForPlate	Code		thumb	0x02019BD8	0x02019BBC	0x0201EE74	0x0201EE48
 ARM9	GetPokeBlockShuffle	Code		thumb	0x02019C54	0x02019C38	0x0201EEF0	0x0201EEC4
 ARM9	GetPersonalField	Code		thumb	0x02019CAC	0x02019C90	0x0201EF48	0x0201EF1C
-ARM9	PokeParty_InitCore	Code		thumb	0x0201AAC4	0x0201AAA8	0x0201FD60	0x0201FD34
+ARM9	PokeParty_Create	Code		thumb			0x0201FD2C	0x0201FD00
+ARM9	PokeParty_InitCore	Code		thumb			0x0201FD60	0x0201FD34
 ARM9	PokeParty_Add	Code		thumb			0x0201FD98	0x0201FD6C
 ARM9	GetPartySize	Code		thumb	0x0201AA34	0x0201AA18	0x0201FE24	0x0201FDF8
 ARM9	GetPartyPokeAddress	Code		thumb	0x0201AB44	0x0201AB28	0x0201FF34	0x0201FF08
@@ -83,7 +87,8 @@ ARM9	IsItemBerry	Code		thumb			0x02026C20	0x02026BF4
 ARM9	TrTool_GetParam	Code		thumb	0x0202A248	0x0202A230	0x0203050C	0x020304E0
 ARM9	TrTool_LoadTrainerData	Code		thumb	0x0202A3C4	0x0202A3AC	0x0203070C	0x020306E0
 ARM9	TrTool_LoadTrainerPoke	Code		thumb	0x0202A3D4	0x0202A3BC	0x02030750	0x02030724
-ARM9	TrainerClass_GetGender	Code		thumb			0x02030760	0x02030734
+ARM9	TrTool_GetClassGender	Code		thumb			0x02030760	0x02030734
+ARM9	TrTool_GetClassGroup	Code		thumb			0x020307F0	0x020307C4
 ARM9	TrTool_LoadTrainer	Code		thumb			0x02030854	0x02030828
 ARM9	TrTool_LoadParty	Code		thumb			0x020308EC	0x020308C0
 ARM9	TrTool_GetRandomPersonal	Code		thumb			0x02030DCC	0x02030DA0
@@ -770,26 +775,27 @@ BattleServer	Data_SideStatusEffectTable	Data	112	4*	0x0689D780	0x0689D780	0x0689
 BattleServer	Data_PlateItems	Data	32		0x0689E38C	0x0689E38C	0x0689E514	0x0689E514
 BattleServer	Data_MoldBreakerIgnoredAbilities	Data	112		0x0689E450	0x0689E450	0x0689E5D8	0x0689E5D8
 BattleServer	SideStatuses	Data	448		0x0689E7E0	0x0689E7E0	0x0689E960	0x0689E960
-Local	Encounter_CreateWildPoke	Code		thumb			0x021A0E00	0x021A0DC0
-Local	Encounter_GenPID	Code		thumb			0x021A1548	0x021A1508
-PWT_Battle	SetDownloadedParty	Code		thumb	--	--	0x021F016C	0x021F012C
-PWT_Battle	GetRivalTrainerId	Code		thumb	--	--	0x021F0260	0x021F0220
-PWT_Battle	SetRomParty	Code		thumb	--	--	0x021F03A4	0x021F0364
-PWT_Battle	TrainerPartySetup	Code		thumb	--	--	0x021F040C	0x021F03CC
+Field	Encounter_CreateWildPoke	Code		thumb			0x021A0E00	0x021A0DC0
+Field	Encounter_GenPID	Code		thumb			0x021A1548	0x021A1508
+Local	TransformSeasonPoke	Code		thumb			0x02164A2C	0x021649EC
+PWTBattle	SetDownloadedParty	Code		thumb	--	--	0x021F016C	0x021F012C
+PWTBattle	GetRivalTrainerId	Code		thumb	--	--	0x021F0260	0x021F0220
+PWTBattle	SetRomParty	Code		thumb	--	--	0x021F03A4	0x021F0364
+PWTBattle	TrainerPartySetup	Code		thumb	--	--	0x021F040C	0x021F03CC
 Script_PWT	GetTournamentId	Code		thumb	--	--	0x021E5CE4	0x021E5CA4
 Script_PWT	GetMaxPartySize	Code		thumb	--	--	0x021E5DBC	0x021E5D7C
-Storage	MakeBox2Main	Code		thumb	0x021DEDF8	0x021DEDD8	0x021BF060	0x021BF020
-Storage	DisplayPreview	Code		thumb	0x021DEF80	0x021DEF60	0x021BF1E8	0x021BF1A8
-Storage	Unk_21BF3A4	Code		thumb			0x021BF3A4	0x021BF364
-Storage	Unk_21BF3CC	Code		thumb			0x021BF3CC	0x021BF38C
-Storage	Unk_21CE078	Code		thumb			0x021CE078	0x021CE038
-Storage	Unk_21CE0A8	Code		thumb			0x021CE0A8	0x021CE068
-Storage	Unk_21CE100	Code		thumb			0x021CE100	0x021CE0C0
-Storage	Preview_Ability	Code		thumb	0x021EB134	0x021EB114	0x021CE62C	0x021CE5EC
-Storage	PreviewCore	Code		thumb	0x021EB2C4	0x021EB2A4	0x021CE7D8	0x021CE798
-Storage	Unk_21D06E4	Code		thumb			0x021D06E4	0x021D06A4
-Storage	DisplayPreview_TypeGraphics	Code		thumb			0x021D0A68	0x021D0A28
-Storage	Box2_Main_C	Data	12		0x021F1420	0x021F1400	0x021D9680	0x021D9640
+StorageSystem	MakeBox2Main	Code		thumb	0x021DEDF8	0x021DEDD8	0x021BF060	0x021BF020
+StorageSystem	DisplayPreview	Code		thumb	0x021DEF80	0x021DEF60	0x021BF1E8	0x021BF1A8
+StorageSystem	Unk_21BF3A4	Code		thumb			0x021BF3A4	0x021BF364
+StorageSystem	Unk_21BF3CC	Code		thumb			0x021BF3CC	0x021BF38C
+StorageSystem	Unk_21CE078	Code		thumb			0x021CE078	0x021CE038
+StorageSystem	Unk_21CE0A8	Code		thumb			0x021CE0A8	0x021CE068
+StorageSystem	Unk_21CE100	Code		thumb			0x021CE100	0x021CE0C0
+StorageSystem	Preview_Ability	Code		thumb	0x021EB134	0x021EB114	0x021CE62C	0x021CE5EC
+StorageSystem	PreviewCore	Code		thumb	0x021EB2C4	0x021EB2A4	0x021CE7D8	0x021CE798
+StorageSystem	Unk_21D06E4	Code		thumb			0x021D06E4	0x021D06A4
+StorageSystem	DisplayPreview_TypeGraphics	Code		thumb			0x021D0A68	0x021D0A28
+StorageSystem	Box2_Main_C	Data	12		0x021F1420	0x021F1400	0x021D9680	0x021D9640
 Title	StartMenuProc_End	Code		thumb			0x0219DA18	0x0219D9D8
 TrainerAI	Data_AIScriptCommands	Data	492	*	0x0218A5C8	0x0218A5A8	0x02181CF4	0x02181CB4
 UnovaLink	Proc_Init	Code		thumb			0x021BEF20	0x021BEEE0

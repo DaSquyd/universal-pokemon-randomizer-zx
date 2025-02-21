@@ -125,19 +125,19 @@ Label_0x021A01CC:
     lsl     r0, r0, #28
     lsr     r0, r0, #28
     cmp     r0, #8
-    bhi     Label_0x021A023C
+    bhi     BattleAction_Zero
     #SWITCH r0
-    #CASE Label_0x021A0238
-    #CASE Label_0x021A0236
-    #CASE Label_0x021A022A
-    #CASE Label_0x021A0226
-    #CASE Label_0x021A020E
-    #CASE Label_0x021A0234
-    #CASE Label_0x021A022E
-    #CASE Label_0x021A0232
-    #CASE Label_0x021A02AE
+    #CASE BattleAction_Null
+    #CASE BattleAction_Zero ; Fight
+    #CASE BattleAction_Item
+    #CASE BattleAction_Switch
+    #CASE BattleAction_Run
+    #CASE BattleAction_Zero ; Shift
+    #CASE BattleAction_Rotate
+    #CASE BattleAction_Zero ; Skip
+    #CASE BattleAction_RecordTimeout
 
-Label_0x021A020E:
+BattleAction_Run:
     ldr     r0, [sp, #0x00]
     ldr     r0, [r0, #0x04]
     bl      Battle::MainModule_GetBattleType
@@ -146,38 +146,29 @@ Label_0x021A020E:
     ldrb    r0, [r4, #0x0C]
     cmp     r0, #1
     bne     Label_0x021A0222
-    b       Label_0x021A023C
+    b       BattleAction_Zero
 
 Label_0x021A0222:
     mov     r5, #4
     b       Label_0x021A023E
 
-Label_0x021A0226:
+BattleAction_Switch:
     mov     r5, #3
     b       Label_0x021A023E
 
-Label_0x021A022A:
+BattleAction_Item:
     mov     r5, #2
     b       Label_0x021A023E
 
-Label_0x021A022E:
+BattleAction_Rotate:
     mov     r5, #1
     b       Label_0x021A023E
 
-Label_0x021A0232:
-    b       Label_0x021A023C
-
-Label_0x021A0234:
-    b       Label_0x021A023C
-
-Label_0x021A0236:
-    b       Label_0x021A023C
-
-Label_0x021A0238:
+BattleAction_Null:
     ldr     r0, =0x03002000 ; NEW - includes default value for Quash
     b       Label_0x021A02AC
 
-Label_0x021A023C:
+BattleAction_Zero:
     mov     r5, #0
 
 Label_0x021A023E:
@@ -249,7 +240,7 @@ Label_0x021A027C:
 Label_0x021A02AC:
     str     r0, [r4, #0x08]
 
-Label_0x021A02AE:
+BattleAction_RecordTimeout:
     ldr     r0, [sp, #0x0C]
     add     r0, r0, #1
     lsl     r0, r0, #24

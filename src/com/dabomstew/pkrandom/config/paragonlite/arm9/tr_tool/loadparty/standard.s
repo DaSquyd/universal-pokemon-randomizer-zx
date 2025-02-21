@@ -41,7 +41,7 @@
     ldr     r0, [sp, #ARG_TempPokePtr]
     str     r0, [sp, #S_ArgTempPokePtr]
     
-    #printf("Standard trainer party generation...")
+    #printf("ARM9::TrTool_LoadParty_Standard (LR=0x%08X)", lr)
     
     mov     r7, #TrainerPoke.BASE_SIZE
     
@@ -54,7 +54,7 @@ CheckPokesHaveStatModifiers:
     cmp     r0, #FALSE
     beq     CheckPokesHaveItems
     
-    #printf("Pokes have stat modifiers flag")
+    #printf("    Pokes have stat modifiers flag")
     
     add     r0, sp, #S_DataOffsets
     strb    r7, [r0, #0x00]
@@ -66,7 +66,7 @@ CheckPokesHaveItems:
     cmp     r0, #FALSE
     beq     CheckPokesHaveMoves
     
-    #printf("Pokes have items flag")
+    #printf("    Pokes have items flag")
     
     add     r0, sp, #S_DataOffsets
     strb    r7, [r0, #0x01]
@@ -78,18 +78,18 @@ CheckPokesHaveMoves:
     cmp     r0, #FALSE
     beq     RandomSetup
     
-    #printf("Pokes have moves flag")
+    #printf("    Pokes have moves flag")
     
     add     r0, sp, #S_DataOffsets
     strb    r7, [r0, #0x02]
     add     r7, #TrainerPoke.MOVES_SIZE
     
 RandomSetup:
-    #printf("Poke size: %d", r7)
+    #printf("    Poke size: %d", r7)
     
     ldr     r0, [sp, #S_TrainerDataPtr]
     ldrb    r0, [r0, #TrainerData.class]
-    bl      ARM9::TrainerClass_GetGender
+    bl      ARM9::TrTool_GetClassGender
     cmp     r0, #1 ; female
     bne     RandomSetup_Male
     
@@ -109,7 +109,7 @@ MainLoop_Setup:
     str     r0, [sp, #S_PokeIndex]
     
 MainLoop_Start:
-    #printf("\tPoke %d...", ldr [sp, #S_PokeIndex])
+    #printf("    Poke %d...", ldr [sp, #S_PokeIndex])
     
     ldr     r0, [sp, #S_PokeIndex]
     mul     r0, r7 ; r0 := size * index
@@ -125,8 +125,9 @@ MainLoop_Start:
     
 MainLoop_AddToParty:
     ldr     r0, [sp, #S_PartyPtr]
-    mov     r1, r6
+    ldr     r1, [sp, #ARG_TempPokePtr]
     bl      ARM9::PokeParty_Add
+    #printf("    added poke to party 0x%08X", ldr [sp, #S_PartyPtr])
     
 MainLoop_End:
     ldr     r0, [sp, #S_PokeIndex]

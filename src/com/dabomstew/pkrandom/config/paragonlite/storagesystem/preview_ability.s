@@ -36,7 +36,7 @@
     add     r5, #136
     ldr     r2, [r5, #0x00]
     mov     r3, #97
-    bl      Storage::Unk_21CE100
+    bl      StorageSystem::Unk_21CE100
     b       Label_0x021CE6A6
 
 Label_0x021CE684:
@@ -55,10 +55,10 @@ Label_0x021CE684:
     add     r5, #136
     ldr     r2, [r5, #0x00]
     mov     r3, #106
-    bl      Storage::Unk_21CE0A8
+    bl      StorageSystem::Unk_21CE0A8
 
 Label_0x021CE6A6:
     add     r0, r4, r7
-    bl      Storage::Unk_21CE078
+    bl      StorageSystem::Unk_21CE078
     add     sp, #0x14
     pop     {r4-r7, pc}

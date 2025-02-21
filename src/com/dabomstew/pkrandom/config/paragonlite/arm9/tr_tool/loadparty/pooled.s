@@ -41,7 +41,7 @@
     ldr     r0, [sp, #ARG_TempPokePtr]
     str     r0, [sp, #S_ArgTempPokePtr]
     
-    #printf("Standard trainer party generation...")
+    #printf("ARM9::TrTool_LoadParty_Pooled (LR=0x%08X)", lr)
     
     add     sp, #STACK_SIZE
     pop     {r4-r7, pc}

@@ -68,24 +68,27 @@ public class ParagonLiteHandler {
     public static Mode mode = Mode.Redux;
 
     Gen5RomHandler romHandler;
+    Gen5RomHandler.RomEntry romEntry;
 
     ArmParser armParser;
     ParagonLiteAddressMap globalAddressMap;
 
     ParagonLiteOverlay arm9;
-    ParagonLiteOverlay fieldOvl;
-    ParagonLiteOverlay uiCommonOvl;
-    ParagonLiteOverlay bagOvl;
-    ParagonLiteOverlay titleOvl;
-    ParagonLiteOverlay battleOvl;
-    ParagonLiteOverlay battleLevelOvl;
-    ParagonLiteOverlay battleServerOvl;
-    ParagonLiteOverlay trainerAIOvl;
-    ParagonLiteOverlay storageOvl;
-    ParagonLiteOverlay fieldSaveOvl;
-    ParagonLiteOverlay unovaLinkOvl;
-    ParagonLiteOverlay scriptPWTOvl;
-    ParagonLiteOverlay pwtBattleOvl;
+    ParagonLiteOverlay localOvl; // ??, 12
+    ParagonLiteOverlay fieldOvl; // 21, 36
+    ParagonLiteOverlay scriptPWTOvl; // --, 55
+    ParagonLiteOverlay pwtBattleOvl; // --, 134
+    ParagonLiteOverlay uiCommonOvl; // 65, 139
+    ParagonLiteOverlay bagOvl; // 68, 142
+    ParagonLiteOverlay titleOvl; // 88, 162
+    ParagonLiteOverlay battleOvl; // 93, 167
+    ParagonLiteOverlay battleLevelOvl; // 94, 168
+    ParagonLiteOverlay battleServerOvl; // 95, 169
+    ParagonLiteOverlay trainerAIOvl; // 96, 170
+    ParagonLiteOverlay storageSystemOvl; // 170, 255
+    ParagonLiteOverlay metaSaveOvl; // --, 331
+    ParagonLiteOverlay unovaLinkOvl; // --, 332
+    List<ParagonLiteOverlay> overlays = new ArrayList<>();
 
     Pokemon[] classicPokes;
     Pokemon[] pokes;
@@ -201,24 +204,28 @@ public class ParagonLiteHandler {
         }
     }
 
+    ParagonLiteOverlay MakeOverlay(String name, ParagonLiteOverlay.Insertion insertionType) {
+        int ovlNumber = romEntry.getInt(name.replace("_", "") + "OvlNumber");
+        
+        if (ovlNumber == 0)
+            throw new RuntimeException();
+        
+        byte[] data;
+        try {
+            data = romHandler.readOverlay(ovlNumber);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        
+        int address = romHandler.getOverlayAddress(ovlNumber);
+        ParagonLiteOverlay overlay = new ParagonLiteOverlay(romHandler, ovlNumber, name, data, address, insertionType, armParser, globalAddressMap);
+        overlays.add(overlay);
+        return overlay;
+    }
+
     ParagonLiteHandler(Params params) {
         romHandler = params.romHandler;
-
-        Gen5RomHandler.RomEntry romEntry = params.romEntry;
-
-        int fieldOvlNumber = romEntry.getInt("FieldOvlNumber");
-        int uiCommonOvlNumber = romEntry.getInt("UICommonOvlNumber");
-        int bagOvlNumber = romEntry.getInt("BagOvlNumber");
-        int titleOvlNumber = romEntry.getInt("TitleOvlNumber");
-        int battleOvlNumber = romEntry.getInt("BattleOvlNumber");
-        int BattleLevelOvlNumber = romEntry.getInt("BattleLevelOvlNumber");
-        int battleServerOvlNumber = romEntry.getInt("BattleServerOvlNumber");
-        int trainerAIOvlNumber = romEntry.getInt("TrainerAIOvlNumber");
-        int storageOvlNumber = romEntry.getInt("PCOvlNumber");
-        int fieldSaveOvlNumber = romEntry.getInt("FieldSaveOvlNumber");
-        int unovaLinkOvlNumber = romEntry.getInt("UnovaLinkOvlNumber");
-        int scriptPWTOvlNumber = romEntry.getInt("ScriptPWTOvlNumber");
-        int PWTBattleOvlNumber = romEntry.getInt("PWTBattleOvlNumber");
+        romEntry = params.romEntry;
 
         globalAddressMap = new ParagonLiteAddressMap();
         armParser = new ArmParser(globalAddressMap);
@@ -232,61 +239,23 @@ public class ParagonLiteHandler {
         armParser.addGlobalValue("WHITE_2", romHandler.isWhite2());
         armParser.addGlobalValue("HAS_POKESTAR_STUDIOS", romHandler.isUpperVersion());
 
-        try {
-            arm9 = new ParagonLiteArm9(romHandler, params.arm9Data, armParser, globalAddressMap);
+        arm9 = new ParagonLiteArm9(romHandler, params.arm9Data, armParser, globalAddressMap);
 
-//            byte[] fieldOvlData = romHandler.readOverlay(fieldOvlNumber);
-//            int fieldOvlAddress = romHandler.getOverlayAddress(fieldOvlNumber);
-//            fieldOvl = new ParagonLiteOverlay(romHandler, fieldOvlNumber, "Field", fieldOvlData, fieldOvlAddress, ParagonLiteOverlay.Insertion.Front, armParser, globalAddressMap);
+        localOvl = MakeOverlay("Local", ParagonLiteOverlay.Insertion.Restricted);
+        fieldOvl = MakeOverlay("Field", ParagonLiteOverlay.Insertion.Restricted);
+        scriptPWTOvl = MakeOverlay("Script_PWT", ParagonLiteOverlay.Insertion.Restricted);
+        pwtBattleOvl = MakeOverlay("PWTBattle", ParagonLiteOverlay.Insertion.Restricted);
+        uiCommonOvl = MakeOverlay("UICommon", ParagonLiteOverlay.Insertion.Restricted);
+        bagOvl = MakeOverlay("Bag", ParagonLiteOverlay.Insertion.Restricted);
+        titleOvl = MakeOverlay("Title", ParagonLiteOverlay.Insertion.Front);
+        battleOvl = MakeOverlay("Battle", ParagonLiteOverlay.Insertion.Front);
+        battleLevelOvl = MakeOverlay("BattleLevel", ParagonLiteOverlay.Insertion.Restricted);
+        battleServerOvl = MakeOverlay("BattleServer", ParagonLiteOverlay.Insertion.Restricted);
+        trainerAIOvl = MakeOverlay("TrainerAI", ParagonLiteOverlay.Insertion.Front);
+        storageSystemOvl = MakeOverlay("StorageSystem", ParagonLiteOverlay.Insertion.Back);
+        metaSaveOvl = MakeOverlay("MetaSave", ParagonLiteOverlay.Insertion.Restricted);
+        unovaLinkOvl = MakeOverlay("UnovaLink", ParagonLiteOverlay.Insertion.Back);
 
-            byte[] uiCommonOvlData = romHandler.readOverlay(uiCommonOvlNumber);
-            int uiCommonOvlAddress = romHandler.getOverlayAddress(uiCommonOvlNumber);
-            uiCommonOvl = new ParagonLiteOverlay(romHandler, uiCommonOvlNumber, "UICommon", uiCommonOvlData, uiCommonOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
-
-            byte[] bagOvlData = romHandler.readOverlay(bagOvlNumber);
-            int bagOvlAddress = romHandler.getOverlayAddress(bagOvlNumber);
-            bagOvl = new ParagonLiteOverlay(romHandler, bagOvlNumber, "Bag", bagOvlData, bagOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
-
-            byte[] titleOvlData = romHandler.readOverlay(titleOvlNumber);
-            int titleOvlAddress = romHandler.getOverlayAddress(titleOvlNumber);
-            titleOvl = new ParagonLiteOverlay(romHandler, titleOvlNumber, "Title", titleOvlData, titleOvlAddress, ParagonLiteOverlay.Insertion.Front, armParser, globalAddressMap);
-
-            byte[] battleOvlData = romHandler.readOverlay(battleOvlNumber);
-            int battleOvlAddress = romHandler.getOverlayAddress(battleOvlNumber);
-            battleOvl = new ParagonLiteOverlay(romHandler, battleOvlNumber, "Battle", battleOvlData, battleOvlAddress, ParagonLiteOverlay.Insertion.Front, armParser, globalAddressMap);
-
-            byte[] BattleLevelOvlData = romHandler.readOverlay(BattleLevelOvlNumber);
-            int BattleLevelOvlAddress = romHandler.getOverlayAddress(BattleLevelOvlNumber);
-            battleLevelOvl = new ParagonLiteOverlay(romHandler, BattleLevelOvlNumber, "BattleLevel", BattleLevelOvlData, BattleLevelOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
-
-            byte[] battleServerOvlData = romHandler.readOverlay(battleServerOvlNumber);
-            int battleServerOvlAddress = romHandler.getOverlayAddress(battleServerOvlNumber);
-            battleServerOvl = new ParagonLiteOverlay(romHandler, battleServerOvlNumber, "BattleServer", battleServerOvlData, battleServerOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
-
-            byte[] trainerAIOvlData = romHandler.readOverlay(trainerAIOvlNumber);
-            int trainerAIOvlAddress = romHandler.getOverlayAddress(trainerAIOvlNumber);
-            trainerAIOvl = new ParagonLiteOverlay(romHandler, trainerAIOvlNumber, "TrainerAI", trainerAIOvlData, trainerAIOvlAddress, ParagonLiteOverlay.Insertion.Front, armParser, globalAddressMap);
-
-            byte[] storageOvlData = romHandler.readOverlay(storageOvlNumber);
-            int storageOvlAddress = romHandler.getOverlayAddress(storageOvlNumber);
-            storageOvl = new ParagonLiteOverlay(romHandler, storageOvlNumber, "Storage", storageOvlData, storageOvlAddress, ParagonLiteOverlay.Insertion.Back, armParser, globalAddressMap);
-
-            byte[] fieldSaveOvlData = romHandler.readOverlay(fieldSaveOvlNumber);
-            int fieldSaveOvlAddress = romHandler.getOverlayAddress(fieldSaveOvlNumber);
-            fieldSaveOvl = new ParagonLiteOverlay(romHandler, fieldSaveOvlNumber, "FieldSave", fieldSaveOvlData, fieldSaveOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
-
-            byte[] unovaLinkOvlData = romHandler.readOverlay(unovaLinkOvlNumber);
-            int unovaLinkOvlAddress = romHandler.getOverlayAddress(unovaLinkOvlNumber);
-            unovaLinkOvl = new ParagonLiteOverlay(romHandler, unovaLinkOvlNumber, "UnovaLink", unovaLinkOvlData, unovaLinkOvlAddress, ParagonLiteOverlay.Insertion.Back, armParser, globalAddressMap);
-
-            byte[] scriptPWTOvlData = romHandler.readOverlay(scriptPWTOvlNumber);
-            int scriptPWTOvlAddress = romHandler.getOverlayAddress(scriptPWTOvlNumber);
-            scriptPWTOvl = new ParagonLiteOverlay(romHandler, scriptPWTOvlNumber, "Script_PWT", scriptPWTOvlData, scriptPWTOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
-            
-            byte[] pwtBattleOvlData = romHandler.readOverlay(PWTBattleOvlNumber);
-            int pwtBattleOvlAddress = romHandler.getOverlayAddress(PWTBattleOvlNumber);
-            pwtBattleOvl = new ParagonLiteOverlay(romHandler, PWTBattleOvlNumber, "PWT_Battle", pwtBattleOvlData, pwtBattleOvlAddress, ParagonLiteOverlay.Insertion.Restricted, armParser, globalAddressMap);
-            
 //            // Search all overlays
 //            for (int i = 0; i < 343; i++) {
 //                byte[] ovl = romHandler.readOverlay(i);
@@ -296,40 +265,37 @@ public class ParagonLiteHandler {
 //                
 //                System.out.printf("found: ovl_%03d @ 0x%08X%n", i, offset);
 //            }
-            
-            // Battle Overlays
-            {
-                ParagonLiteOverlay[] battleOverlays = new ParagonLiteOverlay[]{arm9, battleOvl, battleLevelOvl, battleServerOvl, trainerAIOvl};
-                battleOvl.addContextOverlays(battleOverlays);
-                battleLevelOvl.addContextOverlays(battleOverlays);
-                battleServerOvl.addContextOverlays(battleOverlays);
-                trainerAIOvl.addContextOverlays(battleOverlays);
-                arm9.addContextOverlays(battleOverlays);
-            }
 
-            // Storage Overlays
-            {
-                ParagonLiteOverlay[] storageOverlays = new ParagonLiteOverlay[]{arm9, storageOvl};
-                storageOvl.addContextOverlays(storageOverlays);
-                arm9.addContextOverlays(storageOverlays);
-            }
+        // Battle Overlays
+        {
+            ParagonLiteOverlay[] battleOverlays = new ParagonLiteOverlay[]{arm9, battleOvl, battleLevelOvl, battleServerOvl, trainerAIOvl};
+            battleOvl.addContextOverlays(battleOverlays);
+            battleLevelOvl.addContextOverlays(battleOverlays);
+            battleServerOvl.addContextOverlays(battleOverlays);
+            trainerAIOvl.addContextOverlays(battleOverlays);
+            arm9.addContextOverlays(battleOverlays);
+        }
 
-            // Title Overlays
-            {
-                ParagonLiteOverlay[] unovaLinkOverlays = new ParagonLiteOverlay[]{arm9, uiCommonOvl, titleOvl, unovaLinkOvl};
-                titleOvl.addContextOverlays(unovaLinkOverlays);
-                unovaLinkOvl.addContextOverlays(unovaLinkOverlays);
-                arm9.addContextOverlays(unovaLinkOverlays);
-            }
-            
-            // PWT Overlays
-            {
-                ParagonLiteOverlay[] pwtOverlays = new ParagonLiteOverlay[]{arm9, scriptPWTOvl, pwtBattleOvl};
-                scriptPWTOvl.addContextOverlays(pwtOverlays);
-                pwtBattleOvl.addContextOverlays(pwtOverlays);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        // Storage Overlays
+        {
+            ParagonLiteOverlay[] storageOverlays = new ParagonLiteOverlay[]{arm9, storageSystemOvl};
+            storageSystemOvl.addContextOverlays(storageOverlays);
+            arm9.addContextOverlays(storageOverlays);
+        }
+
+        // Title Overlays
+        {
+            ParagonLiteOverlay[] unovaLinkOverlays = new ParagonLiteOverlay[]{arm9, uiCommonOvl, titleOvl, unovaLinkOvl};
+            titleOvl.addContextOverlays(unovaLinkOverlays);
+            unovaLinkOvl.addContextOverlays(unovaLinkOverlays);
+            arm9.addContextOverlays(unovaLinkOverlays);
+        }
+
+        // PWT Overlays
+        {
+            ParagonLiteOverlay[] pwtOverlays = new ParagonLiteOverlay[]{arm9, scriptPWTOvl, pwtBattleOvl};
+            scriptPWTOvl.addContextOverlays(pwtOverlays);
+            pwtBattleOvl.addContextOverlays(pwtOverlays);
         }
 
         int gameIndex = romHandler.getGen5GameIndex();
@@ -450,14 +416,9 @@ public class ParagonLiteHandler {
         System.out.print("Writing overlays");
         long startTime = System.currentTimeMillis();
         arm9.save(romHandler);
-//        fieldOvl.save(romHandler);
-        bagOvl.save(romHandler);
-        battleOvl.save(romHandler);
-        battleLevelOvl.save(romHandler);
-        battleServerOvl.save(romHandler);
-        trainerAIOvl.save(romHandler);
-        storageOvl.save(romHandler);
-        unovaLinkOvl.save(romHandler);
+        for (ParagonLiteOverlay Overlay : overlays) {
+            Overlay.save(romHandler);
+        }
         System.out.printf(" - done, time=%dms\n", System.currentTimeMillis() - startTime);
     }
 
@@ -747,8 +708,9 @@ public class ParagonLiteHandler {
         addBattleStringStandard("The opposing team's\nAurora Veil disappeared!");
     }
     
-    public void setDebugFlag() {
-        armParser.addGlobalValue("DEBUG", true);
+    public void setDebugFlag(boolean isDebug) {
+        armParser.addGlobalValue("DEBUG", isDebug);
+        debugMode = isDebug;
     }
 
     public void tempFixFairyStruggle() {
@@ -889,16 +851,16 @@ public class ParagonLiteHandler {
     public void setBoxPreview() {
         // This is the function that creates the struct used for a Pokémon's preview in the PC.
         // We are essentially swapping the markings (which is given 2 bytes despite only using 1) and ability.
-        List<String> makeBox2MainLines = readLines("storage/make_box2_main.s");
-        storageOvl.writeCodeForceInline(makeBox2MainLines, "MakeBox2Main", false);
+        List<String> makeBox2MainLines = readLines("storagesystem/make_box2_main.s");
+        storageSystemOvl.writeCodeForceInline(makeBox2MainLines, "MakeBox2Main", false);
 
         // This function calls PreviewCore as well as gets the Box2Main's markings, which have been moved, so we adjust
-        List<String> displayPreviewLines = readLines("storage/display_preview.s");
-        storageOvl.writeCodeForceInline(displayPreviewLines, "DisplayPreview", false);
+        List<String> displayPreviewLines = readLines("storagesystem/display_preview.s");
+        storageSystemOvl.writeCodeForceInline(displayPreviewLines, "DisplayPreview", false);
 
         // Update to use the correct ability string when filling out the display field for ability
-        List<String> previewAbilityLines = readLines("storage/preview_ability.s");
-        storageOvl.writeCodeForceInline(previewAbilityLines, "Preview_Ability", false);
+        List<String> previewAbilityLines = readLines("storagesystem/preview_ability.s");
+        storageSystemOvl.writeCodeForceInline(previewAbilityLines, "Preview_Ability", false);
     }
 
     public void fixChallengeModeLevelBug() {
@@ -916,10 +878,10 @@ public class ParagonLiteHandler {
         // Allows for Damp and Sun-Soaked to override the current weather for outgoing moves
 
         List<String> getEffectiveWeatherLines = readLines("battle/get_effective_weather.s");
-        battleOvl.writeCode(getEffectiveWeatherLines, "GetEffectiveWeather");
+        battleOvl.writeCode(getEffectiveWeatherLines, "GetEffectiveWeather", true);
 
         List<String> getHandlerEffectiveWeatherLines = readLines("battle/handler_get_effective_weather.s");
-        battleOvl.writeCode(getHandlerEffectiveWeatherLines, "Handler_GetEffectiveWeather");
+        battleOvl.writeCode(getHandlerEffectiveWeatherLines, "Handler_GetEffectiveWeather", true);
 
         System.out.println("Set GetEffectiveWeather");
     }
@@ -1163,16 +1125,11 @@ public class ParagonLiteHandler {
     }
 
     public void setShinyRate() {
-//        // Always Shiny
-//        int isShinyAddress = globalAddressMap.getRomAddress(arm9, "IsShiny");
-//        arm9.writeHalfword(isShinyAddress, 0x2001);
-//        arm9.writeHalfword(isShinyAddress + 0x02, 0x4770);
-
         int shinyRate;
         switch (mode) {
             case ParagonLite -> shinyRate = 32;
             case Redux -> shinyRate = 512;
-            default -> shinyRate = 4096;
+            default -> shinyRate = 4096; // modern
         }
         armParser.addGlobalValue("SHINY_RATE", shinyRate);
 
@@ -1223,7 +1180,7 @@ public class ParagonLiteHandler {
 
     public void setHandlerSimulationDamage() {
         List<String> multiStrikeMultiplierLines = readLines("handler_get_simulation_multi-strike_multiplier.s");
-        battleOvl.writeCode(multiStrikeMultiplierLines, "Handler_GetSimulationMultiStrikeMultiplier");
+        battleOvl.writeCode(multiStrikeMultiplierLines, "Handler_GetSimulationMultiStrikeMultiplier", true);
 
         // Updates simulation damage to include move bindings for variable power, type, effectiveness, etc.
         List<String> simulationDamageLines = readLines("handler_simulation_damage.s");
@@ -1300,7 +1257,7 @@ public class ParagonLiteHandler {
 
     private void addSideStatus(byte[] data, int statusId, int maxLevel, String name, String handlerName, int eventType) {
         List<String> handlerLines = readLines(String.format("battleserver/handler_side_%s.s", handlerName));
-        int handlerLinesRomAddress = battleOvl.writeCode(handlerLines, String.format("HandlerSide_%s", name));
+        int handlerLinesRomAddress = battleOvl.writeCode(handlerLines, String.format("HandlerSide_%s", name), true);
         int handlerLinesRamAddress = battleOvl.romToRamAddress(handlerLinesRomAddress);
 
         byte[] eventTable = new byte[8];
@@ -1309,7 +1266,7 @@ public class ParagonLiteHandler {
         battleOvl.writeData(eventTable, String.format("HandlerSide_%s_EventTable", name));
 
         List<String> eventAddLines = readLines(String.format("battleserver/side_status_event_add_%s.s", handlerName));
-        int eventAddRomAddress = battleOvl.writeCode(eventAddLines, String.format("SideStatusEventAdd_%s", name));
+        int eventAddRomAddress = battleOvl.writeCode(eventAddLines, String.format("SideStatusEventAdd_%s", name), true);
         int eventAddRamAddress = battleOvl.romToRamAddress(eventAddRomAddress);
 
         writeHalf(data, statusId * 8, statusId);
@@ -1318,6 +1275,7 @@ public class ParagonLiteHandler {
     }
 
     public void setBattlePokeCreate() {
+        // Expands BattlePoke to allow turnFlags to be two larger
         int pokeCreateRomAddress = globalAddressMap.getRomAddress(battleOvl, "Poke_Create");
         battleOvl.writeByte(pokeCreateRomAddress + 0x0A, 0x01FC >> 2);
 
@@ -1353,6 +1311,13 @@ public class ParagonLiteHandler {
     }
 
     public void setDynamicTurnOrder() {
+        // _I___XXA AAPPPPPP BBBSSSSS SSSSSSSS
+        // X = Special (Quash=0, Default=1, Interrupt=2)
+        // A = Action (Fight=0, Shift=0, Skip=0, Rotate=1, Item=2, Switch=3, Run=4, Null=4)
+        // P = Priority 
+        // B = Bracket (Stall=0, Default=1, QuickClaw/Custap=2)
+        // S = Speed
+        
         // This sets the default action order data to include the Quash flag
         List<String> generateActionOrderLines = readLines("battle/serverflow/generate_action_order.s");
         battleOvl.writeCodeForceInline(generateActionOrderLines, "ServerFlow_GenerateActionOrder", true);
@@ -1409,96 +1374,96 @@ public class ParagonLiteHandler {
         // Adds new functions for terrains that mirror the functions for weather
 
         List<String> getTerrainCoreLines = readLines("battle/field/get_terrain_core.s");
-        battleOvl.writeCode(getTerrainCoreLines, "Field_GetTerrainCore");
+        battleOvl.writeCode(getTerrainCoreLines, "Field_GetTerrainCore", true);
 
         List<String> getTerrainTurnsCoreLines = readLines("battle/field/get_terrain_turns_core.s");
-        battleOvl.writeCode(getTerrainTurnsCoreLines, "Field_GetTerrainTurnsCore");
+        battleOvl.writeCode(getTerrainTurnsCoreLines, "Field_GetTerrainTurnsCore", true);
 
         List<String> setTerrainCoreLines = readLines("battle/field/set_terrain_core.s");
-        battleOvl.writeCode(setTerrainCoreLines, "Field_SetTerrainCore");
+        battleOvl.writeCode(setTerrainCoreLines, "Field_SetTerrainCore", true);
 
         List<String> endTerrainLines = readLines("battle/field/end_terrain.s");
-        battleOvl.writeCode(endTerrainLines, "Field_EndTerrain");
+        battleOvl.writeCode(endTerrainLines, "Field_EndTerrain", true);
 
         List<String> turnCheckTerrainCoreLines = readLines("battle/field/turn_check_terrain_core.s");
-        battleOvl.writeCode(turnCheckTerrainCoreLines, "Field_TurnCheckTerrainCore");
+        battleOvl.writeCode(turnCheckTerrainCoreLines, "Field_TurnCheckTerrainCore", true);
 
         List<String> getTerrainLines = readLines("battle/field/get_terrain.s");
-        battleOvl.writeCode(getTerrainLines, "Field_GetTerrain");
+        battleOvl.writeCode(getTerrainLines, "Field_GetTerrain", true);
 
         List<String> getTerrainTurnsLines = readLines("battle/field/get_terrain_turns.s");
-        battleOvl.writeCode(getTerrainTurnsLines, "Field_GetTerrainTurns");
+        battleOvl.writeCode(getTerrainTurnsLines, "Field_GetTerrainTurns", true);
 
         List<String> setTerrainLines = readLines("battle/field/set_terrain.s");
-        battleOvl.writeCode(setTerrainLines, "Field_SetTerrain");
+        battleOvl.writeCode(setTerrainLines, "Field_SetTerrain", true);
 
         List<String> turnCheckTerrainLines = readLines("battle/field/turn_check_terrain.s");
-        battleOvl.writeCode(turnCheckTerrainLines, "Field_TurnCheckTerrain");
+        battleOvl.writeCode(turnCheckTerrainLines, "Field_TurnCheckTerrain", true);
 
 
         // POKE
 
         List<String> pokeCalcTerrainDamageLines = readLines("battle/poke/calc_terrain_damage.s");
-        battleOvl.writeCode(pokeCalcTerrainDamageLines, "Poke_CalcTerrainDamage");
+        battleOvl.writeCode(pokeCalcTerrainDamageLines, "Poke_CalcTerrainDamage", true);
 
         List<String> pokeCalcTerrainHealLines = readLines("battle/poke/calc_terrain_heal.s");
-        battleOvl.writeCode(pokeCalcTerrainHealLines, "Poke_CalcTerrainHeal");
+        battleOvl.writeCode(pokeCalcTerrainHealLines, "Poke_CalcTerrainHeal", true);
 
 
         // SERVER DISPLAY
 
         List<String> serverDisplayTerrainDamageLines = readLines("battle/serverdisplay/terrain_damage.s");
-        battleOvl.writeCode(serverDisplayTerrainDamageLines, "ServerDisplay_TerrainDamage");
+        battleOvl.writeCode(serverDisplayTerrainDamageLines, "ServerDisplay_TerrainDamage", true);
 
         List<String> serverDisplayTerrainHealLines = readLines("battle/serverdisplay/terrain_heal.s");
-        battleOvl.writeCode(serverDisplayTerrainHealLines, "ServerDisplay_TerrainHeal");
+        battleOvl.writeCode(serverDisplayTerrainHealLines, "ServerDisplay_TerrainHeal", true);
 
 
         // SERVER EVENT
 
         List<String> serverEventPostChangeTerrainLines = readLines("battle/serverevent/post_change_terrain.s");
-        battleOvl.writeCode(serverEventPostChangeTerrainLines, "ServerEvent_PostChangeTerrain");
+        battleOvl.writeCode(serverEventPostChangeTerrainLines, "ServerEvent_PostChangeTerrain", true);
 
         List<String> serverEventCheckTerrainDamageReactionLines = readLines("battle/serverevent/check_terrain_damage_reaction.s");
-        battleOvl.writeCode(serverEventCheckTerrainDamageReactionLines, "ServerEvent_CheckTerrainDamageReaction");
+        battleOvl.writeCode(serverEventCheckTerrainDamageReactionLines, "ServerEvent_CheckTerrainDamageReaction", true);
 
         List<String> serverEventCheckTerrainHealReactionLines = readLines("battle/serverevent/check_terrain_heal_reaction.s");
-        battleOvl.writeCode(serverEventCheckTerrainHealReactionLines, "ServerEvent_CheckTerrainHealReaction");
+        battleOvl.writeCode(serverEventCheckTerrainHealReactionLines, "ServerEvent_CheckTerrainHealReaction", true);
 
 
         // SERVER CONTROL
 
         List<String> serverControlGetTerrainLines = readLines("battle/servercontrol/get_terrain.s");
-        battleOvl.writeCode(serverControlGetTerrainLines, "ServerControl_GetTerrain");
+        battleOvl.writeCode(serverControlGetTerrainLines, "ServerControl_GetTerrain", true);
 
-        // Depends on: Field_GetTerrain, Field_GetTerrainTurns
+        // Refs: Field_GetTerrain, Field_GetTerrainTurns
         List<String> serverControlChangeTerrainCheckLines = readLines("battle/servercontrol/change_terrain_check.s");
-        battleOvl.writeCode(serverControlChangeTerrainCheckLines, "ServerControl_ChangeTerrainCheck");
+        battleOvl.writeCode(serverControlChangeTerrainCheckLines, "ServerControl_ChangeTerrainCheck", true);
 
-        // Depends on: ServerEvent_PostChangeTerrain
+        // Refs: ServerEvent_PostChangeTerrain
         List<String> serverControlPostChangeTerrainLines = readLines("battle/servercontrol/post_change_terrain.s");
-        battleOvl.writeCode(serverControlPostChangeTerrainLines, "ServerControl_PostChangeTerrain");
+        battleOvl.writeCode(serverControlPostChangeTerrainLines, "ServerControl_PostChangeTerrain", true);
 
-        // Depends on: Field_SetTerrain, ServerControl_PostChangeTerrain
+        // Refs: Field_SetTerrain, ServerControl_PostChangeTerrain
         List<String> serverControlChangeTerrainCoreLines = readLines("battle/servercontrol/change_terrain_core.s");
-        battleOvl.writeCode(serverControlChangeTerrainCoreLines, "ServerControl_ChangeTerrainCore");
+        battleOvl.writeCode(serverControlChangeTerrainCoreLines, "ServerControl_ChangeTerrainCore", true);
 
-        // Depends on: Field_TurnCheckTerrain, Poke_CalcTerrainDamage, Poke_CalcTerrainHeal, ServerEvent_CheckTerrainDamageReaction, ServerEvent_CheckTerrainHealReaction,
-        //             ServerDisplay_TerrainDamage, ServerDisplay_TerrainHeal, ServerControl_PostChangeTerrain
+        // Refs: Field_TurnCheckTerrain, Poke_CalcTerrainDamage, Poke_CalcTerrainHeal, ServerEvent_CheckTerrainDamageReaction, ServerEvent_CheckTerrainHealReaction,
+        //       ServerDisplay_TerrainDamage, ServerDisplay_TerrainHeal, ServerControl_PostChangeTerrain
         List<String> serverControlTurnCheckTerrainLines = readLines("battle/servercontrol/turn_check_terrain.s");
-        battleOvl.writeCode(serverControlTurnCheckTerrainLines, "ServerControl_TurnCheck_Terrain");
+        battleOvl.writeCode(serverControlTurnCheckTerrainLines, "ServerControl_TurnCheck_Terrain", true);
 
-        // Depends on: ServerControl_TurnCheck_Terrain
+        // Refs: ServerControl_TurnCheck_Terrain
         List<String> serverControlTurnCheckLines = readLines("battle/servercontrol/turn_check.s");
         battleOvl.writeCodeForceInline(serverControlTurnCheckLines, "ServerControl_TurnCheck", true);
 
 
         // EVENT HANDLER
-        // Depends on: ServerControl_ChangeTerrainCheck, ServerControl_ChangeTerrainCore
+        // Refs: ServerControl_ChangeTerrainCheck, ServerControl_ChangeTerrainCore
         List<String> handlerChangeTerrainLines = readLines("battle/serverflow/handler_change_terrain.s");
-        battleOvl.writeCode(handlerChangeTerrainLines, "Handler_ChangeTerrain");
+        battleOvl.writeCode(handlerChangeTerrainLines, "Handler_ChangeTerrain", true);
 
-        // Depends on: Handler_ChangeTerrain
+        // Refs: Handler_ChangeTerrain
         List<String> serverFlowHandlerExecuteLines = readLines("battle/serverflow/handler_execute.s");
         battleOvl.writeCodeForceInline(serverFlowHandlerExecuteLines, "Handler_Execute", true);
     }
@@ -2048,17 +2013,17 @@ public class ParagonLiteHandler {
 
         // New OP: Multiply Score (0x2B)
         List<String> multiplyScoreLines = readLines("trainerai/scripts/multiply_score.s");
-        int multiplyScoreAddress = trainerAIOvl.writeCode(multiplyScoreLines, "MultiplyScore");
+        int multiplyScoreAddress = trainerAIOvl.writeCode(multiplyScoreLines, "MultiplyScore", true);
         trainerAIOvl.writeWord(scriptCommandTableRomAddress + (0x2B * 4), multiplyScoreAddress + 1, true);
 
         // New OP: Multiply Score by Stored (0x3C)
         List<String> multiplyScoreByStoredLines = readLines("trainerai/scripts/multiply_score_by_stored.s");
-        int multiplyScoreByStoredAddress = trainerAIOvl.writeCode(multiplyScoreByStoredLines, "MultiplyScoreByStored");
+        int multiplyScoreByStoredAddress = trainerAIOvl.writeCode(multiplyScoreByStoredLines, "MultiplyScoreByStored", true);
         trainerAIOvl.writeWord(scriptCommandTableRomAddress + (0x3C * 4), multiplyScoreByStoredAddress + 1, true);
 
         // New OP: Get Simulation Multiplier (0x3E)
         List<String> getSimulationMultiplierLines = readLines("trainerai/scripts/get_simulation_multiplier.s");
-        int getDamageAddress = trainerAIOvl.writeCode(getSimulationMultiplierLines, "GetSimulationMultiplier");
+        int getDamageAddress = trainerAIOvl.writeCode(getSimulationMultiplierLines, "GetSimulationMultiplier", true);
         trainerAIOvl.writeWord(scriptCommandTableRomAddress + (0x3E * 4), getDamageAddress + 1, true);
 
         System.out.println("Set trainer AI scripts");
@@ -2069,58 +2034,68 @@ public class ParagonLiteHandler {
 //        arm9.writeCode(readLines("lcg_seed.s"), "SeedLCG");
 
         // TrainerPoke_GetGenderAbilityByte
-        arm9.writeCode(readLines("arm9/tr_tool/poke_get_gender_ability_byte.s"), "TrainerPoke_GetGenderAbilityByte");
+        arm9.writeCode(readLines("arm9/tr_tool/poke_get_gender_ability_byte.s"), "TrainerPoke_GetGenderAbilityByte", true);
         
         // TrTool_GetParam
         // Refs: TrainerPoke_GetGenderAbilityByte
         arm9.writeCodeForceInline(readLines("arm9/tr_tool/get_param.s"), "TrTool_GetParam", false);
 
         // TrTool_GetPokeDataSize
-        arm9.writeCode(readLines("arm9/tr_tool/get_poke_data_size.s"), "TrTool_GetPokeDataSize");
-        
+        arm9.writeCode(readLines("arm9/tr_tool/get_poke_data_size.s"), "TrTool_GetPokeDataSize", true);
+
         // TrTool_GetPokeFileSize
         // Refs: TrTool_GetPokeDataSize
-        arm9.writeCode(readLines("arm9/tr_tool/get_poke_file_size.s"), "TrTool_GetPokeFileSize");
+        arm9.writeCode(readLines("arm9/tr_tool/get_poke_file_size.s"), "TrTool_GetPokeFileSize", true);
         
         // TrTool_IsPooled
-        arm9.writeCode(readLines("arm9/tr_tool/is_pooled.s"), "TrTool_IsPooled");
-        
+        arm9.writeCode(readLines("arm9/tr_tool/is_pooled.s"), "TrTool_IsPooled", true);
+
         // TrTool_PokesHaveStatModifiers
-        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_stat_modifiers.s"), "TrTool_PokesHaveStatModifiers");
-        
+        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_stat_modifiers.s"), "TrTool_PokesHaveStatModifiers", true);
+
         // TrTool_PokesHaveItems
-        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_items.s"), "TrTool_PokesHaveItems");
-        
+        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_items.s"), "TrTool_PokesHaveItems", true);
+
         // TrTool_PokesHaveMoves
-        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_moves.s"), "TrTool_PokesHaveMoves");
+        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_moves.s"), "TrTool_PokesHaveMoves", true);
         
         // TrTool_PokesHaveNatures
-        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_natures.s"), "TrTool_PokesHaveNatures");
-        
+        arm9.writeCode(readLines("arm9/tr_tool/pokes_have_natures.s"), "TrTool_PokesHaveNatures", true);
+
         // TrainerPoke_GetFormId
-        arm9.writeCode(readLines("arm9/tr_tool/poke_get_form_id.s"), "TrainerPoke_GetFormId");
-        
+        arm9.writeCode(readLines("arm9/tr_tool/poke_get_form_id.s"), "TrainerPoke_GetFormId", true);
+
         // TrTool_MakePokeFromData
         // Refs: TrainerPoke_GetGenderAbilityByte, TrTool_PokesHaveNatures, TrainerPoke_GetFormId
-        arm9.writeCode(readLines("arm9/tr_tool/loadparty/make_poke_from_data.s"), "TrTool_MakePokeFromData");
-        
+        arm9.writeCode(readLines("arm9/tr_tool/loadparty/make_poke_from_data.s"), "TrTool_MakePokeFromData", true);
+
         // TrTool_LoadParty_Standard
         // Refs: TrTool_PokesHaveStatModifiers, TrTool_PokesHaveItems, TrTool_PokesHaveMoves, TrTool_MakePokeFromData
-        arm9.writeCode(readLines("arm9/tr_tool/loadparty/standard.s"), "TrTool_LoadParty_Standard");
-        
+        arm9.writeCode(readLines("arm9/tr_tool/loadparty/standard.s"), "TrTool_LoadParty_Standard", true);
+
         // TrTool_LoadParty_Pooled
-        arm9.writeCode(readLines("arm9/tr_tool/loadparty/pooled.s"), "TrTool_LoadParty_Pooled");
-        
+        arm9.writeCode(readLines("arm9/tr_tool/loadparty/pooled.s"), "TrTool_LoadParty_Pooled", true);
+
+        // TrTool_LoadParty_Core
         // Refs: TrTool_GetPokeFileSize, TrTool_IsPooled, TrTool_LoadParty_Standard, TrTool_LoadParty_Pooled
         // we are ultimately replacing TrTool_LoadParty with this, but we add separately for naming purposes
-        arm9.writeCode(readLines("arm9/tr_tool/loadparty/core.s"), "TrTool_LoadParty_Core");
-        
-        // Refs: TrTool_LoadParty_Core
-        pwtBattleOvl.writeCodeForceInline(readLines("pwt_battle/trainer_party_setup.s"), "TrainerPartySetup", true);
+        arm9.writeCode(readLines("arm9/tr_tool/loadparty/core.s"), "TrTool_LoadParty_Core", true);
 
-        // TODO: Why isn't this working???
-//        // Free the unused version
-//        arm9.freeCode("TrTool_LoadParty");
+        // BattleSetup_LoadTrainer
+        // Refs: TrTool_LoadParty_Core
+        arm9.writeCodeForceInline(readLines("arm9/btl_setup/load_trainer.s"), "BattleSetup_LoadTrainer", !debugMode);
+        
+        // TrainerPartySetup
+        // Refs: TrTool_LoadParty_Core
+        pwtBattleOvl.writeCodeForceInline(readLines("pwtbattle/trainer_party_setup.s"), "TrainerPartySetup", true);
+        
+        // Update minor changes to TrTool_LoadTrainer
+        {
+            int loadTrainerFuncAddress = globalAddressMap.getRomAddress(arm9, "TrTool_LoadTrainer");
+            arm9.writeHalfword(loadTrainerFuncAddress + 0x28, 0x78B1); // ldrb r1, [r6, #TrainerData.class]
+            
+            // No need to update items or AI flags here as they're in the same position
+        }
 
         byte[] trainerDataBytes = readBytes("redux_trainer_data.narc");
         byte[] trainerPokeBytes = readBytes("redux_trainer_poke.narc");
@@ -2187,11 +2162,11 @@ public class ParagonLiteHandler {
         setCommonWeatherChangeAbility();
 
         // Move-type-changing abilities
-        battleOvl.writeCode(readLines("eventhandlers/ability/common_move_type_change_type.s"), "CommonMoveTypeChange_Type");
-        battleOvl.writeCode(readLines("eventhandlers/ability/common_move_type_change_power.s"), "CommonMoveTypeChange_Power");
+        battleOvl.writeCode(readLines("eventhandlers/ability/common_move_type_change_type.s"), "CommonMoveTypeChange_Type", true);
+        battleOvl.writeCode(readLines("eventhandlers/ability/common_move_type_change_power.s"), "CommonMoveTypeChange_Power", true);
 
         // Move-type-changing abilities
-        battleOvl.writeCode(readLines("eventhandlers/ability/common_heal_allies.s"), "CommonHealAlliesAbility");
+        battleOvl.writeCode(readLines("eventhandlers/ability/common_heal_allies.s"), "CommonHealAlliesAbility", true);
 
 
         // ADDED ABILITIES
@@ -4620,13 +4595,13 @@ public class ParagonLiteHandler {
 
 //         HACK: We have to allocate to Battle overlay and jump to that because we can't allocate new space in BattleLevel
         List<String> btlvEffVMLoadScriptLines = readLines("battlelevel/btlveffvm_load_script.s");
-        battleOvl.writeCode(btlvEffVMLoadScriptLines, "BtlvEffVM_LoadScript");
+        battleOvl.writeCode(btlvEffVMLoadScriptLines, "BtlvEffVM_LoadScript", true);
 
         List<String> btlvEffVMLoadScriptJumpLines = readLines("battlelevel/btlveffvm_load_script_jump.s");
         battleLevelOvl.writeCodeForceInline(btlvEffVMLoadScriptJumpLines, "BtlvEffVM_LoadScript", true);
 
         List<String> playMoveAnimationLines = readLines("battlelevel/play_move_animation.s");
-        battleOvl.writeCode(playMoveAnimationLines, "PlayMoveAnimation");
+        battleOvl.writeCode(playMoveAnimationLines, "PlayMoveAnimation", true);
 
         List<String> playMoveAnimationJumpLines = readLines("battlelevel/play_move_animation_jump.s");
         battleLevelOvl.writeCodeForceInline(playMoveAnimationJumpLines, "PlayMoveAnimation", true);
@@ -5889,10 +5864,10 @@ public class ParagonLiteHandler {
         // Weather change item
         if (mode == Mode.ParagonLite) {
             List<String> commonWeatherChangeItemCheckLines = readLines("eventhandlers/item/common_weather_change_item_check.s");
-            battleOvl.writeCode(commonWeatherChangeItemCheckLines, "CommonWeatherChangeItemCheck");
+            battleOvl.writeCode(commonWeatherChangeItemCheckLines, "CommonWeatherChangeItemCheck", true);
 
             List<String> commonWeatherChangeItemUseLines = readLines("eventhandlers/item/common_weather_change_item_use.s");
-            battleOvl.writeCode(commonWeatherChangeItemUseLines, "CommonWeatherChangeItemUse");
+            battleOvl.writeCode(commonWeatherChangeItemUseLines, "CommonWeatherChangeItemUse", true);
 
             // #282 Icy Rock
             setIcyRock();
@@ -7041,7 +7016,7 @@ public class ParagonLiteHandler {
             if (!globalAddressMap.isValidLabel(battleOvl, fullFuncName)) {
                 List<String> lines = readLines(String.format("eventhandlers/%s/%s", getFuncDirectory(), fileName));
 
-                battleOvl.writeCode(lines, fullFuncName);
+                battleOvl.writeCode(lines, fullFuncName, false);
             }
 
             address = globalAddressMap.getRamAddress(battleOvl, fullFuncName);
@@ -7145,7 +7120,7 @@ public class ParagonLiteHandler {
 
         // Write redirector function
         List<String> lines = Arrays.asList("mov r1, #" + eventHandlers.length, "str r1, [r0]", "ldr r0, =" + eventHandlerListAddress, "bx lr");
-        int redirectorFuncAddress = battleOvl.writeCodeUnnamed(lines);
+        int redirectorFuncAddress = battleOvl.writeCodeUnnamed(lines, false);
 
         // Write to object list
         battleOvl.writeWord(objectListAddress + index * 8, number, false);

@@ -606,7 +606,11 @@ public class ParagonLiteAddressMap {
     }
 
     public int getRamAddress(ParagonLiteOverlay overlay, String label) {
-        return getAddressData(overlay, label).address;
+        AddressBase addressData = getAddressData(overlay, label);
+        if (addressData == null)
+            throw new RuntimeException(String.format("Could not find \"%s\" in overlay %s", label, overlay.name));
+        
+        return addressData.address;
     }
 
     public int getRomAddress(ParagonLiteOverlay overlay, String label) {

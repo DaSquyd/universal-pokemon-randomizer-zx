@@ -428,32 +428,32 @@ public class ParagonLiteOverlay {
         throw new RuntimeException();
     }
 
-    public int writeCode(List<String> lines, String label) {
+    public int writeCode(List<String> lines, String label, boolean log) {
         try {
             int size = armParser.getByteLength(this, lines);
             int romAddress = allocateRom(size);
 
-            writeCodeInternal(lines, romAddress, label);
+            writeCodeInternal(lines, romAddress, label, log);
             return romAddress;
         } catch (ArmParseException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public int writeCodeUnnamed(List<String> lines) {
+    public int writeCodeUnnamed(List<String> lines, boolean log) {
         try {
             int size = armParser.getByteLength(this, lines);
             int romAddress = allocateRom(size);
 
             String label = String.format("Code_0x%08X", romAddress);
-            writeCodeInternal(lines, romAddress, label);
+            writeCodeInternal(lines, romAddress, label, log);
             return romAddress;
         } catch (ArmParseException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void writeCodeInternal(List<String> lines, int romAddress, String label) {
+    private void writeCodeInternal(List<String> lines, int romAddress, String label, boolean log) {
         int ramAddress = romToRamAddress(romAddress);
         byte[] bytes;
         try {
@@ -462,6 +462,9 @@ public class ParagonLiteOverlay {
             throw new RuntimeException(e);
         }
         writeBytes(romAddress, bytes);
+        
+        if (log)
+            System.out.printf("%s::%s: ROM=0x%08X; RAM=0x%08X%n", name, label, romAddress, ramAddress);
 
         globalAddressMap.registerCodeAddress(this, label, ramAddress, 2);
     }
