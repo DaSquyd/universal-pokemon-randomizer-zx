@@ -46,7 +46,7 @@ ApplyStatus:
     bl      Battle::EventVar_RewriteValue
     
     mov     r0, #VAR_EFFECT_CHANCE
-    mov     r1, #50
+    mov     r1, #(PARAGONLITE ? 30 : 50)
     bl      Battle::EventVar_RewriteValue
     
 Return:

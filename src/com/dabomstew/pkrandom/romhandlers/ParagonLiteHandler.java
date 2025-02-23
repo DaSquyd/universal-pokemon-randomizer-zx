@@ -65,7 +65,7 @@ public class ParagonLiteHandler {
         ParagonLite, Redux
     }
 
-    public static Mode mode = Mode.Redux;
+    public static Mode mode = Mode.ParagonLite;
 
     Gen5RomHandler romHandler;
     Gen5RomHandler.RomEntry romEntry;
@@ -333,6 +333,9 @@ public class ParagonLiteHandler {
 
             offsetStr = offsetStr.substring(2); // remove 0x
             int romAddress = Integer.parseUnsignedInt(offsetStr, 16);
+            
+            if (romAddress == 0)
+                throw new RuntimeException();
 
             int dataLen;
             switch (values[typeColumn].toLowerCase()) {
@@ -2077,7 +2080,7 @@ public class ParagonLiteHandler {
         arm9.writeCode(readLines("arm9/tr_tool/loadparty/pooled.s"), "TrTool_LoadParty_Pooled", true);
 
         // TrTool_LoadParty_Core
-        // Refs: TrTool_GetPokeFileSize, TrTool_IsPooled, TrTool_LoadParty_Standard, TrTool_LoadParty_Pooled
+        // Refs: TrTool_GetPokeDataSize, TrTool_IsPooled, TrTool_LoadParty_Standard, TrTool_LoadParty_Pooled
         // we are ultimately replacing TrTool_LoadParty with this, but we add separately for naming purposes
         arm9.writeCode(readLines("arm9/tr_tool/loadparty/core.s"), "TrTool_LoadParty_Core", true);
 
