@@ -163,12 +163,18 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (foeAllowedGenerations == 0)
             foeAllowedGenerations = (1 << generationOfPokemon()) - 1;
 
+        // TODO
+        boolean littleCupMode = (settings.getCurrentMiscTweaks() & MiscTweak.LITTLE_CUP_MODE.getValue()) != 0;
+        
         playerPokemonList = new ArrayList<>();
         foePokemonList = new ArrayList<>();
         for (Pokemon pk : mainPokemonList) {
+            boolean hasNextEvo = (pk.baseForme == null && !pk.evolutionsFrom.isEmpty()) || (pk.baseForme != null && !pk.baseForme.evolutionsFrom.isEmpty());
+            boolean hasPrevEvo = (pk.baseForme == null && !pk.evolutionsTo.isEmpty()) || (pk.baseForme != null && !pk.baseForme.evolutionsTo.isEmpty());
+            
             int gen = pk.getGeneration();
             int mask = 1 << (gen - 1);
-            if ((playerAllowedGenerations & mask) != 0)
+            if ((playerAllowedGenerations & mask) != 0 && (!littleCupMode || (hasNextEvo && !hasPrevEvo)))
                 playerPokemonList.add(pk);
             if ((foeAllowedGenerations & mask) != 0)
                 foePokemonList.add(pk);
@@ -177,9 +183,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         playerPokemonListInclFormes = new ArrayList<>();
         foePokemonListInclFormes = new ArrayList<>();
         for (Pokemon pk : mainPokemonListInclFormes) {
+            boolean hasNextEvo = (pk.baseForme == null && !pk.evolutionsFrom.isEmpty()) || (pk.baseForme != null && !pk.baseForme.evolutionsFrom.isEmpty());
+            boolean hasPrevEvo = (pk.baseForme == null && !pk.evolutionsTo.isEmpty()) || (pk.baseForme != null && !pk.baseForme.evolutionsTo.isEmpty());
+            
             int gen = pk.getGeneration();
             int mask = 1 << (gen - 1);
-            if ((playerAllowedGenerations & mask) != 0)
+            if ((playerAllowedGenerations & mask) != 0 && (!littleCupMode || (hasNextEvo && !hasPrevEvo)))
                 playerPokemonListInclFormes.add(pk);
             if ((foeAllowedGenerations & mask) != 0)
                 foePokemonListInclFormes.add(pk);
@@ -188,9 +197,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         playerAltFormesList = new ArrayList<>();
         foeAltFormesList = new ArrayList<>();
         for (Pokemon pk : altFormesList) {
+            boolean hasNextEvo = (pk.baseForme == null && !pk.evolutionsFrom.isEmpty()) || (pk.baseForme != null && !pk.baseForme.evolutionsFrom.isEmpty());
+            boolean hasPrevEvo = (pk.baseForme == null && !pk.evolutionsTo.isEmpty()) || (pk.baseForme != null && !pk.baseForme.evolutionsTo.isEmpty());
+            
             int gen = pk.getGeneration();
             int mask = 1 << (gen - 1);
-            if ((playerAllowedGenerations & mask) != 0)
+            if ((playerAllowedGenerations & mask) != 0 && (!littleCupMode || (hasNextEvo && !hasPrevEvo)))
                 playerAltFormesList.add(pk);
             if ((foeAllowedGenerations & mask) != 0)
                 foeAltFormesList.add(pk);
@@ -198,25 +210,27 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         playerMegaEvolutionsList = new ArrayList<>();
         foeMegaEvolutionsList = new ArrayList<>();
-        for (MegaEvolution mega : megaEvolutionsList) {
-            int gen = mega.from.getGeneration();
-            int mask = 1 << (gen - 1);
-            if ((playerAllowedGenerations & mask) != 0)
-                playerMegaEvolutionsList.add(mega);
-            if ((foeAllowedGenerations & mask) != 0)
-                foeMegaEvolutionsList.add(mega);
+        if (!littleCupMode) {
+            for (MegaEvolution mega : megaEvolutionsList) {
+                int gen = mega.from.getGeneration();
+                int mask = 1 << (gen - 1);
+                if ((playerAllowedGenerations & mask) != 0)
+                    playerMegaEvolutionsList.add(mega);
+                if ((foeAllowedGenerations & mask) != 0)
+                    foeMegaEvolutionsList.add(mega);
+            }
         }
 
         playerLegendaryList = new ArrayList<>();
         playerUltraBeastList = new ArrayList<>();
         playerNonLegendaryList = new ArrayList<>();
-        for (Pokemon p : playerPokemonList) {
-            if (p.isLegendary()) {
-                playerLegendaryList.add(p);
-            } else if (p.isUltraBeast()) {
-                playerUltraBeastList.add(p);
+        for (Pokemon pk : playerPokemonList) {
+            if (pk.isLegendary()) {
+                playerLegendaryList.add(pk);
+            } else if (pk.isUltraBeast()) {
+                playerUltraBeastList.add(pk);
             } else {
-                playerNonLegendaryList.add(p);
+                playerNonLegendaryList.add(pk);
             }
         }
 
@@ -1122,8 +1136,6 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (!repeat) {
                 break;
             }
-
-
         }
 
         return newAbility;
@@ -1140,34 +1152,34 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (settings.isEnsureRelevantAbilities()) {
             setIrrelevantAbilitiesForPoke(pk, settings, irrelevantAbilities, isParagonLite);
         }
-
-        List<Integer> availableAbilitiesList = new ArrayList<>(availableAbilities);
-        while (!availableAbilitiesList.isEmpty()) {
-            int randomIndex = this.random.nextInt(availableAbilitiesList.size());
-            newAbility = availableAbilitiesList.get(randomIndex);
-
-            if (bannedAbilities.contains(newAbility) || irrelevantAbilities.contains(newAbility)) {
-                // swap and remove
-                int lastIndex = availableAbilitiesList.size() - 1;
-                availableAbilitiesList.set(randomIndex, availableAbilitiesList.get(lastIndex));
-                availableAbilitiesList.remove(lastIndex);
+        
+        var allowedAbilities = new ArrayList<Integer>();
+        for (int ability : availableAbilities) {
+            if (bannedAbilities.contains(ability) || irrelevantAbilities.contains(ability))
                 continue;
-            }
-
-            boolean repeat = false;
+            
+            boolean alreadySet = false;
             for (int alreadySetAbility : alreadySetAbilities) {
-                if (alreadySetAbility == newAbility) {
-                    repeat = true;
+                if (ability == alreadySetAbility) {
+                    alreadySet = true;
                     break;
                 }
             }
+            
+            if  (alreadySet)
+                continue;
+            
+            allowedAbilities.add(ability);
+        }
 
-            if (!repeat) {
-                if (useVariations) {
-                    newAbility = pickRandomAbilityVariation(settings, newAbility, alreadySetAbilities);
-                }
-                break;
-            }
+        if  (allowedAbilities.isEmpty())
+            throw new RuntimeException("Could not create ability list");
+        
+        int randomIndex = this.random.nextInt(allowedAbilities.size());
+        newAbility = allowedAbilities.get(randomIndex);
+
+        if (useVariations) {
+            newAbility = pickRandomAbilityVariation(settings, newAbility, alreadySetAbilities);
         }
 
         if (newAbility == -1)
@@ -1902,7 +1914,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         double purePowerBoost = isParagonLite ? 1.5 : 2.0;
         double purePowerBoostedStat = ((isParagonLite ? pk.spatk : pk.attack) + 12.5) * purePowerBoost - 12.5;
         double purePowerOtherStat = isParagonLite ? pk.attack : pk.spatk;
-        if (isParagonLite && (purePowerBoostedStat > 130 || pk.bst() - purePowerOtherStat + purePowerBoostedStat > 650 || purePowerBoostedStat < purePowerOtherStat))
+        if (purePowerBoostedStat > 130 || pk.bst() - purePowerOtherStat + purePowerBoostedStat > 650 || purePowerBoostedStat < purePowerOtherStat)
             irrelevantAbilities.add(Abilities.purePower);
 
         // #075 Shell Armor
@@ -9322,7 +9334,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean allowAltFormes = settings.isEvosAllowAltFormes();
         boolean banIrregularAltFormes = settings.isBanIrregularAltFormes();
         boolean abilitiesAreRandomized = settings.getAbilitiesMod() == Settings.AbilitiesMod.RANDOMIZE;
-
+        
         checkPokemonRestrictions();
         List<Pokemon> pokemonPool;
         if (this.altFormesCanHaveDifferentEvolutions()) {
@@ -9349,6 +9361,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                 i--;
                 actuallyCosmeticPokemonPool.add(pk);
             }
+        }
+        
+        if ((settings.getCurrentMiscTweaks() & MiscTweak.LITTLE_CUP_MODE.getValue()) != 0) {
+            for (Pokemon pk : pokemonPool) {
+                pk.evolutionsFrom.clear();
+            }
+            
+            return;
         }
 
         // Cache old evolutions for data later

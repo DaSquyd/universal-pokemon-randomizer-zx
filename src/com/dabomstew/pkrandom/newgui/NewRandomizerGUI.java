@@ -344,6 +344,7 @@ public class NewRandomizerGUI {
     private JCheckBox NPCSmartAICheckBox;
     private JCheckBox paragonLiteCheckBox;
     private JCheckBox debugModeCheckBox;
+    private JCheckBox littleCupModeCheckBox;
 
     private static JFrame frame;
 
