@@ -363,7 +363,9 @@ public class ArmParser {
                     
                 --i;
                 continue;
-            } else if (str.toUpperCase().startsWith("#READ_BITS(") && str.endsWith(")")) {
+            } else if (str.toUpperCase().startsWith("#READ_BITS(") || str.toUpperCase().startsWith("#READ_BITS_SIGNED(") && str.endsWith(")")) {
+                boolean isSigned = str.toUpperCase().startsWith("#READ_BITS_SIGNED");
+                    
                 String[] strArgs = str.substring(11, str.length() - 1).split(",");
                 if (strArgs.length < 3 || strArgs.length > 4)
                     throw new ArmParseException(lineNumber, str, "incorrect number of arguments for READ_BITS(); expected 3 or 4");
@@ -382,12 +384,21 @@ public class ArmParser {
                 int rightShift = 32 - bitLength;
                 
                 List<ParseLine> oldParseLines = parseLines;
-                parseLines = new ArrayList<>(parseLines.size() + 2);
+                int newLines = (leftShift > 0 ? 1 : 0) + (rightShift > 0 ? 1 : 0);
+                parseLines = new ArrayList<>(parseLines.size() + newLines);
                 for (int j = 0; j < i; ++j)
                     parseLines.add(oldParseLines.get(j));
 
-                parseLines.add(new ParseLine(lineNumber, String.format("lsl r%d, r%d, #%d", rd, rs, leftShift)));
-                parseLines.add(new ParseLine(lineNumber, String.format("lsr r%d, #%d", rd, rightShift)));
+                String rightShiftOperator = isSigned ? "asr" : "lsr";
+                
+                if (leftShift > 0) {
+                    parseLines.add(new ParseLine(lineNumber, String.format("lsl r%d, r%d, #%d", rd, rs, leftShift)));
+                    
+                    if (rightShift > 0)
+                        parseLines.add(new ParseLine(lineNumber, String.format("%s r%d, #%d", rightShiftOperator, rd, rightShift)));
+                } else if (rightShift > 0) {
+                    parseLines.add(new ParseLine(lineNumber, String.format("%s r%d, r%d, #%d", rightShiftOperator, rd, rs, rightShift)));
+                }
                 
                 for (int j = i + 1; j < oldParseLines.size(); ++j)
                     parseLines.add(oldParseLines.get(j));
