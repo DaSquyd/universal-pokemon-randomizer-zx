@@ -3034,6 +3034,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         available |= MiscTweak.MODERNIZE_CRIT.getValue();
         available |= MiscTweak.MODERNIZE_GEMS.getValue();
         available |= MiscTweak.NPC_SMART_AI.getValue();
+        available |= MiscTweak.LITTLE_CUP_MODE.getValue();
+        
         available |= MiscTweak.DEBUG_MODE.getValue();
         available |= MiscTweak.PARAGON_LITE.getValue();
         if (romEntry.romType == Gen5Constants.Type_BW2) {
@@ -6014,8 +6016,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 //        if (debugMode)
 //            paragonLite.setTrainerAI();
 
-//        if (debugMode)
-        paragonLite.setTrainerData();
+        // TODO
+        if (debugMode)
+            paragonLite.setTrainerData();
 
 //        if (debugMode)
 //            paragonLite.test();
