@@ -73,6 +73,7 @@ public class MiscTweak implements Comparable<MiscTweak> {
     public static final MiscTweak MODERNIZE_GEMS = new MiscTweak(1L << 31, "modernizeGems", 0);
     public static final MiscTweak NPC_SMART_AI = new MiscTweak(1L << 32, "npcSmartAI", 0);
     public static final MiscTweak CUSTOM_ADD_FAIRY = new MiscTweak(1L << 33, "customAddFairy", 1);
+    public static final MiscTweak LITTLE_CUP_MODE = new MiscTweak(1L << 34, "littleCupMode", 0);
     public static final MiscTweak DEBUG_MODE = new MiscTweak(1L << 62, "debugMode", 10);
     public static final MiscTweak PARAGON_LITE = new MiscTweak(1L << 63, "paragonLite", 10);
     /* @formatter:on */
