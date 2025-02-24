@@ -654,6 +654,11 @@ public class ParagonLiteHandler {
         addGlobalBattleTextValueWildFoe("XrayVision", "Activate");
         addBattleStringWildFoe("{0} scanned its\ntarget and found one {0}!", BattleTextVar.PokeNickname, BattleTextVar.ItemName);
 
+        // #522 Volcanic Fury
+        addGlobalBattleTextValueWildFoe("VolcanicFury", "Activate");
+        addBattleStringWildFoe("It burned {0}!", BattleTextVar.PokeNickname);
+        
+        
         // MOVES
 
         // #564 Sticky Web
@@ -3698,7 +3703,7 @@ public class ParagonLiteHandler {
         abilityDescriptions.set(number, "Burns targets when\\xFFFEat half HP.");
 
         // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onAddCondition, "volcanic_fury.s"));
+        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1, "volcanic_fury.s"));
     }
 
     private void addHealSpore() {
