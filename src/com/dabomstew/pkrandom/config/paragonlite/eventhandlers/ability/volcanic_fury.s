@@ -25,6 +25,14 @@
     bl      Battle::DivideMaxHP
     mov     r7, r0
     
+#if DEBUG
+    #printf("halfHP=%d", r7)
+    mov     r0, r6
+    mov     r1, #BPV_CurrentHP
+    bl      Battle::GetPokeStat
+    #printf("currentHP=%d", r0)
+#endif
+    
     mov     r0, r6
     mov     r1, #BPV_CurrentHP
     bl      Battle::GetPokeStat
@@ -38,13 +46,13 @@
     bl      Battle::Handler_PushWork
     mov     r6, r0
     
+    ; TODO: make this an actual struct
     mov     r0, #(BHP_AbilityPopup >> 16)
     lsl     r0, #16
     ldr     r1, [r6, #0x00]
     orr     r0, r1
     str     r0, [r6, #0x00]
     
-    ; TODO: make this an actual struct
     mov     r0, #VAR_DefendingPoke
     bl      Battle::EventVar_GetValue
     strb    r0, [r6, #0x0F]
@@ -55,6 +63,7 @@
     str     r0, [r6, #0x08]
     
     mov     r0, r6
+    add     r0, #0x14
     mov     r1, #2
     ldr     r2, =BTLTXT_VolcanicFury_Activate
     bl      Battle::Handler_StrSetup
@@ -62,6 +71,7 @@
     mov     r0, r6
     add     r0, #0x14
     ldrb    r1, [r6, #0x0F]
+    bl      Battle::Handler_AddArg
     
     mov     r0, r5
     mov     r1, r6
