@@ -405,33 +405,33 @@ public class ArmParser {
 
                 --i;
                 continue;
-            } else if (str.toUpperCase().startsWith("#PRINTF(") && str.endsWith(")")) {
+            } else if (str.toUpperCase().startsWith("#PRINTF") && str.endsWith(")")) {
                 if (isDebug) {
-                    String[] printStrArgs = str.substring(8, str.length() - 1).split(",");
-                    List<String> tempPrintStrArgs = new ArrayList<>(printStrArgs.length);
-                    for (String tempPrintStrArg : printStrArgs) {
-                        if (tempPrintStrArg.indexOf(']') > -1) {
-                            int lastIndex = tempPrintStrArgs.size() - 1;
-                            String lastArg = tempPrintStrArgs.get(lastIndex);
+                    int openParen = str.indexOf('(');
+                    String[] printfFullStrArgs = str.substring(openParen + 1, str.length() - 1).split(",");
+                    for (int j = 0; j < printfFullStrArgs.length; ++j)
+                        printfFullStrArgs[j] = printfFullStrArgs[j].trim();
+                    
+                    List<String> printfStrArgs = new ArrayList<>(printfFullStrArgs.length);
+                    for (String tempPrintStrArg : printfFullStrArgs) {
+                        if (!tempPrintStrArg.startsWith("\"") && tempPrintStrArg.indexOf(']') > -1) {
+                            int lastIndex = printfStrArgs.size() - 1;
+                            String lastArg = printfStrArgs.get(lastIndex);
                             lastArg = String.format("%s, %s", lastArg, tempPrintStrArg);
-                            tempPrintStrArgs.set(lastIndex, lastArg);
+                            printfStrArgs.set(lastIndex, lastArg);
                             continue;
                         }
 
-                        tempPrintStrArgs.add(tempPrintStrArg);
+                        printfStrArgs.add(tempPrintStrArg);
                     }
-                    printStrArgs = new String[tempPrintStrArgs.size()];
-                    for (int j = 0; j < tempPrintStrArgs.size(); ++j)
-                        printStrArgs[j] = tempPrintStrArgs.get(j);
                     
                     
-                    if (printStrArgs.length == 0)
+                    if (printfStrArgs.isEmpty())
                         throw new ArmParseException(lineNumber, str, "printf did not contain any arguments");
-                    
-                    for (int j = 0; j < printStrArgs.length; ++j)
-                        printStrArgs[j] = printStrArgs[j].trim();
 
-                    String printStrMsg = printStrArgs[0].trim();
+                    printfStrArgs.replaceAll(String::trim);
+
+                    String printStrMsg = printfStrArgs.remove(0);
                     if (!printStrMsg.startsWith("\"") || !printStrMsg.endsWith("\""))
                         throw new ArmParseException(lineNumber, str, "first argument of printf must be a string");
                     
@@ -457,103 +457,74 @@ public class ArmParser {
                         overlay.writeData(printStrMsgBytesWithNewLine, label, "");
                         addressData = globalAddressMap.getAddressData(overlay, label);
                     }
+
+                    if (printfStrArgs.size() > 32)
+                        throw new ArmParseException(lineNumber, str, "Cannot currently support more than 32 args");
                     
-                    int baseNewLines = 7;
+                    int printfRegisterArgCount = Math.min(printfStrArgs.size(), 2);
+                    int printfPushPopCount = 2 + printfRegisterArgCount;
+                    int printfMaxPushPopRegister = printfPushPopCount - 1;
+                    int printfPushPopSize = printfPushPopCount * 4;
+                    int printfStackCount = Math.max(0, printfStrArgs.size() - 2);
                     
-                    List<ParseLine> lowPrintStrLines = new ArrayList<>();
-
-                    if (printStrArgs.length > 32)
-                        throw new ArmParseException(lineNumber, str, "Cannot support 32 args");
-
-                    boolean usesRegister0 = false;
-                    for (int j = 3; j < printStrArgs.length; ++j) {
-                        String printStrArg = printStrArgs[j];
-
-                        // we won't know if this triggers until we run the next loop
-                        if (parseRegister(printStrArg) > -1)
-                            continue;
-                        
-                        // otherwise, using the stack always requires r0
-                        lowPrintStrLines.add(new ParseLine(lineNumber, "mov r8, r0"));
-                        usesRegister0 = true;
-                        break;
+                    List<ParseLine> printfSetArgParseLines = new ArrayList<>();
+                    
+                    // Check for use of r2 in the second arg (index 1)
+                    if (printfStrArgs.size() >= 2 && printfStrArgs.get(1).contains("r2")) {
+                        throw new ArmParseException(lineNumber, str, "We currently cannot use r2 in this arg slot");
                     }
-                    
-                    int usedArgsBitFlags = 0;
-                    int usedArgsAgainBitFlags = 0;
-                    for (int j = 1; j < printStrArgs.length; ++j) {
-                        int targetRegister = j + 1;
-                        int stackOffset = (j - 3) * 4;
-                        String printStrArg = printStrArgs[j];
-                        int argRegister = parseRegister(printStrArg);
 
-                        if (argRegister == -1 || argRegister > 3 || argRegister == 1)
-                            continue;
-                        
-                        // this doesn't matter if the replaced register is already used
-                        if (targetRegister <= argRegister)
-                            continue;
-                        
-                        int mask = 1 << argRegister;
-                        if ((usedArgsBitFlags & mask) != 0) {
-                            if (!usesRegister0 && argRegister != 0 && stackOffset >= 0 && ((usedArgsBitFlags & 1) == 0)) {
-                                lowPrintStrLines.add(new ParseLine(lineNumber, "mov r8, r0"));
-                                usesRegister0 = true;
-                            }
-                            
-                            lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, r%d", 8 + argRegister, argRegister)));
-                            usedArgsAgainBitFlags |= mask;
-                        }
-                            
-                        usedArgsBitFlags |= mask;
-                    }
+                    int printfStackSize = printfStackCount * 4;
+                    int printfOldStackOffset = printfPushPopSize + printfStackSize;
                     
-                    for (int j = 1; j < printStrArgs.length; ++j) {
-                        int targetRegister = j + 1;
-                        int stackOffset = (j - 3) * 4;
-                        
-                        String printStrArg = printStrArgs[j];
-                        int argRegister = parseRegister(printStrArg);
-                        if (argRegister > -1) {
-                            if (stackOffset < 0) {
-                                if ((usedArgsAgainBitFlags & (1 << argRegister)) != 0)
-                                    lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, r%d", targetRegister, 8 + argRegister)));
-                                else if ((usedArgsBitFlags & (1 << argRegister)) != 0 || targetRegister != argRegister)
-                                    lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, %s", targetRegister, printStrArg)));
-                            } else {
-                                if ((usedArgsBitFlags & (1 << argRegister)) != 0) {
-                                    lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r0, r%d", 8 + argRegister)));
-                                    lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", stackOffset)));
-                                } else
-                                    lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str %s, [sp, #%d]", printStrArg, stackOffset)));
-                            }
+                    // do stack params first
+                    int[] printfOrderedArgs = new int[printfStrArgs.size()];
+                    for (int j = 2; j < printfStrArgs.size(); ++j)
+                        printfOrderedArgs[j - 2] = j;
+                    for (int j = 0; j < printfRegisterArgCount; ++j)
+                        printfOrderedArgs[printfOrderedArgs.length - printfRegisterArgCount + j] = j;
+                    
+                    for (int j : printfOrderedArgs) {
+                        String printfStrArg = printfStrArgs.get(j);
+                        int printfArgAsRegister = parseRegister(printfStrArg);
+                        if (printfArgAsRegister > -1) {
+                            if (j < 2)
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("mov r%d, r%d", j + 2, printfArgAsRegister)));
+                            else
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("str r%d, [sp, #%d]", printfArgAsRegister, (j - 2) * 4)));
                             
                             continue;
                         }
                         
-                        int openBracketIndex = printStrArg.indexOf('[');
-                        if (openBracketIndex > -1 && printStrArg.endsWith("]")) {
-                            String printStrLoadOpCode = printStrArg.substring(0, openBracketIndex).trim();
-                            String printStrLoadParams = printStrArg.substring(openBracketIndex).trim();
-                            if (stackOffset < 0)
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("%s r%d, %s", printStrLoadOpCode, targetRegister, printStrLoadParams)));
+                        int openBracketIndex = printfStrArg.indexOf('[');
+                        if (openBracketIndex > -1 && printfStrArg.endsWith("]")) {
+                            String printfLoadOpCode = printfStrArg.substring(0, openBracketIndex).trim();
+                            String printfLoadParams = printfStrArg.substring(openBracketIndex).trim();
+
+                            String printfLoadParamEnd = printfLoadParams.replaceFirst("\\[ *sp *, *#", "");
+                            if (!printfLoadParams.equals(printfLoadParamEnd)) {
+                                printfLoadParamEnd = printfLoadParamEnd.substring(0, printfLoadParamEnd.length() - 1);
+                                printfLoadParams = String.format("[sp, #((%s) + %d)]", printfLoadParamEnd, printfOldStackOffset);
+                            }
+                            
+                            if (j < 2)
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("%s r%d, %s", printfLoadOpCode, j + 2, printfLoadParams)));
                             else {
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("%s r0, %s", printStrLoadOpCode, printStrLoadParams)));
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", stackOffset)));
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("%s r0, %s", printfLoadOpCode, printfLoadParams)));
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", (j - 2) * 4)));
                             }
                             
                             continue;
                         }
                         
-                        int printStrArgValue = parseValue(lineNumber, str, printStrArg);
+                        int printStrArgValue = parseValue(lineNumber, str, printfStrArg);
                         if (printStrArgValue >= 0 && printStrArgValue <= 255) {
-                            if (stackOffset < 0)
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, #%d", targetRegister, printStrArgValue)));
+                            if (j < 2)
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("mov r%d, #%d", j + 2, printStrArgValue)));
                             else {
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r0, #%d", printStrArgValue)));
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", stackOffset)));
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("mov r0, #%d", printStrArgValue)));
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", (j - 2) * 4)));
                             }
-
                             continue;
                         }
                         
@@ -566,13 +537,13 @@ public class ArmParser {
                             if (condensedValue > 255)
                                 continue;
 
-                            if (stackOffset < 0) {
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r%d, #%d", targetRegister, condensedValue)));
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("lsl r%d, #%d", targetRegister, shift)));
+                            if (j < 2) {
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("mov r%d, #%d", j + 2, condensedValue)));
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("lsl r%d, #%d", j + 2, shift)));
                             } else {
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("mov r0, #%d", condensedValue)));
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("lsl r0, #%d", shift)));
-                                lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", stackOffset)));
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("mov r0, #%d", condensedValue)));
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("lsl r0, #%d", shift)));
+                                printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", (j - 2) * 4)));
                             }
                             
                             resolvedCondensedValue = true;
@@ -582,26 +553,35 @@ public class ArmParser {
                         if (resolvedCondensedValue)
                             continue;
                         
-                        if (stackOffset < 0)
-                            lowPrintStrLines.add(new ParseLine(lineNumber, String.format("ldr r%d, =%d", targetRegister, printStrArgValue)));
+                        if (j < 2)
+                            printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("ldr r%d, =%d", j, printStrArgValue)));
                         else {
-                            lowPrintStrLines.add(new ParseLine(lineNumber, String.format("ldr r0, =%d", printStrArgValue)));
-                            lowPrintStrLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", stackOffset)));
+                            printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("ldr r0, =%d", printStrArgValue)));
+                            printfSetArgParseLines.add(new ParseLine(lineNumber, String.format("str r0, [sp, #%d]", (j - 2) * 4)));
                         }
                     }
                     
+                    int baseNewLines = 7 + (printfStackCount > 0 ? 2 : 0);
                     List<ParseLine> oldParseLines = parseLines;
-                    parseLines = new ArrayList<>(parseLines.size() + baseNewLines + lowPrintStrLines.size());
+                    parseLines = new ArrayList<>(parseLines.size() + baseNewLines + printfSetArgParseLines.size());
                     for (int j = 0; j < i; ++j)
                         parseLines.add(oldParseLines.get(j));
 
-                    parseLines.addAll(lowPrintStrLines);
-                    
+                    parseLines.add(new ParseLine(lineNumber, String.format("push {r0-r%d}", printfMaxPushPopRegister)));
+                    if (printfStackCount > 0)
+                        parseLines.add(new ParseLine(lineNumber, String.format("sub sp, #%d", printfStackSize)));
+
+                    parseLines.addAll(printfSetArgParseLines);
+                        
                     parseLines.add(new ParseLine(lineNumber, String.format("ldr r0, =%d", bufferAddressData.getRamAddress())));
                     parseLines.add(new ParseLine(lineNumber, String.format("ldr r1, =%d", addressData.getRamAddress())));
                     parseLines.add(new ParseLine(lineNumber, "blx ARM9::sprintf"));
                     parseLines.add(new ParseLine(lineNumber, String.format("ldr r0, =%d", bufferAddressData.getRamAddress())));
                     parseLines.add(new ParseLine(lineNumber, "swi 0xFC"));
+                    
+                    if (printfStackCount > 0)
+                        parseLines.add(new ParseLine(lineNumber, String.format("add sp, #%d", printfStackSize)));
+                    parseLines.add(new ParseLine(lineNumber, String.format("pop {r0-r%d}", printfMaxPushPopRegister)));
 
                     for (int j = i + 1; j < oldParseLines.size(); ++j)
                         parseLines.add(oldParseLines.get(j));
