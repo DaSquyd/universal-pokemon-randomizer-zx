@@ -25,6 +25,7 @@ package com.dabomstew.pkrandom.pokemon;
 /*----------------------------------------------------------------------------*/
 
 import com.dabomstew.pkrandom.constants.GlobalConstants;
+import com.dabomstew.pkrandom.constants.Moves;
 
 public class Move {
     public static class StatChange {
@@ -279,7 +280,6 @@ public class Move {
                     false;
             default -> true;
         };
-
     }
 
     public double getHitCount(int generation) {
@@ -320,7 +320,7 @@ public class Move {
     public boolean isGoodDamaging(int generation) {
         if (recoil > 0 || effect == MoveEffect.JUMP_KICK || effect == MoveEffect.FLY || effect == MoveEffect.THRASH_ABOUT || isChargeMove || isRechargeMove)
             return false;
-        
+
         double hitCount = getHitCount(generation);
         double acc = hasPerfectAccuracy() ? 1.0 : accuracy / 100.0;
         double damage = power * hitCount * acc;
@@ -340,8 +340,14 @@ public class Move {
     }
 
     public boolean isBoostedBySheerForce() {
-        // TODO: Add in explicit moves
-        return qualities == MoveQualities.DAMAGE_TARGET_STATUS || qualities == MoveQualities.DAMAGE_TARGET_STAT_CHANGE || flinchPercentChance > 0;
+        if (qualities == MoveQualities.DAMAGE_TARGET_STATUS || qualities == MoveQualities.DAMAGE_TARGET_STAT_CHANGE || (qualities == MoveQualities.DAMAGE_USER_STAT_CHANGE && statChanges[0].stages > 0) || flinchPercentChance > 0)
+            return true;
+
+        return switch (number) {
+            case Moves.secretPower, Moves.spiritShackle, Moves.sparklingAria, Moves.anchorShot, Moves.genesisSupernova, Moves.eerieSpell, Moves.stoneAxe,
+                 Moves.ceaselessEdge, Moves.orderUp, Moves.electroShot -> true;
+            default -> false;
+        };
     }
 
     public boolean isAbsorbMove() {
@@ -361,7 +367,7 @@ public class Move {
             return false;
 
         switch (qualities) {
-            case DAMAGE ->  {
+            case DAMAGE -> {
                 if (other.qualities != MoveQualities.DAMAGE || effect != other.effect)
                     return false;
             }
@@ -372,7 +378,7 @@ public class Move {
             case DAMAGE_TARGET_STATUS, DAMAGE_TARGET_STAT_CHANGE, DAMAGE_USER_STAT_CHANGE, DRAIN_HEALTH -> {
                 if (other.qualities != MoveQualities.DAMAGE && qualities != other.qualities)
                     return false;
-                
+
                 if (other.qualities == MoveQualities.DAMAGE && effect != other.effect)
                     return false;
             }
@@ -404,7 +410,7 @@ public class Move {
         // Incomparable
         if (statusType != other.statusType)
             return false;
-        
+
         // Incomparable
         if (isTrapMove() != other.isTrapMove())
             return false;
@@ -423,11 +429,11 @@ public class Move {
 
         double tempPower = power;
         double otherTempPower = other.power;
-        
+
         if (doubleBattleMode) {
             tempPower *= target == MoveTarget.ALL_ADJACENT_FOES || target == MoveTarget.ALL_ADJACENT || target == MoveTarget.ALL_ON_FIELD ? 0.75 : 1.0;
             otherTempPower *= other.target == MoveTarget.ALL_ADJACENT_FOES || other.target == MoveTarget.ALL_ADJACENT || other.target == MoveTarget.ALL_ON_FIELD ? 0.75 : 1.0;
-            
+
             switch (other.target) {
                 // Other is single-foe target
                 case ANY_ADJACENT, ADJACENT_FOE -> {
@@ -475,7 +481,7 @@ public class Move {
 
         if (!hasBeneficialStatChange() && other.hasBeneficialStatChange())
             return false;
-        
+
         // Worse (other has stat boost that we don't or better for what we do have
         for (StatChange otherStatChange : other.statChanges) {
             if (otherStatChange.type == StatChangeType.NONE)
@@ -511,7 +517,7 @@ public class Move {
         for (StatChange statChange : statChanges) {
             if (statChange.type == StatChangeType.NONE)
                 continue;
-            
+
             boolean has = false;
             for (StatChange otherStatChange : other.statChanges) {
                 if (statChange.type != otherStatChange.type)

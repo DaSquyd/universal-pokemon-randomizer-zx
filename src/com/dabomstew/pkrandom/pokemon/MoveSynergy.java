@@ -27,6 +27,8 @@ package com.dabomstew.pkrandom.pokemon;
 
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Moves;
+import com.dabomstew.pkrandom.constants.ParagonLiteAbilities;
+import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +41,7 @@ public class MoveSynergy {
     public static List<Move> getSoftAbilityMoveSynergy(int ability, List<Move> moveList, Type pkType1, Type pkType2) {
         List<Integer> synergisticMoves = new ArrayList<>();
 
-        switch(ability) {
+        switch (ability) {
             case Abilities.drizzle:
             case Abilities.primordialSea:
                 synergisticMoves.addAll(moveList
@@ -150,6 +152,49 @@ public class MoveSynergy {
                         .map(mv -> mv.number)
                         .toList());
                 break;
+            case ParagonLiteAbilities.heavyWing:
+                synergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> mv.type == Type.FLYING && mv.category != MoveCategory.STATUS)
+                        .map(mv -> mv.number)
+                        .toList());
+                break;
+            case ParagonLiteAbilities.incendiate:
+                if (pkType1 == Type.FIRE || pkType2 == Type.FIRE) {
+                    synergisticMoves.addAll(moveList
+                            .stream()
+                            .filter(mv -> mv.type == Type.NORMAL && mv.category != MoveCategory.STATUS)
+                            .map(mv -> mv.number)
+                            .toList());
+                }
+                break;
+            case ParagonLiteAbilities.liquidate:
+                if (pkType1 == Type.WATER || pkType2 == Type.WATER) {
+                    synergisticMoves.addAll(moveList
+                            .stream()
+                            .filter(mv -> mv.type == Type.NORMAL && mv.category != MoveCategory.STATUS)
+                            .map(mv -> mv.number)
+                            .toList());
+                }
+                break;
+            case ParagonLiteAbilities.florilate:
+                if (pkType1 == Type.GRASS || pkType2 == Type.GRASS) {
+                    synergisticMoves.addAll(moveList
+                            .stream()
+                            .filter(mv -> mv.type == Type.NORMAL && mv.category != MoveCategory.STATUS)
+                            .map(mv -> mv.number)
+                            .toList());
+                }
+                break;
+            case ParagonLiteAbilities.contaminate:
+                if (pkType1 == Type.POISON || pkType2 == Type.POISON) {
+                    synergisticMoves.addAll(moveList
+                            .stream()
+                            .filter(mv -> mv.type == Type.NORMAL && mv.category != MoveCategory.STATUS)
+                            .map(mv -> mv.number)
+                            .toList());
+                }
+                break;
         }
 
         return moveList
@@ -162,7 +207,7 @@ public class MoveSynergy {
     public static List<Move> getSoftAbilityMoveAntiSynergy(int ability, List<Move> moveList) {
         List<Integer> antiSynergisticMoves = new ArrayList<>();
 
-        switch(ability) {
+        switch (ability) {
             case Abilities.drizzle:
                 antiSynergisticMoves.addAll(moveList
                         .stream()
@@ -193,15 +238,15 @@ public class MoveSynergy {
                 .collect(Collectors.toList());
     }
 
-    public static List<Move> getHardAbilityMoveSynergy(int ability, Type pkType1, Type pkType2, List<Move> moveList,
-                                                       int generation) {
+    public static List<Move> getHardAbilityMoveSynergy(int ability, Type pkType1, Type pkType2, List<Move> moveList, int generation, HackMode hackMode) {
         List<Integer> synergisticMoves = new ArrayList<>();
 
-        switch(ability) {
+        switch (ability) {
             case Abilities.drizzle:
             case Abilities.primordialSea:
                 synergisticMoves.add(Moves.thunder);
                 synergisticMoves.add(Moves.hurricane);
+                synergisticMoves.add(Moves.electroShot);
                 if (pkType1 == Type.WATER || pkType2 == Type.WATER) {
                     synergisticMoves.add(Moves.weatherBall);
                 }
@@ -247,10 +292,17 @@ public class MoveSynergy {
                 break;
             case Abilities.poisonPoint:
                 synergisticMoves.add(Moves.venoshock);
-                // fallthrough
+                synergisticMoves.add(Moves.hex);
+                synergisticMoves.add(Moves.bitterMalice);
+                break;
             case Abilities.effectSpore:
+                synergisticMoves.add(Moves.hex);
+                synergisticMoves.add(Moves.bitterMalice);
+                break;
             case Abilities.flameBody:
                 synergisticMoves.add(Moves.hex);
+                synergisticMoves.add(Moves.bitterMalice);
+                synergisticMoves.add(Moves.infernalParade);
                 break;
             case Abilities.sereneGrace:
                 synergisticMoves.addAll(moveList
@@ -258,7 +310,7 @@ public class MoveSynergy {
                         .filter(mv -> (mv.isDamagingMove() && mv.hasBeneficialStatChange() &&
                                 mv.statChanges[0].percentChance < 100) ||
                                 (mv.qualities == MoveQualities.DAMAGE_TARGET_STATUS && mv.statusPercentChance < 100) ||
-                        mv.flinchPercentChance > 0)
+                                mv.flinchPercentChance > 0)
                         .map(mv -> mv.number)
                         .toList());
                 break;
@@ -287,8 +339,20 @@ public class MoveSynergy {
                 break;
             case Abilities.truant:
                 synergisticMoves.add(Moves.transform);
+                synergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> mv.isRechargeMove)
+                        .map(mv -> mv.number)
+                        .toList());
                 break;
             case Abilities.hustle:
+                if (hackMode == HackMode.ParagonLite) {
+                    synergisticMoves.addAll(moveList
+                            .stream()
+                            .filter(mv -> mv.isDamagingMove() && mv.power > 1 && mv.power <= 60 && mv.maxHits <= 1 && mv.criticalChance != CriticalChance.GUARANTEED)
+                            .map(mv -> mv.number)
+                            .toList());
+                } else {
                 synergisticMoves.addAll(moveList
                         .stream()
                         .filter(mv -> (mv.qualities == MoveQualities.DAMAGE_USER_STAT_CHANGE ||
@@ -301,6 +365,7 @@ public class MoveSynergy {
                         .filter(mv -> mv.category == MoveCategory.PHYSICAL && mv.hasPerfectAccuracy())
                         .map(mv -> mv.number)
                         .toList());
+                }
                 break;
             case Abilities.guts:
                 synergisticMoves.add(Moves.facade);
@@ -314,6 +379,7 @@ public class MoveSynergy {
                 break;
             case Abilities.drought:
             case Abilities.desolateLand:
+            case ParagonLiteAbilities.sunSoaked:
                 synergisticMoves.add(Moves.solarBeam);
                 synergisticMoves.add(Moves.solarBlade);
                 synergisticMoves.add(Moves.morningSun);
@@ -353,11 +419,19 @@ public class MoveSynergy {
                 synergisticMoves.add(Moves.acupressure);
                 break;
             case Abilities.adaptability:
-                synergisticMoves.addAll(moveList
-                        .stream()
-                        .filter(mv -> mv.category != MoveCategory.STATUS && (mv.type == pkType1 || mv.type == pkType2))
-                        .map(mv -> mv.number)
-                        .toList());
+                if (hackMode == HackMode.ParagonLite) {
+                    synergisticMoves.addAll(moveList
+                            .stream()
+                            .filter(mv -> mv.category != MoveCategory.STATUS && mv.type != pkType1 && mv.type != pkType2)
+                            .map(mv -> mv.number)
+                            .toList());
+                } else {
+                    synergisticMoves.addAll(moveList
+                            .stream()
+                            .filter(mv -> mv.category != MoveCategory.STATUS && (mv.type == pkType1 || mv.type == pkType2))
+                            .map(mv -> mv.number)
+                            .toList());
+                }
                 break;
             case Abilities.skillLink:
                 synergisticMoves.addAll(moveList
@@ -451,11 +525,7 @@ public class MoveSynergy {
             case Abilities.sheerForce:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.qualities == MoveQualities.DAMAGE_TARGET_STAT_CHANGE ||
-                                (mv.qualities == MoveQualities.DAMAGE_USER_STAT_CHANGE &&
-                                        mv.statChanges[0].stages > 0) ||
-                                mv.qualities == MoveQualities.DAMAGE_TARGET_STATUS ||
-                                mv.flinchPercentChance > 0)
+                        .filter(mv -> mv.isBoostedBySheerForce() && (mv.number != Moves.electroShot || (hackMode != HackMode.ParagonLite && hackMode != HackMode.Redux)))
                         .map(mv -> mv.number)
                         .toList());
                 break;
@@ -487,6 +557,10 @@ public class MoveSynergy {
                 synergisticMoves.add(Moves.uTurn);
                 synergisticMoves.add(Moves.voltSwitch);
                 synergisticMoves.add(Moves.partingShot);
+                
+                if (generation >= 7 || hackMode == HackMode.ParagonLite || hackMode == HackMode.Redux)
+                    synergisticMoves.add(Moves.teleport);
+                
                 break;
             case Abilities.prankster:
                 synergisticMoves.addAll(moveList
@@ -503,24 +577,19 @@ public class MoveSynergy {
                 synergisticMoves.add(Moves.substitute);
                 break;
             case Abilities.strongJaw:
-                synergisticMoves.add(Moves.bite);
-                synergisticMoves.add(Moves.crunch);
-                synergisticMoves.add(Moves.fireFang);
-                synergisticMoves.add(Moves.fishiousRend);
-                synergisticMoves.add(Moves.hyperFang);
-                synergisticMoves.add(Moves.iceFang);
-                synergisticMoves.add(Moves.jawLock);
-                synergisticMoves.add(Moves.poisonFang);
-                synergisticMoves.add(Moves.psychicFangs);
-                synergisticMoves.add(Moves.thunderFang);
+            case ParagonLiteAbilities.ravenousTorque:
+                synergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> mv.isCustomBiteMove)
+                        .map(mv -> mv.number)
+                        .toList());
                 break;
             case Abilities.megaLauncher:
-                synergisticMoves.add(Moves.auraSphere);
-                synergisticMoves.add(Moves.darkPulse);
-                synergisticMoves.add(Moves.dragonPulse);
-                synergisticMoves.add(Moves.originPulse);
-                synergisticMoves.add(Moves.terrainPulse);
-                synergisticMoves.add(Moves.waterPulse);
+                synergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> mv.isCustomPulseMove || ((hackMode == HackMode.ParagonLite || hackMode == HackMode.Redux) && mv.isCustomBallBombMove))
+                        .map(mv -> mv.number)
+                        .toList());
                 break;
             case Abilities.wimpOut:
             case Abilities.emergencyExit:
@@ -562,6 +631,20 @@ public class MoveSynergy {
                         .map(mv -> mv.number)
                         .toList());
                 break;
+            case ParagonLiteAbilities.cacophony:
+                synergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> mv.isSoundMove && mv.isDamagingMove())
+                        .map(mv -> mv.number)
+                        .toList());
+                break;
+            case ParagonLiteAbilities.windWhipper:
+                synergisticMoves.addAll(moveList
+                        .stream()
+                        .filter(mv -> mv.isCustomWindMove && mv.isDamagingMove())
+                        .map(mv -> mv.number)
+                        .toList());
+                break;
         }
 
         return moveList
@@ -571,10 +654,10 @@ public class MoveSynergy {
                 .collect(Collectors.toList());
     }
 
-    public static List<Move> getHardAbilityMoveAntiSynergy(int ability, List<Move> moveList) {
+    public static List<Move> getHardAbilityMoveAntiSynergy(int ability, List<Move> moveList, HackMode hackMode) {
         List<Integer> antiSynergisticMoves = new ArrayList<>();
 
-        switch(ability) {
+        switch (ability) {
             case Abilities.primordialSea:
                 antiSynergisticMoves.addAll(moveList
                         .stream()
@@ -616,6 +699,7 @@ public class MoveSynergy {
                         .toList());
                 // fallthrough
             case Abilities.drought:
+            case ParagonLiteAbilities.sunSoaked:
                 antiSynergisticMoves.add(Moves.thunder);
                 antiSynergisticMoves.add(Moves.hurricane);
                 antiSynergisticMoves.add(Moves.rainDance);
@@ -635,10 +719,22 @@ public class MoveSynergy {
                         .toList());
                 break;
             case Abilities.damp:
-                antiSynergisticMoves.add(Moves.selfDestruct);
-                antiSynergisticMoves.add(Moves.explosion);
-                antiSynergisticMoves.add(Moves.mindBlown);
-                antiSynergisticMoves.add(Moves.mistyExplosion);
+                if (hackMode == HackMode.ParagonLite) {
+                    antiSynergisticMoves.add(Moves.solarBeam);
+                    antiSynergisticMoves.add(Moves.solarBlade);
+                    antiSynergisticMoves.add(Moves.morningSun);
+                    antiSynergisticMoves.add(Moves.synthesis);
+                    antiSynergisticMoves.add(Moves.moonlight);
+                    antiSynergisticMoves.add(Moves.rainDance);
+                    antiSynergisticMoves.add(Moves.sunnyDay);
+                    antiSynergisticMoves.add(Moves.hail);
+                    antiSynergisticMoves.add(Moves.sandstorm);
+                } else {
+                    antiSynergisticMoves.add(Moves.selfDestruct);
+                    antiSynergisticMoves.add(Moves.explosion);
+                    antiSynergisticMoves.add(Moves.mindBlown);
+                    antiSynergisticMoves.add(Moves.mistyExplosion);
+                }
                 break;
             case Abilities.insomnia:
             case Abilities.vitalSpirit:
@@ -697,11 +793,11 @@ public class MoveSynergy {
                         .stream()
                         .filter(mv -> (mv.category == MoveCategory.STATUS &&
                                 (mv.statusType == MoveStatusType.BURN ||
-                                mv.statusType == MoveStatusType.FREEZE ||
-                                mv.statusType == MoveStatusType.PARALYZE ||
-                                mv.statusType == MoveStatusType.SLEEP ||
-                                mv.statusType == MoveStatusType.POISON ||
-                                mv.statusType == MoveStatusType.TOXIC_POISON)))
+                                        mv.statusType == MoveStatusType.FREEZE ||
+                                        mv.statusType == MoveStatusType.PARALYZE ||
+                                        mv.statusType == MoveStatusType.SLEEP ||
+                                        mv.statusType == MoveStatusType.POISON ||
+                                        mv.statusType == MoveStatusType.TOXIC_POISON)))
                         .map(mv -> mv.number)
                         .toList());
                 antiSynergisticMoves.add(Moves.rest);
@@ -711,8 +807,6 @@ public class MoveSynergy {
                 antiSynergisticMoves.add(Moves.magnitude);
                 antiSynergisticMoves.add(Moves.bulldoze);
                 break;
-
-
         }
 
         return moveList
@@ -725,12 +819,12 @@ public class MoveSynergy {
     public static List<Move> getStatMoveSynergy(Pokemon pk, List<Move> moveList) {
         List<Integer> synergisticMoves = new ArrayList<>();
 
-        if ((double)pk.hp / (double)pk.bst() < 1.0/8) {
+        if ((double) pk.hp / (double) pk.bst() < 1.0 / 8) {
             synergisticMoves.add(Moves.painSplit);
             synergisticMoves.add(Moves.endeavor);
         }
 
-        if ((double)pk.hp / (double)pk.bst() >= 1.0/4) {
+        if ((double) pk.hp / (double) pk.bst() >= 1.0 / 4) {
             synergisticMoves.add(Moves.waterSpout);
             synergisticMoves.add(Moves.eruption);
             synergisticMoves.add(Moves.counter);
@@ -741,19 +835,19 @@ public class MoveSynergy {
             synergisticMoves.add(Moves.powerTrick);
         }
 
-        if ((double)(pk.attack + pk.spatk) / (double)pk.bst() < 1.0/4) {
+        if ((double) (pk.attack + pk.spatk) / (double) pk.bst() < 1.0 / 4) {
             synergisticMoves.add(Moves.powerSplit);
         }
 
-        if ((double)(pk.defense + pk.spdef) / (double)pk.bst() < 1.0/4) {
+        if ((double) (pk.defense + pk.spdef) / (double) pk.bst() < 1.0 / 4) {
             synergisticMoves.add(Moves.guardSplit);
         }
 
-        if ((double)pk.speed / (double)pk.bst() < 1.0/8) {
+        if ((double) pk.speed / (double) pk.bst() < 1.0 / 8) {
             synergisticMoves.add(Moves.gyroBall);
         }
 
-        if ((double)pk.speed / (double)pk.bst() >= 1.0/4) {
+        if ((double) pk.speed / (double) pk.bst() >= 1.0 / 4) {
             synergisticMoves.add(Moves.electroBall);
         }
 
@@ -767,7 +861,7 @@ public class MoveSynergy {
     public static List<Move> getStatMoveAntiSynergy(Pokemon pk, List<Move> moveList) {
         List<Integer> antiSynergisticMoves = new ArrayList<>();
 
-        if ((double)pk.hp / (double)pk.bst() >= 1.0/4) {
+        if ((double) pk.hp / (double) pk.bst() >= 1.0 / 4) {
             antiSynergisticMoves.add(Moves.painSplit);
             antiSynergisticMoves.add(Moves.endeavor);
         }
@@ -776,19 +870,19 @@ public class MoveSynergy {
             antiSynergisticMoves.add(Moves.powerTrick);
         }
 
-        if ((double)(pk.attack + pk.spatk) / (double)pk.bst() >= 1.0/3) {
+        if ((double) (pk.attack + pk.spatk) / (double) pk.bst() >= 1.0 / 3) {
             antiSynergisticMoves.add(Moves.powerSplit);
         }
 
-        if ((double)(pk.defense + pk.spdef) / (double)pk.bst() >= 1.0/3) {
+        if ((double) (pk.defense + pk.spdef) / (double) pk.bst() >= 1.0 / 3) {
             antiSynergisticMoves.add(Moves.guardSplit);
         }
 
-        if ((double)pk.speed / (double)pk.bst() >= 1.0/4) {
+        if ((double) pk.speed / (double) pk.bst() >= 1.0 / 4) {
             antiSynergisticMoves.add(Moves.gyroBall);
         }
 
-        if ((double)pk.speed / (double)pk.bst() < 1.0/8) {
+        if ((double) pk.speed / (double) pk.bst() < 1.0 / 8) {
             antiSynergisticMoves.add(Moves.electroBall);
         }
 
@@ -838,7 +932,7 @@ public class MoveSynergy {
             synergisticMoves.add(Moves.hex);
         }
 
-        switch(mv1.number) {
+        switch (mv1.number) {
             case Moves.toxic:
                 synergisticMoves.add(Moves.protect);
                 synergisticMoves.add(Moves.detect);
@@ -1034,7 +1128,7 @@ public class MoveSynergy {
 
         if (mv1.category != MoveCategory.STATUS) {
             List<Type> notVeryEffective = Effectiveness.notVeryEffective(mv1.type, generation, effectivenessUpdated, custom, addFairy);
-            for (Type nveType: notVeryEffective) {
+            for (Type nveType : notVeryEffective) {
                 List<Type> superEffectiveAgainstNVE =
                         Objects.requireNonNull(Effectiveness.against(nveType, null, generation, effectivenessUpdated, custom, addFairy))
                                 .entrySet()
@@ -1051,7 +1145,7 @@ public class MoveSynergy {
             }
         }
 
-        switch(mv1.number) {
+        switch (mv1.number) {
             case Moves.swordsDance:
                 synergisticMoves.addAll(moveList
                         .stream()
@@ -1090,7 +1184,7 @@ public class MoveSynergy {
                     .toList());
         }
 
-        switch(mv1.number) {
+        switch (mv1.number) {
             case Moves.protect:
                 antiSynergisticMoves.add(Moves.detect);
                 antiSynergisticMoves.add(Moves.banefulBunker);
@@ -1186,7 +1280,7 @@ public class MoveSynergy {
 
     public static List<Move> requiresOtherMove(Move mv1, List<Move> moveList) {
         List<Integer> requiresMove = new ArrayList<>();
-        switch(mv1.number) {
+        switch (mv1.number) {
             case Moves.spitUp:
             case Moves.swallow:
                 requiresMove.add(Moves.stockpile);
