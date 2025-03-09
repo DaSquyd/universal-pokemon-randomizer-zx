@@ -1,5 +1,5 @@
-; r0    trainerPokePtr
-; r1    trainerPokeDataSize
+; r0    pokeDataPtr
+; r1    pokeDataSize
 ; r2    playerId
 ; r3    trainerId
 ; arg0  heapId
@@ -33,17 +33,17 @@
 #define ARG_OFFSET (STACK_SIZE + PUSH_SIZE)
 
 #define ARG_HeapId (ARG_OFFSET + 0x00)
-#define ARG_DataOffsets (ARG_OFFSET + 0x04) ; [0] = statModifiers, [1] = item, [2] = moves
+#define ARG_PokeDataOffsets (ARG_OFFSET + 0x04) ; [0] = statModifiers, [1] = item, [2] = moves
 #define ARG_TeamRand (ARG_OFFSET + 0x08) ; updated through each poke, used to generate S_PokeRand
 #define ARG_TrainerDataPtr (ARG_OFFSET + 0x0C)
 #define ARG_TempPokePtr (ARG_OFFSET + 0x10)
 
-; r0 trainerPokePtr
-; r1 trainerPokeDataSize
+; r0 pokeDataPtr
+; r1 pokeDataSize
 ; r2 playerId
 ; r3 trainerId
 ; ARG_HeapId
-; ARG_DataOffsets
+; ARG_PokeDataOffsets
 ; ARG_TeamRand
 ; ARG_TrainerDataPtr
 ; ARG_TempPokePtr
@@ -51,12 +51,16 @@
     push    {r4-r7, lr}
     sub     sp, #STACK_SIZE
     
-    mov     r6, r0 ; trainerPokePtr
-    mov     r7, r1 ; trainerPokeDataSize
+    mov     r6, r0 ; pokeDataPtr
+    mov     r7, r1 ; pokeDataSize
     str     r2, [sp, #S_PlayerId]
     str     r3, [sp, #S_TrainerId]
 
     #printf("    ARM9::TrTool_MakePokeFromData (LR=0x%08X)", lr)
+    #printf("        pokeDataPtr=0x%08X", r6)
+    #printf("        pokeDataSize=%d", r7)
+    #printf("        playerId=0x%08X", ldr [sp, #S_PlayerId])
+    #printf("        trainerId=%d", ldr [sp, #S_TrainerId])
 
     mov     r0, r6
     bl      ARM9::TrainerPoke_GetGenderAbilityByte ; byte value where lower 4 bits are gender and upper 4 bits are ability
@@ -81,8 +85,9 @@
     str     r0, [sp, #S_IVs]
     
 CheckPokesHaveStatModifiers:
-    add     r1, sp, #ARG_DataOffsets
+    add     r1, sp, #ARG_PokeDataOffsets
     ldrb    r1, [r1, #0x00] ; statModifiers
+    #printf("        statModifierOffset=%d", r1)
     cmp     r1, #0
     beq     AddLevelToRand
     
@@ -161,7 +166,7 @@ MakeCompactIVs:
     
 CheckPokeHasStatModifiers:
     #printf("        check poke has stat modifiers")
-    add     r4, sp, #ARG_DataOffsets
+    add     r4, sp, #ARG_PokeDataOffsets
     ldrb    r4, [r4, #0x00] ; stat modifiers offset
     cmp     r4, #0
     beq     CheckPokeHasItem
@@ -173,7 +178,7 @@ CheckPokeHasStatModifiers:
     
 #if DEBUG
     #printf("            evFlags=0x%02X", r0)
-    str     r0, [sp, #S_EVBits]
+    ldr     r0, [sp, #S_EVBits]
 #endif
     
     mov     r1, #0 ; count
@@ -257,8 +262,9 @@ CheckHasNature:
 
 CheckPokeHasItem:
     #printf("        check poke has item")
-    add     r4, sp, #ARG_DataOffsets
+    add     r4, sp, #ARG_PokeDataOffsets
     ldrb    r4, [r4, #0x01] ; item offset
+    #printf("        itemOffset=%d", r4)
     cmp     r4, #0
     beq     CheckPokeHasMoves
     
@@ -271,13 +277,15 @@ CheckPokeHasItem:
     
 CheckPokeHasMoves:
     #printf("        check poke has moves")
-    add     r4, sp, #ARG_DataOffsets
+    add     r4, sp, #ARG_PokeDataOffsets
     ldrb    r4, [r4, #0x02] ; moves offset
+    #printf("        movesOffset=%d", r4)
     cmp     r4, #0
     beq     FinishSetup
     
     mov     r5, #0 ; iteration
 MovesLoop_Start:
+    ldr     r0, [sp, #ARG_TempPokePtr]
     mov     r1, #PF_Move1
     add     r1, r5
     ldrh    r2, [r6, r4]
@@ -291,14 +299,17 @@ MovesLoop_Start:
     bcc     MovesLoop_Start
     
 FinishSetup:
-    #printf("        finishing setup")
+    #printf("        finishing setup...")
     mov     r0, r6
     bl      ARM9::TrainerPoke_GetFormId
     mov     r2, r0
     ldr     r0, [sp, #S_TrainerId]
     ldr     r1, [sp, #ARG_TempPokePtr]
     ldr     r3, [sp, #S_GenderAbilityByte]
+    #printf("        formId=%d", r2)
+    #printf("        genderAbilityByte=0x%02X", r3)
     bl      ARM9::TrTool_FinishPokeSetup
+    #printf("        finished setup!")
     
 Return:
     add     sp, #STACK_SIZE

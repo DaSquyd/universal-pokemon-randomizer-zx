@@ -9,6 +9,7 @@
     mov     r0, r4
 #endif
     
+    mov     r1, #0 ; nullptr
     bl      ARM9::TrTool_GetPokeDataSize
     mov     r5, r0
     ldrb    r0, [r4, #TrainerData.pokeCount]

@@ -1775,7 +1775,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (tr.pokemonHaveItems()) {
             itemOffset = pokeDataSize;
             pokeDataSize += 2;
-        
         }
         
         if (tr.pokemonHaveCustomMoves()) {
@@ -1828,7 +1827,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             count += numPokesInPool;
         }
         
-        
+        int poolFlags = readUnsignedWord(trPokeBytes, headerFlagsOffset);
+        tr.uniqueSpecies = (poolFlags & 0x0001) != 0;
+        tr.uniqueItems = (poolFlags & 0x0002) != 0;
         
         return tr;
     }
@@ -2232,7 +2233,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         
         // header
         if (tr.isPooled) {
-
             if (tr.partySlots.size() > 6)
                 throw new RuntimeException("too many slots");
 
@@ -2252,7 +2252,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 trpoke[headerOffset++] = (byte) pool.size();
             }
 
-            headerOffset = 0x0C;
+            headerOffset = 0x12;
             int flags = 0;
             flags |= tr.uniqueSpecies ? 0x01 : 0x00;
             flags |= tr.uniqueItems ? 0x02 : 0x00;
@@ -5866,6 +5866,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         ParagonLiteHandler.Params params = new ParagonLiteHandler.Params();
         params.romHandler = this;
         params.romEntry = romEntry;
+        params.hackMode = settings.hackMode;
         params.arm9Data = arm9;
         params.classicPokes = oldPokes;
         params.pokes = pokes;
@@ -5972,6 +5973,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         paragonLite.setDebugFlag(debugMode);
         
+        paragonLite.addUtilFuncs();
+        
         // Code updates
         paragonLite.tempFixFairyStruggle();
 //        paragonLite.setUnovaLink();
@@ -6016,9 +6019,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 //        if (debugMode)
 //            paragonLite.setTrainerAI();
 
-        // TODO
-        if (debugMode)
-            paragonLite.setTrainerData();
+        paragonLite.setTrainerData();
 
 //        if (debugMode)
 //            paragonLite.test();

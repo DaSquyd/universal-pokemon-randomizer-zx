@@ -1,5 +1,11 @@
 {
-  "poolAndIV": 0,
-  "level": 1,
+  "poolBit": 0,
+  "poolSize": 3,
+  
+  "ivBit": 3,
+  "ivSize": 5,
+  
+  "levelBit": 8,
+  "levelSize": 8,
   "SIZE": 2
 }

@@ -155,7 +155,7 @@ public class ParagonLiteAbilities {
             colossal, // 512
 //            finalThread, // 513
 //            homeGrown, // 514
-//            ravenousTorque, // 515
+            ravenousTorque, // 515
 //            superconductor, // 516
 //            somaticReflex, // 517
             incendiate, // 518

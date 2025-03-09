@@ -10,15 +10,17 @@
 #define S_ArgTrainerDataPtr 0x00
 #define S_ArgTrainerPokePtr 0x04
 #define S_ArgPokePtr 0x08
+#define S_ArgPokeDataSize 0x0C
+#define S_ArgPokeDataOffsets 0x10 ; [0] = statModifiers, [1] = item, [2] = moves
 
 ; stack
-#define S_GameDataPtr = 0x0C
-#define S_PlayerId = 0x10
-#define S_TrainerDataPtr = 0x14
-#define S_TrainerPokePtr = 0x18
-#define S_TempPokePtr = 0x1C
+#define S_GameDataPtr = 0x14
+#define S_PlayerId = 0x18
+#define S_TrainerDataPtr = 0x1C
+#define S_TrainerPokePtr = 0x20
+#define S_TempPokePtr = 0x24
 
-#define STACK_SIZE 0x20
+#define STACK_SIZE 0x28
 
     push    {r3-r7, lr}
     sub     sp, #STACK_SIZE
@@ -70,6 +72,7 @@
     ldr     r0, [sp, #S_TrainerDataPtr]
     bl      ARM9::TrTool_GetPokeFileSize
     mov     r1, r0
+    #printf("TrainerPoke size: %d", r0)
     mov     r0, #0
     str     r0, [sp, #S_ArgLineNum]
     mov     r0, r4 ; heapLowId
@@ -77,12 +80,6 @@
     ldr     r3, =ARM9::Data_aTrToolC ; "tr_tool.c"
     bl      ARM9::GFL_HeapAllocate
     str     r0, [sp, #S_TrainerPokePtr]
-    
-#if DEBUG
-    ldr     r0, [sp, #S_TrainerDataPtr]
-    bl      ARM9::TrTool_GetPokeFileSize
-    #printf("TrainerPoke size: %d", r0)
-#endif
     
     ; Load in Trainer Poke
     mov     r0, r5
@@ -103,9 +100,14 @@
     bl      ARM9::TrTool_IsPooled
     mov     r4, r0
     
-    ; setup
+    ; setup    
     ldr     r0, [sp, #S_TrainerDataPtr] ; trainerDataPtr
     str     r0, [sp, #S_ArgTrainerDataPtr] ; trainerDataPtr
+    add     r1, sp, #S_ArgPokeDataOffsets
+    bl      ARM9::TrTool_GetPokeDataSize
+    str     r0, [sp, #S_ArgPokeDataSize]
+    
+    #printf("offsets: 0x%06X", ldr [sp, #S_ArgPokeDataOffsets])
     
     ldr     r0, [sp, #S_TrainerPokePtr]
     str     r0, [sp, #S_ArgTrainerPokePtr] ; trainerPokePtr
