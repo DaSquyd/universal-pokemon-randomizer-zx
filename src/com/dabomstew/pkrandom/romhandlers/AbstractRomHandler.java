@@ -32,6 +32,7 @@ import com.dabomstew.pkrandom.*;
 import com.dabomstew.pkrandom.constants.*;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
 import com.dabomstew.pkrandom.pokemon.*;
+import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -4704,7 +4705,7 @@ public abstract class AbstractRomHandler implements RomHandler {
                 List<Move> movesAtLevel = getMoveSelectionPoolAtLevel(tp, isCyclicEvolutions);
 
                 boolean isDouble = doubleBattleMode || t.battleType == Trainer.BattleType.DoubleBattle || t.battleType == Trainer.BattleType.TripleBattle;
-                movesAtLevel = trimMoveList(tp, movesAtLevel, isDouble);
+                movesAtLevel = trimMoveList(tp, movesAtLevel, isDouble, settings.hackMode);
 
                 if (movesAtLevel.isEmpty()) {
                     continue;
@@ -4763,7 +4764,8 @@ public abstract class AbstractRomHandler implements RomHandler {
                         pk.primaryType,
                         pk.secondaryType,
                         movesAtLevel,
-                        generationOfPokemon());
+                        generationOfPokemon(),
+                        settings.hackMode);
                 Collections.shuffle(abilityMoveSynergyList, this.random);
                 for (int i = 0; i < hardAbilityMoveBias * abilityMoveSynergyList.size(); i++) {
                     int j = i % abilityMoveSynergyList.size();
@@ -5014,7 +5016,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         setTrainers(trainers, false, allSmart, false);
     }
 
-    private List<Move> trimMoveList(TrainerPokemon tp, List<Move> movesAtLevel, boolean doubleBattleMode) {
+    private List<Move> trimMoveList(TrainerPokemon tp, List<Move> movesAtLevel, boolean doubleBattleMode, HackMode hackMode) {
         int movesLeft = movesAtLevel.size();
 
         if (movesLeft <= 4) {
@@ -5095,7 +5097,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         List<Move> withoutHardAntiSynergy = new ArrayList<>(movesAtLevel);
         withoutHardAntiSynergy.removeAll(MoveSynergy.getHardAbilityMoveAntiSynergy(
                 getAbilityForTrainerPokemon(tp),
-                movesAtLevel));
+                movesAtLevel, hackMode));
 
         if (withoutHardAntiSynergy.size() > 0) {
             movesAtLevel = withoutHardAntiSynergy;
