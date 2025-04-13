@@ -76,9 +76,9 @@ CheckMaxCritStage:
     mov     r0, #VAR_CRIT_STAGE
     bl      Battle::EventVar_GetValue
     mov     r2, r0  ; r2 := critStage
-    cmp     r0, #MAX_CRIT_STAGE
+    cmp     r0, #CRITICAL_HIT_RATIO_MAX
     ble     CheckIsSimulation
-    mov     r0, #MAX_CRIT_STAGE
+    mov     r0, #CRITICAL_HIT_RATIO_MAX
     
 CheckIsSimulation:
     mov     r0, r5 ; r0 := *serverFlow

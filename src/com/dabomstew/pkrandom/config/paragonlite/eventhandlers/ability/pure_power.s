@@ -14,13 +14,7 @@
     bne     Return
     
     mov     r0, #VAR_Ratio
-#if PARAGONLITE
-    mov     r1, #6
-    lsl     r1, #10 ; 6144 (1.5x)
-#else
-    mov     r1, #8
-    lsl     r1, #10 ; 8192 (2.0x)
-#endif
+    ldr     r1, =(0x1000 * ABILITY_PURE_POWER_MULTIPLIER)
     bl      Battle::EventVar_MulValue
     
 Return:

@@ -127,8 +127,7 @@ BaseDamage:
     
 DamageRatio:
     ldr     r0, [sp, #ARG_TARGET_DMG_RATIO]
-    mov     r1, #1
-    lsl     r1, #12 ; 4096
+    ldr     r1, =0x1000
     cmp     r0, r1
     beq     Weather
     mov     r1, r7
@@ -141,8 +140,7 @@ Weather:
     bl      Battle::GetEffectiveWeather
     ldrb    r1, [r4, #MoveParam.moveType]
     bl      Battle::ServerEvent_WeatherPowerMod
-    mov     r1, #4
-    lsl     r1, #10 ; 4096
+    ldr     r1, =0x1000
     cmp     r0, r1
     beq     CriticalHit
     mov     r1, r7
@@ -153,8 +151,30 @@ CriticalHit:
     cmp     r6, #0
     beq     Debug
     
+    ; small optimizations
+#if Math.log2(CRITICAL_HIT_MULTIPLIER) % 1 === 0
+    ; power of 2
+    lsl     r7, #Math.log2(CRITICAL_HIT_MULTIPLIER)
+#elif CRITICAL_HIT_MULTIPLIER == 1.5
+    ; modern
     lsr     r0, r7, #1
     add     r7, r0
+#elif CRITICAL_HIT_MULTIPLIER == 1.25
+    ; modern
+    lsr     r0, r7, #2
+    add     r7, r0
+#elif CRITICAL_HIT_MULTIPLIER == Math.round(CRITICAL_HIT_MULTIPLIER)
+    ; whole number multiplier, not power of 2
+    ldr     r0, =CRITICAL_HIT_MULTIPLIER
+    mul     r7, r0
+#else
+    ; fractional multiplier -> use percentage
+    ldr     r0, =(100 * CRITICAL_HIT_MULTIPLIER)
+    mul     r0, r7
+    mov     r1, #100
+    blx     ARM9::DivideModUnsigned
+    mov     r7, r0
+#endif
     
 Debug:
 ;    ldr     r0, [r5, #ServerFlow.mainModule]
@@ -210,6 +230,7 @@ Effectiveness:
     bl      Battle::ServerEvent_GetEffectivenessMod
     mov     r7, r0
     
+#if REPLACE_FREEZE_WITH_FROSTBITE
 CheckSpecial:
     ; Special
     ldr     r0, [sp, #SP_MOVE_CATEGORY]
@@ -222,15 +243,15 @@ CheckSpecial:
     cmp     r0, #MC_Frostbite
     bne     ZeroHandle
     
-    ; Superconductor
+    ; Coolant Boost
     ldr     r0, [sp, #SP_ATTACKING_MON]
     mov     r1, #BPV_EffectiveAbility
     bl      Battle::GetPokeStat
-    mov     r1, #(516 >> 2)
-    lsl     r1, #2 ; Superconductor
+    ldr     r1, =ABILITY_COOLANT_BOOST
     cmp     r0, r1
     bne     Condition_HalveDamage
     b       ZeroHandle
+#endif
     
 CheckPhysical:
     ; Physical
@@ -306,3 +327,4 @@ Return:
     ldr     r0, [sp, #SP_IS_FIXED_DAMAGE]
     add     sp, #ADD_STACK_SIZE
     pop     {r4-r7, pc}
+    

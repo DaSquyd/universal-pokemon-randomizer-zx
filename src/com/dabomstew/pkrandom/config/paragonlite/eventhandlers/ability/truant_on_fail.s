@@ -25,7 +25,7 @@
     
     
 RunMessageAndHeal:
-#if PARAGONLITE
+#if ABILITY_TRUANT_HEAL_ON_LOAFING_TURNS && !ABILITY_TRUANT_HEAL_ON_MOVE_TURNS
     ; NEW - Add Ability Popup
     mov     r0, r5
     mov     r1, #HE_AbilityPopup_Add
@@ -41,7 +41,7 @@ RunMessageAndHeal:
     bl      Battle::Handler_PushWork
     mov     r7, r0
     
-#if !PARAGONLITE
+#if !ABILITY_TRUANT_HEAL_ON_LOAFING_TURNS || ABILITY_TRUANT_HEAL_ON_MOVE_TURNS
     ldr     r0, [r7, #HandlerParam_RecoverHP.header]
     mov     r1, #(BHP_AbilityPopup >> 16)
     lsl     r1, #16
@@ -63,7 +63,7 @@ RunMessageAndHeal:
     bl      Battle::Handler_PopWork
     
     
-#if PARAGONLITE
+#if ABILITY_TRUANT_HEAL_ON_LOAFING_TURNS && !ABILITY_TRUANT_HEAL_ON_MOVE_TURNS
     ; NEW - Heal
     mov     r0, r5
     mov     r1, r4
@@ -81,7 +81,7 @@ RunMessageAndHeal:
     mov     r0, r5
     mov     r1, r4
     bl      Battle::GetPoke
-    mov     r1, #2 ; 1/2
+    mov     r1, #ABILITY_TRUANT_HEAL_FRACTION
     bl      Battle::DivideMaxHPZeroCheck
     strh    r0, [r7, #HandlerParam_RecoverHP.amount]
     

@@ -159,7 +159,7 @@ public class GlobalConstants {
             Abilities.battery,
 
             Abilities.plus, Abilities.minus,
-            ParagonLiteAbilities.ripTide
+            ParagonLiteAbilities.undercurrent
     );
 
     public static final List<Integer> duplicateAbilities = Arrays.asList(

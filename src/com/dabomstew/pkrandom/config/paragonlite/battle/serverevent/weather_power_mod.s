@@ -4,35 +4,29 @@
     cmp     r0, #WEATHER_Rain
     beq     Rain
     
-    b       ReturnOne
+ReturnOne:
+    ldr     r0, =0x1000
+    bx      lr
     
 Sun:
     cmp     r1, #TYPE_Fire
-    bne     Sun_CheckWater
-    mov     r0, #5
-    b       ShiftAndReturn
+    beq     ReturnStrong
     
-Sun_CheckWater:
     cmp     r1, #TYPE_Water
     bne     ReturnOne
-    mov     r0, #3
-    b       ShiftAndReturn
+    
+ReturnWeak:
+    ldr     r0, =(WEATHER_MOD_WEAK * 0x1000)
+    bx      lr
     
 Rain:
     cmp     r1, #TYPE_Fire
-    bne     Rain_CheckWater
-    mov     r0, #3
-    b       ShiftAndReturn
+    beq     ReturnWeak
     
-Rain_CheckWater:
     cmp     r1, #TYPE_Water
     bne     ReturnOne
-    mov     r0, #5
-    b       ShiftAndReturn
     
-ReturnOne:
-    mov     r0, #4
-    
-ShiftAndReturn:
-    lsl     r0, #10
+ReturnStrong:
+    ldr     r0, =(WEATHER_MOD_STRONG * 0x1000)
     bx      lr
+    

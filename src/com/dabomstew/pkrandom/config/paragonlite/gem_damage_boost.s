@@ -25,7 +25,7 @@
     
 Boost:
     mov     r0, #0x31
-    ldr     r1, =5325 ; 1.3x
+    ldr     r1, =(GEM_ITEM_DAMAGE_MULTIPLIER * 0x1000)
     bl      Battle::EventVar_MulValue
     
 End:

@@ -20,7 +20,7 @@
     bne     Return
     
     mov     r0, #0x35 ; stat
-    ldr     r1, =5325 ; 1.3x
+    ldr     r1, =(0x1000 * ABILITY_PLUS_MULTIPLIER)
     bl      Battle::EventVar_MulValue
 
 Return:

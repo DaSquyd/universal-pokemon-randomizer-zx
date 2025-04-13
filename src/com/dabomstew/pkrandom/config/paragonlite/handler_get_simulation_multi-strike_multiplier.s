@@ -66,18 +66,17 @@ IsMultiStrike:
     mov     r1, r0
     
 CheckSkillLink:
-    lsl     r5, r4, #12 ; 0x5000 (5.0x)
+    ldr     r5, =(0x1000 * 5.0)
     cmp     r1, #1
     beq     PopAndReturn
     
 CheckLoadedDice:
-    mov     r5, #9
-    lsl     r5, #11 ; 0x4800 (4.5x)
+    ldr     r5, =(0x1000 * 4.5)
     cmp     r1, #2
     beq     PopAndReturn
     
     ; otherwise, use this default
-    ldr     r5, =0x319A ; 12698 (3.1x)
+    ldr     r5, =(0x1000 * 3.1)
 
 PopAndReturn:
     bl      Battle::EventVar_Pop

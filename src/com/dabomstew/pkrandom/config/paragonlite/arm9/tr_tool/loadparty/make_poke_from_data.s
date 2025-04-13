@@ -26,7 +26,8 @@
 #define S_EVsIndex 0x28
 #define S_EVsPerStat 0x2C
 #define S_Item 0x30
-#define STACK_SIZE 0x34
+#define S_PokeParamFastMode 0x34
+#define STACK_SIZE 0x38
 
 #define PUSH_SIZE (5 * 4) ; r4-r7, lr
 
@@ -164,6 +165,10 @@ MakeCompactIVs:
     ldrb    r2, [r6, #TrainerPoke.level]
     bl      ARM9::PokeTool_SetupEx
     
+;    ldr     r0, [sp, #ARG_TempPokePtr]
+;    bl      ARM9::PokeTool_EnableFastMode
+;    str     r0, [sp, #S_PokeParamFastMode]
+    
 CheckPokeHasStatModifiers:
     #printf("        check poke has stat modifiers")
     add     r4, sp, #ARG_PokeDataOffsets
@@ -249,8 +254,7 @@ CheckHasNature:
     
     ldr     r0, [sp, #ARG_TempPokePtr]
     ldrh    r2, [r6, r4]
-    lsl     r2, #(32 - (TrainerPoke_StatModifiers.natureBit + TrainerPoke_StatModifiers.natureSize))
-    lsr     r2, #(32 - TrainerPoke_StatModifiers.natureSize)
+    #read_bits(r2, TrainerPoke_StatModifiers.natureBit, TrainerPoke_StatModifiers.natureSize)
     mov     r1, #PF_Nature
     bl      ARM9::Poke_SetParam
     
@@ -310,6 +314,10 @@ FinishSetup:
     #printf("        genderAbilityByte=0x%02X", r3)
     bl      ARM9::TrTool_FinishPokeSetup
     #printf("        finished setup!")
+    
+;    ldr     r0, [sp, #ARG_TempPokePtr]
+;    ldr     r1, [sp, #S_PokeParamFastMode]
+;    bl      ARM9::PokeTool_DisableFastMode
     
 Return:
     add     sp, #STACK_SIZE

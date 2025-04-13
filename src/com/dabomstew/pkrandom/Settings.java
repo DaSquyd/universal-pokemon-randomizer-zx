@@ -331,7 +331,7 @@ public class Settings {
     private PickupItemsMod pickupItemsMod = PickupItemsMod.UNCHANGED;
     private boolean banBadRandomPickupItems;
     
-    public HackMode hackMode = HackMode.Redux;
+    public HackMode hackMode = new HackMode("Redux");
 
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {

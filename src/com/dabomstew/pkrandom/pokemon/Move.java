@@ -122,6 +122,7 @@ public class Move {
 
     public String name;
     public String description;
+    public String shopDescription;
     public int number = 0;
     public int internalId = 0;
     public Type type = Type.NORMAL; // 00
@@ -185,6 +186,10 @@ public class Move {
         if (name.length() > 15)
             return name.replace(" ", "");
         return name;
+    }
+    
+    public String getSafeShopDescription() {
+        return shopDescription.isEmpty() ? description : shopDescription;
     }
 
     public boolean isTrapMove() {

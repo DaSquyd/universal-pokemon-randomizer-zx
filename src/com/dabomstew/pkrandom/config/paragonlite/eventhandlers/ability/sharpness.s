@@ -1,20 +1,21 @@
     push    {r4, lr}
-    mov     r0, #3
+    mov     r0, #VAR_AttackingPoke
     mov     r4, r2
     bl      Battle::EventVar_GetValue
     cmp     r4, r0 ; maybe to ensure same user? same move?
-    bne     End
-    mov     r0, #18
+    bne     Return
+    
+    mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
-    lsl     r0, r0, #16
-    lsr     r0, r0, #16
-    mov     r1, #16 ; slice flag
+    
+    mov     r1, #MF_Slice
     bl      ARM9::MoveHasFlag
-    cmp     r0, #0
-    beq     End
-    ldr     r1, =5325 ; 1.3x
-    mov     r0, #0x31 ; move power
+    cmp     r0, #FALSE
+    beq     Return
+    
+    ldr     r1, =(0x1000 * ABILITY_SHARPNESS_MULTIPLIER)
+    mov     r0, #VAR_MovePower
     bl      Battle::EventVar_MulValue
     
-End:
+Return:
     pop     {r4, pc}

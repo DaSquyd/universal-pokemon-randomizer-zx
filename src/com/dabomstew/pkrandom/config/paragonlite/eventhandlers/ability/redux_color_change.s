@@ -23,7 +23,7 @@
     cmp     r0, #TYPE_Null ; no type, case of Struggle
     beq     Return
     
-#if ABILITY_PROTEAN_FIRST_ONLY
+#if ABILITY_COLOR_CHANGE_MODERN_PROTEAN
     ; Check if it was already activated once
     ldr     r0, [r3]
     cmp     r0, #FALSE

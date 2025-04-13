@@ -31,27 +31,27 @@
     bne     STAB
     
 NotSTAB:
-    mov     r1, #4
-    lsl     r1, #10 ; 4096 (1x)
+    ldr     r1, =0x1000
     b       CallRatioHandlers
     
 STAB:
+#if STAB_SINGLE_TYPE != STAB_MULTI_TYPE
     mov     r0, r7
     bl      Battle::GetPokeType
     bl      Battle::TypePair_IsMonoType
     cmp     r0, #FALSE
-    beq     DualType
+    beq     MultiType
     
 ;CheckExtraType:
 ;    mov     r0, r7 ; TODO
     
 MonoType:
-    mov     r1, #6
-    lsl     r1, #10 ; 6144 (1.5x)
+    ldr     r1, =(STAB_SINGLE_TYPE * 0x1000)
     b       CallRatioHandlers
     
-DualType:
-    ldr     r1, =(4096 * 4/3)
+MultiType:
+#endif
+    ldr     r1, =(STAB_MULTI_TYPE * 0x1000)
     
 CallRatioHandlers:
     mov     r0, #VAR_Ratio

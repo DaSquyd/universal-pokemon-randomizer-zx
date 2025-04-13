@@ -35,7 +35,8 @@
 #define S_SelectedPokeIndices 0x60 ; 6 bytes (8)
 #define S_UsedSpecies 0x68 ; 12 bytes
 #define S_UsedItems 0x74 ; 12 bytes
-#define STACK_SIZE 0x80
+#define S_PokeParamFastMode 0x80
+#define STACK_SIZE 0x84
 
 #define PUSH_SIZE (5 * 4) ; r4-r7, lr
 
@@ -402,23 +403,29 @@ AddToTeamLoop_Start:
     add     r0, r1 ; r0 := poolOffsets[currentSlot.poolId] + pokeDataSize * selectedPokeIndices[i]
     ldr     r1, [sp, #ARG_TrainerPokePtr] ; r1 := &trainerPokePtr
     #printf("            trainerPokePtr=0x%0X", r1)
-    add     r0, r1
+    add     r5, r0, r1
     
-    #printf("            species=%d", ldrh [r0, #TrainerPoke.species])
+    #printf("            species=%d", ldrh [r5, #TrainerPoke.species])
     
     ; pokeDataPtr->level = currentSlot.level;
     #read_bits(r1, r6, TrainerPoke_Header_Slot.levelBit, TrainerPoke_Header_Slot.levelSize)
-    strb    r1, [r0, #TrainerPoke.level]
+    strb    r1, [r5, #TrainerPoke.level]
     
     ; ARM9::TrTool_MakePokeFromData(pokeDataPtr, pokeDataSize, playerId, trainerId, heapId, dataOffsets, teamRand, trainerDataPtr, tempPokePtr);
+    mov     r0, r5
     ldr     r1, [sp, #ARG_PokeDataSize]
     ldr     r2, [sp, #S_PlayerId] ; playerId
     ldr     r3, [sp, #S_TrainerId] ; trainerId
     bl      ARM9::TrTool_MakePokeFromData
     
+;    ; pokeParamFastMode = ARM9::PokeTool_EnableFastMode(argTempPokePtr);
+;    ldr     r0, [sp, #ARG_TempPokePtr]
+;    bl      ARM9::PokeTool_EnableFastMode
+;    str     r0, [sp, #S_PokeParamFastMode]
+    
     ; int iv = currentSlot.iv;
     ; iv |= (iv << 5) | (iv << 10) | (iv << 15) | (iv << 20) | (iv << 25);
-    ; ARM9::Poke_SetParam(argTempPokePtr, 172, iv);
+    ; ARM9::Poke_SetParam(argTempPokePtr, PF_IVsCompact, iv);
     #read_bits(r0, r6, TrainerPoke_Header_Slot.ivBit, TrainerPoke_Header_Slot.ivSize)
     lsl     r2, r0, #5
     orr     r2, r0
@@ -432,13 +439,16 @@ AddToTeamLoop_Start:
     orr     r2, r0
     #printf("            combinedIvs=0x%08X", r2)
     ldr     r0, [sp, #ARG_TempPokePtr]
-    mov     r1, #172 ; combined IVs
+    mov     r1, #PF_IVsCompact
     bl      ARM9::Poke_SetParam
 
-AddToTeamLoop_CheckHasNature:
-    
     
 AddToTeamLoop_Add:
+;    ; ARM9::PokeTool_DisableFastMode(argTempPokePtr, pokeParamFastMode);
+;    ldr     r0, [sp, #ARG_TempPokePtr]
+;    ldr     r1, [sp, #S_PokeParamFastMode]
+;    bl      ARM9::PokeTool_DisableFastMode
+
     ; ARM9::PokeParty_Add(partyPtr, tempPokePtr);
     ldr     r0, [sp, #S_PartyPtr]
     ldr     r1, [sp, #ARG_TempPokePtr]

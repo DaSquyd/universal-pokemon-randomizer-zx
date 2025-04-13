@@ -28,7 +28,7 @@
     str     r0, [r7, #HandlerParam_RecoverHP.header]
     
     mov     r0, r6
-    mov     r1, #16 ; 1/16
+    mov     r1, #ABILITY_TRUANT_HEAL_FRACTION
     bl      Battle::DivideMaxHPZeroCheck
     strh    r0, [r7, #HandlerParam_RecoverHP.amount]
     

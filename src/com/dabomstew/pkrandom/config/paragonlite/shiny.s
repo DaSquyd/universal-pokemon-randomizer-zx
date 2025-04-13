@@ -15,7 +15,7 @@
     cmp     r0, r1
     bcs     IsNotShiny
     
-; IsShiny
+IsShiny:
     mov     r0, #1
     bx      lr
     

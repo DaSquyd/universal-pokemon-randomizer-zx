@@ -18,8 +18,16 @@
     #CASE ReturnZero
     #CASE ReturnZero ; Paralysis
     #CASE ReturnZero ; Sleep
-    #CASE FreezeBurn ; Freeze
-    #CASE FreezeBurn ; Burn
+    
+#if STATUS_FREEZE_REPLACE_WITH_FROSTBITE && STATUS_BURN_DAMAGE_FRACTION == STATUS_FROSTBITE_DAMAGE_FRACTION
+    #CASE Burn ; Frostbite (same damage as Burn)
+#elif STATUS_FREEZE_REPLACE_WITH_FROSTBITE && STATUS_BURN_DAMAGE_FRACTION != STATUS_FROSTBITE_DAMAGE_FRACTION
+    #CASE Frostbite ; Frostbite (different damage from Burn)
+#else
+    #CASE ReturnZero ; Freeze
+#endif
+
+    #CASE Burn ; Burn
     #CASE Poison
     #CASE ReturnZero ; Confusion
     #CASE ReturnZero ; Attract
@@ -27,13 +35,18 @@
     #CASE Nightmare
     #CASE Curse
     
-    
-FreezeBurn:
+#if !STATUS_FREEZE_REPLACE_WITH_FROSTBITE || STATUS_BURN_DAMAGE_FRACTION == STATUS_FROSTBITE_DAMAGE_FRACTION
+Burn:
     mov     r0, r4
-    mov     r1, #16 ; 1/16
-    bl      Battle::DivideMaxHPZeroCheck
-    pop     {r3-r5, pc}
-    
+    mov     r1, #STATUS_BURN_DAMAGE_FRACTION ; 1/16
+    b       ReturnDivide
+#endif
+
+#if STATUS_FREEZE_REPLACE_WITH_FROSTBITE && STATUS_BURN_DAMAGE_FRACTION != STATUS_FROSTBITE_DAMAGE_FRACTION
+    mov     r0, r4
+    mov     r1, #STATUS_BURN_DAMAGE_FRACTION ; 1/16
+    b       ReturnDivide
+#endif
     
 Poison:
     lsl     r0, r5, #2
@@ -46,8 +59,7 @@ Poison:
     
     mov     r0, r4
     mov     r1, #8 ; 1/8
-    bl      Battle::DivideMaxHPZeroCheck
-    pop     {r3-r5, pc}
+    b       ReturnDivide
     
 BadPoison:
     mov     r0, r4
@@ -71,6 +83,8 @@ Nightmare:
 Curse:
     mov     r0, r4
     mov     r1, #4 ; 1/4
+    
+ReturnDivide:
     bl      Battle::DivideMaxHPZeroCheck
     pop     {r3-r5, pc}
     

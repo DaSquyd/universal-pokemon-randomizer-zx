@@ -81,6 +81,8 @@ NoEffectLoop_CheckContinue:
     mov     r7, r0
     bne     NoEffectLoop_Start
 
+
+
 ProtectLoop_Setup:
     ldr     r0, [sp, #MOVE_PARAM]
     ldrh    r0, [r0, #MoveParam.moveId]
@@ -168,12 +170,13 @@ ProtectLoop_SpikyShield:
     ldr     r0, [r5, #ServerFlow.serverCommandQueue]
     bl      Battle::ServerDisplay_AddMessageImpl
 
-
 ProtectLoop_CheckContinue:
     mov     r0, r4
     bl      BattleServer::PokeSet_SeekNext
     mov     r7, r0
     bne     ProtectLoop_Start
+
+
 
 AbilityNoEffectLoop_Setup:
     mov     r0, r4
@@ -181,7 +184,7 @@ AbilityNoEffectLoop_Setup:
     mov     r0, r4
     bl      BattleServer::PokeSet_SeekNext
     mov     r7, r0
-    beq     GrassPowderLoop_Setup
+    beq     AbilityNoEffectLoop_End
 
 AbilityNoEffectLoop_Start:
     ldr     r0, [sp, #IN_EFF_REC]
@@ -206,7 +209,10 @@ AbilityNoEffectLoop_CheckContinue:
     mov     r7, r0
     bne     AbilityNoEffectLoop_Start
     
+AbilityNoEffectLoop_End:
+    
 
+#if TYPE_GRASS_IS_IMMUNE_TO_POWDER_MOVES
 ; NEW - Grass-type immunity to Powder moves
 GrassPowderLoop_Setup:
     ldr     r0, [sp, #MOVE_PARAM]
@@ -214,14 +220,14 @@ GrassPowderLoop_Setup:
     mov     r1, #MF_Powder
     bl      ARM9::MoveHasFlag
     cmp     r0, #0
-    beq     DarkPranksterLoop_Setup
+    beq     GrassPowderLoop_End
 
     mov     r0, r4
     bl      BattleServer::PokeSet_SeekStart
     mov     r0, r4
     bl      BattleServer::PokeSet_SeekNext
     mov     r7, r0
-    beq     Return
+    beq     GrassPowderLoop_End
     
 GrassPowderLoop_Start:
     ; check if Grass
@@ -251,9 +257,13 @@ GrassPowderLoop_CheckContinue:
     mov     r0, r4
     bl      BattleServer::PokeSet_SeekNext
     mov     r7, r0
-    bne     GrassPowderLoop_Setup
+    bne     GrassPowderLoop_Start
+    
+GrassPowderLoop_End:
+#endif
     
 
+#if TYPE_DARK_IS_IMMUNE_TO_PRANKSTER
 ; NEW - Dark-type immunity to Prankster
 DarkPranksterLoop_Setup:
     ; check if prankster
@@ -261,14 +271,16 @@ DarkPranksterLoop_Setup:
     ldr     r0, [r0, #MoveParam.flags]
     mov     r1, #MPF_Prankster
     tst     r0, r1
-    beq     Return
+    beq     DarkPranksterLoop_End
+    
+    #printf("Prankster move")
 
     mov     r0, r4
     bl      BattleServer::PokeSet_SeekStart
     mov     r0, r4
     bl      BattleServer::PokeSet_SeekNext
     mov     r7, r0
-    beq     Return
+    beq     DarkPranksterLoop_End
     
 DarkPranksterLoop_Start:
     ; check if ally
@@ -278,14 +290,14 @@ DarkPranksterLoop_Start:
     mov     r0, r7
     bl      Battle::GetPokeId
     bl      Battle::IsAllyPokeId
-    cmp     r0, #0
+    cmp     r0, #FALSE
     bne     DarkPranksterLoop_CheckContinue
     
     ; check if Dark
     mov     r0, r7
     mov     r1, #TYPE_Dark
     bl      Battle::PokeHasType
-    cmp     r0, #0
+    cmp     r0, #FALSE
     beq     DarkPranksterLoop_CheckContinue
     
     ; remove
@@ -298,6 +310,9 @@ DarkPranksterLoop_CheckContinue:
     bl      BattleServer::PokeSet_SeekNext
     mov     r7, r0
     bne     DarkPranksterLoop_Start
+    
+DarkPranksterLoop_End:
+#endif
 
 Return:
     add     sp, #(STACK_SIZE - PUSH_SIZE)

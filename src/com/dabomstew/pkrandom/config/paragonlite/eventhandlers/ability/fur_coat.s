@@ -16,8 +16,7 @@
     bne     End
     
     mov     r0, #53 ; stat
-    mov     r1, #6
-    lsl     r1, #10 ; 6144 (1.5x)
+    ldr     r1, =(0x1000 * ABILITY_FUR_COAT_MULTIPLIER)
     bl      Battle::EventVar_MulValue
     
 End:

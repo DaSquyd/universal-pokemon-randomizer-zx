@@ -35,7 +35,7 @@ AssaultVestCheck:
     bl      Battle::Poke_GetHeldItem
     mov     r1, #114 ; Assault Vest
     cmp     r0, r1
-#IF PARAGONLITE
+#IF ITEM_PROTECTOR_NO_STATUS
     beq     NoStatusMove
     ; Protector
     add     r1, #(321 - 114) ; Protector

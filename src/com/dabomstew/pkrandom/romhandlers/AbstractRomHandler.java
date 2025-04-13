@@ -2789,9 +2789,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (soundMovesFromLevel == 0 || soundMoves.size() < 2)
             irrelevantAbilities.add(ParagonLiteAbilities.cacophony);
 
-        // #508 Rip Tide
+        // #508 Undercurrent
         if (!settings.isDoubleBattleMode() && !mediumSpeed)
-            irrelevantAbilities.add(ParagonLiteAbilities.ripTide);
+            irrelevantAbilities.add(ParagonLiteAbilities.undercurrent);
 
         // #509 Wind Whipper
         if (windMovesFromLevel == 0 || windMoves.size() < 2)
@@ -2824,7 +2824,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(ParagonLiteAbilities.ravenousTorque);
 
         // #516 Superconductor
-        if (pk.hp == 1 || isIce || !higherOrEqualSpAtk)
+        if (resistsIce && !mediumSpeed)
             irrelevantAbilities.add(ParagonLiteAbilities.superconductor);
 
         // #517 Somatic Reflex
@@ -2856,6 +2856,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         // #524 Heal Spore
         if (lowBulk)
             irrelevantAbilities.add(ParagonLiteAbilities.healSpore);
+        
+        // #525 X-ray Vision
+        
+        // #526 Coolant Boost
+        if (pk.hp == 1 || isIce || !higherOrEqualSpAtk)
+            irrelevantAbilities.add(ParagonLiteAbilities.coolantBoost);
     }
 
     private boolean isTypeBoostAbilityIrrelevant(Pokemon pk, Type type, boolean isCustomTypeEffectiveness, Map<Type, Effectiveness> against,

@@ -6,15 +6,15 @@
     cmp     r4, r0
     bne     Return
     
-    mov     r0, #0x12 ; move id
+    mov     r0, #0x25
     bl      Battle::EventVar_GetValue
-    bl      ARM9::GetMoveCategory
-    cmp     r0, #1 ; Physical
+    lsl     r0, #24
+    lsr     r0, #24
     bne     Return
     
-    mov     r0, #0x35
-    ldr     r1, =3686 ; 0.9x
-    bl      Battle::EventVar_MulValue
+    mov     r0, #0x26
+    mov     r1, #ABILITY_STENCH_FLINCH_PERCENT
+    bl      Battle::EventVar_RewriteValue
     
 Return:
     pop     {r4, pc}

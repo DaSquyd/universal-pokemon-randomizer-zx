@@ -36,7 +36,7 @@ public class ParagonLiteAbilities {
     public static final int assimilate = 505;
     public static final int stoneHome = 506;
     public static final int cacophony = 507;
-    public static final int ripTide = 508;
+    public static final int undercurrent = 508;
     public static final int windWhipper = 509;
     public static final int glazeware = 510;
     public static final int sunSoaked = 511;
@@ -54,6 +54,7 @@ public class ParagonLiteAbilities {
     public static final int pastoralAroma = 523;
     public static final int healSpore = 524;
     public static final int xrayVision = 525;
+    public static final int coolantBoost = 526;
 
     public static final int MAX = xrayVision;
     
@@ -156,7 +157,7 @@ public class ParagonLiteAbilities {
 //            finalThread, // 513
 //            homeGrown, // 514
             ravenousTorque, // 515
-//            superconductor, // 516
+            superconductor, // 516
 //            somaticReflex, // 517
             incendiate, // 518
             liquidate, // 519
@@ -166,5 +167,6 @@ public class ParagonLiteAbilities {
 //            pastoralAroma, // 523
             healSpore, // 524
             xrayVision // 525
+//            coolantBoost // 526
     );
 }

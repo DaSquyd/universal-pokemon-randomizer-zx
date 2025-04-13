@@ -3650,12 +3650,20 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             offset += Gen5Constants.tmDataPrefix.length() / 2; // because it was
             // a prefix
             for (int i = 0; i < Gen5Constants.tmBlockOneCount; i++) {
-                writeWord(arm9, offset + i * 2, moveIndexes.get(i));
+                int move = moveIndexes.get(i);
+                if (move == 0)
+                    throw new RuntimeException();
+                    
+                writeWord(arm9, offset + i * 2, move);
             }
             // Skip past those 92 TMs and 6 HMs
             offset += (Gen5Constants.tmBlockOneCount + Gen5Constants.hmCount) * 2;
             for (int i = 0; i < (Gen5Constants.tmCount - Gen5Constants.tmBlockOneCount); i++) {
-                writeWord(arm9, offset + i * 2, moveIndexes.get(i + Gen5Constants.tmBlockOneCount));
+                int move = moveIndexes.get(i + Gen5Constants.tmBlockOneCount);
+                if (move == 0)
+                    throw new RuntimeException();
+                
+                writeWord(arm9, offset + i * 2, move);
             }
 
             int maxLines = 3;
@@ -3666,17 +3674,20 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             // TM01 is item 328 and so on
             for (int i = 0; i < Gen5Constants.tmBlockOneCount; i++) {
-                String description = sortText(moves.get(moveIndexes.get(i)).description, maxLines, maxLinePixels, allowDescriptionError);
+                Move move = moves.get(moveIndexes.get(i));
+                String description = sortText(move.getSafeShopDescription(), maxLines, maxLinePixels, allowDescriptionError);
                 itemDescriptions.set(i + Gen5Constants.tmBlockOneOffset, description);
             }
             // TM93-95 are 618-620
             for (int i = 0; i < (Gen5Constants.tmCount - Gen5Constants.tmBlockOneCount); i++) {
-                String description = sortText(moves.get(moveIndexes.get(i + Gen5Constants.tmBlockOneCount)).description, maxLines, maxLinePixels, allowDescriptionError);
+                Move move = moves.get(moveIndexes.get(i + Gen5Constants.tmBlockOneCount));
+                String description = sortText(move.getSafeShopDescription(), maxLines, maxLinePixels, allowDescriptionError);
                 itemDescriptions.set(i + Gen5Constants.tmBlockTwoOffset, description);
             }
             // HMs
             for (int i = 0; i < (Gen5Constants.hmCount); i++) {
-                String description = sortText(moves.get(hmMoves.get(i)).description, maxLines, maxLinePixels, allowDescriptionError);
+                Move move = moves.get(hmMoves.get(i));
+                String description = sortText(move.getSafeShopDescription(), maxLines, maxLinePixels, allowDescriptionError);
                 itemDescriptions.set(i + Gen5Constants.hmOffset, description);
             }
             // Save the new item descriptions
@@ -5931,7 +5942,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         params.itemDescriptions = getStrings(false, itemDescriptionsTextOffset);
 
         ParagonLiteHandler paragonLite = new ParagonLiteHandler(params);
-        processParagonLiteHandler(paragonLite, debugMode);
+        processParagonLiteHandler(paragonLite, settings, debugMode);
         paragonLite.save();
 
         setStrings(false, battleTextOffset1, params.battleStrings1);
@@ -5968,7 +5979,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.logUpdates("E:\\Documents\\universal-pokemon-randomizer-zx\\out\\production");
     }
 
-    private static void processParagonLiteHandler(ParagonLiteHandler paragonLite, boolean debugMode) {
+    private static void processParagonLiteHandler(ParagonLiteHandler paragonLite, Settings settings, boolean debugMode) {
         paragonLite.setBattleEventStrings();
 
         paragonLite.setDebugFlag(debugMode);
@@ -6009,12 +6020,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setMaxSpeedFix();
         paragonLite.setDynamicTurnOrder();
         paragonLite.setMoves();
+        paragonLite.setTMsAndHMs(settings);
         paragonLite.setItems();
         paragonLite.setAbilities();
 
         paragonLite.setTypeEffectiveness();
 
         paragonLite.setPokemonData();
+        
+        paragonLite.setBoxSearchAbilities(settings);
 
 //        if (debugMode)
 //            paragonLite.setTrainerAI();
