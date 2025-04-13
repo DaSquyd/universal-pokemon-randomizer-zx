@@ -3414,7 +3414,7 @@ public class ParagonLiteHandler {
         abilityNames.set(number, "Stone Home");
 
         // Description
-        abilityDescriptions.set(number, "Boosts the Defense stat\\xFFFEof allies.");
+        abilityDescriptions.set(number, "Boosts the Defense stat\\xFFFEof the Pokémon's allies.");
 
         // Data
         setAbilityEventHandlers(number,
