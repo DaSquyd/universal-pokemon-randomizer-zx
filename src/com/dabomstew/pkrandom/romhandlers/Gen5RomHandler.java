@@ -121,7 +121,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private int mainNumTrainers = 0;
-    
+
     private static List<RomEntry> roms;
 
     private static boolean isChallengeMode = false;
@@ -539,7 +539,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             // Name?
             pokes[i].name = pokeNames[i];
         }
-        
+
         for (int i = 0; i < Gen5Constants.pokestarPokemonCount; i++) {
             int speciesId = Gen5Constants.pokestarPokemonOffset + i;
             pokestarPokes[i] = new Pokemon();
@@ -729,7 +729,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         pkmn.ability3 = (stats[Gen5Constants.bsAbility3Offset] & 0xFF) | ((stats[Gen5Constants.bsAbility3Offset - 3] & 0xC0) << 2);
 
         pkmn.isAsymmetric = (stats[Gen5Constants.bsDexColorOffset] & 0x40) != 0;
-        
+
         pkmn.expYield = readUnsignedWord(stats, Gen5Constants.bsExpYieldOffset);
 
         int formeCount = stats[Gen5Constants.bsFormeCountOffset] & 0xFF;
@@ -986,7 +986,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         stats[Gen5Constants.bsDexColorOffset] &= (byte) ~0x40;
         stats[Gen5Constants.bsDexColorOffset] |= (byte) (pkmn.isAsymmetric ? 0x40 : 0);
-        
+
         writeWord(stats, Gen5Constants.bsExpYieldOffset, pkmn.expYield);
 
         if (pkmn.specialForms > 0)
@@ -1572,7 +1572,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         return getTrainers(null, null);
     }
 
-    public List<Trainer> getTrainers(NARCArchive trDataNarc, NARCArchive trPokeNarc) {        
+    public List<Trainer> getTrainers(NARCArchive trDataNarc, NARCArchive trPokeNarc) {
         List<String> tclasses = this.getTrainerClassNames();
         List<String> tnames = this.getTrainerNames();
 
@@ -1582,7 +1582,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         try {
             if (trDataNarc == null)
                 trDataNarc = this.readNARC(romEntry.getFile("TrainerData"));
-            
+
             if (trPokeNarc == null)
                 trPokeNarc = this.readNARC(romEntry.getFile("TrainerPokemon"));
 
@@ -1633,7 +1633,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
         return allTrainers;
     }
-    
+
     private Trainer getTrainerFromData(int number, byte[] trDataBytes, byte[] trPokeBytes, List<String> tclasses, List<String> tnames, boolean setOriginalDoubleTrainers) {
         int partyFlagsOffset = 0x00;
         int trainerClassOffset = 0x01;
@@ -1674,7 +1674,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             originalDoubleTrainers.add(number);
 
         int partyCount = trDataBytes[pokeCountOffset] & 0xFF;
-        
+
         int pokeOffs = 0;
         var party = tr.getStandardPokePool();
         for (int poke = 0; poke < partyCount; poke++) {
@@ -1719,7 +1719,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             }
             party.add(tpk);
         }
-        
+
         return tr;
     }
 
@@ -1740,7 +1740,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         tr.battleType = Trainer.BattleType.values()[flags & 0x03];
         if (tr.battleType == Trainer.BattleType.DoubleBattle && setOriginalDoubleTrainers)
             originalDoubleTrainers.add(number);
-        
+
         tr.isHealer = (flags & 0x0008) != 0;
         tr.setPokemonHaveCustomMoves((flags & 0x0010) != 0);
         tr.setPokemonHaveItems((flags & 0x0020) != 0);
@@ -1749,7 +1749,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         tr.ppMax = (flags & 0x0100) != 0;
         tr.isPooled = (flags & 0x8000) != 0;
         tr.plMode = true;
-        
+
         tr.trainerclass = trDataBytes[trainerClassOffset] & 0xFF;
 
         for (int i = 0; i < 4; ++i)
@@ -1766,24 +1766,24 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         int statModifiersOffset = -1;
         int itemOffset = -1;
         int movesOffset = -1;
-        
+
         if (tr.pokesHaveNatures || tr.pokesHaveIVsEVs) {
             statModifiersOffset = pokeDataSize;
             pokeDataSize += 2;
         }
-        
+
         if (tr.pokemonHaveItems()) {
             itemOffset = pokeDataSize;
             pokeDataSize += 2;
         }
-        
+
         if (tr.pokemonHaveCustomMoves()) {
             movesOffset = pokeDataSize;
             pokeDataSize += 8;
         }
 
         int pokeCount = trDataBytes[pokeCountOffset] & 0xFF;
-        
+
         if (!tr.isPooled) {
             var standardPool = tr.getStandardPokePool();
             for (int i = 0; i < pokeCount; ++i) {
@@ -1791,10 +1791,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 TrainerPokemon poke = getParagonLiteTrainerPoke(trPokeBytes, pokeOffset, statModifiersOffset, itemOffset, movesOffset);
                 standardPool.add(poke);
             }
-            
+
             return tr;
         }
-        
+
         int headerSlotSize = 2;
         int headerSlotCount = 6;
         int headerPoolIndiciesOffset = headerSlotSize * headerSlotCount;
@@ -1811,7 +1811,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             int level = trPokeBytes[i * headerSlotSize + 1] & 0xFF;
             tr.partySlots.add(new Trainer.PartySlot(poolId, iv, level));
         }
-        
+
         int count = 0;
         for (int poolId = 0; poolId < 6; ++poolId) {
             int numPokesInPool = trPokeBytes[headerPoolIndiciesOffset + poolId * headerPoolIndicesSize] & 0xFF;
@@ -1823,53 +1823,53 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 pool.add(poke);
             }
             tr.pools.add(pool);
-            
+
             count += numPokesInPool;
         }
-        
+
         int poolFlags = readUnsignedWord(trPokeBytes, headerFlagsOffset);
         tr.uniqueSpecies = (poolFlags & 0x0001) != 0;
         tr.uniqueItems = (poolFlags & 0x0002) != 0;
-        
+
         return tr;
     }
-    
+
     private TrainerPokemon getParagonLiteTrainerPoke(byte[] trPokeBytes, int offset, int statModifiersOffset, int itemOffset, int movesOffset) {
         int speciesOffset = 0x00;
         int basicFlagsOffset = 0x02;
         int levelOffset = 0x03;
 
         TrainerPokemon tpk = new TrainerPokemon();
-        
+
         int species = readUnsignedWord(trPokeBytes, offset + speciesOffset);
         int forme = trPokeBytes[offset + basicFlagsOffset] & 0x1F;
         int gender = (trPokeBytes[offset + basicFlagsOffset] >> 5) & 0x01;
         int ability = (trPokeBytes[offset + basicFlagsOffset] >> 6) & 0x03;
         int level = trPokeBytes[offset + levelOffset] & 0xFF;
-        
+
         tpk.level = level;
         tpk.pokemon = species > Gen5Constants.pokemonCount ? pokestarPokes[species - Gen5Constants.pokestarPokemonOffset] : pokes[species];
         tpk.forme = forme;
         tpk.formeSuffix = Gen5Constants.getFormeSuffixByBaseForme(species, forme);
         tpk.abilitySlot = ability;
         tpk.forcedGenderFlag = gender;
-        
+
         if (statModifiersOffset > 0) {
             int statModifiers = readUnsignedWord(trPokeBytes, offset + statModifiersOffset);
             tpk.IVs = statModifiers & 0x1F;
             tpk.nature = (byte) ((statModifiers >> 5) & 0x1F);
             tpk.evFlags = (byte) ((statModifiers >> 10) & 0x3F);
         }
-        
+
         if (itemOffset > 0)
             tpk.heldItem = readUnsignedWord(trPokeBytes, offset + itemOffset);
-        
+
         if (movesOffset > 0) {
             for (int move = 0; move < 4; move++) {
                 tpk.moves[move] = readUnsignedWord(trPokeBytes, offset + movesOffset + move * 2);
             }
         }
-        
+
         return tpk;
     }
 
@@ -1951,10 +1951,10 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             trpokes.files.add(new byte[isParagonLite ? 4 : 8]);
             for (int i = 1; i < mainNumTrainers; i++) {
                 Trainer tr = allTrainers.next();
-                
+
                 byte[] trainer = makeTrainerData(tr, doubleBattleMode, allSmart, isParagonLite || tr.plMode);
                 byte[] trpoke = makeTrainerPoke(tr, movesets, isParagonLite);
-                
+
                 trainers.files.add(trainer);
                 trpokes.files.add(trpoke);
             }
@@ -2051,7 +2051,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 for (int trno = 0; trno < 17; trno++) {
                     if (!allTrainers.hasNext())
                         break;
-                    
+
                     Trainer tr = allTrainers.next();
                     Iterator<TrainerPokemon> tpks = tr.getStandardPokePool().iterator();
                     int pokemonNum = 6;
@@ -2089,7 +2089,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     private byte[] makeTrainerData(Trainer tr, boolean doubleBattleMode, boolean allSmart, boolean isParagonLite) {
         if (isParagonLite || tr.plMode)
             return makeParagonTrainerData(tr, doubleBattleMode, allSmart);
-        
+
         byte[] trainer = new byte[20];
 
         boolean setToDoubleBattle = doubleBattleMode && !tr.skipImportant() && tr.battleType == Trainer.BattleType.SingleBattle;
@@ -2116,15 +2116,15 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         trainer[0x10] = (byte) (tr.isHealer ? 1 : 0);
         trainer[0x11] = tr.payoutScale;
         writeWord(trainer, 0x12, tr.rewardItem);
-        
+
         return trainer;
     }
-    
+
     private byte[] makeParagonTrainerData(Trainer tr, boolean doubleBattleMode, boolean allSmart) {
         byte[] trainer = new byte[20];
 
         boolean setToDoubleBattle = doubleBattleMode && !tr.skipImportant() && tr.battleType == Trainer.BattleType.SingleBattle;
-        
+
         int flags = 0;
         flags |= tr.battleType == null ? 0x00 : tr.battleType.ordinal() & 0x03;
         flags |= 0x04; // signature
@@ -2136,9 +2136,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         flags |= tr.ppMax ? 0x0100 : 0x00;
         flags |= tr.isPooled ? 0x8000 : 0x00;
         writeWord(trainer, 0x00, flags);
-        
+
         trainer[0x02] = (byte) tr.trainerclass;
-        
+
         trainer[0x03] = (byte) tr.getPartySize();
 
         for (int j = 0; j < 4; ++j)
@@ -2154,16 +2154,16 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         trainer[0x11] = tr.payoutScale;
         writeWord(trainer, 0x12, tr.rewardItem);
-        
+
         return trainer;
     }
 
     private byte[] makeTrainerPoke(Trainer tr, Map<Integer, List<MoveLearnt>> movesets, boolean isParagonLite) {
         if (isParagonLite)
             return makeParagonLiteTrainerPoke(tr, movesets);
-        
+
         int numPokes = tr.getStandardPokePool().size();
-        
+
         int bytesNeeded = 8 * numPokes;
         if (tr.pokemonHaveCustomMoves()) {
             bytesNeeded += 8 * numPokes;
@@ -2171,7 +2171,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         if (tr.pokemonHaveItems()) {
             bytesNeeded += 2 * numPokes;
         }
-        
+
         byte[] trpoke = new byte[bytesNeeded];
         int pokeOffs = 0;
         Iterator<TrainerPokemon> tpokes = tr.getStandardPokePool().iterator();
@@ -2206,31 +2206,31 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 pokeOffs += 8;
             }
         }
-        
+
         return trpoke;
     }
-    
+
     private byte[] makeParagonLiteTrainerPoke(Trainer tr, Map<Integer, List<MoveLearnt>> movesets) {
         int numPokes = tr.getTotalPokes();
 
         int bytesNeeded = 4 * numPokes;
-        
+
         if (tr.isPooled)
             bytesNeeded += 20;
-        
+
         if (tr.pokesHaveNatures || tr.pokesHaveIVsEVs)
             bytesNeeded += 2 * numPokes;
-        
+
         if (tr.pokemonHaveItems())
             bytesNeeded += 2 * numPokes;
-        
+
         if (tr.pokemonHaveCustomMoves())
             bytesNeeded += 8 * numPokes;
 
         byte[] trpoke = new byte[bytesNeeded];
 
         int pokeOffs = 0;
-        
+
         // header
         if (tr.isPooled) {
             if (tr.partySlots.size() > 6)
@@ -2238,14 +2238,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             if (tr.pools.size() > 6)
                 throw new RuntimeException("too many pools");
-            
+
             // slots
             int headerOffset = 0;
             for (Trainer.PartySlot partySlot : tr.partySlots) {
                 writeWord(trpoke, headerOffset, partySlot.toPacked());
                 headerOffset += 2;
             }
-            
+
             // pool sizes
             headerOffset = 0x0C;
             for (List<TrainerPokemon> pool : tr.pools) {
@@ -2260,18 +2260,18 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
             pokeOffs = 0x14;
         }
-        
+
         Iterator<TrainerPokemon> tpokes = tr.getAllPokesInPools().iterator();
         for (int poke = 0; poke < numPokes; poke++) {
             TrainerPokemon tp = tpokes.next();
-            
+
             writeWord(trpoke, pokeOffs, tp.pokemon.number);
             int baseFlags = 0;
             baseFlags |= tp.forme & 0x1F;
             baseFlags |= (tp.forcedGenderFlag & 0x01) << 5;
             baseFlags |= (tp.abilitySlot & 0x03) << 6;
             trpoke[pokeOffs + 2] = (byte) baseFlags;
-            
+
             trpoke[pokeOffs + 3] = (byte) tp.level;
 
             pokeOffs += 4;
@@ -2283,17 +2283,17 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 writeWord(trpoke, pokeOffs, statModifiers);
                 pokeOffs += 2;
             }
-            
+
             if (tr.pokemonHaveItems()) {
                 writeWord(trpoke, pokeOffs, tp.heldItem);
                 pokeOffs += 2;
             }
-            
+
             if (tr.pokemonHaveCustomMoves()) {
                 if (tp.resetMoves) {
                     if (tr.isPooled)
                         throw new RuntimeException("This should never be pooled!");
-                    
+
                     int[] pokeMoves = RomFunctions.getMovesAtLevel(getAltFormeOfPokemon(tp.pokemon, tp.forme).number, movesets, tp.level);
                     for (int m = 0; m < 4; m++) {
                         writeWord(trpoke, pokeOffs + m * 2, pokeMoves[m]);
@@ -3035,7 +3035,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         available |= MiscTweak.MODERNIZE_GEMS.getValue();
         available |= MiscTweak.NPC_SMART_AI.getValue();
         available |= MiscTweak.LITTLE_CUP_MODE.getValue();
-        
+
         available |= MiscTweak.DEBUG_MODE.getValue();
         available |= MiscTweak.PARAGON_LITE.getValue();
         if (romEntry.romType == Gen5Constants.Type_BW2) {
@@ -3193,12 +3193,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             if (typeEffectivenessTableOffset >= 0) {
                 Effectiveness[][] typeEffectivenessTable = readTypeEffectivenessTable(battleOverlay, typeEffectivenessTableOffset);
                 log("--Updating Type Effectiveness--");
-                int steel = Gen5Constants.typeToByte(Type.STEEL);
-                int dark = Gen5Constants.typeToByte(Type.DARK);
-                int ghost = Gen5Constants.typeToByte(Type.GHOST);
-                typeEffectivenessTable[ghost][steel] = Effectiveness.NEUTRAL;
+                typeEffectivenessTable[Type.GHOST.ordinal()][Type.STEEL.ordinal()] = Effectiveness.NEUTRAL;
                 log("Replaced: Ghost not very effective vs Steel => Ghost neutral vs Steel");
-                typeEffectivenessTable[dark][steel] = Effectiveness.NEUTRAL;
+                typeEffectivenessTable[Type.DARK.ordinal()][Type.STEEL.ordinal()] = Effectiveness.NEUTRAL;
                 log("Replaced: Dark not very effective vs Steel => Dark neutral vs Steel");
                 logBlankLine();
                 writeTypeEffectivenessTable(typeEffectivenessTable, battleOverlay, typeEffectivenessTableOffset);
@@ -3228,8 +3225,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
     }
 
     private Effectiveness[][] readTypeEffectivenessTable(byte[] battleOverlay, int typeEffectivenessTableOffset) {
-        int min = Type.NORMAL.ordinal();
-        int max = typeInGame(Type.FAIRY) ? Type.FAIRY.ordinal() : Type.DARK.ordinal();
+        int min = 0;
+        int max = (typeInGame(Type.FAIRY) ? Type.GEN6PLUS.size() : Type.GEN2THROUGH5.size()) - 1;
 
         Effectiveness[][] effectivenessTable = new Effectiveness[max + 1][max + 1];
         for (int attacker = min; attacker <= max; attacker++) {
@@ -3243,21 +3240,24 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                     case 0 -> Effectiveness.ZERO;
                     default -> null;
                 };
-                effectivenessTable[attacker][defender] = effectiveness;
+                int attackerIndex = Gen5Constants.typeTable[attacker].ordinal();
+                int defenderIndex = Gen5Constants.typeTable[defender].ordinal();
+                effectivenessTable[attackerIndex][defenderIndex] = effectiveness;
             }
         }
         return effectivenessTable;
     }
 
-    private void writeTypeEffectivenessTable(Effectiveness[][] typeEffectivenessTable, byte[] battleOverlay,
-                                             int typeEffectivenessTableOffset) {
-        int min = Type.NORMAL.ordinal();
-        int max = typeInGame(Type.FAIRY) ? Type.FAIRY.ordinal() : Type.DARK.ordinal();
+    private void writeTypeEffectivenessTable(Effectiveness[][] typeEffectivenessTable, byte[] battleOverlay, int typeEffectivenessTableOffset) {
+        int min = 0;
+        int max = (typeInGame(Type.FAIRY) ? Type.GEN6PLUS.size() : Type.GEN2THROUGH5.size()) - 1;
 
         for (int attacker = min; attacker <= max; attacker++) {
             for (int defender = min; defender <= max; defender++) {
                 Effectiveness effectiveness = typeEffectivenessTable[attacker][defender];
-                int offset = typeEffectivenessTableOffset + (attacker * (max + 1)) + defender;
+                int attackerIndex = Gen5Constants.typeToByte(Type.values()[attacker]);
+                int defenderIndex = Gen5Constants.typeToByte(Type.values()[defender]);
+                int offset = typeEffectivenessTableOffset + (attackerIndex * (max + 1)) + defenderIndex;
                 byte effectivenessInternal = switch (effectiveness) {
                     case DOUBLE -> 8;
                     case NEUTRAL -> 4;
@@ -3268,6 +3268,112 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 battleOverlay[offset] = effectivenessInternal;
             }
         }
+
+        if (!isUpperVersion())
+            return;
+
+        // Update Cheren's descriptions to be correctly sized given new types
+        try {
+            int overlayNumber = romEntry.getInt("LocalXtransceiverOvlNumber");
+            byte[] xtransceiverOverlay = readOverlay(overlayNumber);
+            xtransceiverOverlay[0x61D2] = (byte) typeEffectivenessTable.length;
+            writeOverlay(overlayNumber, xtransceiverOverlay);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Update text file
+        int maxLineLength = 229;
+        int typeExplanationTextOffset = romEntry.getInt("TypeExplanationTextOffset");
+        List<String> typeExplanationStrings = new ArrayList<>();
+
+        for (int type1Index = 0; type1Index < typeEffectivenessTable.length; ++type1Index) {
+            for (int type2Index = type1Index; type2Index < typeEffectivenessTable.length; ++type2Index) {
+                StringBuilder sb = new StringBuilder();
+
+                Type type1 = Gen5Constants.typeTable[type1Index];
+                Type type2 = Gen5Constants.typeTable[type2Index];
+                if (type1 == type2)
+                    type2 = null;
+
+                sb.append("A ");
+
+                sb.append(type1.camelCase());
+                if (type2 != null) {
+                    sb.append("- and ");
+                    sb.append(type2.camelCase());
+                }
+
+                sb.append("-type Pokémon...\uF000븁\\x0000\\xFFFE");
+
+                List<String> weakTypeNames = new ArrayList<>();
+                for (int attackerTypeIndex = 0; attackerTypeIndex < typeEffectivenessTable.length; ++attackerTypeIndex) {
+                    Type attackerType = Gen5Constants.typeTable[attackerTypeIndex];
+                    Effectiveness effectiveness = typeEffectivenessTable[attackerType.ordinal()][type1.ordinal()];
+                    if (type2 != null)
+                        effectiveness = effectiveness.combine(typeEffectivenessTable[attackerType.ordinal()][type2.ordinal()]);
+
+                    if (effectiveness.ordinal() > Effectiveness.NEUTRAL.ordinal())
+                        weakTypeNames.add(attackerType.camelCase());
+                }
+
+                int weaknessCount = weakTypeNames.size();
+                if (weaknessCount == 0) {
+                    sb.append("It is a rare type combination that\\xFFFEdoesn't have any weaknesses.\uF000븁\\x0000");
+                } else if (weaknessCount == 1) {
+                    sb.append("It's weak to only\\xFFFE");
+                    sb.append(weakTypeNames.get(0));
+                    sb.append("-type attacks.\uF000븁\\x0000");
+                } else {
+                    StringBuilder weakSb = new StringBuilder();
+                    weakSb.append("It's weak to ");
+                
+                    for (int i = 0; i < weaknessCount; ++i) {
+                        if (i > 0 && weaknessCount > 2)
+                            weakSb.append(",");
+
+                        weakSb.append(' ');
+                        
+                        if (i + 1 == weaknessCount)
+                            weakSb.append("and ");
+
+                        weakSb.append(weakTypeNames.get(i));
+                        weakSb.append('-');
+                    }
+                    
+                    weakSb.append("type attacks.");
+
+                    String weakStr = sortText(weakSb.toString(), maxLineLength, false);
+                    String[] weakStrLines = weakStr.split(getLineBreakStringRegex());
+
+                    for (int i = 1; i < weakStrLines.length; ++i) {
+                        if (!weakStrLines[i].startsWith("attacks."))
+                            continue;
+                        
+                        String previousLine = weakStrLines[i - 1];
+                        int lastSpaceIndex = previousLine.lastIndexOf(' ');
+                        weakStrLines[i - 1] = previousLine.substring(0, lastSpaceIndex);
+                        weakStrLines[i] = String.join(" ", previousLine.substring(lastSpaceIndex + 1), weakStrLines[i]);
+                    }
+                    
+                    for (int i = 0; i < weakStrLines.length; ++i) {
+                        if (i > 0)
+                            sb.append(i % 2 == 0 ? "\uF000븀\\x0000\\xFFFE" : "\\xFFFE");
+                        
+                        sb.append(weakStrLines[i]);
+                    }
+                    
+                    sb.append("\uF000븁\\x0000");
+                    
+                    if (weaknessCount >= 5)
+                        sb.append("\\xFFFEBecause it's weak to many types,\\xFFFEa Trainer has to plan for it.\uF000븁\\x0000");
+                }
+
+                typeExplanationStrings.add(sb.toString());
+            }
+        }
+
+        setStrings(false, typeExplanationTextOffset, typeExplanationStrings);
     }
 
     private void modernizeGems() {
@@ -5840,7 +5946,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     private void applyParagonLite(Settings settings) {
         // Find String
-//        String searchKey = "Resolute";
+//        String searchKey = "punching";
 //        List<String> strs = new ArrayList<>();
 //        List<Integer> counts = new ArrayList<>();
 //        int stringFileCount = stringsNarc.files.size();
@@ -5857,7 +5963,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 //                }
 //            }
 //        }
-
+        
         ParagonLiteRemoveTweak(settings, MiscTweak.CUSTOM_MOVE_CHANGES);
 //        ParagonLiteRemoveTweak(settings, MiscTweak.CUSTOM_POKEMON_TYPES);
 //        ParagonLiteRemoveTweak(settings, MiscTweak.CUSTOM_POKEMON_STATS);
@@ -5983,9 +6089,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setBattleEventStrings();
 
         paragonLite.setDebugFlag(debugMode);
-        
+
         paragonLite.addUtilFuncs();
-        
+
         // Code updates
         paragonLite.tempFixFairyStruggle();
 //        paragonLite.setUnovaLink();

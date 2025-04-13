@@ -7027,8 +7027,12 @@ public abstract class AbstractRomHandler implements RomHandler {
         }
     }
 
+    public String sortText(String inText, int maxLinePixels, boolean throwOnOverflow) {
+        return sortText(inText, 0, maxLinePixels, 0, throwOnOverflow);
+    }
+
     public String sortText(String inText, int maxLines, int maxLinePixels, boolean throwOnOverflow) {
-        return sortText(inText, maxLines, maxLinePixels, 7, throwOnOverflow);
+        return sortText(inText, maxLines, maxLinePixels, (1 << maxLines) - 1, throwOnOverflow);
     }
 
     public String sortText(String inText, int maxLines, int maxLinePixels, int sentenceLineFlags, boolean throwOnOverflow) {
@@ -7086,7 +7090,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         lines.add(stringBuilder.toString());
 
-        if (lines.size() > maxLines) {
+        if (maxLines > 0 && lines.size() > maxLines) {
             if (sentenceLineFlags > 0) {
                 int mask = (1 << (sentenceIndex - 1)) - 1;
                 sentenceLineFlags = mask & (sentenceLineFlags - 1);
@@ -7109,7 +7113,7 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private boolean validateTextLines(String[] lines, int maxLines, int maxLinePixels) {
-        if (lines.length > maxLines)
+        if (maxLines > 0 && lines.length > maxLines)
             return false;
 
         for (String line : lines) {

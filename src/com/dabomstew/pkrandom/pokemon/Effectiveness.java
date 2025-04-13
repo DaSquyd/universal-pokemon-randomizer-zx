@@ -190,7 +190,7 @@ public enum Effectiveness {
             /*FAIRY  */ {NEUTRAL,  DOUBLE, NEUTRAL, NEUTRAL, NEUTRAL,    HALF, NEUTRAL, NEUTRAL, NEUTRAL,    HALF,  DOUBLE, NEUTRAL, NEUTRAL,    HALF, NEUTRAL,    HALF,  DOUBLE, NEUTRAL},
     };
 
-    private Effectiveness combine(Effectiveness other) {
+    public Effectiveness combine(Effectiveness other) {
         return combineTable[this.ordinal()][other.ordinal()];
     }
 
