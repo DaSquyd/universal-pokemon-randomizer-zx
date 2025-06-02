@@ -148,7 +148,7 @@ Weather:
     mov     r7, r0
     
 CriticalHit:
-    cmp     r6, #0
+    cmp     r6, #FALSE
     beq     Debug
     
     ; small optimizations
@@ -177,11 +177,11 @@ CriticalHit:
 #endif
     
 Debug:
-;    ldr     r0, [r5, #ServerFlow.mainModule]
-;    mov     r1, #DEBUG_NoRandDamage
-;    bl      Battle::MainModule_GetDebugFlag
-;    cmp     r0, #0
-;    bne     STAB
+    ldr     r0, [r5, #ServerFlow.mainModule]
+    mov     r1, #DEBUG_NoRandDamage
+    bl      Battle::MainModule_GetDebugFlag
+    cmp     r0, #FALSE
+    bne     STAB
     
 #if HAS_POKESTAR_STUDIOS
     mov     r0, r5
