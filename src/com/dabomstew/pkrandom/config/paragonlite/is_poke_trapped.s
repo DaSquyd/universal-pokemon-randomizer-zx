@@ -27,18 +27,26 @@
     mov     r6, r1
     mov     r5, r0
     
+#if TYPE_GHOST_CAN_ALWAYS_ESCAPE
     mov     r0, r6
     mov     r1, #GHOST_TYPE
     bl      Battle::PokeHasType
-    cmp     r0, #0
+    cmp     r0, #FALSE
+    #if ABILITY_RUN_AWAY_CAN_ESCAPE_TRAPS
     bne     ReturnNotTrapped
+    #else
+    beq     CheckAllForTrap
+    #endif
+#endif
     
+#if ABILITY_RUN_AWAY_CAN_ESCAPE_TRAPS
 CheckRunAway:
     mov     r0, r6
     mov     r1, #ABILITY_STAT
     bl      Battle::GetPokeStat
     cmp     r0, #RUN_AWAY
     bne     CheckAllForTrap
+#endif
     
 ReturnNotTrapped:
     mov     r0, #4

@@ -84,12 +84,24 @@ public class ParagonLiteOverlay {
         return romAddress;
     }
 
+    public int getRomAddress(String label) {
+        return globalAddressMap.getRomAddress(this, label);
+    }
+
+    public int getRamAddress(String label) {
+        return globalAddressMap.getRamAddress(this, label);
+    }
+
     public int allocateRom(int size) {
         return allocateRomRange(size, -1, -1);
     }
 
     public int allocateRomNear(int size, int referenceAddress, int referenceSize) {
         return allocateRomRange(size, referenceAddress, referenceAddress + referenceSize);
+    }
+    
+    public boolean isValidLabel(String label) {
+        return globalAddressMap.isValidLabel(this, label);
     }
 
     private boolean rangeIsNear(int startA, int endA, int startB, int endB) {
@@ -598,6 +610,10 @@ public class ParagonLiteOverlay {
         int romAddress = allocateRom(bytes.length);
         writeDataInternal(bytes, label, romAddress, refPattern);
         return romAddress;
+    }
+
+    public int writeDataUnnamed(byte[] bytes) {
+        return writeDataUnnamed(bytes, "");
     }
 
     public int writeDataUnnamed(byte[] bytes, String refPattern) {

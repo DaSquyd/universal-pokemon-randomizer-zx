@@ -1,14 +1,21 @@
 package com.dabomstew.pkrandom.romhandlers.hack;
 
+import com.dabomstew.pkrandom.arm.ArmParser;
+import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Type;
-import com.dabomstew.pkrandom.romhandlers.hack.Ability.*;
-import com.dabomstew.pkrandom.romhandlers.hack.Item.ItemProtectorMode;
-import com.dabomstew.pkrandom.romhandlers.hack.Weather.WeatherHailSnowMode;
+import com.dabomstew.pkrandom.romhandlers.*;
+import com.dabomstew.pkrandom.romhandlers.hack.ability.old.*;
+import com.dabomstew.pkrandom.romhandlers.hack.item.ItemProtectorMode;
+import com.dabomstew.pkrandom.romhandlers.hack.weather.WeatherHailSnowMode;
+
+import java.util.*;
 
 public class HackMode {
     public final String name;
 
-    // Abilities
+    private final Map<Class<? extends HackMod>, HackMod> hackMods = new HashMap<>();
+
+    // Abilities    
     public int abilityStenchFlinchPercent = 10; // #001
     public AbilityDampMode abilityDampMode = AbilityDampMode.VANILLA; // #006
     public AbilityLimberMode abilityLimberMode = AbilityLimberMode.VANILLA; // #007
@@ -31,6 +38,7 @@ public class HackMode {
     public String abilityMagnetPullMessage; // #042
     public boolean abilitySoundproofIsImmuneToPerishSong = false; // #043
     public boolean abilitySandStreamAllowSelfDamage = true; // #045
+    public AbilityRunAwayMode abilityRunAwayMode = AbilityRunAwayMode.VANILLA; // #050
     public AbilityKeenEyeMode abilityKeenEyeMode = AbilityKeenEyeMode.VANILLA; // #051
     public AbilityHyperCutterMode abilityHyperCutterMode = AbilityHyperCutterMode.VANILLA; // #052
     public AbilityTruantMode abilityTruantMode = AbilityTruantMode.VANILLA; // #054
@@ -41,12 +49,19 @@ public class HackMode {
     public double abilityPlusMultiplier = 1; // #057
     public String abilityPlusMessage; // #057
     public AbilityMinusMode abilityMinusMode = AbilityMinusMode.VANILLA; // #058
+    public double abilityMinusMultiplier = 1; // #058
     public String abilityMinusMessage; // #058
     public String abilityArenaTrapMessage; // #071
     public AbilityVitalSpiritMode abilityVitalSpiritMode = AbilityVitalSpiritMode.VANILLA; // #072
-    public AbilityPurePowerMode abilityPurePowerMode = AbilityPurePowerMode.ATTACK; // #074
+    public MoveCategory abilityPurePowerMoveCategory = MoveCategory.PHYSICAL; // #074
     public double abilityPurePowerMultiplier = 2; // #074
     public String abilityPurePowerMessage; // #074
+    public AbilityTangledFeetMode abilityTangledFeetMode = AbilityTangledFeetMode.VANILLA; // #077
+    public double abilityRivalrySameGenderMultiplier = 1.25; // #079
+    public double abilityRivalryOppositeGenderMultiplier = 0.75; // #079
+    public boolean abilitySteadfastIgnoresTaunt = false; // #080
+    public AbilityAngerPointMode abilityAngerPointMode = AbilityAngerPointMode.VANILLA; // #083
+    public double abilityIronFistMultiplier = 1.2; // #089
     public String abilitySuperLuckMessage; // #105
     public AbilityIceBodyMode abilityIceBodyMode = AbilityIceBodyMode.VANILLA; // #115
     public AbilityJustifiedMode abilityJustifiedMode = AbilityJustifiedMode.VANILLA; // #154
@@ -60,12 +75,16 @@ public class HackMode {
     public String abilityLuckyFootName = "Lucky Foot"; // #504
 
     // Moves
+    public List<HackMod> moveCommonMods = new ArrayList<>();
+    public SortedMap<Integer, MoveHackMod> moveEventMods = new TreeMap<>();
     public String tmsAndHMsFile;
     public byte trapMoveDamageFraction = 16;
     public byte trapMoveDamageFractionWithBoost = 8;
     public double screenMoveDoubleBattleReduction = 0.66;
 
     // Items
+    public List<HackMod> itemCommonMods = new ArrayList<>();
+    public SortedMap<Integer, ItemHackMod> itemEventMods = new TreeMap<>();
     public double gemItemDamageMultiplier = 1.5;
     public ItemProtectorMode itemProtectorMode = ItemProtectorMode.VANILLA; // #321
 
@@ -147,16 +166,33 @@ public class HackMode {
     public double multiTypeSTAB = 1.5;
     public boolean dynamicTurnOrder = false;
 
-    public HackMode() {
-        this.name = "Vanilla";
-        setValues();
-    }
-
     public HackMode(String name) {
         this.name = name;
-        setValues();
     }
 
-    protected void setValues() {
+    protected void addHackMod(HackMod hackMod) {
+        hackMods.put(hackMod.getClass(), hackMod);
+    }
+
+    protected void removeHackMod(Class<? extends HackMod> hackModClass) {
+        hackMods.remove(hackModClass);
+    }
+
+    protected <T extends HackMod> T getHackMod(Class<T> hackModClass) {
+        HackMod hackMod = hackMods.get(hackModClass);
+        return hackModClass.cast(hackMod);
+    }
+
+    public void applyAll(Gen5RomHandler romHandler, ArmParser armParser, ParagonLiteAddressMap globalAddressMap, ParagonLiteArm9 arm9, Map<OverlayId, ParagonLiteOverlay> overlays) {
+        Collection<HackMod> hackModValues = hackMods.values();
+        Map<Class<? extends HackMod>, HackMod> applied = new HashMap<>();
+        HackMod.Context context = new HackMod.Context(romHandler, armParser, globalAddressMap, arm9, overlays, applied);
+        for (HackMod hackMod : hackModValues) {
+            if (applied.containsKey(hackMod.getClass()))
+                throw new RuntimeException();
+
+            hackMod.apply(context);
+            applied.put(hackMod.getClass(), hackMod);
+        }
     }
 }

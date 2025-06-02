@@ -10,7 +10,7 @@
     bl      Battle::EventVar_GetValue
     
     bl      ARM9::GetMoveCategory
-    cmp     r0, #CAT_Special
+    cmp     r0, #ABILITY_PURE_POWER_MOVE_CATEGORY
     bne     Return
     
     mov     r0, #VAR_Ratio

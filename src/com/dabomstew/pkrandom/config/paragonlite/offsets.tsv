@@ -492,9 +492,11 @@ Battle	SwitchAI_AsleepWithNaturalCure	Code		thumb			0x021B549C	0x021B545C
 Battle	SwitchAI_EffectiveMove	Code		thumb			0x021B5554	0x021B5514
 Battle	SwitchAI_CheckForTypeAbsorbAbility	Code		thumb			0x021B5760	0x021B5720
 Battle	DoesPokeHaveSuperEffectiveMove	Code		thumb	0x021D0664	0x021D0644	0x021B58C0	0x021B5880
+Battle	AI_SelectAction	Code		thumb			0x021B59EC	0x021B59AC
 Battle	Inst_Unknown2ListCountCmp1	Inst	2		0x021D1B9A	0x021D1B7A	0x021B6F66	0x021B6F26
 Battle	Inst_Unknown2ListCountCmp2	Inst	2		0x021D1B9E	0x021D1B7E	0x021B6F6A	0x021B6F2A
 Battle	Data_Unknown2ListAddress	Data	4	*	0x021D1BEC	0x021D1BCC	0x021B6FB8	0x021B6F78
+Battle	AI_CheckUseItem	Code		thumb	0x021D3DE4	0x021D3DC4	0x021B9218	0x021B91D8
 Battle	Poke_Create	Code		thumb	0x021D4DA4	0x021D4D84	0x021BA5C4	0x021BA584
 Battle	GetPokeId	Code		thumb	0x021D5460	0x021D5440	0x021BAC80	0x021BAC40
 Battle	HasMove	Code		thumb	0x021D5770	0x021D5750	0x021BAF90	0x021BAF50
@@ -606,6 +608,7 @@ Battle	Action_SetSwitchDepleteParam	Code		thumb	0x021D83E4	0x021D83C4	0x021BDC2C
 Battle	Action_IsDeplete	Code		thumb	0x021D8400	0x021D83E0	0x021BDC48	0x021BDC08
 Battle	Action_SetRotateParam	Code		thumb	0x021D841C	0x021D83FC	0x021BDC64	0x021BDC24
 Battle	BattleAction_GetActionType	Code		thumb	0x021D8474	0x021D8454	0x021BDCBC	0x021BDC7C
+Battle	AbilityEvent_AddObject	Code		thumb	0x021D84A4	0x021D8484	0x021BDCEC	0x021BDCAC
 Battle	Inst_AbilityEffectListCountCmp	Data	1		0x021D84FE	0x021D84DE	0x021BDD46	0x021BDD06
 Battle	Data_AbilityEffectListAddress	Data	4	*	0x021D8508	0x021D84E8	0x021BDD50	0x021BDD10
 Battle	Data_AbilityEffectListAddress4	Data	4	*	0x021D850C	0x021D84EC	0x021BDD54	0x021BDD14
@@ -764,8 +767,22 @@ BattleServer	Condition_CreateDamageMessage	Code		thumb	0x0689B8CC	0x0689B8CC	0x0
 BattleServer	Condition_GetDamageText	Code		thumb	0x0689B92C	0x0689B92C	0x0689BABC	0x0689BABC
 BattleServer	Condition_HandlerBind	Code		thumb	0x0689BC30	0x0689BC30	0x0689BDC0	0x0689BDC0
 BattleServer	ConditionEffectivenessModifiers	Code		thumb	0x0689C540	0x0689C540	0x0689C6C8	0x0689C6C8
+BattleServer	IsEncoreFailMove	Code		thumb	0x0689C8AC	0x0689C8AC	0x0689CA34	0x0689CA34
+BattleServer	IsMeFirstFailMove	Code		thumb	0x0689C8BC	0x0689C8BC	0x0689CA44	0x0689CA44
+BattleServer	IsDelayedHitMove	Code		thumb	0x0689C8CC	0x0689C8CC	0x0689CA54	0x0689CA54
+BattleServer	IsPressureBoostMove	Code		thumb	0x0689C8DC	0x0689C8DC	0x0689CA64	0x0689CA64
+BattleServer	IsComboMove	Code		thumb	0x0689C8EC	0x0689C8EC	0x0689CA74	0x0689CA74
+BattleServer	IsRolePlayFailAbility	Code		thumb	0x0689C91C	0x0689C91C	0x0689CAA4	0x0689CAA4
+BattleServer	IsSkillSwapFailAbility	Code		thumb	0x0689C954	0x0689C954	0x0689CADC	0x0689CADC
 BattleServer	IsPlateItem	Code		thumb	0x0689C980	0x0689C980	0x0689CB08	0x0689CB08
-BattleServer	IsMoldBreakerIgnoredAbility	Code		thumb	0x0689C9B0	0x0689C9B0	0x0689CB38	0x0689CB38
+BattleServer	IsDriveItem	Code		thumb	0x0689C990	0x0689C990	0x0689CB18	0x0689CB18
+BattleServer	IsBreakableAbility	Code		thumb	0x0689C9B0	0x0689C9B0	0x0689CB38	0x0689CB38
+BattleServer	GetMoveConditionByTurnCheckOrder	Code		thumb	0x0689C9F8	0x0689C9F8	0x0689CB80	0x0689CB80
+BattleServer	IsUncallableMove	Code		thumb	0x0689CA0C	0x0689CA0C	0x0689CB94	0x0689CB94
+BattleServer	IsSleepTalkUncallableMove	Code		thumb	0x0689CA1C	0x0689CA1C	0x0689CBA4	0x0689CBA4
+BattleServer	IsAssistUncallableMove	Code		thumb	0x0689CA3C	0x0689CA3C	0x0689CBC4	0x0689CBC4
+BattleServer	IsCopyCatUncallableMove	Code		thumb	0x0689CA5C	0x0689CA5C	0x0689CBE4	0x0689CBE4
+BattleServer	IsMimicFailMove	Code		thumb	0x0689CA7C	0x0689CA7C	0x0689CC04	0x0689CC04
 BattleServer	PokeSet_Remove	Code		thumb	0x0689CC14	0x0689CC14	0x0689CD9C	0x0689CD9C
 BattleServer	PokeSet_SeekStart	Code		thumb	0x0689CC84	0x0689CC84	0x0689CE0C	0x0689CE0C
 BattleServer	PokeSet_SeekNext	Code		thumb	0x0689CC8C	0x0689CC8C	0x0689CE14	0x0689CE14
@@ -795,9 +812,15 @@ StorageSystem	Unk_21CE078	Code		thumb			0x021CE078	0x021CE038
 StorageSystem	Unk_21CE0A8	Code		thumb			0x021CE0A8	0x021CE068
 StorageSystem	Unk_21CE100	Code		thumb			0x021CE100	0x021CE0C0
 StorageSystem	Preview_Ability	Code		thumb	0x021EB134	0x021EB114	0x021CE62C	0x021CE5EC
+StorageSystem	Preview_Item	Code		thumb			0x021CE6B0	0x021CE670
+StorageSystem	Preview_Move	Code		thumb			0x021CE730	0x021CE6F0
 StorageSystem	PreviewCore	Code		thumb	0x021EB2C4	0x021EB2A4	0x021CE7D8	0x021CE798
 StorageSystem	Unk_21D06E4	Code		thumb			0x021D06E4	0x021D06A4
 StorageSystem	DisplayPreview_TypeGraphics	Code		thumb			0x021D0A68	0x021D0A28
+StorageSystem	Search_Core	Code		thumb			0x021D640C	0x021D63CC
+StorageSystem	Search_UI_Init	Code		thumb			0x021D6D68	0x021D6D28
+StorageSystem	Data_SearchAbilityLetterOffsets	Data	48				0x021D9078	0x021D9038
+StorageSystem	Data_SearchAbilityNameSort	Data	164				0x021D9288	0x021D9248
 StorageSystem	Box2_Main_C	Data	12		0x021F1420	0x021F1400	0x021D9680	0x021D9640
 Title	StartMenuProc_End	Code		thumb			0x0219DA18	0x0219D9D8
 TrainerAI	Data_AIScriptCommands	Data	492	*	0x0218A5C8	0x0218A5A8	0x02181CF4	0x02181CB4
@@ -975,8 +998,3 @@ UnovaLink	Data_KeySystem_UI_SendReceive_Receive	Data	16	***4			0x021C8FF8	0x021C
 UnovaLink	Data_KeySystem_UI_SendReceive_Send	Data	16	***4			0x021C9008	0x021C8FC8
 UnovaLink	Data_KeySystem_UI_SendReceive_YesNo	Data	16	***4			0x021C9018	0x021C8FD8
 UnovaLink	Data_KeySystem_UI_Settings_Door	Data	16	***4			0x021C9028	0x021C8FE8
-UnovaLink	Data_aMAN	Data	4				0x021C9314	0x021C92D4
-UnovaLink	Data_aKeySystemUtilC	Data	18				0x021C9330	0x021C92F0
-UnovaLink	Data_aKEM	Data	4				0x021C9480	0x021C9440
-UnovaLink	Data_aKLL	Data	4				0x021C9484	0x021C9444
-UnovaLink	Data_aDNM	Data	4				0x021C9488	0x021C9448

@@ -55,8 +55,12 @@ public class ParagonLiteAbilities {
     public static final int healSpore = 524;
     public static final int xrayVision = 525;
     public static final int coolantBoost = 526;
+    public static final int warpDrive = 527;
+    public static final int scaredyCat = 528;
+    public static final int relentless = 529;
 
-    public static final int MAX = xrayVision;
+    public static final int MIN = heavyWing;
+    public static final int MAX = relentless;
     
     public static Set<Integer> allowedAbilities = Set.of(
 //            Abilities.aromaVeil, // 165
@@ -70,7 +74,7 @@ public class ParagonLiteAbilities {
             Abilities.strongJaw, // 173
             Abilities.refrigerate, // 174
 //            Abilities.sweetVeil, // 175
-            
+//            Abilities.stanceChange, // 176
             Abilities.galeWings, // 177
             Abilities.megaLauncher, // 178
 //            Abilities.grassPelt, // 179
@@ -83,7 +87,9 @@ public class ParagonLiteAbilities {
 //            Abilities.darkAura, // 186
 //            Abilities.fairyAura, // 187
 //            Abilities.auraBreak, // 188
-            
+//            Abilities.primordialSea, // 189
+//            Abilities.desolateLand, // 190
+//            Abilities.deltaStream, // 191
             Abilities.stamina, // 192
 //            Abilities.wimpOut, // 193
 //            Abilities.emergencyExit, // 194
@@ -100,7 +106,10 @@ public class ParagonLiteAbilities {
             Abilities.triage, // 205
             Abilities.galvanize, // 206
 //            Abilities.surgeSurfer, // 207
-            
+//            Abilities.schooling, // 208
+//            Abilities.disguise, // 209
+//            Abilities.battleBond, // 210
+//            Abilities.powerConstruct, // 21
 //            Abilities.corrosion, // 212
 //            Abilities.comatose, // 213
 //            Abilities.queenlyMajesty, // 214
@@ -114,7 +123,7 @@ public class ParagonLiteAbilities {
 //            Abilities.receiver, // 222
 //            Abilities.powerOfAlchemy, // 223
 //            Abilities.beastBoost, // 224
-            
+//            Abilities.rksSystem, // 225
 //            Abilities.electricSurge, // 226
 //            Abilities.psychicSurge, // 227
 //            Abilities.mistySurge, // 228
@@ -126,9 +135,11 @@ public class ParagonLiteAbilities {
 //            Abilities.intrepidSword, // 234
 //            Abilities.dauntlessShield, // 235
 //            Abilities.libero, // 236
-            
+//            Abilities.ballFetch, // 237
 //            Abilities.cottonDown, // 238
+            
 //            Abilities.quickDraw, // 259
+            
             Abilities.transistor, // 262
             Abilities.dragonsMaw, // 263
             Abilities.thermalExchange, // 270
@@ -167,6 +178,9 @@ public class ParagonLiteAbilities {
 //            pastoralAroma, // 523
             healSpore, // 524
             xrayVision // 525
-//            coolantBoost // 526
+//            coolantBoost, // 526
+//            warpDrive, // 527
+//            scaredyCat, // 528
+//            unyielding // 529
     );
 }

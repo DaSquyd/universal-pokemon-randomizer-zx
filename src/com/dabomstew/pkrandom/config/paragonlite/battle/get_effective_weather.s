@@ -10,7 +10,7 @@
     bl      Battle::GetPokeStat
     mov     r6, r0
     
-#if PARAGONLITE
+#if ABILITY_DAMP_IS_RAIN_EFFECT
 CheckDamp:
     mov     r1, #6 ; Damp
     cmp     r6, r1

@@ -64,7 +64,7 @@ BindMoveEvent:
     ldr     r0, [sp, #ATTACKING_MON_PARAM]
     mov     r1, r4
     mov     r2, #0 ; subPriority
-    bl      Battle::MoveEvent_AddItem
+    bl      Battle::MoveEvent_AddObject
     
 Effectiveness:
     ldr     r0, [sp, #ARG_USE_EFFECTIVENESS]

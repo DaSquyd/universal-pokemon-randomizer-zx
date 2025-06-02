@@ -14,7 +14,7 @@
     beq     Return
     
     mov     r0, #VAR_MovePower
-    ldr     r1, =5325 ; 1.3x
+    ldr     r1, =ABILITY_IRON_FIST_MULTIPLIER
     bl      Battle::EventVar_MulValue
     
 Return:

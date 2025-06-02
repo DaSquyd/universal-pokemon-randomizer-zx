@@ -3587,6 +3587,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             moves.get(Moves.sweetKiss).type = Type.FAIRY;
 
             wasFairyAdded = true;
+            
+            updateTypeEffectiveness();
         } catch (IOException e) {
             throw new RandomizerIOException(e);
         }
@@ -4158,14 +4160,22 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             return found.get(0);
         }
     }
+    
+    public int getRomInt(String key) {
+        return romEntry.getInt(key);
+    }
+    
+    public String getRomString(String key) {
+        return romEntry.getString(key);
+    }
 
-    private List<String> getStrings(boolean isStoryText, int index) {
+    public List<String> getStrings(boolean isStoryText, int index) {
         NARCArchive baseNARC = isStoryText ? storyTextNarc : stringsNarc;
         byte[] rawFile = baseNARC.files.get(index);
         return new ArrayList<>(PPTxtHandler.readTexts(rawFile));
     }
 
-    private void setStrings(boolean isStoryText, int index, List<String> strings) {
+    public void setStrings(boolean isStoryText, int index, List<String> strings) {
         NARCArchive baseNARC = isStoryText ? storyTextNarc : stringsNarc;
         byte[] newRawFile = PPTxtHandler.saveEntry(strings);
 
@@ -5808,7 +5818,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         }
 
         String getItemSortName(int itemNumber, Item.FieldPocket pocket) {
-            if (Objects.requireNonNull(pocket) == Item.FieldPocket.TMS_AND_HMS) {
+            if (pocket == Item.FieldPocket.TMS_AND_HMS) {
                 int moveNumber;
 
                 int tmNumber = tmFromIndex(itemNumber);
@@ -6116,7 +6126,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         paragonLite.setWeatherDamage();
         paragonLite.setShinyRate();
         paragonLite.setTrainerShiny();
-        paragonLite.setGhostEscape();
+        paragonLite.setCanPokeEscape();
         paragonLite.setCheckNoEffect();
         paragonLite.setCallModifyEffectivenessHandler();
         paragonLite.setHandlerSimulationDamage();

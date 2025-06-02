@@ -115,6 +115,7 @@ public class Gen5Constants {
     public static final int evolutionMethodCount = 27;
 
     public static final int highestAbilityIndex = Abilities.teravolt;
+    public static final int highestMoveIndex = Moves.fusionBolt;
 
     public static final int fossilPokemonFile = 877;
     public static final int fossilPokemonLevelOffset = 0x3F7;
@@ -133,15 +134,11 @@ public class Gen5Constants {
             MoveCategory.SPECIAL};
 
     public static byte moveCategoryToByte(MoveCategory cat) {
-        switch (cat) {
-            case PHYSICAL:
-                return 1;
-            case SPECIAL:
-                return 2;
-            case STATUS:
-            default:
-                return 0;
-        }
+        return switch (cat) {
+            case PHYSICAL -> 1;
+            case SPECIAL -> 2;
+            default -> 0;
+        };
     }
 
     public static final int trappingEffect = 106;
