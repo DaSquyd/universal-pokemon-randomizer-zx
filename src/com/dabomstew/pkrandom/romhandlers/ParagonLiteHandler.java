@@ -4936,8 +4936,12 @@ public class ParagonLiteHandler {
         // TODO: For some reason the relocator addresses values are wrong
         relocateMoveListRamAddress(newMoves.length - movesToClear.length);
 
+        // #560 Flying Press
+        setMoveAnimations(Moves.flyingPress);
+        
         // + #562 Belch
         setMoveEventHandlers(Moves.belch, new MoveEventHandler(Gen5BattleEventType.onMoveExecuteCheck2, "belch.s"));
+        setMoveAnimations(Moves.belch);
 
         // TODO #564 Sticky Web
         setMoveEventHandlers(Moves.stickyWeb, new MoveEventHandler(Gen5BattleEventType.onUncategorizedMoveNoTarget, "sticky_web.s"));
@@ -4962,6 +4966,9 @@ public class ParagonLiteHandler {
 
         // #577 Draining Kiss
         setMoveAnimations(Moves.drainingKiss, 744);
+
+        // #580 Grassy Terrain
+        setMoveAnimations(Moves.grassyTerrain);
 
         // #583 Play Rough
         setMoveAnimations(Moves.playRough, 740);
@@ -4994,6 +5001,9 @@ public class ParagonLiteHandler {
 
         // #598 Eerie Impulse
         setMoveAnimations(Moves.eerieImpulse);
+        
+        // #604 Electric Terrain
+        setMoveAnimations(Moves.electricTerrain, 794);
 
         // #605 Dazzling Gleam
         setMoveAnimations(Moves.dazzlingGleam, 745);
@@ -5011,6 +5021,9 @@ public class ParagonLiteHandler {
         // + #660 First Impression
         cloneMoveEventHandlers(Moves.firstImpression, Moves.fakeOut);
         setMoveAnimations(Moves.firstImpression, 760);
+        
+        // #662 Spirit Shackle
+        setMoveAnimations(Moves.spiritShackle, 800);
 
         // + #663 Darkest Lariat
         cloneMoveEventHandlers(Moves.darkestLariat, Moves.chipAway);
@@ -5059,7 +5072,7 @@ public class ParagonLiteHandler {
 
         // + #686 Revelation Dance
         setMoveEventHandlers(Moves.revelationDance, new MoveEventHandler(Gen5BattleEventType.onGetMoveParam, "revelation_dance.s"));
-        // TODO: Animation
+        setMoveAnimations(Moves.revelationDance);
 
         // #688 Trop Kick
         setMoveAnimations(Moves.tropKick, 784);
@@ -5090,6 +5103,9 @@ public class ParagonLiteHandler {
                 new MoveEventHandler(Gen5BattleEventType.onMoveDamageProcessingEnd, Moves.brickBreak),
                 new MoveEventHandler(Gen5BattleEventType.onGetMoveDamage, "common_screen_break.s"));
         setMoveAnimations(Moves.psychicFangs, 748, 798);
+        
+        // TODO: +#707 Stomping Tantrum
+        setMoveAnimations(Moves.stompingTantrum);
 
         // #708 Shadow Bone
         setMoveAnimations(Moves.shadowBone, 789);
@@ -5106,6 +5122,12 @@ public class ParagonLiteHandler {
         // + #776 Body Pres
         setMoveEventHandlers(Moves.bodyPress, new MoveEventHandler(Gen5BattleEventType.onGetAttackingStat, "body_press.s"));
         setMoveAnimations(Moves.bodyPress, 771);
+        
+        // #778 Drum Beating
+        setMoveAnimations(Moves.drumBeating, 802);
+
+        // #780 Pyro Ball
+        setMoveAnimations(Moves.pyroBall, 803);
 
         // #784 Breaking Swipe
         setMoveAnimations(Moves.breakingSwipe, 755);
@@ -5126,6 +5148,9 @@ public class ParagonLiteHandler {
         setMoveEventHandlers(Moves.steelBeam, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEnd, "steel_beam.s"));
         setMoveAnimations(Moves.steelBeam, 762);
 
+        // #797 Expanding Force
+        setMoveAnimations(Moves.expandingForce, 808);
+
         // + #799 Scale Shot
         setMoveEventHandlers(Moves.scaleShot, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEnd, "scale_shot.s"));
         setMoveAnimations(Moves.scaleShot, 758);
@@ -5138,6 +5163,15 @@ public class ParagonLiteHandler {
             setMoveAnimations(Moves.meteorBeam);
         }
 
+        // #802 Misty Explosion
+        setMoveAnimations(Moves.mistyExplosion, 805);
+
+        // #803 Grassy Glide
+        setMoveAnimations(Moves.grassyGlide, 807);
+
+        // #804 Rising Voltage
+        setMoveAnimations(Moves.risingVoltage, 806);
+
         // #806 Skitter Smack
         setMoveAnimations(Moves.skitterSmack, 783);
 
@@ -5148,6 +5182,7 @@ public class ParagonLiteHandler {
         setMoveEventHandlers(Moves.poltergeist,
                 new MoveEventHandler(Gen5BattleEventType.onNoEffectCheck, "poltergeist_check.s"),
                 new MoveEventHandler(Gen5BattleEventType.onDamageProcessingStart, "poltergeist_message.s"));
+        setMoveAnimations(Moves.poltergeist, 797);
 
         // #810 Corrosive Gas
         setMoveAnimations(Moves.corrosiveGas);
@@ -5219,6 +5254,9 @@ public class ParagonLiteHandler {
         cloneMoveEventHandlers(Moves.bitterMalice, Moves.hex);
         setMoveAnimations(Moves.bitterMalice);
 
+        // #843 Triple Arrows
+        setMoveAnimations(Moves.tripleArrows, 801);
+
         // + #844 Infernal Parade
         cloneMoveEventHandlers(Moves.infernalParade, Moves.hex);
         setMoveAnimations(Moves.infernalParade);
@@ -5253,6 +5291,12 @@ public class ParagonLiteHandler {
 
         // #870 Flower Trick
         setMoveAnimations(Moves.flowerTrick, 768);
+
+        // #871 Torch Song
+        setMoveAnimations(Moves.torchSong);
+
+        // #872 Aqua Step
+        setMoveAnimations(Moves.aquaStep, 804);
 
         // + #874 Make It Rain
         cloneMoveEventHandlers(Moves.makeItRain, Moves.payDay);
@@ -5299,6 +5343,9 @@ public class ParagonLiteHandler {
 
         // #914 Alluring Voice
         setMoveAnimations(Moves.alluringVoice, 777);
+        
+        // TODO #915 Temper Flare
+        setMoveAnimations(Moves.temperFlare);
 
         // #916 Supercell Slam
         cloneMoveEventHandlers(Moves.supercellSlam, Moves.jumpKick);
@@ -5356,6 +5403,7 @@ public class ParagonLiteHandler {
         // + #190 Octazooka
         if (hackMode == HackMode.Redux)
             setMoveEventHandlers(Moves.octazooka, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "super_effective_vs_steel.s"));
+        setMoveAnimations(Moves.octazooka, 360);
 
         // #200 Outrage
         if (hackMode == HackMode.ParagonLite)
@@ -5404,6 +5452,7 @@ public class ParagonLiteHandler {
 
         // + #336 Howl
         setMoveEventHandlers(Moves.howl, new MoveEventHandler(Gen5BattleEventType.onUncategorizedMoveNoTarget, "howl.s"));
+        setMoveAnimations(Moves.howl);
 
         // #360 Gyro Ball
         if (hackMode == HackMode.ParagonLite)
