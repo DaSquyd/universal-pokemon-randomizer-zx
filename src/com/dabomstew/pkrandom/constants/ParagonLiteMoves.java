@@ -53,7 +53,7 @@ ParagonLiteMoves {
             Moves.nuzzle, // 609
 //            Moves.infestation, // 611
             Moves.powerUpPunch, // 612
-//            Moves.firstImpression, // 660 TODO: Wait until QSpec fixes this
+            Moves.firstImpression, // 660
 //            Moves.spiritShackle, // 662
             Moves.darkestLariat, // 663
 //            Moves.sparklingAria, // 664
@@ -64,7 +64,7 @@ ParagonLiteMoves {
             Moves.leafage, // 670
 //            Moves.throatChop, // 675
             Moves.pollenPuff, // 676
-//            Moves.lunge, // 679 TODO: Wait until QSpec fixes this
+            Moves.lunge, // 679
             Moves.fireLash, // 680
             Moves.powerTrip, // 681
             Moves.smartStrike, // 684
@@ -107,8 +107,8 @@ ParagonLiteMoves {
             Moves.headlongRush, // 838
             Moves.barbBarrage, // 839
             Moves.esperWing, // 840
-//            Moves.bitterMalice, // 841 TODO: Wait until QSpec fixes this
-//            Moves.tripleArrows, // 843
+            Moves.bitterMalice, // 841
+            Moves.tripleArrows, // 843
             Moves.infernalParade, // 844
 //            Moves.ceaselessEdge, // 845
             Moves.luminaCrash, // 855
@@ -120,8 +120,8 @@ ParagonLiteMoves {
             Moves.mortalSpin, // 866
             Moves.kowtowCleave, // 869
             Moves.flowerTrick, // 870
-//            Moves.torchSong, // 871
-//            Moves.aquaStep, // 872
+            Moves.torchSong, // 871
+            Moves.aquaStep, // 872
             Moves.makeItRain, // 874
             Moves.pounce, // 884
             Moves.trailblaze, // 885
