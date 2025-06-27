@@ -27,7 +27,6 @@ public class AbilityHackMod_001_Stench extends AbilityHackMod {
 
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
-        addGlobalValue(context, "ABILITY_STENCH_FLINCH_PERCENT", percentChance);
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveFlinchChance, "stench.s"));
     }
 }
