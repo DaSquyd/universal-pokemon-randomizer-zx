@@ -1,4 +1,4 @@
-package com.dabomstew.pkrandom.romhandlers.hack.ability.custom;
+package com.dabomstew.pkrandom.romhandlers.hack.ability.modernplus;
 
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
