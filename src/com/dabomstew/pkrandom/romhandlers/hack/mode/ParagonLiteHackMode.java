@@ -23,7 +23,9 @@ public class ParagonLiteHackMode extends ModernPlusHackMode {
                 new AbilityHackMod_017_Immunity_PoisonTypeImmunity(),
                 new AbilityHackMod_035_Illuminate_Accuracy(1.3, "{0} illuminated\nthe area!"),
                 new AbilityHackMod_037_HugePower(1.5, "{0} is flexing\nits muscles!"),
-                new AbilityHackMod_040_MagmaArmor_WaterAndIceImmunity()
+                new AbilityHackMod_040_MagmaArmor_WaterAndIceImmunity(),
+                new AbilityHackMod_051_KeenEye(true, 1.1),
+                new AbilityHackMod_074_PurePower(1.5, MoveCategory.SPECIAL, "{0} is striking\na pose!")
         ));
 
 

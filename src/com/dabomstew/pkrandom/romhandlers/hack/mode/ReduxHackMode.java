@@ -2,6 +2,7 @@ package com.dabomstew.pkrandom.romhandlers.hack.mode;
 
 import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.custom.*;
+import com.dabomstew.pkrandom.romhandlers.hack.ability.modernplus.AbilityHackMod_023_ShadowTag_Message;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.old.*;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackModCollection;
 import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
@@ -23,7 +24,10 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 new AbilityHackMod_017_Immunity_PoisonTypeImmunity(),
                 new AbilityHackMod_023_ShadowTag_Message("{0} stalks\nthe shadows!"),
                 new AbilityHackMod_035_Illuminate_GhostAndDarkResistance(),
-                new AbilityHackMod_040_MagmaArmor_WaterAndIceImmunity()
+                new AbilityHackMod_040_MagmaArmor_WaterAndIceImmunity(),
+                new AbilityHackMod_051_KeenEye(true, 1.1),
+                new AbilityHackMod_074_PurePower(1.5, MoveCategory.SPECIAL, "{0} is striking\na pose!"),
+                new AbilityHackMod_155_Rattled_IntimidateActivationAndBugGhostResist()
         ));
 
 

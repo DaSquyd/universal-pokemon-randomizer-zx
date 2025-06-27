@@ -2677,21 +2677,9 @@ public class ParagonLiteHandler {
 
         // OLD ABILITIES
 
-        // #040 Magma Armor (Water/Ground resist + 10% chance to burn on contact)
-        Utils.printProgress(totalChanges, ++currentChanges, "Magma Armor");
-        setMagmaArmor();
-
         // #041 Water Veil
         Utils.printProgress(totalChanges, ++currentChanges, "Water Veil");
         setWaterVeil();
-
-        // #042 Magnet Pull
-        Utils.printProgress(totalChanges, ++currentChanges, "Magnet Pull");
-        setMagnetPull();
-
-        // #045 Sand Stream (+ no sandstorm damage)
-        Utils.printProgress(totalChanges, ++currentChanges, "Sand Stream");
-        setSandStream();
 
         // #051 Keen Eye (+ increased accuracy)
         Utils.printProgress(totalChanges, ++currentChanges, "Keen Eye");
@@ -2787,10 +2775,6 @@ public class ParagonLiteHandler {
         Utils.printProgress(totalChanges, ++currentChanges, "Slow Start");
         setSlowStart();
 
-        // #113 Scrappy
-        Utils.printProgress(totalChanges, ++currentChanges, "Scrappy");
-        setScrappy();
-
         // #115 Ice Body (+ Ice-type immunity)
         Utils.printProgress(totalChanges, ++currentChanges, "Ice Body");
         if (hackMode.abilityIceBodyMode == AbilityIceBodyMode.ICE_IMMUNE_AND_RECOVER) {
@@ -2831,11 +2815,6 @@ public class ParagonLiteHandler {
         Utils.printProgress(totalChanges, ++currentChanges, "Light Metal");
         setLightMetal();
         breakableAbilities.add(Abilities.lightMetal);
-
-        // #142 Overcoat (+ immunity to spore moves)
-        Utils.printProgress(totalChanges, ++currentChanges, "Overcoat");
-        setOvercoat();
-        breakableAbilities.add(Abilities.overcoat);
 
         // #144 Regenerator
         Utils.printProgress(totalChanges, ++currentChanges, "Regenerator");
@@ -3953,55 +3932,6 @@ public class ParagonLiteHandler {
         }
     }
 
-    private void setMagnetPull() {
-        if (hackMode.abilityMagnetPullMessage == null)
-            return;
-
-        int number = Abilities.magnetPull;
-
-        // Data
-        setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onPreventRun),
-                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "magnet_pull_message.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onRotateIn, "magnet_pull_message.s"),
-                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "magnet_pull_message.s"));
-    }
-
-    private void setSandStream() {
-        if (hackMode.abilitySandStreamAllowSelfDamage)
-            return;
-
-        int number = Abilities.sandStream;
-
-        setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
-                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
-                new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction, "sand_stream_no_damage.s"));
-    }
-
-    private void setKeenEye() {
-        int number = Abilities.keenEye;
-
-        switch (hackMode.abilityKeenEyeMode) {
-            case VANILLA -> {
-            }
-            case VANILLA_PLUS_IGNORES_EVASION, VANILLA_PLUS_IGNORES_EVASION_AND_INCREASES_ACCURACY -> {
-                abilityDescriptions.set(number, "Prevents accuracy loss\\xFFFEand ignores evasion.");
-
-                List<AbilityEventHandler> eventHandlers = new ArrayList<>();
-                eventHandlers.add(new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck));
-                eventHandlers.add(new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail));
-                eventHandlers.add(new AbilityEventHandler(Gen5BattleEventType.onGetMoveAccuracyStage, "keen_eye_evasion_stage.s"));
-
-                if (hackMode.abilityKeenEyeMode == AbilityKeenEyeMode.VANILLA_PLUS_IGNORES_EVASION_AND_INCREASES_ACCURACY)
-                    eventHandlers.add(new AbilityEventHandler(Gen5BattleEventType.onGetMoveAccuracy, "keen_eye_move_accuracy.s"));
-
-                setAbilityEventHandlers(number, eventHandlers);
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + hackMode.abilityKeenEyeMode);
-        }
-    }
-
     private void setHyperCutter() {
         int number = Abilities.hyperCutter;
 
@@ -4186,61 +4116,6 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeFail));
     }
 
-    private void setPurePower() {
-        if (hackMode.abilityPurePowerMoveCategory == vanillaHackMode.abilityPurePowerMoveCategory
-                && hackMode.abilityPurePowerMultiplier == vanillaHackMode.abilityPurePowerMultiplier
-                && hackMode.abilityPurePowerMessage == null)
-            return;
-
-        int number = Abilities.purePower;
-
-        String statName;
-        switch (hackMode.abilityPurePowerMoveCategory) {
-            case PHYSICAL -> statName = "Attack";
-            case SPECIAL -> statName = "Sp. Attack";
-            case STATUS, default -> throw new IllegalStateException("Unexpected value: " + hackMode.abilityPurePowerMoveCategory);
-        }
-
-        String vanillaStatName;
-        switch (vanillaHackMode.abilityPurePowerMoveCategory) {
-            case PHYSICAL -> vanillaStatName = "Attack";
-            case SPECIAL -> vanillaStatName = "Sp. Attack";
-            case STATUS, default -> throw new IllegalStateException("Unexpected value: " + vanillaHackMode.abilityPurePowerMoveCategory);
-        }
-
-        // Description
-        if (hackMode.abilityPurePowerMoveCategory != vanillaHackMode.abilityPurePowerMoveCategory)
-            abilityDescriptions.set(number, abilityDescriptions.get(number).replace(vanillaStatName, statName));
-
-        // Explanation
-        if (hackMode.abilityPurePowerMultiplier == 1.5)
-            abilityExplanations.set(number, String.format("Pure Power, huh...\uF000븁\\x0000\\xFFFEThis Ability increases a Pokémon's\\xFFFE%s stat by half.\uF000븁\\x0000", statName));
-        else if (hackMode.abilityPurePowerMultiplier != 2)
-            abilityExplanations.set(number, String.format("Pure Power, huh...\uF000븁\\x0000\\xFFFEThis Ability increases a Pokémon's\\xFFFE%s stat.\uF000븁\\x0000", statName));
-        else if (hackMode.abilityPurePowerMoveCategory != vanillaHackMode.abilityPurePowerMoveCategory)
-            abilityExplanations.set(number, abilityExplanations.get(number).replace(vanillaStatName, statName));
-
-        List<AbilityEventHandler> eventHandlers = new ArrayList<>();
-
-        if (hackMode.abilityPurePowerMultiplier != vanillaHackMode.abilityPurePowerMultiplier
-                || hackMode.abilityPurePowerMoveCategory != vanillaHackMode.abilityPurePowerMoveCategory) {
-            armParser.addGlobalValue("ABILITY_PURE_POWER_MULTIPLIER", hackMode.abilityPurePowerMultiplier);
-            armParser.addGlobalValue("ABILITY_PURE_POWER_MOVE_CATEGORY", Gen5Constants.moveCategoryToByte(hackMode.abilityPurePowerMoveCategory));
-            eventHandlers.add(new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "pure_power.s"));
-        } else {
-            eventHandlers.add(new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue));
-        }
-
-        if (hackMode.abilityPurePowerMessage != null) {
-            eventHandlers.add(new AbilityEventHandler(Gen5BattleEventType.onSwitchIn, "pure_power_message.s"));
-            eventHandlers.add(new AbilityEventHandler(Gen5BattleEventType.onRotateIn, "pure_power_message.s"));
-            eventHandlers.add(new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange, "pure_power_message.s"));
-        }
-
-        // Data
-        setAbilityEventHandlers(number, eventHandlers);
-    }
-
     private void setTangledFeet() {
         int number = Abilities.tangledFeet;
 
@@ -4407,16 +4282,6 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onTurnCheckEnd, "slow_start_end_of_turn.s"));
     }
 
-    private void setScrappy() {
-        int number = Abilities.scrappy;
-        abilityUpdates.put(number, "Hit Ghost with Normal and Fighting; NEW: Immunity to Intimidate");
-
-        // Data
-        setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onGetEffectiveness),
-                new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeLastCheck, "common_intimidate_immunity.s"));
-    }
-
     private void setIceBody() {
         int number = Abilities.iceBody;
 
@@ -4434,15 +4299,6 @@ public class ParagonLiteHandler {
         setAbilityEventHandlers(number,
                 new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction),
                 new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "ice_body_immunity.s"));
-    }
-
-    private void setSnowWarning() {
-        int number = Abilities.snowWarning;
-
-        setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
-                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
-                new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction, "snow_warning_no_damage.s"));
     }
 
     private void setFlowerGift() {
@@ -4531,19 +4387,6 @@ public class ParagonLiteHandler {
                 new AbilityEventHandler(Gen5BattleEventType.onCalcSpeed, "light_metal_speed"));
     }
 
-    private void setOvercoat() {
-        int number = Abilities.overcoat;
-
-        // Description
-        String description = "Protects the Pokémon from\\xFFFEsand, hail and powder.";
-        abilityDescriptions.set(number, description);
-
-        // Data
-        setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onWeatherReaction),
-                new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "overcoat_powder_immunity"));
-    }
-
     private void setRegenerator() {
         int number = Abilities.regenerator;
 
@@ -4571,42 +4414,6 @@ public class ParagonLiteHandler {
 
         // Data
         setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onAbilityCheckNoEffect, "justified"));
-    }
-
-    private void setRattled() {
-        int number = Abilities.rattled;
-        abilityUpdates.put(number, "Prevents confusion; NEW: Immunity to Intimidate");
-
-        // Data
-        switch (hackMode.abilityRattledMode) {
-            case MODERN -> setAbilityEventHandlers(number,
-                    new AbilityEventHandler(Gen5BattleEventType.onMoveDamageReaction1),
-                    new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeSuccess, "rattled_on_intimidate.s"));
-            case BUG_GHOST_RESIST -> setAbilityEventHandlers(number,
-                    new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue, "rattled_resist_redux.s"),
-                    new AbilityEventHandler(Gen5BattleEventType.onStatStageChangeSuccess, "rattled_on_intimidate.s"));
-            default -> throw new IllegalStateException("Unexpected value: " + hackMode.abilityRattledMode);
-        }
-    }
-
-    private void setHerbivore() {
-        int number = ParagonLiteAbilities.herbivore;
-
-        // Name
-        abilityNames.set(number, "Herbivore");
-
-        // Explanation
-        if (abilityExplanations != null) {
-            String explanation = abilityExplanations.get(number).replace("Sap Sipper", "Herbivore");
-            abilityExplanations.set(number, explanation);
-        }
-    }
-
-    private void setPrankster() {
-        int number = Abilities.prankster;
-
-        // Data
-        setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onGetMovePriority, "prankster.s"));
     }
 
     private void setTurboblaze() {

@@ -1,5 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers.hack.mode;
 
+import com.dabomstew.pkrandom.romhandlers.hack.ability.custom.AbilityHackMod_051_KeenEye;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.modern.*;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.old.AbilityIlluminateMode;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.old.AbilityRattledMode;
@@ -15,12 +16,17 @@ public class ModernHackMode extends HackMode {
         // Ability
         addHackMod(new AbilityExpansionHackMod());
         addHackMod(new AbilityHackModCollection(
-                new AbilityHackMod_012_Oblivious_Modern(),
-                new AbilityHackMod_014_CompoundEyes_Modern(),
-                new AbilityHackMod_020_OwnTempo_Modern(),
-                new AbilityHackMod_031_LightningRod_Modern(),
+                new AbilityHackMod_012_Oblivious_TauntAndIntimidateImmunity(),
+                new AbilityHackMod_014_CompoundEyes_NameUpdate(),
+                new AbilityHackMod_020_OwnTempo_IntimidateImmunity(),
+                new AbilityHackMod_031_LightningRod_NameUpdate(),
                 new AbilityHackMod_035_Illuminate_Modern(),
-                new AbilityHackMod_039_InnerFocus_Modern()
+                new AbilityHackMod_039_InnerFocus_IntimidateImmunity(),
+                new AbilityHackMod_051_KeenEye(true),
+                new AbilityHackMod_113_Scrappy_IntimidateImmunity(),
+                // TODO: Snow Warning - Hail -> Snow
+                new AbilityHackMod_155_Rattled_IntimidateActivation(),
+                new AbilityHackMod_158_Prankster_QuickGuardDarkType()
         ));
 
 

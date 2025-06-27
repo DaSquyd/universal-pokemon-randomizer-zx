@@ -19,7 +19,7 @@ public class HackModCollection<T extends HackMod> extends HackMod {
         Set<Class<? extends HackMod>> newHackModsSet = new HashSet<>(newHackMods.size());
         for (T newHackMod : newHackMods) {
             if (newHackModsSet.contains(newHackMod.getClass()))
-                throw new RuntimeException("Duplicate type found");
+                throw new RuntimeException("Duplicate type found"); // TODO: Replace instead?
             
             newHackModsSet.add(newHackMod.getClass());
         }
