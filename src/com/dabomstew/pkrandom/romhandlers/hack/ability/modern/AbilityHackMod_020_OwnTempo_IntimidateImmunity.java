@@ -6,8 +6,8 @@ import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
 
 import java.util.List;
 
-public class AbilityHackMod_020_OwnTempo_Modern extends AbilityHackMod {
-    public AbilityHackMod_020_OwnTempo_Modern() {
+public class AbilityHackMod_020_OwnTempo_IntimidateImmunity extends AbilityHackMod {
+    public AbilityHackMod_020_OwnTempo_IntimidateImmunity() {
         super(Abilities.ownTempo);
     }
 
