@@ -21,17 +21,15 @@ public class AbilityExpansionHackMod extends HackMod {
         List<String> readPersonalDataLines = readLines("read_poke_personal_data.s");
         context.arm9().writeCodeForceInline(readPersonalDataLines, "ReadPokePersonalData", false);
 
-        // Updates the box data to allow for abilities up to index 1023
         // Also fixes the Azurill->Marill gender bug
         List<String> readBoxDataLines = readLines("read_poke_box_data.s");
         context.arm9().writeCodeForceInline(readBoxDataLines, "ReadPokeBoxData", true);
 
-        // Updates the box data to allow for abilities up to index 1023
         // Also fixes the Azurill->Marill gender bug
         List<String> writeBoxDataLines = readLines("write_poke_box_data.s");
         context.arm9().writeCodeForceInline(writeBoxDataLines, "WritePokeBoxData", true);
 
-        // Fix storage system to display abilities properly
+        // Fix Storage System to display abilities properly
 
         // This is the function that creates the struct used for a Pokémon's preview in the PC.
         // We are essentially swapping the markings (which is given 2 bytes despite only using 1) and ability.
