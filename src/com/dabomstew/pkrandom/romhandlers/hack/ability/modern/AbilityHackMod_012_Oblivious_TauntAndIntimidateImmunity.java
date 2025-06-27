@@ -6,8 +6,8 @@ import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
 
 import java.util.List;
 
-public class AbilityHackMod_012_Oblivious_Modern extends AbilityHackMod {
-    public AbilityHackMod_012_Oblivious_Modern() {
+public class AbilityHackMod_012_Oblivious_TauntAndIntimidateImmunity extends AbilityHackMod {
+    public AbilityHackMod_012_Oblivious_TauntAndIntimidateImmunity() {
         super(Abilities.oblivious);
     }
 
