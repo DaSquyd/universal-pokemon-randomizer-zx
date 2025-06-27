@@ -5,8 +5,8 @@ import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
 
 import java.util.List;
 
-public class AbilityHackMod_014_CompoundEyes_Modern extends AbilityHackMod {
-    public AbilityHackMod_014_CompoundEyes_Modern() {
+public class AbilityHackMod_014_CompoundEyes_NameUpdate extends AbilityHackMod {
+    public AbilityHackMod_014_CompoundEyes_NameUpdate() {
         super(Abilities.compoundEyes);
     }
 
