@@ -5,8 +5,8 @@ import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
 
 import java.util.List;
 
-public class AbilityHackMod_031_LightningRod_Modern extends AbilityHackMod {
-    public AbilityHackMod_031_LightningRod_Modern() {
+public class AbilityHackMod_031_LightningRod_NameUpdate extends AbilityHackMod {
+    public AbilityHackMod_031_LightningRod_NameUpdate() {
         super(Abilities.lightningRod);
     }
 
