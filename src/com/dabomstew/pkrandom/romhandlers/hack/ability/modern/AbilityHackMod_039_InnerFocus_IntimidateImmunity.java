@@ -2,13 +2,12 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.modern;
 
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
-import com.dabomstew.pkrandom.romhandlers.ParagonLiteHandler;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
 
 import java.util.List;
 
-public class AbilityHackMod_039_InnerFocus_Modern extends AbilityHackMod {
-    public AbilityHackMod_039_InnerFocus_Modern() {
+public class AbilityHackMod_039_InnerFocus_IntimidateImmunity extends AbilityHackMod {
+    public AbilityHackMod_039_InnerFocus_IntimidateImmunity() {
         super(Abilities.ownTempo);
     }
 
