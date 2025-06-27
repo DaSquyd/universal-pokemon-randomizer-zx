@@ -7,7 +7,7 @@
     bne     Return
     
     mov     r0, #VAR_Ratio
-    ldr     r1, =(0x1000 * 1.1)
+    ldr     r1, =(0x1000 * ABILITY_KEEN_EYE_ACCURACY_MULTIPLIER)
     bl      Battle::EventVar_MulValue
     
 Return:
