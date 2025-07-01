@@ -15,8 +15,7 @@
     
 ApplyMod:
     mov     r0, #VAR_Ratio
-    mov     r1, #4
-    lsl     r1, #9 ; 2048 (0.5x)
+    ldr     r1, =(0x1000 * 0.5)
     bl      Battle::EventVar_MulValue
 
 Return:
