@@ -14,7 +14,7 @@
     beq     Return
     
     mov     r0, #VAR_MovePower
-    ldr     r1, =5325 ; 1.3x
+    ldr     r1, =(0x1000 * 1.3)
     bl      Battle::EventVar_MulValue
     
 Return:
