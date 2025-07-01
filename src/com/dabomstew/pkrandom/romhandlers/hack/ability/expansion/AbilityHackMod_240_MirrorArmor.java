@@ -11,6 +11,11 @@ public class AbilityHackMod_240_MirrorArmor extends AbilityHackMod {
     }
 
     @Override
+    public String getName(Context context, List<String> allNames) {
+        return "Mirror Armor";
+    }
+
+    @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
         // TODO
     }

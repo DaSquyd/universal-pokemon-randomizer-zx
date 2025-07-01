@@ -11,6 +11,11 @@ public class AbilityHackMod_257_PastelVeil extends AbilityHackMod {
     }
 
     @Override
+    public String getName(Context context, List<String> allNames) {
+        return "Pastel Veil";
+    }
+
+    @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
         // TODO
     }

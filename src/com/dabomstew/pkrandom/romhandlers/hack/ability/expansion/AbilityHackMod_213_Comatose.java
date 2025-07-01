@@ -11,6 +11,11 @@ public class AbilityHackMod_213_Comatose extends AbilityHackMod {
     }
 
     @Override
+    public String getName(Context context, List<String> allNames) {
+        return "Comatose";
+    }
+
+    @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
         // TODO
     }

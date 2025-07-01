@@ -11,6 +11,11 @@ public class AbilityHackMod_288_OrichalcumPulse extends AbilityHackMod {
     }
 
     @Override
+    public String getName(Context context, List<String> allNames) {
+        return "Orichalcum Pulse";
+    }
+
+    @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
         // TODO
     }

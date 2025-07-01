@@ -11,6 +11,11 @@ public class AbilityHackMod_297_EarthEater extends AbilityHackMod {
     }
 
     @Override
+    public String getName(Context context, List<String> allNames) {
+        return "Earth Eater";
+    }
+
+    @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
         // TODO
     }

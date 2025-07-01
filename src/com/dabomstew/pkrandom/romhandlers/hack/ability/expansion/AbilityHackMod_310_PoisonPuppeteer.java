@@ -11,6 +11,11 @@ public class AbilityHackMod_310_PoisonPuppeteer extends AbilityHackMod {
     }
 
     @Override
+    public String getName(Context context, List<String> allNames) {
+        return "Poison Puppeteer";
+    }
+
+    @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
         // TODO
     }

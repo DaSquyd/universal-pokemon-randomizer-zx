@@ -7,7 +7,12 @@ import java.util.List;
 
 public class AbilityHackMod_222_Receiver extends AbilityHackMod {
     public AbilityHackMod_222_Receiver() {
-        super(Abilities.powerOfAlchemy);
+        super(Abilities.receiver);
+    }
+
+    @Override
+    public String getName(Context context, List<String> allNames) {
+        return "Receiver";
     }
 
     @Override

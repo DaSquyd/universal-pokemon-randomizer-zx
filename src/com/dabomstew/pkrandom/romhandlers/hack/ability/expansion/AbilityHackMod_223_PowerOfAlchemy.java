@@ -11,6 +11,11 @@ public class AbilityHackMod_223_PowerOfAlchemy extends AbilityHackMod {
     }
 
     @Override
+    public String getName(Context context, List<String> allNames) {
+        return "Power of Alchemy";
+    }
+
+    @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
         // TODO
     }
