@@ -10,6 +10,12 @@ import java.util.Map;
 public class AbilityHackMod_168_Protean extends AbilityHackMod {
     public final boolean firstOnly;
 
+    public AbilityHackMod_168_Protean() {
+        super(Abilities.protean);
+
+        this.firstOnly = true;
+    }
+
     public AbilityHackMod_168_Protean(boolean firstOnly) {
         super(Abilities.protean);
 
@@ -17,9 +23,13 @@ public class AbilityHackMod_168_Protean extends AbilityHackMod {
     }
 
     @Override
+    public String getName(Context context, List<String> allNames) {
+        return "Protean";
+    }
+
+    @Override
     public String getDescription(Context context, List<String> abilityDescriptions) {
-        return "Changes type to the match" +
-                "the current move.";
+        return "Changes type to the match\\xFFFEthe current move.";
     }
 
     @Override
