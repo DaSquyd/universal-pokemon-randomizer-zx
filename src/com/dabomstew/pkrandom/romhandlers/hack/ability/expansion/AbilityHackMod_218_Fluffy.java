@@ -3,6 +3,9 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.expansion;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -12,13 +15,19 @@ public class AbilityHackMod_218_Fluffy extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Fluffy";
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return "Halves physical damage.\\xFFFEMakes the user flamable.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription("Halves physical damage.", "Makes the user flammable.");
+    }
+
+    @Override
+    public Dialogue getExplanation(Context context) {
+        // TODO
+        return super.getExplanation(context);
     }
 
     @Override

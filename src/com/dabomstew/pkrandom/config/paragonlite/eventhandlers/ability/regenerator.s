@@ -21,7 +21,7 @@
     bne     Return
     
     mov     r0, r6
-    mov     r1, #4 ; 25%
+    mov     r1, #ABILITY_REGENERATOR_HP_FRACTION
     bl      Battle::DivideMaxHPZeroCheck
     mov     r4, r0
     

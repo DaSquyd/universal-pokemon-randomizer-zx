@@ -3,6 +3,8 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.expansion;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
 
 import java.util.List;
 import java.util.Map;
@@ -23,13 +25,22 @@ public class AbilityHackMod_168_Protean extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Protean";
     }
 
     @Override
-    public String getDescription(Context context, List<String> abilityDescriptions) {
-        return "Changes type to the match\\xFFFEthe current move.";
+    public AbilityDescription getDescription(Context context) {
+        return new AbilityDescription(
+                "Changes type to the match",
+                "the current move."
+        );
+    }
+
+    @Override
+    public Dialogue getExplanation(Context context) {
+        // TODO
+        return super.getExplanation(context);
     }
 
     @Override

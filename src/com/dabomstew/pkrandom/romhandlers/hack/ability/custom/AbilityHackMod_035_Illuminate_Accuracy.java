@@ -3,6 +3,8 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.custom;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 import java.util.Map;
@@ -19,9 +21,8 @@ public class AbilityHackMod_035_Illuminate_Accuracy extends AbilityHackMod {
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return "Boosts the accuracy of\n" +
-                "all Pokémon on the field.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription("Boosts the accuracy of", "all Pokémon on the field.");
     }
 
     @Override

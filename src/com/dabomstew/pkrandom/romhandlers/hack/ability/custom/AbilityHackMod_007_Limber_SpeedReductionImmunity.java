@@ -3,6 +3,9 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.custom;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,9 +17,14 @@ public class AbilityHackMod_007_Limber_SpeedReductionImmunity extends AbilityHac
     }
 
     @Override
-    public String getDescription(Context context, List<String> abilityDescriptions) {
-        return "Guards against paralysis\\xFFFE" +
-                "and Speed drops.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription("Guards against paralysis", "and Speed drops.");
+    }
+
+    @Override
+    public Dialogue getExplanation(Context context) {
+        // TODO
+        return super.getExplanation(context);
     }
 
     @Override

@@ -4,6 +4,9 @@ import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.constants.ParagonLiteAbilities;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -13,20 +16,27 @@ public class AbilityHackMod_508_Undercurrent extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Undercurrent";
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return "Boosts the Speed stat\\xFFFEof the Pokémon's allies.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription(
+                "Boosts the Speed stat",
+                "of the Pokémon's allies."
+        );
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
-        return allExplanations.get(Abilities.victoryStar)
-                .replace("Victory Star", "Undercurrent")
-                .replace("accuracy", "Speed stat");
+    public Dialogue getExplanation(Context context) {
+        return new Dialogue(
+                "Undercurrent, huh...",
+                Dialogue.clearLine,
+                "A Pokémon with this Ability",
+                "raises the Speed",
+                "of itself and its allies."
+        );
     }
 
     @Override

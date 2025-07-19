@@ -45,6 +45,7 @@ import com.dabomstew.pkrandom.romhandlers.Gen3RomHandler;
 import com.dabomstew.pkrandom.romhandlers.Gen5RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
+import com.dabomstew.pkrandom.romhandlers.hack.mode.ReduxHackMode;
 
 public class Settings {
 
@@ -331,7 +332,7 @@ public class Settings {
     private PickupItemsMod pickupItemsMod = PickupItemsMod.UNCHANGED;
     private boolean banBadRandomPickupItems;
     
-    public HackMode hackMode = new HackMode("Redux");
+    public HackMode hackMode = new ReduxHackMode();
 
     // to and from strings etc
     public void write(FileOutputStream out) throws IOException {

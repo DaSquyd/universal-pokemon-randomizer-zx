@@ -4,6 +4,9 @@ import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.constants.ParagonLiteAbilities;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -13,19 +16,22 @@ public class AbilityHackMod_507_Cacophony extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Cacophony";
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return "Harsh noise amplifies the\\xFFFEpower of sound moves.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription(
+                "Harsh noise amplifies the",
+                "power of sound moves."
+        );
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
+    public Dialogue getExplanation(Context context) {
         // TODO
-        return super.getExplanation(context, allExplanations);
+        return super.getExplanation(context);
     }
 
     @Override

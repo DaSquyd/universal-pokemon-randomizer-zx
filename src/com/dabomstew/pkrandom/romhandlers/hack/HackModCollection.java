@@ -42,6 +42,16 @@ public class HackModCollection<T extends HackMod> extends HackMod {
     }
 
     @Override
+    public void Merge(HackMod other) {
+        if (other instanceof HackModCollection<?> otherCollection) {
+            for (var test : otherCollection.hackMods) {
+                hackMods.removeIf((i) -> i.getClass() == test.getClass());
+                hackMods.add((T)test);
+            }
+        }
+    }
+
+    @Override
     public Set<Class<? extends HackMod>> getDependencies() {
         return dependencies;
     }

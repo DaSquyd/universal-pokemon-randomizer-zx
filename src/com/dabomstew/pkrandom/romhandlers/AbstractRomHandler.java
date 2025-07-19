@@ -1342,6 +1342,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         int ballBombPulseMovesFromLevel = 0;
         Set<Integer> danceMoves = new HashSet<>();
         int danceMovesFromLevel = 0;
+        Set<Integer> rollSpinMoves = new HashSet<>();
+        int rollSpinMovesFromLevel = 0;
         Set<Integer> offensiveSunMoves = new HashSet<>();
         Set<Integer> supportSunMoves = new HashSet<>();
         Set<Integer> rainMoves = new HashSet<>();
@@ -1450,6 +1452,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 danceMovesFromLevel++;
             }
 
+            if (m.isCustomRollSpinMove) {
+                rollSpinMoves.add(m.number);
+                rollSpinMovesFromLevel++;
+            }
+
             if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
                 offensiveSunMoves.add(m.number);
 
@@ -1534,6 +1541,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (m.isCustomDanceMove)
                 danceMoves.add(m.number);
+            
+            if (m.isCustomRollSpinMove)
+                rollSpinMoves.add(m.number);
 
             if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
                 offensiveSunMoves.add(m.number);
@@ -1620,6 +1630,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (m.isCustomDanceMove)
                 danceMoves.add(m.number);
+
+            if (m.isCustomRollSpinMove && m.power * m.getHitCount(generationOfPokemon()) >= 60)
+                rollSpinMoves.add(m.number);
 
             if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
                 offensiveSunMoves.add(m.number);
@@ -2777,7 +2790,7 @@ public abstract class AbstractRomHandler implements RomHandler {
 
         // #504 Lucky Foot
         if (kickMovesFromLevel == 0 || kickMoves.size() < 2)
-            irrelevantAbilities.add(ParagonLiteAbilities.luckyFoot);
+            irrelevantAbilities.add(ParagonLiteAbilities.springLegs);
 
         // #505 Assimilate
         if (resistsPsychic && !higherOrEqualSpAtk)
@@ -2815,9 +2828,9 @@ public abstract class AbstractRomHandler implements RomHandler {
         // #513 Final Thread
         irrelevantAbilities.add(ParagonLiteAbilities.finalThread);
 
-        // #514 Homegrown
-        if (pk.hp == 1)
-            irrelevantAbilities.add(ParagonLiteAbilities.homegrown);
+        // #514 Capoeirista
+        if (rollSpinMovesFromLevel == 0 || rollSpinMoves.size() < 2)
+            irrelevantAbilities.add(ParagonLiteAbilities.capoeirista);
 
         // #515 Ravenous Torque
         if (highSpeed || biteMovesFromLevel == 0)
@@ -2862,6 +2875,18 @@ public abstract class AbstractRomHandler implements RomHandler {
         // #526 Coolant Boost
         if (pk.hp == 1 || isIce || !higherOrEqualSpAtk)
             irrelevantAbilities.add(ParagonLiteAbilities.coolantBoost);
+        
+        // #530 Psionize
+        if (isNormal || isTypeBoostAbilityIrrelevant(pk, Type.NORMAL, Type.PSYCHIC, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(ParagonLiteAbilities.psionize);
+        
+        // #531 Obfuscate
+        if (isNormal || isTypeBoostAbilityIrrelevant(pk, Type.NORMAL, Type.DARK, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(ParagonLiteAbilities.obfuscate);
+        
+        // #532 Invigorate
+        if (isNormal || isTypeBoostAbilityIrrelevant(pk, Type.NORMAL, Type.FIGHTING, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(ParagonLiteAbilities.invigorate);
     }
 
     private boolean isTypeBoostAbilityIrrelevant(Pokemon pk, Type type, boolean isCustomTypeEffectiveness, Map<Type, Effectiveness> against,
@@ -5736,8 +5761,8 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
 
             if (generationOfPokemon() >= 8) {
-                // Grassy Glide 60 Power
-                updateMovePower(moves, Moves.grassyGlide, 60);
+                // Grassy Glide 55 Power
+                updateMovePower(moves, Moves.grassyGlide, 55);
                 // Wicked Blow 75 Power
                 updateMovePower(moves, Moves.wickedBlow, 75);
                 // Glacial Lance 120 Power

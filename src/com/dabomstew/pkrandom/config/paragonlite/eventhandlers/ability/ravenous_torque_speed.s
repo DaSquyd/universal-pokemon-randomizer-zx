@@ -9,7 +9,7 @@
     cmp     r4, r0
     bne     Return
     
-    mov     r1, #STSG_Attack
+    mov     r1, #STSG_Speed
     mov     r2, #BoostAmount
     bl      Battle::IsStatChangeValid
     cmp     r0, #FALSE
@@ -29,8 +29,7 @@
     mov     r1, r0
     
     ldr     r0, [r1, #HandlerParam_ChangeStatStage.header]
-    mov     r2, #(BHP_AbilityPopup >> 16)
-    lsl     r2, #16
+    ldr     r2, =BHP_AbilityPopup
     orr     r0, r2
     str     r0, [r1, #HandlerParam_ChangeStatStage.header]
     

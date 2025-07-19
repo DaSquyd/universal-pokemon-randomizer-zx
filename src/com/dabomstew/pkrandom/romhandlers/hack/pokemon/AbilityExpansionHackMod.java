@@ -44,4 +44,8 @@ public class AbilityExpansionHackMod extends HackMod {
         List<String> previewAbilityLines = readLines("storagesystem/preview_ability.s");
         storageSystemOvl.writeCodeForceInline(previewAbilityLines, "Preview_Ability", false);
     }
+
+    @Override
+    public void Merge(HackMod other) {
+    }
 }

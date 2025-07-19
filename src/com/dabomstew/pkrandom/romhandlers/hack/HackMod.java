@@ -28,6 +28,8 @@ public abstract class HackMod implements Comparable<HackMod> {
 
     public abstract void apply(Context context);
 
+    public abstract void Merge(HackMod other);
+    
     @Override
     public int compareTo(HackMod o) {
         int comparison = Integer.compare(getDependencies().size(), o.getDependencies().size());

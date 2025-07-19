@@ -4,6 +4,9 @@ import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.constants.ParagonLiteAbilities;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -13,18 +16,27 @@ public class AbilityHackMod_501_Specialized extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Specialized";
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return allDescriptions.get(Abilities.adaptability);
+    public GameText getDescription(Context context) {
+        return new AbilityDescription(
+                "Powers up moves of the",
+                "same type as the Pokémon."
+        );
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
-        return allExplanations.get(Abilities.adaptability).replace("Adaptability", "Specialized");
+    public Dialogue getExplanation(Context context) {
+        return new Dialogue(
+                "Specialized, huh...",
+                Dialogue.clearLine,
+                "When the Pokémon uses a move that",
+                "matches its type, this Ability increases",
+                "the power boost."
+        );
     }
 
     @Override

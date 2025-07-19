@@ -3,6 +3,8 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.expansion;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
 
 import java.util.List;
 
@@ -12,20 +14,30 @@ public class AbilityHackMod_172_Competitive extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Competitive";
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return "If a stat is lowered,\\xFFFESp. Atk sharply increases.";
+    public AbilityDescription getDescription(Context context) {
+        return new AbilityDescription(
+                "If a stat is lowered,",
+                "Sp. Atk sharply increases."
+        );
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
-        return allExplanations.get(Abilities.defiant)
-                .replace("Defiant", "Competitive")
-                .replace("Attack", "Sp. Attack");
+    public Dialogue getExplanation(Context context) {
+        return new Dialogue(
+                "Competitive, huh...",
+                Dialogue.clearLine,
+                "When an opponent lowers the stats",
+                "of a Pokémon with this Ability,",
+                "its Sp. Atk goes way up!",
+                Dialogue.clearLine,
+                "But be careful--if it lowers",
+                "its own stats, the Ability won't work!"
+        );
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.dabomstew.pkrandom.romhandlers.hack.mode;
 
+import com.dabomstew.pkrandom.romhandlers.ParagonLiteDocWriter;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.custom.AbilityHackMod_051_KeenEye;
+import com.dabomstew.pkrandom.romhandlers.hack.ability.expansion.*;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.modern.*;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.old.AbilityIlluminateMode;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.old.AbilityRattledMode;
@@ -24,9 +26,66 @@ public class ModernHackMode extends HackMode {
                 new AbilityHackMod_039_InnerFocus_IntimidateImmunity(),
                 new AbilityHackMod_051_KeenEye(true),
                 new AbilityHackMod_113_Scrappy_IntimidateImmunity(),
-                // TODO: Snow Warning - Hail -> Snow
+                // TODO: 117 Snow Warning - Hail -> Snow
+                new AbilityHackMod_133_WeakArmor_Modern(),
                 new AbilityHackMod_155_Rattled_IntimidateActivation(),
-                new AbilityHackMod_158_Prankster_QuickGuardDarkType()
+                new AbilityHackMod_158_Prankster_QuickGuardDarkType(),
+                
+                // Expansion
+                new AbilityHackMod_165_AromaVeil(), // TODO
+                new AbilityHackMod_166_FlowerVeil(), // TODO
+                new AbilityHackMod_167_CheekPouch(), // TODO
+                new AbilityHackMod_168_Protean(),
+                new AbilityHackMod_169_FurCoat(),
+                new AbilityHackMod_171_Bulletproof(),
+                new AbilityHackMod_172_Competitive(),
+                new AbilityHackMod_173_StrongJaw(),
+                new AbilityHackMod_174_Refrigerate(),
+                new AbilityHackMod_175_SweetVeil(), // TODO
+                new AbilityHackMod_176_StanceChange(), // TODO
+                new AbilityHackMod_177_GaleWings(),
+                new AbilityHackMod_188_AuraBreak(), // TODO
+                new AbilityHackMod_197_ShieldsDown(), // TODO
+                new AbilityHackMod_199_WaterBubble(), // TODO
+                new AbilityHackMod_208_Schooling(), // TODO
+                new AbilityHackMod_209_Disguise(), // TODO
+                new AbilityHackMod_210_BattleBond(), // TODO
+                new AbilityHackMod_211_PowerConstruct(), // TODO
+                new AbilityHackMod_213_Comatose(), // TODO
+                new AbilityHackMod_214_QueenlyMajesty(), // TODO
+                new AbilityHackMod_218_Fluffy(),
+                new AbilityHackMod_219_Dazzling(), // TODO
+                new AbilityHackMod_222_Receiver(), // TODO
+                new AbilityHackMod_223_PowerOfAlchemy(), // TODO
+                new AbilityHackMod_225_RksSystem(), // TODO
+                new AbilityHackMod_240_MirrorArmor(), // TODO
+                new AbilityHackMod_241_GulpMissile(), // TODO
+                new AbilityHackMod_244_PunkRock(), // TODO
+                new AbilityHackMod_246_IceScales(), // TODO
+                new AbilityHackMod_248_IceFace(), // TODO
+                new AbilityHackMod_256_NeutralizingGas(), // TODO
+                new AbilityHackMod_257_PastelVeil(), // TODO
+                new AbilityHackMod_266_AsOne_ChillingNeigh(), // TODO
+                new AbilityHackMod_267_AsOne_GrimNeigh(), // TODO
+                new AbilityHackMod_270_ThermalExchange(),
+                new AbilityHackMod_272_PurifyingSalt(), // TODO
+                new AbilityHackMod_273_WellBakedBody(), // TODO
+                new AbilityHackMod_274_WindRider(), // TODO
+                new AbilityHackMod_275_GuardDog(), // TODO
+                new AbilityHackMod_278_ZeroToHero(), // TODO
+                new AbilityHackMod_279_Commander(), // TODO
+                new AbilityHackMod_281_Protosynthesis(), // TODO
+                new AbilityHackMod_282_QuarkDrive(), // TODO
+                new AbilityHackMod_283_GoodAsGold(),
+                new AbilityHackMod_284_VesselOfRuin(), // TODO
+                new AbilityHackMod_286_TabletsOfRuin(), // TODO
+                new AbilityHackMod_288_OrichalcumPulse(), // TODO
+                new AbilityHackMod_289_HadronEngine(), // TODO
+                new AbilityHackMod_296_ArmorTail(), // TODO
+                new AbilityHackMod_297_EarthEater(), // TODO
+                new AbilityHackMod_300_MindsEye(),
+                new AbilityHackMod_308_TeraShell(), // TODO
+                new AbilityHackMod_310_PoisonPuppeteer() // TODO
         ));
 
 

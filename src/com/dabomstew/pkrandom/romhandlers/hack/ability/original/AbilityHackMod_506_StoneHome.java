@@ -4,6 +4,9 @@ import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.constants.ParagonLiteAbilities;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -13,19 +16,22 @@ public class AbilityHackMod_506_StoneHome extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Stone Home";
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return "Boosts the Defense stat\\xFFFEof the Pokémon's allies.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription(
+                "Boosts the Defense stat",
+                "of the Pokémon's allies."
+        );
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
+    public Dialogue getExplanation(Context context) {
         // TODO
-        return super.getExplanation(context, allExplanations);
+        return super.getExplanation(context);
     }
 
     @Override

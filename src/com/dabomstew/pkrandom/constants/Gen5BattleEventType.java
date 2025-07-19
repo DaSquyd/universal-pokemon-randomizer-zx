@@ -61,7 +61,7 @@ public class Gen5BattleEventType {
     public static final int onBreakOpponentGuard = 0x23;
     public static final int onMoveExecuteStart = 0x24;
     public static final int OnMoveExecuteEffective = 0x25;
-    public static final int OnMoveExecuteNoEffect = 0x26;
+    public static final int onMoveExecuteNoEffect = 0x26;
     public static final int OnMoveExecuteEnd = 0x27;
     public static final int onGetMoveParam = 0x28;
     public static final int onDecideTarget = 0x29;

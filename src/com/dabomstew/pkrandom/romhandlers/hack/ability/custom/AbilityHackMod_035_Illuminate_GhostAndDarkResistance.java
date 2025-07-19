@@ -4,6 +4,8 @@ import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.ParagonLiteHandler;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -13,9 +15,8 @@ public class AbilityHackMod_035_Illuminate_GhostAndDarkResistance extends Abilit
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return "Ups resistance to Dark-\n" +
-                "and Ghost-type moves.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription("Ups resistance to Dark-", "and Ghost-type moves.");
     }
 
     @Override

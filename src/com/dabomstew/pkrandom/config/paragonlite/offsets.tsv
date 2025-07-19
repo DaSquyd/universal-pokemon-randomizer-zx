@@ -253,6 +253,7 @@ ARM9	Data_MoveCache	Data	20160		0x02146554	0x02146534	0x02141434	0x021413F4
 Bag	Sort_Name	Code		thumb			0x0219B904	0x0219B8C4
 Bag	Sort_RepositoryNo	Code		thumb			0x021A0788	0x021A0748
 Bag	Data_ItemsAlphabetical	Data	568				0x021A1178	0x021A1138
+Battle	MainModule_Init	Code		thumb			0x02199900	0x021998C0
 Battle	Setup_GetBattleStyle	Code		thumb	0x021B85A8	0x021B8588	0x0219BDC0	0x0219BD80
 Battle	MainModule_GetBattleType	Code		thumb	0x021B86D8	0x021B86B8	0x0219BF14	0x0219BED4
 Battle	MainModule_AreClientIDsOpposing	Code		thumb	0x021B8D08	0x021B8CE8	0x0219C594	0x0219C554
@@ -582,7 +583,7 @@ Battle	GetEffectivenessVsPoke	Code		thumb	0x021D79BC	0x021D799C	0x021BD1F0	0x021
 Battle	MultiplyEffectiveness	Code		thumb	0x021D7A08	0x021D79E8	0x021BD23C	0x021BD1FC
 Battle	CalcBaseDamage	Code		thumb	0x021D7A64	0x021D7A44	0x021BD298	0x021BD258
 Battle	ServerEvent_GetEffectivenessMod	Code		thumb	0x021D7A8C	0x021D7A6C	0x021BD2C0	0x021BD280
-Battle	GetEffectivenessType	Code		thumb	0x021D7AF4	0x021D7AD4	0x021BD328	0x021BD2E8
+Battle	GetEffectivenessAdvantage	Code		thumb	0x021D7AF4	0x021D7AD4	0x021BD328	0x021BD2E8
 Battle	RollEffectChance	Code		thumb	0x021D7B10	0x021D7AF0	0x021BD344	0x021BD304
 Battle	Max	Code		thumb	0x021D7B28	0x021D7B08	0x021BD35C	0x021BD31C
 Battle	FixedRound	Code		thumb	0x021D7B30	0x021D7B10	0x021BD364	0x021BD324
@@ -613,6 +614,7 @@ Battle	Inst_AbilityEffectListCountCmp	Data	1		0x021D84FE	0x021D84DE	0x021BDD46	0
 Battle	Data_AbilityEffectListAddress	Data	4	*	0x021D8508	0x021D84E8	0x021BDD50	0x021BDD10
 Battle	Data_AbilityEffectListAddress4	Data	4	*	0x021D850C	0x021D84EC	0x021BDD54	0x021BDD14
 Battle	CalcAbilityHandlerSubPriority	Code		thumb	0x021D85D0	0x021D85B0	0x021BDE18	0x021BDDD8
+Battle	AbilityEvent_RollEffectChance	Code		thumb	0x021D85E0	0x021D85C0	0x021BDE28	0x021BDDE8
 Battle	ResetSlowStartState	Code		thumb	0x021D8994	0x021D8974	0x021BE1DC	0x021BE19C
 Battle	CommonWeatherGuard	Code		thumb	0x021D8B0C	0x021D8AEC	0x021BE354	0x021BE314
 Battle	CommonLowHPTypeBoostAbility	Code		thumb	0x021D8CCC	0x021D8CAC	0x021BE514	0x021BE4D4
@@ -638,11 +640,12 @@ Battle	CommonBerrySuperEffectiveCheck	Code		thumb	0x021DDCF8	0x021DDCD8	0x021C35
 Battle	CommonTypeBoostItem	Code		thumb	0x021DF95C	0x021DF93C	0x021C51A4	0x021C5164
 Battle	CommonGemWork	Code		thumb	0x021E01F4	0x021E01D4	0x021C5A3C	0x021C59FC
 Battle	CommonGemDamageBoost	Code		thumb	0x021E02A4	0x021E0284	0x021C5AEC	0x021C5AAC
-Battle	MoveEvent_AddItem	Code		thumb	0x021E02FC	0x021E02DC	0x021C5B44	0x021C5B04
+Battle	MoveEvent_AddObject	Code		thumb	0x021E02FC	0x021E02DC	0x021C5B44	0x021C5B04
 Battle	Data_MoveEffectListAddress	Data	4	*	0x021E0368	0x021E0348	0x021C5BB0	0x021C5B70
 Battle	Data_MoveEffectListCount	Data	4	*	0x021E036C	0x021E034C	0x021C5BB4	0x021C5B74
 Battle	Data_MoveEffectListAddress4	Data	4	*	0x021E0370	0x021E0350	0x021C5BB8	0x021C5B78
 Battle	MoveEvent_RemoveItem	Code		thumb	0x021E03B4	0x021E0394	0x021C5BFC	0x021C5BBC
+Battle	MoveHandler_Protect_Start	Code		thumb			0x021C938C	0x021C934C
 Battle	HandlerCommon_CreateSideStatus	Code		thumb	0x021E558C	0x021E556C	0x021CADE4	0x021CADA4
 Battle	HandlerCommon_CheckTargetMonID	Code		thumb	0x021E8618	0x021E85F8	0x021CDE78	0x021CDE38
 Battle	HandlerCommon_IsPokeLastInTurnOder	Code		thumb	0x021E8644	0x021E8624	0x021CDEA4	0x021CDE64
@@ -722,6 +725,7 @@ Battle	Data_EffectivenessMultipliers	Data	5		0x021F0447	0x021F0427	0x021D74EB	0x
 Battle	Data_TypeEffectivenessTable	Data	292		0x021F049C	0x021F047C	0x021D7540	0x021D7500
 Battle	Data_AbilityEffectList	Data	1264	4*	0x021F0E94	0x021F0E74	0x021D7F38	0x021D7EF8
 Battle	Data_ItemEffectList	Data	1376	4*	0x021F1EC4	0x021F1EA4	0x021D8F68	0x021D8F28
+Battle	Data_ProtectionFailRates	Data	8		0x021F2876	0x021F2856	0x021D991A	0x021D98DA
 Battle	Data_MoveEffectList	Data	2064	4*	0x021F3050	0x021F3030	0x021DA0F4	0x021DA0B4
 Battle	Data_Unknown1List	Data	112	4*	0x021F39F8	0x021F39D8	0x021DAABC	0x021DAA7C
 Battle	Data_BattleField	Data	360				0x021DD928	0x021DD8E8
@@ -788,6 +792,7 @@ BattleServer	PokeSet_SeekStart	Code		thumb	0x0689CC84	0x0689CC84	0x0689CE0C	0x06
 BattleServer	PokeSet_SeekNext	Code		thumb	0x0689CC8C	0x0689CC8C	0x0689CE14	0x0689CE14
 BattleServer	FaintRecord_GetCount	Code		thumb	0x0689D174	0x0689D174	0x0689D2FC	0x0689D2FC
 BattleServer	PosPoke_IsExist	Code		thumb	0x0689D588	0x0689D588	0x0689D710	0x0689D710
+BattleServer	PosPoke_IsExistFrontPos	Code		thumb			0x0689D724	0x0689D724
 BattleServer	Data_WonderRoomEventHandlerAddress	Data	4	*	0x0689D62C	0x0689D62C	0x0689D7B4	0x0689D7B4
 BattleServer	Data_FieldStatusEffectTable	Data	56	4*	0x0689D650	0x0689D650	0x0689D7D8	0x0689D7D8
 BattleServer	Data_SideStatusEffectTable	Data	112	4*	0x0689D780	0x0689D780	0x0689D908	0x0689D908
@@ -797,7 +802,7 @@ BattleServer	SideStatuses	Data	448		0x0689E7E0	0x0689E7E0	0x0689E960	0x0689E960
 Field	Encounter_CreateWildPoke	Code		thumb			0x021A0E00	0x021A0DC0
 Field	Encounter_GenPID	Code		thumb			0x021A1548	0x021A1508
 Local	TransformSeasonPoke	Code		thumb			0x02164A2C	0x021649EC
-Local	Event_TrainerBattle	Code		thumb			0x0216870C	
+Local	Event_TrainerBattle	Code		thumb			0x0216870C	0x021686CC
 PWTBattle	SetDownloadedParty	Code		thumb	--	--	0x021F016C	0x021F012C
 PWTBattle	GetRivalTrainerId	Code		thumb	--	--	0x021F0260	0x021F0220
 PWTBattle	SetRomParty	Code		thumb	--	--	0x021F03A4	0x021F0364
@@ -823,6 +828,7 @@ StorageSystem	Data_SearchAbilityLetterOffsets	Data	48				0x021D9078	0x021D9038
 StorageSystem	Data_SearchAbilityNameSort	Data	164				0x021D9288	0x021D9248
 StorageSystem	Box2_Main_C	Data	12		0x021F1420	0x021F1400	0x021D9680	0x021D9640
 Title	StartMenuProc_End	Code		thumb			0x0219DA18	0x0219D9D8
+Title	StartMenuProc_CallIntro	Code		thumb			0x021A0084	0x021A0044
 TrainerAI	Data_AIScriptCommands	Data	492	*	0x0218A5C8	0x0218A5A8	0x02181CF4	0x02181CB4
 UnovaLink	Proc_Init	Code		thumb			0x021BEF20	0x021BEEE0
 UnovaLink	Seq_FadeIn	Code		thumb			0x021BF17C	0x021BF13C
@@ -998,3 +1004,8 @@ UnovaLink	Data_KeySystem_UI_SendReceive_Receive	Data	16	***4			0x021C8FF8	0x021C
 UnovaLink	Data_KeySystem_UI_SendReceive_Send	Data	16	***4			0x021C9008	0x021C8FC8
 UnovaLink	Data_KeySystem_UI_SendReceive_YesNo	Data	16	***4			0x021C9018	0x021C8FD8
 UnovaLink	Data_KeySystem_UI_Settings_Door	Data	16	***4			0x021C9028	0x021C8FE8
+UnovaLink	Data_aMAN	Data	4				0x021C9314	0x021C92D4
+UnovaLink	Data_aKeySystemUtilC	Data	18				0x021C9330	0x021C92F0
+UnovaLink	Data_aKEM	Data	4				0x021C9480	0x021C9440
+UnovaLink	Data_aKLL	Data	4				0x021C9484	0x021C9444
+UnovaLink	Data_aDNM	Data	4				0x021C9488	0x021C9448

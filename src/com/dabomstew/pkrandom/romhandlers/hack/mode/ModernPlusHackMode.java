@@ -14,7 +14,7 @@ public class ModernPlusHackMode extends ModernHackMode {
         super(name);
 
         // Ability
-        getHackMod(AbilityHackModCollection.class).addHackMods(List.of(
+        addHackMod(new AbilityHackModCollection(
                 new AbilityHackMod_023_ShadowTag_Message("{0} steps on\nfoe shadows!"),
                 new AbilityHackMod_025_WonderGuard_Message("{0} is cloaked in\na mysterious power!"),
                 new AbilityHackMod_037_HugePower("{0} is flexing\nits muscles!"),

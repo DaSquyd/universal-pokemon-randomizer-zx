@@ -3,6 +3,9 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.modern;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -12,15 +15,17 @@ public class AbilityHackMod_035_Illuminate_Modern extends AbilityHackMod {
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return "It prevents its accuracy\n" +
-                "from being lowered.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription(
+                "It prevents its accuracy",
+                "from being lowered."
+        );
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
+    public Dialogue getExplanation(Context context) {
         // TODO
-        return super.getExplanation(context, allExplanations);
+        return super.getExplanation(context);
     }
 
     @Override

@@ -1,5 +1,9 @@
 package com.dabomstew.pkrandom.romhandlers.hack;
 
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,19 +50,23 @@ public abstract class BattleObjectHackMod extends HackMod {
     }
 
     @Override
+    public void Merge(HackMod other) {
+    }
+
+    @Override
     public Set<Class<? extends HackMod>> getDependencies() {
         return Set.of();
     }
 
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return null;
     }
 
-    public String getDescription(Context context, List<String> allDescriptions) {
+    public GameText getDescription(Context context) {
         return null;
     }
 
-    public String getExplanation(Context context, List<String> allExplanations) {
+    public Dialogue getExplanation(Context context) {
         return null;
     }
 

@@ -32,7 +32,7 @@ public class ParagonLiteAbilities {
     public static final int specialized = 501;
     public static final int insectivore = 502;
     public static final int prestige = 503;
-    public static final int luckyFoot = 504;
+    public static final int springLegs = 504;
     public static final int assimilate = 505;
     public static final int stoneHome = 506;
     public static final int cacophony = 507;
@@ -42,7 +42,7 @@ public class ParagonLiteAbilities {
     public static final int sunSoaked = 511;
     public static final int colossal = 512;
     public static final int finalThread = 513;
-    public static final int homegrown = 514;
+    public static final int capoeirista = 514;
     public static final int ravenousTorque = 515;
     public static final int superconductor = 516;
     public static final int somaticReflex = 517;
@@ -57,10 +57,18 @@ public class ParagonLiteAbilities {
     public static final int coolantBoost = 526;
     public static final int warpDrive = 527;
     public static final int scaredyCat = 528;
-    public static final int relentless = 529;
+    public static final int adrenalineRush = 529;
+    public static final int psionize = 530;
+    public static final int obfuscate = 531;
+    public static final int invigorate = 532;
+    public static final int tenacity = 533;
+    public static final int tractorBeam = 534;
+    public static final int mightyMunition = 535;
+    public static final int allergen = 536;
+    public static final int dynamo = 537;
 
     public static final int MIN = heavyWing;
-    public static final int MAX = relentless;
+    public static final int MAX = dynamo;
     
     public static Set<Integer> allowedAbilities = Set.of(
 //            Abilities.aromaVeil, // 165
@@ -156,17 +164,17 @@ public class ParagonLiteAbilities {
             specialized, // 501
             insectivore, // 502
             prestige, // 503
-            luckyFoot, // 504
+            springLegs, // 504
             assimilate, // 505
             stoneHome, // 506
             cacophony, // 507
-//            ripTide, // 508
+            undercurrent, // 508
             windWhipper, // 509
             glazeware, // 510
             sunSoaked, // 511
             colossal, // 512
 //            finalThread, // 513
-//            homeGrown, // 514
+            capoeirista, // 514
             ravenousTorque, // 515
             superconductor, // 516
 //            somaticReflex, // 517
@@ -177,10 +185,18 @@ public class ParagonLiteAbilities {
             volcanicFury, // 522
 //            pastoralAroma, // 523
             healSpore, // 524
-            xrayVision // 525
+            xrayVision, // 525
 //            coolantBoost, // 526
 //            warpDrive, // 527
 //            scaredyCat, // 528
-//            unyielding // 529
+//            adrenalineRush, // 529
+            psionize, // 530
+            obfuscate, // 531
+            invigorate, // 532
+            tenacity // 533
+//            tractorBeam, // 534
+//            mightyMunition, // 535
+//            allergen, // 536
+//            dynamo // 537
     );
 }

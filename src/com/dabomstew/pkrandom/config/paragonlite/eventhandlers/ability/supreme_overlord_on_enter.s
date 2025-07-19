@@ -1,11 +1,20 @@
     push    {r3-r7, lr}
+    sub     sp, #0x04
     mov     r5, r1
     mov     r4, r2
+    mov     r6, r3
     
-    mov     r0, #0x02
+    mov     r0, #VAR_PokeId
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
     bne     Return
+    
+    ldr     r0, [r6, #0x00]
+    cmp     r0, #FALSE
+    bne     Return
+    
+    mov     r0, #TRUE
+    str     r0, [r6, #0x00]
     
     bl      Battle::GetTeamIdFromPokePos
     mov     r1, r0
@@ -15,24 +24,26 @@
     
     ; get party size
     ldrb    r0, [r3, #0x18]
-    mov     r6, #0 ; iteration
-    mov     r7, #0 ; fainted count
+    mov     r7, #0 ; iteration
+    str     r7, [sp, #0x04] ; fainted count
     cmp     r0, #0
     ble     Return
     
 LoopStart:
-    lsl     r0, r6, #2
+    lsl     r0, r7, #2
     ldr     r0, [r3, r0]
     bl      Battle::IsPokeFainted
     cmp     r0, #0
     bne     DisplayMessage ; found
     
-    add     r7, #1 ; increment fainted count
+    ldr     r0, [r6, #0x04]
+    add     r0, #1
+    str     r0, [r6, #0x04] ; increment fainted count
 
 LoopCheckContinue:
     ldrb    r0, [r3, #0x18] ; party size
-    add     r6, #1
-    cmp     r6, r0
+    add     r7, #1
+    cmp     r7, r0
     blt     LoopStart
     b       Return ; no fainted allies were found
     
@@ -67,4 +78,5 @@ DisplayMessage:
     bl      Battle::Handler_PushRun
     
 Return:
+    add     sp, #0x04
     pop     {r3-r7, pc}

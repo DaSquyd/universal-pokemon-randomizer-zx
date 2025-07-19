@@ -5,6 +5,8 @@ import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
 import com.dabomstew.pkrandom.romhandlers.hack.HackMod;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.expansion.AbilityHackMod_168_Protean;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 import java.util.Map;
@@ -12,10 +14,10 @@ import java.util.Set;
 
 public class AbilityHackMod_016_ColorChange_Protean extends AbilityHackMod {
     public final boolean firstOnly;
-    
+
     public AbilityHackMod_016_ColorChange_Protean(boolean firstOnly) {
         super(Abilities.colorChange);
-        
+
         this.firstOnly = firstOnly;
     }
 
@@ -25,9 +27,8 @@ public class AbilityHackMod_016_ColorChange_Protean extends AbilityHackMod {
     }
 
     @Override
-    public String getDescription(Context context, List<String> abilityDescriptions) {
-        return "Changes type to the match" +
-                "the current move.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription("Changes type to the match", "the current move.");
     }
 
     @Override

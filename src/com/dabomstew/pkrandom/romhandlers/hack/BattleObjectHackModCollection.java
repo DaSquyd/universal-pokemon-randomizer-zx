@@ -2,6 +2,9 @@ package com.dabomstew.pkrandom.romhandlers.hack;
 
 import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.romhandlers.*;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.*;
 import java.util.function.Function;
@@ -51,7 +54,7 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
         EventHandler(int type, int existingObject) {
             this.type = type;
 
-            int referenceAddress = getEventHandlerFuncReferenceAddress(existingObject, getEffectListRomAddress(), getEffectListCount(), type);
+            int referenceAddress = getEventHandlerFuncReferenceAddress(existingObject, getEffectListNumReferenceOffset(), getEffectListCount(), type);
             this.address = battleOvl.readWord(referenceAddress) - 1;
         }
 
@@ -155,7 +158,7 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
 
     @SafeVarargs
     BattleObjectHackModCollection(T... hackMods) {
-        super(hackMods);
+        super(Arrays.stream(hackMods).toList());
     }
 
     @Override
@@ -194,16 +197,16 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
             int number = hackMod.number;
 
             // Name
-            String name = hackMod.getName(context, names);
+            String name = hackMod.getName(context);
             setText(hackMod, names, name);
 
             // Description
-            String description = hackMod.getDescription(context, descriptions);
+            GameText description = hackMod.getDescription(context);
             setText(hackMod, descriptions, description);
 
             // Explanation
-            String explanation = hackMod.getExplanation(context, descriptions);
-            setText(hackMod, descriptions, explanation);
+            GameText explanation = hackMod.getExplanation(context);
+            setText(hackMod, explanations, explanation);
 
             // Event Handlers
             List<BattleObjectHackMod.QueueEntry> queueEntries = new ArrayList<>();
@@ -328,13 +331,18 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
 
     protected abstract List<Table> getTables();
 
-    protected void setText(BattleObjectHackMod hackMod, List<String> texts, String text) {
-        if (texts != null && text != null) {
-            while (hackMod.number <= texts.size())
-                texts.add("");
+    protected void setText(BattleObjectHackMod hackMod, List<String> texts, GameText text) {
+        setText(hackMod, texts, text.toString());
+    }
 
-            texts.set(hackMod.number, text);
-        }
+    protected void setText(BattleObjectHackMod hackMod, List<String> texts, String text) {
+        if (texts == null || text == null)
+            return;
+        
+        while (hackMod.number <= texts.size())
+            texts.add("");
+
+        texts.set(hackMod.number, text);
     }
 
     protected abstract int getMaxVanillaObjectNumber();

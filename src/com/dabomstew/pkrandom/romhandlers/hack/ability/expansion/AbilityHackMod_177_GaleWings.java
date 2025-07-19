@@ -3,6 +3,9 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.expansion;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 import java.util.Map;
@@ -35,30 +38,30 @@ public class AbilityHackMod_177_GaleWings extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Gale Wings";
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
+    public GameText getDescription(Context context) {
         switch (hpRequirement) {
             case None -> {
-                return "Gives priority to\\xFFFEFlying-type moves.";
+                return new AbilityDescription("Gives priority to", "Flying-type moves.");
             }
             case Half -> {
-                return "Gives priority to Flying-\\xFFFEtype moves at high HP";
+                return new AbilityDescription("Gives priority to Flying-", "type moves at high HP.");
             }
             case Full -> {
-                return "Gives priority to Flying-\\xFFFEtype moves at full HP";
+                return new AbilityDescription("Gives priority to Flying-", "type moves at full HP.");
             }
             default -> throw new IllegalStateException("Unexpected value: " + hpRequirement);
         }
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
+    public Dialogue getExplanation(Context context) {
         // TODO
-        return super.getExplanation(context, allExplanations);
+        return super.getExplanation(context);
     }
 
     @Override

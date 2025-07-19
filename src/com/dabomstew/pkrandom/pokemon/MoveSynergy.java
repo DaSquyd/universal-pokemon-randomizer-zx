@@ -346,7 +346,7 @@ public class MoveSynergy {
                         .toList());
                 break;
             case Abilities.hustle:
-                if (hackMode == HackMode.ParagonLite) {
+                if (Objects.equals(hackMode.name, "ParagonLite")) {
                     synergisticMoves.addAll(moveList
                             .stream()
                             .filter(mv -> mv.isDamagingMove() && mv.power > 1 && mv.power <= 60 && mv.maxHits <= 1 && mv.criticalChance != CriticalChance.GUARANTEED)
@@ -419,7 +419,7 @@ public class MoveSynergy {
                 synergisticMoves.add(Moves.acupressure);
                 break;
             case Abilities.adaptability:
-                if (hackMode == HackMode.ParagonLite) {
+                if (Objects.equals(hackMode.name, "ParagonLite")) {
                     synergisticMoves.addAll(moveList
                             .stream()
                             .filter(mv -> mv.category != MoveCategory.STATUS && mv.type != pkType1 && mv.type != pkType2)
@@ -525,7 +525,7 @@ public class MoveSynergy {
             case Abilities.sheerForce:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.isBoostedBySheerForce() && (mv.number != Moves.electroShot || (hackMode != HackMode.ParagonLite && hackMode != HackMode.Redux)))
+                        .filter(mv -> mv.isBoostedBySheerForce() && (mv.number != Moves.electroShot || (!Objects.equals(hackMode.name, "ParagonLite") && !Objects.equals(hackMode.name, "Redux"))))
                         .map(mv -> mv.number)
                         .toList());
                 break;
@@ -558,7 +558,7 @@ public class MoveSynergy {
                 synergisticMoves.add(Moves.voltSwitch);
                 synergisticMoves.add(Moves.partingShot);
                 
-                if (generation >= 7 || hackMode == HackMode.ParagonLite || hackMode == HackMode.Redux)
+                if (generation >= 7 || Objects.equals(hackMode.name, "ParagonLite") || Objects.equals(hackMode.name, "Redux"))
                     synergisticMoves.add(Moves.teleport);
                 
                 break;
@@ -587,7 +587,7 @@ public class MoveSynergy {
             case Abilities.megaLauncher:
                 synergisticMoves.addAll(moveList
                         .stream()
-                        .filter(mv -> mv.isCustomPulseMove || ((hackMode == HackMode.ParagonLite || hackMode == HackMode.Redux) && mv.isCustomBallBombMove))
+                        .filter(mv -> mv.isCustomPulseMove || ((Objects.equals(hackMode.name, "ParagonLite") || Objects.equals(hackMode.name, "Redux")) && mv.isCustomBallBombMove))
                         .map(mv -> mv.number)
                         .toList());
                 break;
@@ -719,7 +719,7 @@ public class MoveSynergy {
                         .toList());
                 break;
             case Abilities.damp:
-                if (hackMode == HackMode.ParagonLite) {
+                if (Objects.equals(hackMode.name, "ParagonLite")) {
                     antiSynergisticMoves.add(Moves.solarBeam);
                     antiSynergisticMoves.add(Moves.solarBlade);
                     antiSynergisticMoves.add(Moves.morningSun);

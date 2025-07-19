@@ -2,35 +2,50 @@ package com.dabomstew.pkrandom.romhandlers.hack.mode;
 
 import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.custom.*;
+import com.dabomstew.pkrandom.romhandlers.hack.ability.expansion.AbilityHackMod_177_GaleWings;
+import com.dabomstew.pkrandom.romhandlers.hack.ability.expansion.AbilityHackMod_270_ThermalExchange;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.modernplus.AbilityHackMod_023_ShadowTag_Message;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.old.*;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackModCollection;
 import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
+import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_500_HeavyWing;
 import com.dabomstew.pkrandom.romhandlers.hack.weather.WeatherHailSnowMode;
 
 import java.util.List;
 
 // Blaze Black 2 Redux and Volt White 2 Redux
 public class ReduxHackMode extends ModernPlusHackMode {
-    public ReduxHackMode(String name) {
-        super(name);
+    public ReduxHackMode() {
+        super("Redux");
+
+        // REMOVE LATER
+        abilityShadowTagMessage = "{0} stalks\nthe shadows!";
+        abilityHugePowerMessage = "{0} is striking\na pose!";
 
         // Ability
-        getHackMod(AbilityHackModCollection.class).addHackMods(List.of(
+        addHackMod(new AbilityHackModCollection(
                 new AbilityHackMod_001_Stench(20),
                 new AbilityHackMod_006_Damp_FireResist(),
                 new AbilityHackMod_007_Limber_SpeedReductionImmunity(),
                 new AbilityHackMod_016_ColorChange_Protean(false),
                 new AbilityHackMod_017_Immunity_PoisonTypeImmunity(),
-                new AbilityHackMod_023_ShadowTag_Message("{0} stalks\nthe shadows!"),
+                new AbilityHackMod_023_ShadowTag_Message(abilityShadowTagMessage),
                 new AbilityHackMod_035_Illuminate_GhostAndDarkResistance(),
                 new AbilityHackMod_040_MagmaArmor_WaterAndIceImmunity(),
                 new AbilityHackMod_051_KeenEye(true, 1.1),
                 new AbilityHackMod_074_PurePower(1.5, MoveCategory.SPECIAL, "{0} is striking\na pose!"),
-                new AbilityHackMod_155_Rattled_IntimidateActivationAndBugGhostResist()
+                new AbilityHackMod_155_Rattled_IntimidateActivationAndBugGhostResist(),
+
+                // Expansion
+                new AbilityHackMod_177_GaleWings(AbilityHackMod_177_GaleWings.HPRequirement.Half),
+                new AbilityHackMod_270_ThermalExchange(true),
+
+                // Original
+                new AbilityHackMod_500_HeavyWing()
         ));
 
-
+        abilityIlluminateMode = AbilityIlluminateMode.RESIST_DARK_AND_GHOST;
+        
         // Ability
         abilityMagmaArmorMode = AbilityMagmaArmorMode.VANILLA_PLUS_IMMUNE_TO_WATER_AND_ICE; // #040
         abilityWaterVeilMode = AbilityWaterVeilMode.VANILLA_PLUS_OVERCOAT; // #041

@@ -4,6 +4,9 @@ import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.constants.ParagonLiteAbilities;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -13,21 +16,26 @@ public class AbilityHackMod_510_Glazeware extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Glazeware";
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return "Resistant to Water- and\\xFFFEPoison-type moves.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription(
+                "Resistant to Water- and",
+                "Poison-type moves."
+        );
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
-        return allExplanations.get(Abilities.thickFat)
-                .replace("Thick Fat", "Glazeware")
-                .replace("Fire", "Water")
-                .replace("Ice", "Poison");
+    public Dialogue getExplanation(Context context) {
+        return new Dialogue(
+                "Glazeware, huh...",
+                Dialogue.clearLine,
+                "This Ability halves damage from",
+                "Water- and Poison-type moves."
+        );
     }
 
     @Override

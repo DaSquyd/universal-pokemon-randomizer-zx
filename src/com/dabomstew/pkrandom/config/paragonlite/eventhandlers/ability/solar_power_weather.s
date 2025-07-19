@@ -16,7 +16,7 @@
     mov     r0, r5
     mov     r1, r4
     bl      Battle::GetPoke
-    mov     r1, #10 ; 1/10 hp
+    mov     r1, #ABILITY_SOLAR_POWER_HP_FRACTION
     bl      Battle::DivideMaxHPZeroCheck
     
     mov     r6, r0

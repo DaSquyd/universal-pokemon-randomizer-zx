@@ -1,21 +1,19 @@
-; 25% -> 20%
     push    {r4, lr}
-    mov     r0, #4
     mov     r4, r2
+    
+    mov     r0, #VAR_DefendingPoke
     bl      Battle::EventVar_GetValue
-    lsl     r0, #24
-    lsr     r1, #24
-    cmp     r1, r4
-    beq     End
+    cmp     r0, r4
+    beq     Return
     
     mov     r0, r4
     bl      Battle::IsAllyPokeId
-    cmp     r0, #0
-    beq     End
+    cmp     r0, #FALSE
+    beq     Return
     
-    ldr     r1, =3277 ; 80%
-    mov     r0, #53 ; damage
+    mov     r0, #VAR_Ratio
+    ldr     r1, =(0x1000 * ABILITY_FRIEND_GUARD_MULTIPLIER)
     bl      Battle::EventVar_MulValue
     
-End:
+Return:
     pop     {r4, pc}

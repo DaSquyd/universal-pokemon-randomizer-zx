@@ -4,6 +4,9 @@ import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.constants.ParagonLiteAbilities;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -13,20 +16,27 @@ public class AbilityHackMod_503_Prestige extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Prestige";
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return allDescriptions.get(Abilities.moxie).replace("Attack", "Sp. Atk");
+    public GameText getDescription(Context context) {
+        return new AbilityDescription(
+                "Boosts Sp. Atk after",
+                "knocking out any Pokémon."
+        );
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
-        return allExplanations.get(Abilities.moxie)
-                .replace("Moxie", "Prestige")
-                .replace("Attack", "Sp. Attack");
+    public Dialogue getExplanation(Context context) {
+        return new Dialogue(
+                "Prestige, huh...",
+                Dialogue.clearLine,
+                "When a Pokémon with this Ability",
+                "knocks out an opponent,",
+                "its Sp. Atk goes up."
+        );
     }
 
     @Override

@@ -11,7 +11,7 @@ public class AbilityHackMod_289_HadronEngine extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Hadron Engine";
     }
 

@@ -10,8 +10,8 @@
     bl      Battle::GetPokeStat
     mov     r6, r0
     
-#if ABILITY_DAMP_IS_RAIN_EFFECT
 CheckDamp:
+#if ABILITY_DAMP_IS_RAIN_EFFECT
     mov     r1, #6 ; Damp
     cmp     r6, r1
     bne     CheckSunSoaked
@@ -20,11 +20,13 @@ CheckDamp:
 #endif
     
 CheckSunSoaked:
+#if ABILITY_SUN-SOAKED_IS_SUN_EFFECT
     ldr     r1, =511 ; Sun-Soaked
     cmp     r6, r1
     bne     GetWeather
     mov     r0, #WEATHER_Sun
     b       Return
+#endif
     
 GetWeather:
     mov     r0, r5

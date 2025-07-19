@@ -1,23 +1,22 @@
     push    {r4, lr}
-    mov     r0, #3
+    mov     r0, #VAR_AttackingPoke
+    
     mov     r4, r2
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
-    bne     End
+    bne     Return
     
-    mov     r0, #18
+    mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
-    lsl     r0, #16
-    lsr     r0, #16
     
-    mov     r1, #14 ; Kick move flag
+    mov     r1, #MF_Kick
     bl      ARM9::MoveHasFlag
-    cmp     r0, #0
-    beq     End
+    cmp     r0, #FALSE
+    beq     Return
     
-    ldr     r1, =6144 ; 1.5x
-    mov     r0, #49 ; move power
+    ldr     r1, =(0x1000 * 1.3)
+    mov     r0, #VAR_MovePower
     bl      Battle::EventVar_MulValue
     
-End:
+Return:
     pop     {r4, pc}

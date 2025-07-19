@@ -37,4 +37,8 @@ public class HackMod_ModernProtectMoveChance extends HackMod {
         int newDataAddress = battleOvl.romToRamAddress(battleOvl.writeData(bytes, "Data_ProtectionFailRates"));
         battleOvl.writeWord(romAddress + 0x54, newDataAddress, true);
     }
+
+    @Override
+    public void Merge(HackMod other) {
+    }
 }

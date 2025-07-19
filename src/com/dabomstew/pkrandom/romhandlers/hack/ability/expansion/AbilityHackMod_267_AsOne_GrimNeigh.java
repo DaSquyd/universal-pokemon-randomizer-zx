@@ -11,7 +11,7 @@ public class AbilityHackMod_267_AsOne_GrimNeigh extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
          return "As One";
     }
 

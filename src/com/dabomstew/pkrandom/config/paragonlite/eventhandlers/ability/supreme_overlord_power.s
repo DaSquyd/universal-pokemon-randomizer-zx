@@ -1,12 +1,16 @@
     push    {r4-r7, lr}
     mov     r4, r2
     mov     r5, r1
+    mov     r6, r3
     
     mov     r0, #0x03
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
     bne     Return
     
+#if ABILITY_SUPREME_OVERLORD_ONLY_ON_ENTER
+    ldr     r7, [r6, #0x04] ; num fainted
+#else
     bl      Battle::GetTeamIdFromPokePos
     mov     r1, r0
     ldr     r0, [r5, #0x08]
@@ -34,6 +38,7 @@ LoopCheckContinue:
     add     r6, #1
     cmp     r6, r0
     blt     LoopStart
+#endif
 
     cmp     r7, #5
     bls     Switch
@@ -50,24 +55,23 @@ Switch:
     #CASE Fainted_5
     
 Fainted_1:
-    ldr     r1, =4506 ; 1.1x
+    ldr     r1, =(0x1000 * 1.1)
     b       ApplyMultiplier
     
 Fainted_2:
-    ldr     r1, =4915 ; 1.2x
+    ldr     r1, =(0x1000 * 1.2)
     b       ApplyMultiplier
     
 Fainted_3:
-    ldr     r1, =5325 ; 1.3x
+    ldr     r1, =(0x1000 * 1.3)
     b       ApplyMultiplier
     
 Fainted_4:
-    ldr     r1, =5734 ; 1.4x
+    ldr     r1, =(0x1000 * 1.4)
     b       ApplyMultiplier
     
 Fainted_5:
-    mov     r1, #6
-    lsl     r1, #10 ; 6144 (1.5x)
+    ldr     r1, =(0x1000 * 1.5)
     
 ApplyMultiplier:
     mov     r0, #0x31

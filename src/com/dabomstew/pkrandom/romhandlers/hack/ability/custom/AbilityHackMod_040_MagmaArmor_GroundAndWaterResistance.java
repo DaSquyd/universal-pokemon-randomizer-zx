@@ -4,6 +4,9 @@ import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.ParagonLiteHandler;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -13,19 +16,26 @@ public class AbilityHackMod_040_MagmaArmor_GroundAndWaterResistance extends Abil
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return "Resists Water- and\n" +
-                "Ground-type moves.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription("Resists Water- and", "Ground-type moves.");
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
-        return "Magma Armor, huh...\uF000븁\\x0000\\xFFFE"
-                + "This Ability halves damage from\\xFFFEWater- and Ground-type moves.\uF000븁\\x0000"
-                + "It also has a small chance to inflict\\xFFFEthe burned status condition\uF000븀\\x0000\\xFFFE"
-                + "when hit with a direct attack.\uF000븁\\x0000\\xFFFE"
-                + "What's more...\uF000븁\\x0000\\xFFFE"
-                + "It makes Eggs in your party hatch faster.\uF000븁\\x0000";
+    public Dialogue getExplanation(Context context) {
+        return new Dialogue(
+                "Magma Armor, huh...",
+                Dialogue.clearLine,
+                "This Ability halves damage from",
+                "Water- and Ground-type moves.",
+                Dialogue.clearLine,
+                "It also has a chance to inflict",
+                "the burned status condition",
+                "when hit with a direct attack.",
+                Dialogue.clearLine,
+                "What's more...",
+                Dialogue.clearLine,
+                "It makes Eggs in your party hatch faster."
+        );
     }
 
     @Override

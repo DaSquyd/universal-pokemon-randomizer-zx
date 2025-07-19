@@ -1,15 +1,14 @@
-; 0x13
     push    {r4, lr}
     mov     r4, r2
     
-    mov     r0, #2
+    mov     r0, #VAR_PokeId
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
     bne     Return
     
-    mov     r0, #53 ; stat
-    ldr     r1, =(4096 * 0.75)
+    mov     r0, #VAR_Ratio
+    ldr     r1, =(0x1000 * ABILITY_HEAVY_METAL_SPEED_MULTIPLIER)
     bl      Battle::EventVar_MulValue
-
+    
 Return:
     pop     {r4, pc}

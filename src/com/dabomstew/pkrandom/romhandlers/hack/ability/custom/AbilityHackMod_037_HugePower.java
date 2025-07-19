@@ -2,8 +2,10 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.custom;
 
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
+import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.romhandlers.ParagonLiteHandler;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
 
 import java.util.List;
 import java.util.Map;
@@ -43,12 +45,13 @@ public class AbilityHackMod_037_HugePower extends AbilityHackMod {
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
-        if (multiplier == 1.5)
-            return "Huge Power, huh...\uF000븁\\x0000\\xFFFEThis Ability increases a Pokémon's\\xFFFEAttack stat by half.\uF000븁\\x0000";
-        else if (multiplier != 2)
-            return "Huge Power, huh...\uF000븁\\x0000\\xFFFEThis Ability increases a Pokémon's\\xFFFEAttack stat.\uF000븁\\x0000";
-        return allExplanations.get(number);
+    public Dialogue getExplanation(Context context) {
+        return new Dialogue(
+                "Huge Power, huh...",
+                Dialogue.clearLine,
+                "This Ability " + (multiplier == 2 ? "doubles" : "increases") + " a Pokémon's",
+                "Attack stat."
+        );
     }
 
     @Override

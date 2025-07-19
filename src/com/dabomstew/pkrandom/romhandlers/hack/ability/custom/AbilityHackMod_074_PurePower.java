@@ -5,6 +5,7 @@ import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.constants.Gen5Constants;
 import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
 
 import java.util.List;
 import java.util.Map;
@@ -55,19 +56,13 @@ public class AbilityHackMod_074_PurePower extends AbilityHackMod {
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
-        String explanation;
-        if (multiplier == 1.5)
-            explanation = "Pure Power, huh...\uF000븁\\x0000\\xFFFEThis Ability increases a Pokémon's\\xFFFEAttack stat by half.\uF000븁\\x0000";
-        else if (multiplier != 2)
-            explanation = "Pure Power, huh...\uF000븁\\x0000\\xFFFEThis Ability increases a Pokémon's\\xFFFEAttack stat.\uF000븁\\x0000";
-        else
-            explanation = allExplanations.get(number);
-
-        if (moveCategory == MoveCategory.SPECIAL)
-            explanation = explanation.replace("Attack", "Sp. Attack");
-
-        return explanation;
+    public Dialogue getExplanation(Context context) {
+        return new Dialogue(
+                "Pure Power, huh...",
+                Dialogue.clearLine,
+                "This Ability " + (multiplier == 2 ? "doubles" : "increases") + " a Pokémon's",
+                (moveCategory == MoveCategory.SPECIAL ? "Sp. Atk" : "Attack") + " stat."
+        );
     }
 
     @Override

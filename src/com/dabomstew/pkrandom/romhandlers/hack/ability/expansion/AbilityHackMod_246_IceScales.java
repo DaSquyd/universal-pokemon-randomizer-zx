@@ -11,7 +11,7 @@ public class AbilityHackMod_246_IceScales extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Ice Scales";
     }
 

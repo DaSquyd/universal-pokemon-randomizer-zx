@@ -3,6 +3,8 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.custom;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -12,9 +14,8 @@ public class AbilityHackMod_006_Damp_FireResist extends AbilityHackMod {
     }
 
     @Override
-    public String getDescription(Context context, List<String> abilityDescriptions) {
-        return "Guards against Fire and\\xFFFE" +
-                "self-destructing moves.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription("Guards against Fire and", "self-destructing moves.");
     }
 
     @Override

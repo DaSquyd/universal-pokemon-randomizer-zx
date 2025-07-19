@@ -3,6 +3,7 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.modern;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
 
 import java.util.List;
 
@@ -12,9 +13,9 @@ public class AbilityHackMod_113_Scrappy_IntimidateImmunity extends AbilityHackMo
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
+    public Dialogue getExplanation(Context context) {
         // TODO
-        return super.getExplanation(context, allExplanations);
+        return super.getExplanation(context);
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.expansion;
 
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -11,8 +13,16 @@ public class AbilityHackMod_256_NeutralizingGas extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Neutralizing Gas";
+    }
+
+    @Override
+    public GameText getDescription(Context context) {
+        return new AbilityDescription(
+                "Strange gas blocks all",
+                "other Abilities."
+        );
     }
 
     @Override

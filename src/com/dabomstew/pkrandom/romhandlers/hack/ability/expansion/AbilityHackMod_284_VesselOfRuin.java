@@ -11,7 +11,7 @@ public class AbilityHackMod_284_VesselOfRuin extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Vessel of Ruin";
     }
 

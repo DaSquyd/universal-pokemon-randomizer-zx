@@ -6,6 +6,7 @@ import com.dabomstew.pkrandom.romhandlers.hack.ability.custom.*;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.old.*;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackModCollection;
 import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
+import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_500_HeavyWing;
 import com.dabomstew.pkrandom.romhandlers.hack.item.ItemProtectorMode;
 import com.dabomstew.pkrandom.romhandlers.hack.weather.WeatherHailSnowMode;
 
@@ -17,7 +18,7 @@ public class ParagonLiteHackMode extends ModernPlusHackMode {
         super(name);
 
         // Ability
-        getHackMod(AbilityHackModCollection.class).addHackMods(List.of(
+        addHackMod(new AbilityHackModCollection(
                 new AbilityHackMod_006_Damp_RainEffect(),
                 new AbilityHackMod_007_Limber_SpeedReductionImmunity(),
                 new AbilityHackMod_017_Immunity_PoisonTypeImmunity(),
@@ -25,7 +26,10 @@ public class ParagonLiteHackMode extends ModernPlusHackMode {
                 new AbilityHackMod_037_HugePower(1.5, "{0} is flexing\nits muscles!"),
                 new AbilityHackMod_040_MagmaArmor_WaterAndIceImmunity(),
                 new AbilityHackMod_051_KeenEye(true, 1.1),
-                new AbilityHackMod_074_PurePower(1.5, MoveCategory.SPECIAL, "{0} is striking\na pose!")
+                new AbilityHackMod_074_PurePower(1.5, MoveCategory.SPECIAL, "{0} is striking\na pose!"),
+                
+                // Original
+                new AbilityHackMod_500_HeavyWing()
         ));
 
 

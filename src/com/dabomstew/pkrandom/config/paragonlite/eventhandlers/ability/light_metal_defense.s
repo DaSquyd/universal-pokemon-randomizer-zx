@@ -13,8 +13,8 @@
     cmp     r0, #CAT_Physical
     bne     Return
     
-    mov     r0, #VAR_Ratio ; stat
-    ldr     r1, =3686 ; 0.9x
+    mov     r0, #VAR_Ratio
+    ldr     r1, =(0x1000 * ABILITY_LIGHT_METAL_DEFENSE_MULTIPLIER)
     bl      Battle::EventVar_MulValue
     
 Return:

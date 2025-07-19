@@ -4,6 +4,9 @@ import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.constants.ParagonLiteAbilities;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -13,20 +16,27 @@ public class AbilityHackMod_502_Insectivore extends AbilityHackMod {
     }
 
     @Override
-    public String getName(Context context, List<String> allNames) {
+    public String getName(Context context) {
         return "Insectivore";
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return allDescriptions.get(Abilities.waterAbsorb).replace("Water", "Bug");
+    public GameText getDescription(Context context) {
+        return new AbilityDescription(
+                "Restores HP if hit by a",
+                "Bug-type move."
+        );
     }
 
     @Override
-    public String getExplanation(Context context, List<String> allExplanations) {
-        return allExplanations.get(Abilities.waterAbsorb)
-                .replace("Water Absorb", "Insectivore")
-                .replace("Water", "Bug");
+    public Dialogue getExplanation(Context context) {
+        return new Dialogue(
+                "Insectivore, huh...",
+                Dialogue.clearLine,
+                "Pokémon with this Ability do not",
+                "take damage from Bug-type moves",
+                "Their HP is restored a little instead."
+        );
     }
 
     @Override

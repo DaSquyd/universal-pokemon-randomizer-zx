@@ -1,5 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers.hack;
 
+import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.arm.ArmParser;
 import com.dabomstew.pkrandom.pokemon.MoveCategory;
 import com.dabomstew.pkrandom.pokemon.Type;
@@ -170,8 +171,14 @@ public class HackMode {
         this.name = name;
     }
 
-    protected void addHackMod(HackMod hackMod) {
-        hackMods.put(hackMod.getClass(), hackMod);
+    protected void addHackMod(HackMod newHackMod) {
+        if (hackMods.containsKey(newHackMod.getClass())) {
+            HackMod hackMod = hackMods.get(newHackMod.getClass());
+            hackMod.Merge(newHackMod);
+            return;
+        }
+
+        hackMods.put(newHackMod.getClass(), newHackMod);
     }
 
     protected void removeHackMod(Class<? extends HackMod> hackModClass) {
@@ -183,10 +190,10 @@ public class HackMode {
         return hackModClass.cast(hackMod);
     }
 
-    public void applyAll(Gen5RomHandler romHandler, ArmParser armParser, ParagonLiteAddressMap globalAddressMap, ParagonLiteArm9 arm9, Map<OverlayId, ParagonLiteOverlay> overlays) {
+    public void applyAll(Gen5RomHandler romHandler, Settings settings, ArmParser armParser, ParagonLiteAddressMap globalAddressMap, ParagonLiteArm9 arm9, Map<OverlayId, ParagonLiteOverlay> overlays) {
         Collection<HackMod> hackModValues = hackMods.values();
         Map<Class<? extends HackMod>, HackMod> applied = new HashMap<>();
-        HackMod.Context context = new HackMod.Context(romHandler, armParser, globalAddressMap, arm9, overlays, applied);
+        HackMod.Context context = new HackMod.Context(romHandler, settings, armParser, globalAddressMap, arm9, overlays, applied);
         for (HackMod hackMod : hackModValues) {
             if (applied.containsKey(hackMod.getClass()))
                 throw new RuntimeException();

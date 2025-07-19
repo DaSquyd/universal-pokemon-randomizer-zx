@@ -3,6 +3,9 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.custom;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
+import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
+import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -12,9 +15,14 @@ public class AbilityHackMod_040_MagmaArmor_WaterAndIceImmunity extends AbilityHa
     }
 
     @Override
-    public String getDescription(Context context, List<String> allDescriptions) {
-        return "Immune to Ice- and\n" +
-                "Water-type moves.";
+    public GameText getDescription(Context context) {
+        return new AbilityDescription("Immune to Ice- and", "Water-type moves.");
+    }
+
+    @Override
+    public Dialogue getExplanation(Context context) {
+        // TODO
+        return super.getExplanation(context);
     }
 
     @Override
