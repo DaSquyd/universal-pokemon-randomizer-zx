@@ -675,7 +675,7 @@ public class ParagonLiteAddressMap {
                 if (!(addressDataEntry.getValue() instanceof AddressBase addressBase))
                     throw new RuntimeException();
 
-                String label = addressDataEntry.getKey();
+                String label = addressDataEntry.getKey().toLowerCase();
                 int address = addressBase.address;
                 expression = expression.replaceAll(String.format("%s::%s(?=[^A-Za-z0-9_.]|$)", namespace, label), String.valueOf(address));
             }
