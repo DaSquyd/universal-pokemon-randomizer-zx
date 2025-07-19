@@ -94,6 +94,7 @@ public class ParagonLiteHandler {
 
     NARCArchive pokemonGraphicsNarc;
     NARCArchive moveAnimationsNarc;
+    int originalMoveAnimationsNarcCount;
     NARCArchive itemDataNarc;
     NARCArchive itemGraphicsNarc;
     NARCArchive moveAnimationScriptsNarc;
@@ -374,6 +375,7 @@ public class ParagonLiteHandler {
 
         pokemonGraphicsNarc = params.pokemonGraphicsNarc;
         moveAnimationsNarc = params.moveAnimationsNarc;
+        originalMoveAnimationsNarcCount = moveAnimationsNarc.files.size();
         itemDataNarc = params.itemDataNarc;
         itemGraphicsNarc = params.itemGraphicsNarc;
         moveAnimationScriptsNarc = params.moveAnimationScriptsNarc;
@@ -5521,11 +5523,13 @@ public class ParagonLiteHandler {
                 moveAnimationsNarc.files.add(new byte[16]);
             }
 
-            byte[] existingSpaFile = moveAnimationsNarc.files.get(spaFileNumber);
-            for (byte b : existingSpaFile) {
-                if (b != 0) // Should be all blank
-                    throw new RuntimeException(String.format("Attempted to overwrite existing SPA file #%03d for move #%03d %s",
-                            spaFileNumber, moveNumber, moves.get(moveNumber).name));
+            if (spaFileNumber >= originalMoveAnimationsNarcCount) {
+                byte[] existingSpaFile = moveAnimationsNarc.files.get(spaFileNumber);
+                for (byte b : existingSpaFile) {
+                    if (b != 0) // Should be all blank
+                        throw new RuntimeException(String.format("Attempted to overwrite existing SPA file #%03d for move #%03d %s",
+                                spaFileNumber, moveNumber, moves.get(moveNumber).name));
+                }
             }
 
             moveAnimationsNarc.files.set(spaFileNumber, spaFileData);
