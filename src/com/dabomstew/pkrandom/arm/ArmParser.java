@@ -2205,7 +2205,7 @@ public class ArmParser {
         }
 
         String fullStr = globalAddressMap.replaceLabelsInExpression(valueStr);
-
+        
         try {
             Object evalObj = engine.eval(fullStr, currentContext);
             if (evalObj instanceof Double asDouble)

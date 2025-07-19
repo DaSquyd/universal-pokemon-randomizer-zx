@@ -662,9 +662,11 @@ public class ParagonLiteAddressMap {
         if (!expression.contains("::"))
             return expression;
 
+        expression = expression.toLowerCase();
+        
         for (Map.Entry<ParagonLiteOverlay, Map<String, LabeledAddressInterface>> overlayEntry : labelMap.entrySet()) {
             ParagonLiteOverlay overlay = overlayEntry.getKey();
-            String namespace = overlay.name;
+            String namespace = overlay.name.toLowerCase();
             if (!expression.contains(namespace + "::"))
                 continue;
 
