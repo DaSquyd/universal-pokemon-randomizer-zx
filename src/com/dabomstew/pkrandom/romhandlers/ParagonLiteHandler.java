@@ -879,7 +879,7 @@ public class ParagonLiteHandler {
         // Updates the box data to allow for abilities up to index 1023
         // Also fixes the Azurill->Marill gender bug
         List<String> writeBoxDataLines = readLines("write_poke_box_data.s");
-        arm9.writeCodeForceInline(writeBoxDataLines, "WritePokeBoxData", true);
+        arm9.writeCodeForceInline(writeBoxDataLines, "WritePokeBoxData", false);
 
         System.out.println("Set Poke Data");
     }
