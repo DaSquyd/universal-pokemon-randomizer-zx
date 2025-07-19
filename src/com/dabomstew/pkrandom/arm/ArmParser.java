@@ -120,6 +120,7 @@ public class ArmParser {
                 "HandlerParam_ChangeType",
                 "HandlerParam_ChangeWeather",
                 "HandlerParam_ConsumeItem",
+                "HandlerParam_CureCondition",
                 "HandlerParam_Damage",
                 "HandlerParam_ForceUseItem",
                 "HandlerParam_Message",
@@ -1040,7 +1041,7 @@ public class ArmParser {
         // check for simplification
         if (line.startsWith("ldr") && line.contains("=")) {
             int equalsIndex = line.indexOf('=');
-            String valueStr = line.substring(0, equalsIndex).trim();
+            String valueStr = line.substring(equalsIndex).trim();
             int value;
             try {
                 value = parseValue(lineNum, line, valueStr);
