@@ -945,5 +945,7 @@ public class Moves {
     public static final int upperHand = 918;
     public static final int malignantChain = 919;
     
-    public static final int MAX = malignantChain;
+    public static final int secretBlast = 1023;
+    
+    public static final int MAX = secretBlast;
 }
