@@ -1130,6 +1130,8 @@ public class ArmParser {
         // Format 13    (2) ADD SP, #Imm
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
 
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("sp"))
@@ -1166,6 +1168,8 @@ public class ArmParser {
         // Format 4     (2) ASR Rd, Rs
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
 
         if (args.length == 2) {
             if (args[1].startsWith("#"))
@@ -1196,6 +1200,8 @@ public class ArmParser {
         // Format 5     (2) CMP Rd/Hd, Rs/Hs        op 1
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
 
         if (args.length != 2)
             throw new ArmParseArgCountException(line, op, args, 2);
@@ -1216,6 +1222,8 @@ public class ArmParser {
         // Format 15    LDM Rb!, { Rlist }
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
 
         if (args.length < 2)
             throw new ArmParseArgCountException(line, op, args, 2);
@@ -1254,6 +1262,9 @@ public class ArmParser {
         // Format 11    LDR Rd, [SP, #Imm]
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
+        
         if (args.length == 2) {
 
             // Hack to allow "LDR Rd, =Number" to use "LDR Rd, [PC, #NumberAddressOffset]"
@@ -1326,6 +1337,9 @@ public class ArmParser {
         // Format 9     LDRB Rd, [Rb, #Imm]
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
+        
         if (args.length == 2)
             args = new String[]{args[0], args[1].substring(0, args[1].length() - 1), "#0]"};
 
@@ -1361,6 +1375,9 @@ public class ArmParser {
         // Format 10    LDRH Rd, [Rb, #Imm]
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
+        
         if (args.length == 2)
             args = new String[]{args[0], args[1].substring(0, args[1].length() - 1), "#0]"};
 
@@ -1395,6 +1412,8 @@ public class ArmParser {
         // Format 8     LDSB Rd, [Rb, Ro]
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
 
         if (args.length != 3)
             throw new ArmParseArgCountException(line, op, args, 3);
@@ -1417,6 +1436,8 @@ public class ArmParser {
         // Format 8     LDSH Rd, [Rb, Ro]
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
 
         if (args.length != 3)
             throw new ArmParseArgCountException(line, op, args, 3);
@@ -1440,6 +1461,8 @@ public class ArmParser {
         // Format 4     (2) LSL/LSR Rd, Rs
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
 
         if (args.length == 2) {
             if (args[1].startsWith("#"))
@@ -1459,6 +1482,8 @@ public class ArmParser {
         // Format 5     (2) MOV Rd, Hs
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
         
         if (args.length != 2)
             throw new ArmParseArgCountException(line, op, args, 2);
@@ -1505,6 +1530,8 @@ public class ArmParser {
         // Format 13    (2) SUB SP, #Imm
 
         String[] args = argsStr.split(",");
+        for (var i = 0; i < args.length; ++i)
+            args[i] = args[i].trim();
 
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("sp"))
