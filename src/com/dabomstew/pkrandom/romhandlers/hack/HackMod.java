@@ -26,6 +26,8 @@ public abstract class HackMod implements Comparable<HackMod> {
 
     public abstract Set<Class<? extends HackMod>> getDependencies();
 
+    public abstract void registerGlobalValues(Context context);
+    
     public abstract void apply(Context context);
 
     public abstract void Merge(HackMod other);

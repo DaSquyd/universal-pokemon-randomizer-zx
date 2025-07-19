@@ -406,6 +406,8 @@ public class ParagonLiteHandler {
         for (int i = 0; i < pokeUpdates.length; ++i) {
             pokeUpdates[i] = new PokeUpdate();
         }
+        
+        hackMode.registerGlobalValue(romHandler, settings, armParser, globalAddressMap, arm9, overlays);
     }
 
     public void applyHackMods() {

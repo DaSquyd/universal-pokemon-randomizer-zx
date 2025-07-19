@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.romhandlers.hack;
 
 import com.dabomstew.pkrandom.Utils;
+import com.dabomstew.pkrandom.arm.ArmParser;
 import com.dabomstew.pkrandom.romhandlers.*;
 import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
 import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;

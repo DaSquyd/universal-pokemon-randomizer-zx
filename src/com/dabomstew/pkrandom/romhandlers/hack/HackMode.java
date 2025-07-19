@@ -189,6 +189,14 @@ public class HackMode {
         HackMod hackMod = hackMods.get(hackModClass);
         return hackModClass.cast(hackMod);
     }
+    
+    public void registerGlobalValue(Gen5RomHandler romHandler, Settings settings, ArmParser armParser, ParagonLiteAddressMap globalAddressMap, ParagonLiteArm9 arm9, Map<OverlayId, ParagonLiteOverlay> overlays) {
+        Collection<HackMod> hackModValues = hackMods.values();
+        HackMod.Context context = new HackMod.Context(romHandler, settings, armParser, globalAddressMap, arm9, overlays, null);
+        for (HackMod hackMod : hackModValues) {
+            hackMod.registerGlobalValues(context);
+        }
+    }
 
     public void applyAll(Gen5RomHandler romHandler, Settings settings, ArmParser armParser, ParagonLiteAddressMap globalAddressMap, ParagonLiteArm9 arm9, Map<OverlayId, ParagonLiteOverlay> overlays) {
         Collection<HackMod> hackModValues = hackMods.values();

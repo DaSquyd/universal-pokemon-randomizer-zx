@@ -14,6 +14,10 @@ public class AbilityExpansionHackMod extends HackMod {
     }
 
     @Override
+    public void registerGlobalValues(Context context) {
+    }
+
+    @Override
     public void apply(Context context) {
         ParagonLiteOverlay storageSystemOvl = context.overlays().get(OverlayId.STORAGE_SYSTEM);
 

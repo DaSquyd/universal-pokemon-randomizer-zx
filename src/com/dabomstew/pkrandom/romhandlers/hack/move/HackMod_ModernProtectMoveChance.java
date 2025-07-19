@@ -12,7 +12,11 @@ public class HackMod_ModernProtectMoveChance extends HackMod {
     public Set<Class<? extends HackMod>> getDependencies() {
         return Set.of();
     }
-
+    
+    @Override
+    public void registerGlobalValues(Context context) {
+    }
+    
     @Override
     public void apply(Context context) {
         ParagonLiteOverlay battleOvl = context.overlays().get(OverlayId.BATTLE);

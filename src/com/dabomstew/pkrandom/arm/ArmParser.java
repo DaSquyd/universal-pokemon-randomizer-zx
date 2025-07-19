@@ -49,6 +49,8 @@ public class ArmParser {
     int currentRamAddress = 0;
     int size = 0;
 
+    Set<String> usedGlobalValues = new HashSet<>();
+    
     ScriptEngineManager engineManager;
     ScriptEngine engine;
     ScriptContext currentContext;
@@ -184,14 +186,19 @@ public class ArmParser {
 
     public void addGlobalValue(String name, int value) {
         engineManager.put(name, value);
+        usedGlobalValues.add(name);
     }
 
     public void addGlobalValue(String name, double value) {
         engineManager.put(name, value);
+        usedGlobalValues.add(name);
     }
 
     public void addGlobalValue(String name, boolean value) {
+        Object test = engineManager.get(name);
+        
         engineManager.put(name, value ? 1 : 0);
+        usedGlobalValues.add(name);
     }
 
     public Object getGlobalValue(String name) {

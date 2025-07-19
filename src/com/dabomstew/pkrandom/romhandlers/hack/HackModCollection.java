@@ -1,5 +1,7 @@
 package com.dabomstew.pkrandom.romhandlers.hack;
 
+import com.dabomstew.pkrandom.arm.ArmParser;
+
 import java.util.*;
 
 public class HackModCollection<T extends HackMod> extends HackMod {
@@ -13,6 +15,7 @@ public class HackModCollection<T extends HackMod> extends HackMod {
 
         // Sort
         this.hackMods = new ArrayList<>(hackMods.size());
+        addHackMods(hackMods);
     }
 
     public final void addHackMods(List<? extends T> newHackMods) {
@@ -54,6 +57,13 @@ public class HackModCollection<T extends HackMod> extends HackMod {
     @Override
     public Set<Class<? extends HackMod>> getDependencies() {
         return dependencies;
+    }
+
+    @Override
+    public void registerGlobalValues(Context context) {
+        for (T hackMod : hackMods) {
+            hackMod.registerGlobalValues(context);
+        }
     }
 
     @Override
