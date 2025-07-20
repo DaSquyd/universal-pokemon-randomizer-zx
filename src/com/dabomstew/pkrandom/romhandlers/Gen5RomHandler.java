@@ -6145,7 +6145,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
         paragonLite.setPokemonData();
         
-        paragonLite.setBoxSearchAbilities(settings);
+        // TODO
+        // paragonLite.setBoxSearchAbilities(settings);
 
 //        if (debugMode)
 //            paragonLite.setTrainerAI();
