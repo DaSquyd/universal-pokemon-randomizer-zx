@@ -66,9 +66,14 @@ public class ParagonLiteAbilities {
     public static final int mightyMunition = 535;
     public static final int allergen = 536;
     public static final int dynamo = 537;
+    public static final int rabbitsFoot = 538;
+    public static final int floralArmor = 539;
+    public static final int trafficControl = 540;
+    public static final int veggieSword = 541;
+    public static final int flutterDust = 542;
 
     public static final int MIN = heavyWing;
-    public static final int MAX = dynamo;
+    public static final int MAX = flutterDust;
     
     public static Set<Integer> allowedAbilities = Set.of(
 //            Abilities.aromaVeil, // 165
@@ -193,10 +198,15 @@ public class ParagonLiteAbilities {
             psionize, // 530
             obfuscate, // 531
             invigorate, // 532
-            tenacity // 533
+            tenacity, // 533
 //            tractorBeam, // 534
 //            mightyMunition, // 535
 //            allergen, // 536
 //            dynamo // 537
+            rabbitsFoot, // 538
+            floralArmor, // 539
+            trafficControl, // 540
+            veggieSword, // 541
+            flutterDust // 542
     );
 }

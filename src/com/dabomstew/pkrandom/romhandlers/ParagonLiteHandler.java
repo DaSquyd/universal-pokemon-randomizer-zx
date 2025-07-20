@@ -920,6 +920,14 @@ public class ParagonLiteHandler {
 
         ParagonLiteOverlay battleOvl = overlays.get(OverlayId.BATTLE);
 
+        String dampRainEffect = "ABILITY_DAMP_IS_RAIN_EFFECT";
+        if (!armParser.hasGlobalValue(dampRainEffect))
+            armParser.addGlobalValue(dampRainEffect, false);
+
+        String sunSoakedEffect = "ABILITY_SUN_SOAKED_IS_SUN_EFFECT";
+        if (!armParser.hasGlobalValue(sunSoakedEffect))
+            armParser.addGlobalValue(sunSoakedEffect, false);
+
         List<String> getEffectiveWeatherLines = readLines("battle/get_effective_weather.s");
         battleOvl.writeCode(getEffectiveWeatherLines, "GetEffectiveWeather", true);
 
@@ -1390,7 +1398,7 @@ public class ParagonLiteHandler {
         battleServerOvl.writeCodeForceInline(getLevelsFromEventItemLines, "SideStatus_GetLevelFromEventItem", true);
 
         List<String> sideStatusEndMessageLines = readLines("battle/servercontrol/side_status_end_message_core.s");
-        battleOvl.writeCodeForceInline(sideStatusEndMessageLines, "ServerControl_SideStatusEndMessageCore", true);
+        battleOvl.writeCodeForceInline(sideStatusEndMessageLines, "ServerControl_SideStatusEndMessageCore", false);
 
         // Replace hardcoded null values (only used by the pledge moves)
         int pledgeFuncRefAddress = getEventHandlerFuncReferenceAddress(Moves.waterPledge, getMoveListAddress(), getMoveListCount(), Gen5BattleEventType.onDamageProcessingEnd_Hit2);

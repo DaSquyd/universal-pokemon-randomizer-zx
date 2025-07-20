@@ -3749,7 +3749,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void setTMMoves(Settings settings, List<Integer> moveIndexes) {
-        boolean allowDescriptionError = settings.getTmsMod() == Settings.TMsMod.UNCHANGED;
+        boolean allowDescriptionError = false; // settings.getTmsMod() == Settings.TMsMod.UNCHANGED;
 
         String tmDataPrefix = Gen5Constants.tmDataPrefix;
         int offset = find(arm9, tmDataPrefix);

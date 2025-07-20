@@ -152,20 +152,19 @@ CriticalHit:
     beq     Debug
     
     ; small optimizations
-#if Math.log2(CRITICAL_HIT_MULTIPLIER) % 1 === 0
-    ; power of 2
-    lsl     r7, #Math.log2(CRITICAL_HIT_MULTIPLIER)
+#if CRITICAL_HIT_MULTIPLIER == 2
+    ; vanilla
+    lsl     r7, #1
 #elif CRITICAL_HIT_MULTIPLIER == 1.5
     ; modern
     lsr     r0, r7, #1
     add     r7, r0
 #elif CRITICAL_HIT_MULTIPLIER == 1.25
-    ; modern
     lsr     r0, r7, #2
     add     r7, r0
 #elif CRITICAL_HIT_MULTIPLIER == Math.round(CRITICAL_HIT_MULTIPLIER)
-    ; whole number multiplier, not power of 2
-    ldr     r0, =CRITICAL_HIT_MULTIPLIER
+    ; whole number multiplier, not 2
+    mov     r0, #CRITICAL_HIT_MULTIPLIER
     mul     r7, r0
 #else
     ; fractional multiplier -> use percentage
