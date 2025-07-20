@@ -2142,6 +2142,9 @@ public class ParagonLiteHandler {
         // Only include abilities used by at least one pokemon species
         Set<Integer> uniqueAbilities = new HashSet<>();
         for (Pokemon pk : pokes) {
+            if (pk == null)
+                continue;
+            
             uniqueAbilities.add(pk.ability1);
             uniqueAbilities.add(pk.ability2);
             uniqueAbilities.add(pk.ability3);
