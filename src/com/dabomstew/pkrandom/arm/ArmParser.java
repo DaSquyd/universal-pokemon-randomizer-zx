@@ -48,8 +48,6 @@ public class ArmParser {
     int initialRamAddress = 0;
     int currentRamAddress = 0;
     int size = 0;
-
-    Set<String> usedGlobalValues = new HashSet<>();
     
     ScriptEngineManager engineManager;
     ScriptEngine engine;
@@ -184,21 +182,21 @@ public class ArmParser {
         }
     }
 
+    
+    public boolean hasGlobalValue(String name) {
+        return engineManager.get(name) != null;
+    }
+    
     public void addGlobalValue(String name, int value) {
         engineManager.put(name, value);
-        usedGlobalValues.add(name);
     }
 
     public void addGlobalValue(String name, double value) {
         engineManager.put(name, value);
-        usedGlobalValues.add(name);
     }
 
-    public void addGlobalValue(String name, boolean value) {
-        Object test = engineManager.get(name);
-        
+    public void addGlobalValue(String name, boolean value) {        
         engineManager.put(name, value ? 1 : 0);
-        usedGlobalValues.add(name);
     }
 
     public Object getGlobalValue(String name) {
@@ -625,7 +623,7 @@ public class ArmParser {
                 continue;
 
             str = stripComment(str).trim();
-            if (str.toUpperCase().startsWith("#CASE ")) {
+            if (str.toLowerCase().startsWith("#case ")) {
                 String label = str.split(" ", 2)[1].trim();
                 if (!labelAddressMap.containsKey(label))
                     throw new ExpectedLabelException(lineNumber, str, label);
@@ -653,12 +651,9 @@ public class ArmParser {
         for (ParseLine parseLine : parseLines) {
             int lineNumber = parseLine.number;
             String str = parseLine.str;
-            if (str.startsWith("#"))
-                continue;
-
             str = stripComment(str).trim();
 
-            if (str.isEmpty() || str.endsWith(":"))
+            if (str.startsWith("#") || str.isEmpty() || str.endsWith(":"))
                 continue;
 
             int firstSpaceIndex = str.indexOf(' ');
@@ -1019,34 +1014,34 @@ public class ArmParser {
     private int getLineByteLength(int lineNum, String line) {
         line = stripComment(line).trim();
 
+        String lowerLine = line.toLowerCase();
+
         if (line.isEmpty())
             return 0;
 
         if (line.endsWith(":"))
             return 0;
 
-        if (line.toUpperCase().startsWith("#DEFINE "))
+        if (lowerLine.startsWith("#define "))
             return 0;
 
-        if (line.toUpperCase().startsWith("#IF"))
+        if (lowerLine.startsWith("#if"))
             return 0;
 
-        if (line.toUpperCase().startsWith("#ELSE"))
+        if (lowerLine.startsWith("#else"))
             return 0;
 
-        if (line.toUpperCase().startsWith("#ELSEIF"))
+        if (lowerLine.startsWith("#elif"))
             return 0;
 
-        if (line.toUpperCase().startsWith("#ENDIF"))
+        if (lowerLine.startsWith("#endif"))
             return 0;
 
-        if (line.toUpperCase().startsWith("#CASE "))
+        if (lowerLine.startsWith("#case "))
             return 2;
 
-        line = line.toLowerCase();
-
         // check for simplification
-        if (line.startsWith("ldr") && line.contains("=")) {
+        if (lowerLine.startsWith("ldr") && line.contains("=")) {
             int equalsIndex = line.indexOf('=');
             String valueStr = line.substring(equalsIndex).trim();
             int value;
@@ -1067,21 +1062,21 @@ public class ArmParser {
             return shift > 0 && reducedValue < 256 ? 4 : 2;
         }
 
-        if (line.startsWith("bl "))
+        if (lowerLine.startsWith("bl "))
             return 4;
 
-        if (line.startsWith("blx ")) {
+        if (lowerLine.startsWith("blx ")) {
             String args = line.split(" ", 2)[1].trim();
             return parseRegister(args) == -1 ? 4 : 2;
         }
 
-        if (line.startsWith("dcb "))
+        if (lowerLine.startsWith("dcb "))
             return 1;
 
-        if (line.startsWith("dcw "))
+        if (lowerLine.startsWith("dcw "))
             return 2;
 
-        if (line.startsWith("dcd "))
+        if (lowerLine.startsWith("dcd "))
             return isWordAligned(currentRamAddress) ? 4 : 6;
 
         return 2;
@@ -1306,7 +1301,7 @@ public class ArmParser {
 
                 // check to see if this can be conveniently resolved with a move and shift
                 int shift = 0;
-                while ((imm >> (shift + 1)) << (shift + 1) == imm)
+                while (imm != 0 && (imm >> (shift + 1)) << (shift + 1) == imm)
                     ++shift;
 
                 int reducedImm = imm >> shift;
