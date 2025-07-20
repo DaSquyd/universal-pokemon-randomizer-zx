@@ -333,14 +333,15 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
     protected abstract List<Table> getTables();
 
     protected void setText(BattleObjectHackMod hackMod, List<String> texts, GameText text) {
-        setText(hackMod, texts, text.toString());
+        if (text != null)
+            setText(hackMod, texts, text.toString());
     }
 
     protected void setText(BattleObjectHackMod hackMod, List<String> texts, String text) {
         if (texts == null || text == null)
             return;
         
-        while (hackMod.number <= texts.size())
+        while (texts.size() <= hackMod.number)
             texts.add("");
 
         texts.set(hackMod.number, text);
