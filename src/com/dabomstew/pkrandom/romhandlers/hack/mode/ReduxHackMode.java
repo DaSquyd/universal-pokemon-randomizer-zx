@@ -9,6 +9,8 @@ import com.dabomstew.pkrandom.romhandlers.hack.ability.old.*;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackModCollection;
 import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_500_HeavyWing;
+import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_511_SunSoaked;
+import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_542_FlutterDust;
 import com.dabomstew.pkrandom.romhandlers.hack.weather.WeatherHailSnowMode;
 
 import java.util.List;
@@ -41,7 +43,11 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 new AbilityHackMod_270_ThermalExchange(true),
 
                 // Original
-                new AbilityHackMod_500_HeavyWing()
+                new AbilityHackMod_500_HeavyWing(),
+                
+                new AbilityHackMod_511_SunSoaked(),
+                
+                new AbilityHackMod_542_FlutterDust()
         ));
 
         abilityIlluminateMode = AbilityIlluminateMode.RESIST_DARK_AND_GHOST;
@@ -83,6 +89,7 @@ public class ReduxHackMode extends ModernPlusHackMode {
 
         // Weather
         weatherHailSnowMode = WeatherHailSnowMode.HAIL_INCREASE_SPECIAL_DEFENSE;
+        statusFrostbiteDamageFraction = 16;
 
         // Pokémon Data
         pokemonData = new HackMode.PokemonDataNarc("redux_poke_personal.narc", "redux_poke_level-up_moves.narc", "redux_poke_evolutions.narc");

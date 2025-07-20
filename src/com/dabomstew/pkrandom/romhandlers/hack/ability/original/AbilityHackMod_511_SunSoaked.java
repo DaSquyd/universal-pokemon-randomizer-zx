@@ -37,7 +37,7 @@ public class AbilityHackMod_511_SunSoaked extends AbilityHackMod {
 
     @Override
     public Map<String, Object> getGlobalValues(Context context) {
-        return Map.of("ABILITY_SUN-SOAKED_IS_SUN_EFFECT", true);
+        return Map.of("ABILITY_SUN_SOAKED_IS_SUN_EFFECT", true);
     }
 
     @Override

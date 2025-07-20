@@ -15,7 +15,7 @@
     
     mov     r0, #0x38 ; effectiveness
     bl      Battle::EventVar_GetValue
-    bl      Battle::GetEffectivenessType
+    bl      Battle::GetEffectivenessAdvantage
     cmp     r0, #2 ; super effective
     bne     End
     

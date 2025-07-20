@@ -20,7 +20,7 @@ CheckDamp:
 #endif
     
 CheckSunSoaked:
-#if ABILITY_SUN-SOAKED_IS_SUN_EFFECT
+#if ABILITY_SUN_SOAKED_IS_SUN_EFFECT
     ldr     r1, =511 ; Sun-Soaked
     cmp     r6, r1
     bne     GetWeather

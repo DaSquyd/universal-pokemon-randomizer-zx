@@ -427,10 +427,10 @@ public class ParagonLiteAddressMap {
             return;
         }
 
-        // At this point, we are assuming that there was a relocation
-        // We should only have one more address and one fewer label
-        if (labelOverlayMap.size() + 1 != addressOverlayMap.size())
-            throw new RuntimeException();
+//        // At this point, we are assuming that there was a relocation
+//        // We should only have one more address and one fewer label
+//        if (labelOverlayMap.size() + 1 != addressOverlayMap.size())
+//            throw new RuntimeException();
 
         addressOverlayMap.remove(address);
     }
@@ -661,12 +661,10 @@ public class ParagonLiteAddressMap {
     public String replaceLabelsInExpression(String expression) {
         if (!expression.contains("::"))
             return expression;
-
-        expression = expression.toLowerCase();
         
         for (Map.Entry<ParagonLiteOverlay, Map<String, LabeledAddressInterface>> overlayEntry : labelMap.entrySet()) {
             ParagonLiteOverlay overlay = overlayEntry.getKey();
-            String namespace = overlay.name.toLowerCase();
+            String namespace = overlay.name;
             if (!expression.contains(namespace + "::"))
                 continue;
 
@@ -675,7 +673,7 @@ public class ParagonLiteAddressMap {
                 if (!(addressDataEntry.getValue() instanceof AddressBase addressBase))
                     throw new RuntimeException();
 
-                String label = addressDataEntry.getKey().toLowerCase();
+                String label = addressDataEntry.getKey();
                 int address = addressBase.address;
                 expression = expression.replaceAll(String.format("%s::%s(?=[^A-Za-z0-9_.]|$)", namespace, label), String.valueOf(address));
             }
