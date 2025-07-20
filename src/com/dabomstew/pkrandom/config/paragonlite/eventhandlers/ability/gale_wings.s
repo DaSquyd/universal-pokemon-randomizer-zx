@@ -51,7 +51,7 @@
     
 Return:
 #if ABILITY_GALE_WINGS_HP_FRACTION <= 1
-   push    {r4-r5, pc}
+   pop     {r4-r5, pc}
 #else
-   push    {r4-r7, pc}
+   pop     {r4-r7, pc}
 #endif
