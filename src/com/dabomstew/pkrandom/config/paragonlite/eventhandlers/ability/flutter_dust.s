@@ -39,8 +39,7 @@
     mov     r6, r0
     
     ; TODO: make this an actual struct
-    ldr     r0, #(BHP_AbilityPopup >> 16)
-    lsl     r0, #16
+    ldr     r0, =BHP_AbilityPopup
     ldr     r1, [r6, #0x00]
     orr     r0, r1
     str     r0, [r6, #0x00]
