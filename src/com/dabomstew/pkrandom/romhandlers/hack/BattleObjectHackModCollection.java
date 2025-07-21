@@ -35,7 +35,7 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
     protected ParagonLiteOverlay battleOvl;
     protected ParagonLiteOverlay battleServerOvl;
     protected ParagonLiteAddressMap globalAddressMap;
-    
+
     List<String> names;
     List<String> descriptions;
     List<String> explanations;
@@ -55,7 +55,11 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
         EventHandler(int type, int existingObject) {
             this.type = type;
 
-            int referenceAddress = getEventHandlerFuncReferenceAddress(existingObject, getEffectListNumReferenceOffset(), getEffectListCount(), type);
+            int functionRomAddress = getAddFunctionRomAddress();
+            int numReferenceOffset = getEffectListNumReferenceOffset();
+            int objectListAddress = battleOvl.readWord(functionRomAddress + numReferenceOffset);
+
+            int referenceAddress = getEventHandlerFuncReferenceAddress(existingObject, objectListAddress, getEffectListCount(), type);
             this.address = battleOvl.readWord(referenceAddress) - 1;
         }
 
@@ -160,6 +164,28 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
     @SafeVarargs
     BattleObjectHackModCollection(T... hackMods) {
         super(Arrays.stream(hackMods).toList());
+
+        Map<Integer, BattleObjectHackMod> numToHackMod = new TreeMap<>();
+        
+        for (T hackMod : hackMods) {
+            int number = hackMod.number;
+            if (numToHackMod.containsKey(number))
+                throw new RuntimeException();
+
+            numToHackMod.put(number, hackMod);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void Merge(HackMod other) {
+        if (other instanceof HackModCollection<?> otherCollection) {
+            for (var test : otherCollection.hackMods) {
+                if (hackMods.removeIf((i) -> i.number == ((T)test).number))
+                    System.out.println("Selected override of object " + ((T)test).number);
+                hackMods.add((T) test);
+            }
+        }
     }
 
     @Override
@@ -170,7 +196,7 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
         globalAddressMap = context.globalAddressMap();
 
         sortHackMods(new NewFirstComparator(getMaxVanillaObjectNumber()));
-        
+
         ParagonLiteOverlay overlay = getOverlay();
 
         names = getTexts(getNamesTextOffsetKey());
@@ -234,11 +260,11 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
             }
             objectToEffects.put(number, eventHandlers);
         }
-        
+
         boolean useTerminator = baseEffectListCount <= 255 && objectToEffects.size() > 255;
 
         // relocate
-        
+
         int newSize = (objectToEffects.size() + (useTerminator ? 1 : 0)) * 8;
         byte[] newData = new byte[newSize];
         int effectIndex = 0;
@@ -256,10 +282,10 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
 
             ++effectIndex;
         }
-        
+
         if (useTerminator)
             writeWord(newData, newSize - 8, 0xFFFFFFFF);
-        
+
         int newEventListAddress = overlay.newData(newData, effectListLabel, "4*");
 
         // Populate new values
@@ -270,7 +296,7 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
             if (eventHandlers == null)
                 continue;
 
-            setBattleObject(number, effectIndex, newEventListAddress, eventHandlers);
+            setBattleObject(number, effectIndex, newEventListAddress, existingRedirectors, eventHandlers);
 
             ++effectIndex;
         }
@@ -283,24 +309,24 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
 
         overlay.writeWord(addFunctionRomAddress + effectListNumReferenceOffset, newEventListAddress, false);
         overlay.writeWord(addFunctionRomAddress + effectListFuncReferenceOffset, newEventListAddress + 4, false);
-        
+
         if (useTerminator) {
             // we've exceeded the normal amount for byte comparison
             // we use a terminating value of -1 and loop
-            
+
             if (effectListCompareOffset <= 0)
                 throw new RuntimeException();
-            
+
             int effectListComparisonRomAddress = addFunctionRomAddress + effectListCompareOffset;
-            
+
             overlay.writeHalfword(effectListComparisonRomAddress, 0x2800); // cmp r0, #0
             overlay.writeByte(effectListComparisonRomAddress + 3, 0xDC); // bgt
         } else if (effectListCompareOffset > 0) {
             // simple comparison edit
-            
+
             if (objectToEffects.size() > 255)
                 throw new RuntimeException();
-            
+
             int effectListCompareRomAddress = addFunctionRomAddress + effectListCompareOffset;
             overlay.writeByte(effectListCompareRomAddress, objectToEffects.size());
         } else if (effectListCountOffset > 0) {
@@ -322,6 +348,7 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
     }
 
     protected abstract String getBattleObjectTypeName();
+
     protected abstract String getFunctionDirectory();
 
     protected abstract String getNamesTextOffsetKey();
@@ -340,7 +367,7 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
     protected void setText(BattleObjectHackMod hackMod, List<String> texts, String text) {
         if (texts == null || text == null)
             return;
-        
+
         while (texts.size() <= hackMod.number)
             texts.add("");
 
@@ -390,7 +417,7 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
 
     private int getRedirectorCountSetAddress(int funcRamAddress) {
         ParagonLiteOverlay overlay = getOverlay();
-        
+
         int returnValue = -1;
 
         int funcSize = overlay.getFuncSizeRam(funcRamAddress);
@@ -422,7 +449,7 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
 
     private int getRedirectorListReferenceRomAddress(int funcRamAddress) {
         ParagonLiteOverlay overlay = getOverlay();
-        
+
         int returnValue = -1;
 
         int funcSize = overlay.getFuncSizeRam(funcRamAddress);
@@ -468,15 +495,16 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
         return -1;
     }
 
-    protected final void setBattleObject(int number, int index, int effectListAddress, List<EventHandler> eventHandlers) {
+    protected final void setBattleObject(int number, int index, int effectListAddress, Map<Integer, Integer> existingRedirectors, List<EventHandler> eventHandlers) {
         var overlay = getOverlay();
 
         int eventHandlerListSize = eventHandlers.size() * 8;
 
         for (EventHandler eventHandler : eventHandlers) {
-            if (eventHandler.address > 0) continue;
+            if (eventHandler.address > 0)
+                continue;
 
-            int redirectorAddress = overlay.readWord(effectListAddress + index * 8 + 4) - 1;
+            int redirectorAddress = existingRedirectors.get(number) - 1;
             int eventHandlerListAddress = getEventHandlerListAddressFromRedirector(redirectorAddress);
             int eventHandlerListCount = getEventHandlerListCountFromRedirector(redirectorAddress);
 
@@ -520,7 +548,7 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
         String battleObjectTypeName = getBattleObjectTypeName();
         int effectListRomAddress = overlay.getRomAddress(getEffectListLabel());
         int effectListCount = getEffectListCount();
-        
+
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < effectListCount; ++i) {
             int objectNumberRomAddress = effectListRomAddress + i * 8;
@@ -559,7 +587,7 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
             // Set reference from list to redirector
             globalAddressMap.addReference(overlay, redirectorRamAddress, overlay, overlay.romToRamAddress(sourceRomAddress));
         }
-        
+
         Utils.printProgressFinished(startTime, effectListCount);
         System.out.println();
     }
