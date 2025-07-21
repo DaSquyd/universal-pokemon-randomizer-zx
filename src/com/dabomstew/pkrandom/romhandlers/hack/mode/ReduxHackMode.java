@@ -35,7 +35,7 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 new AbilityHackMod_035_Illuminate_GhostAndDarkResistance(),
                 new AbilityHackMod_040_MagmaArmor_WaterAndIceImmunity(),
                 new AbilityHackMod_051_KeenEye(true, 1.1),
-                new AbilityHackMod_074_PurePower(1.5, MoveCategory.SPECIAL, "{0} is striking\na pose!"),
+                new AbilityHackMod_074_PurePower(1.5, MoveCategory.SPECIAL, abilityHugePowerMessage),
                 new AbilityHackMod_155_Rattled_IntimidateActivationAndBugGhostResist(),
 
                 // Expansion
