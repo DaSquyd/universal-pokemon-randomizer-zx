@@ -29,6 +29,9 @@ public class ModernPlusHackMode extends ModernHackMode {
         ));
 
         // Ability
+        abilityShadowTagMessage = "{0} steps on\nfoe shadows!"; // #023
+        abilityWonderGuardMessage = "{0} is cloaked in\na mysterious power!"; // #025
+        abilityHugePowerMessage = "{0} is flexing\nits muscles!"; // #037
         abilityWaterVeilMessage = "{0} is cloaked\nin water!"; // #041
         abilityMagnetPullMessage = "{0} is generating\na magnetic field!"; // #042
         abilitySandStreamAllowSelfDamage = false; // #045
