@@ -44,6 +44,7 @@ public class HackModCollection<T extends HackMod> extends HackMod {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void Merge(HackMod other) {
         if (other instanceof HackModCollection<?> otherCollection) {
