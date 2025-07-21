@@ -9,7 +9,7 @@ import java.util.List;
 
 public class AbilityHackMod_039_InnerFocus_IntimidateImmunity extends AbilityHackMod {
     public AbilityHackMod_039_InnerFocus_IntimidateImmunity() {
-        super(Abilities.ownTempo);
+        super(Abilities.innerFocus);
     }
 
     @Override
