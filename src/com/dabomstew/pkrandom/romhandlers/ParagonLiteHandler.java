@@ -448,6 +448,10 @@ public class ParagonLiteHandler {
     }
 
     public void setBattleEventStrings() {
+        var battleOvl = overlays.get(OverlayId.BATTLE);
+        var lines = readLines("eventhandlers/ability/common_user_message.s");
+        battleOvl.writeCode(lines, "CommonUserMessage", true);
+        
         setbattleEventStrings1();
         setBattleEventStrings2();
     }
@@ -678,6 +682,10 @@ public class ParagonLiteHandler {
         // #522 Volcanic Fury
         addGlobalBattleTextValueWildFoe("VolcanicFury", "Activate");
         addBattleStringWildFoe("It burned {0}!", BattleTextVar.PokeNickname);
+
+        // #542 Flutter Dust
+        addGlobalBattleTextValueWildFoe("FlutterDust", "Activate");
+        addBattleStringWildFoe("It poisoned {0}!", BattleTextVar.PokeNickname);
 
 
         // MOVES
