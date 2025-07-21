@@ -7,7 +7,7 @@ import java.util.List;
 
 public class AbilityHackMod_211_PowerConstruct extends AbilityHackMod {
     public AbilityHackMod_211_PowerConstruct() {
-        super(Abilities.battleBond);
+        super(Abilities.powerConstruct);
     }
 
     @Override
