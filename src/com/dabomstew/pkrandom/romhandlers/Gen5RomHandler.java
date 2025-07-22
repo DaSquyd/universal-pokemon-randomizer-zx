@@ -6092,8 +6092,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        paragonLite.logUpdates("E:\\Documents\\universal-pokemon-randomizer-zx\\out\\production");
+        paragonLite.logUpdates("out\\production");
     }
 
     private static void processParagonLiteHandler(ParagonLiteHandler paragonLite, Settings settings, boolean debugMode) {
