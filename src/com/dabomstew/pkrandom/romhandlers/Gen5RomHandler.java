@@ -660,16 +660,17 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             move.bypassesSubstitute = (flags & 0x2000) != 0;
 
             // Custom Flags
-            move.isCustomKickMove = (flags & 0x4000) != 0;
-            move.isCustomBiteMove = (flags & 0x8000) != 0;
-            move.isCustomSliceMove = (flags & 0x10000) != 0;
-            move.isCustomTriageMove = (flags & 0x20000) != 0;
-            move.isCustomPowderMove = (flags & 0x40000) != 0;
-            move.isCustomWindMove = (flags & 0x80000) != 0;
-            move.isCustomBallBombMove = (flags & 0x100000) != 0;
-            move.isCustomPulseMove = (flags & 0x200000) != 0;
-            move.isCustomDanceMove = (flags & 0x400000) != 0;
-            move.isCustomRollSpinMove = (flags & 0x800000) != 0;
+            move.isCustomKickMove = (flags & 0x00004000) != 0;
+            move.isCustomBiteMove = (flags & 0x00008000) != 0;
+            move.isCustomSliceMove = (flags & 0x00010000) != 0;
+            move.isCustomTriageMove = (flags & 0x00020000) != 0;
+            move.isCustomPowderMove = (flags & 0x00040000) != 0;
+            move.isCustomWindMove = (flags & 0x00080000) != 0;
+            move.isCustomBallBombMove = (flags & 0x00100000) != 0;
+            move.isCustomPulseMove = (flags & 0x00200000) != 0;
+            move.isCustomDanceMove = (flags & 0x00400000) != 0;
+            move.isCustomRollSpinMove = (flags & 0x00800000) != 0;
+            move.isCustomLightMove = (flags & 0x01000000) != 0;
         }
     }
 

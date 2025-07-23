@@ -2710,6 +2710,28 @@ public class ParagonLiteHandler {
             moves.get(moveIndex).isCustomRollSpinMove = true;
         }
 
+        // Light Moves
+        for (int moveIndex : new int[]{
+                Moves.psybeam, // 060
+                Moves.auroraBeam, // 062
+//                Moves.hyperBeam, // 063
+                Moves.solarBeam, // 076
+                Moves.confuseRay, // 109
+//                Moves.mirrorCoat, // 243
+                Moves.lusterPurge, // 295,
+                Moves.signalBeam, // 324
+                Moves.powerGem, // 408
+                Moves.mirrorShot, // 429
+                Moves.flashCannon, // 430
+                Moves.chargeBeam, // 451
+                Moves.moonblast, // 585
+                Moves.dazzlingGleam, // 605
+                Moves.solarBlade, // 669
+//                Moves.meteorBeam, // 800
+        }) {
+            moves.get(moveIndex).isCustomLightMove = true;
+        }
+
 
         int[] newMoves;
         int[] movesToClear;
