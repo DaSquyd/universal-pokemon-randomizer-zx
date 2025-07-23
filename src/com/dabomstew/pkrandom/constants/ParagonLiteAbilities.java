@@ -57,7 +57,7 @@ public class ParagonLiteAbilities {
     public static final int coolantBoost = 526;
     public static final int warpDrive = 527;
     public static final int scaredyCat = 528;
-    public static final int adrenalineRush = 529;
+    public static final int relentless = 529;
     public static final int psionize = 530;
     public static final int obfuscate = 531;
     public static final int invigorate = 532;

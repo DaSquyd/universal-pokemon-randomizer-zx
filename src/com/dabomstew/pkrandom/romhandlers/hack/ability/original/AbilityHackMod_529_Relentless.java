@@ -12,13 +12,13 @@ public class AbilityHackMod_529_Relentless extends AbilityHackMod {
     private final String name;
     
     public AbilityHackMod_529_Relentless() {
-        super(ParagonLiteAbilities.adrenalineRush);
+        super(ParagonLiteAbilities.relentless);
 
         this.name = "Relentless";
     }
     
     public AbilityHackMod_529_Relentless(String name) {
-        super(ParagonLiteAbilities.adrenalineRush);
+        super(ParagonLiteAbilities.relentless);
 
         this.name = name;
     }
