@@ -1283,9 +1283,13 @@ public abstract class AbstractRomHandler implements RomHandler {
         boolean weakToFairy = typeInGame(Type.FAIRY) ? (pk.hp == 1 || against.get(Type.FAIRY).ordinal() > Effectiveness.NEUTRAL.ordinal()) : false;
 
         int weaknesses = 0;
+        int bigWeaknesses = 0;
         for (Effectiveness e : against.values()) {
             if (e.ordinal() > Effectiveness.NEUTRAL.ordinal())
                 ++weaknesses;
+            
+            if (e.ordinal() > Effectiveness.DOUBLE.ordinal())
+                ++bigWeaknesses;
         }
 
         List<Move> moves = this.getMoves();
@@ -1310,10 +1314,14 @@ public abstract class AbstractRomHandler implements RomHandler {
             }
         }
 
+        Set<Integer> rechargeMoves = new HashSet<>();
+        int rechargeMovesFromLevel = 0;
         Set<Integer> recoilMoves = new HashSet<>();
         int recoilMovesFromLevel = 0;
-        Set<Integer> technicianMoves = new HashSet<>();
-        int technicianMovesFromLevel = 0;
+        Set<Integer> goodRecoilMoves = new HashSet<>();
+        int goodRecoilMovesFromLevel = 0;
+        Set<Integer> lowPowerMoves = new HashSet<>();
+        int lowPowerMovesFromLevel = 0;
         Set<Integer> multiStrikeMoves = new HashSet<>();
         int multiStrikeMovesFromLevel = 0;
         Set<Integer> sheerForceMoves = new HashSet<>();
@@ -1328,6 +1336,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         int soundMovesFromLevel = 0;
         Set<Integer> kickMoves = new HashSet<>();
         int kickMovesFromLevel = 0;
+        Set<Integer> kickMovesThatMiss = new HashSet<>();
+        int kickMovesThatMissFromLevel = 0;
         Set<Integer> biteMoves = new HashSet<>();
         int biteMovesFromLevel = 0;
         Set<Integer> sliceMoves = new HashSet<>();
@@ -1338,8 +1348,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         int triageDamageMovesFromLevel = 0;
         Set<Integer> windMoves = new HashSet<>();
         int windMovesFromLevel = 0;
-        Set<Integer> ballBombPulseMoves = new HashSet<>();
-        int ballBombPulseMovesFromLevel = 0;
+        Set<Integer> ballBombMoves = new HashSet<>();
+        int ballBombMovesFromLevel = 0;
+        Set<Integer> pulseMoves = new HashSet<>();
+        int pulseMovesFromLevel = 0;
         Set<Integer> danceMoves = new HashSet<>();
         int danceMovesFromLevel = 0;
         Set<Integer> rollSpinMoves = new HashSet<>();
@@ -1372,15 +1384,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
-
             if (m.isRecoilMove()) {
                 recoilMoves.add(m.number);
                 recoilMovesFromLevel++;
             }
 
             if (m.power > 0 && (m.power == 60 || m.minHits > 1)) {
-                technicianMoves.add(m.number);
-                technicianMovesFromLevel++;
+                lowPowerMoves.add(m.number);
+                lowPowerMovesFromLevel++;
             }
 
             if (m.maxHits == 5) {
@@ -1390,6 +1401,11 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (!m.isGoodDamaging(generationOfPokemon()))
                 continue;
+
+            if (m.isRecoilMove()) {
+                goodRecoilMoves.add(m.number);
+                goodRecoilMovesFromLevel++;
+            }
 
             if (m.isBoostedBySheerForce()) {
                 sheerForceMoves.add(m.number);
@@ -1409,6 +1425,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 }
             }
 
+            if (m.isRechargeMove) {
+                rechargeMoves.add(m.number);
+                rechargeMovesFromLevel++;
+            }
+
             if (m.isPunchMove) {
                 punchMoves.add(m.number);
                 punchMovesFromLevel++;
@@ -1422,6 +1443,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.isCustomKickMove && m.effect != MoveEffect.JUMP_KICK) {
                 kickMoves.add(m.number);
                 kickMovesFromLevel++;
+            }
+
+            if (m.isCustomKickMove && !m.hasPerfectAccuracy() && m.accuracy < 100) {
+                kickMovesThatMiss.add(m.number);
+                kickMovesThatMissFromLevel++;
             }
 
             if (m.isCustomBiteMove) {
@@ -1444,9 +1470,14 @@ public abstract class AbstractRomHandler implements RomHandler {
                 windMovesFromLevel++;
             }
 
-            if (m.isCustomBallBombMove || m.isCustomPulseMove) {
-                ballBombPulseMoves.add(m.number);
-                ballBombPulseMovesFromLevel++;
+            if (m.isCustomBallBombMove) {
+                ballBombMoves.add(m.number);
+                ballBombMovesFromLevel++;
+            }
+
+            if (m.isCustomPulseMove) {
+                pulseMoves.add(m.number);
+                pulseMovesFromLevel++;
             }
 
             if (m.isCustomDanceMove) {
@@ -1502,13 +1533,16 @@ public abstract class AbstractRomHandler implements RomHandler {
                 recoilMoves.add(m.number);
 
             if (m.power > 0 && (m.power == 60 || m.minHits > 1))
-                technicianMoves.add(m.number);
+                lowPowerMoves.add(m.number);
 
             if (m.maxHits == 5)
                 multiStrikeMoves.add(m.number);
 
             if (!m.isGoodDamaging(generationOfPokemon()))
                 continue;
+
+            if (m.isRecoilMove())
+                goodRecoilMoves.add(m.number);
 
             if (m.isBoostedBySheerForce())
                 sheerForceMoves.add(m.number);
@@ -1522,6 +1556,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     stabContactMoves.add(m.number);
             }
 
+            if (m.isRechargeMove)
+                rechargeMoves.add(m.number);
+
             if (m.isPunchMove)
                 punchMoves.add(m.number);
 
@@ -1530,6 +1567,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (m.isCustomKickMove && m.effect != MoveEffect.JUMP_KICK)
                 kickMoves.add(m.number);
+
+            if (m.isCustomKickMove && !m.hasPerfectAccuracy() && m.accuracy < 100)
+                kickMovesThatMiss.add(m.number);
 
             if (m.isCustomBiteMove)
                 biteMoves.add(m.number);
@@ -1543,8 +1583,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.isCustomWindMove)
                 windMoves.add(m.number);
 
-            if (m.isCustomBallBombMove || m.isCustomPulseMove)
-                ballBombPulseMoves.add(m.number);
+            if (m.isCustomBallBombMove)
+                ballBombMoves.add(m.number);
+
+            if (m.isCustomPulseMove)
+                pulseMoves.add(m.number);
 
             if (m.isCustomDanceMove)
                 danceMoves.add(m.number);
@@ -1594,13 +1637,16 @@ public abstract class AbstractRomHandler implements RomHandler {
                 recoilMoves.add(m.number);
 
             if (m.power > 0 && (m.power == 60 || m.minHits > 1))
-                technicianMoves.add(m.number);
+                lowPowerMoves.add(m.number);
 
             if (m.maxHits == 5)
                 multiStrikeMoves.add(m.number);
 
             if (!m.isGoodDamaging(generationOfPokemon()))
                 continue;
+
+            if (m.isRecoilMove())
+                goodRecoilMoves.add(m.number);
 
             if (m.isBoostedBySheerForce())
                 sheerForceMoves.add(m.number);
@@ -1614,6 +1660,9 @@ public abstract class AbstractRomHandler implements RomHandler {
                     stabContactMoves.add(m.number);
             }
 
+            if (m.isRechargeMove)
+                rechargeMoves.add(m.number);
+
             if (m.isPunchMove)
                 punchMoves.add(m.number);
 
@@ -1622,6 +1671,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (m.isCustomKickMove && m.effect != MoveEffect.JUMP_KICK)
                 kickMoves.add(m.number);
+
+            if (m.isCustomKickMove && !m.hasPerfectAccuracy() && m.accuracy < 100)
+                kickMovesThatMiss.add(m.number);
 
             if (m.isCustomBiteMove)
                 biteMoves.add(m.number);
@@ -1635,8 +1687,11 @@ public abstract class AbstractRomHandler implements RomHandler {
             if (m.isCustomWindMove)
                 windMoves.add(m.number);
 
-            if (m.isCustomBallBombMove || m.isCustomPulseMove)
-                ballBombPulseMoves.add(m.number);
+            if (m.isCustomBallBombMove)
+                ballBombMoves.add(m.number);
+
+            if (m.isCustomPulseMove)
+                pulseMoves.add(m.number);
 
             if (m.isCustomDanceMove)
                 danceMoves.add(m.number);
@@ -1920,7 +1975,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.swarm);
 
         // #069 Rock Head
-        if (recoilMovesFromLevel == 0 || recoilMoves.size() < 2)
+        if (goodRecoilMovesFromLevel == 0 || goodRecoilMoves.size() < 2)
             irrelevantAbilities.add(Abilities.rockHead);
 
         // #070 Drought
@@ -2044,7 +2099,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         irrelevantAbilities.add(Abilities.stall); // 100
 
         // #101 Technician
-        if (technicianMovesFromLevel == 0 || technicianMoves.size() < 2)
+        if (lowPowerMovesFromLevel == 0 || lowPowerMoves.size() < 2)
             irrelevantAbilities.add(Abilities.technician);
 
         // #102 Leaf Guard
@@ -2102,7 +2157,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         // #119 Frisk/X-ray Vision
 
         // #120 Reckless
-        if (pk.hp == 1 || recoilMovesFromLevel == 0 || recoilMoves.size() < 2)
+        if (pk.hp == 1 || goodRecoilMovesFromLevel == 0 || goodRecoilMoves.size() < 2)
             irrelevantAbilities.add(Abilities.reckless);
 
         // #121 Multitype
@@ -2324,7 +2379,7 @@ public abstract class AbstractRomHandler implements RomHandler {
             irrelevantAbilities.add(Abilities.galeWings);
 
         // #178 Mega Launcher
-        if (ballBombPulseMovesFromLevel == 0 || ballBombPulseMoves.size() < 2)
+        if (pulseMovesFromLevel == 0 || pulseMoves.size() < 2)
             irrelevantAbilities.add(Abilities.megaLauncher);
 
         // #179 Grass Pelt
@@ -2801,7 +2856,7 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (!higherOrEqualSpAtk)
             irrelevantAbilities.add(ParagonLiteAbilities.prestige);
 
-        // #504 Lucky Foot
+        // #504 Spring Legs
         if (kickMovesFromLevel == 0 || kickMoves.size() < 2)
             irrelevantAbilities.add(ParagonLiteAbilities.springLegs);
 
@@ -2889,6 +2944,18 @@ public abstract class AbstractRomHandler implements RomHandler {
         if (pk.hp == 1 || isIce || !higherOrEqualSpAtk)
             irrelevantAbilities.add(ParagonLiteAbilities.coolantBoost);
         
+        // #527 Warp Drive
+        if (weakToPsychic || isTypeBoostAbilityIrrelevant(pk, Type.PSYCHIC, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(ParagonLiteAbilities.warpDrive);
+        
+        // #528 Scaredy Cat
+        if (pk.hp == 1 || lowSpeed)
+            irrelevantAbilities.add(ParagonLiteAbilities.scaredyCat);
+        
+        // #529 Relentless
+        if (rechargeMovesFromLevel == 0 || rechargeMoves.isEmpty())
+            irrelevantAbilities.add(ParagonLiteAbilities.relentless);
+        
         // #530 Psionize
         if (isNormal || isTypeBoostAbilityIrrelevant(pk, Type.NORMAL, Type.PSYCHIC, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
             irrelevantAbilities.add(ParagonLiteAbilities.psionize);
@@ -2900,6 +2967,42 @@ public abstract class AbstractRomHandler implements RomHandler {
         // #532 Invigorate
         if (isNormal || isTypeBoostAbilityIrrelevant(pk, Type.NORMAL, Type.FIGHTING, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
             irrelevantAbilities.add(ParagonLiteAbilities.invigorate);
+        
+        // #533 Tenacity
+        if (pk.hp == 1 || !mediumSpeed || recoilMovesFromLevel == 0 || recoilMoves.size() < 2)
+            irrelevantAbilities.add(ParagonLiteAbilities.tenacity);
+        
+        // #534 Tractor Beam
+        
+        // #535 Mighty Munition
+        if (ballBombMovesFromLevel == 0 || rollSpinMoves.size() < 2)
+            irrelevantAbilities.add(ParagonLiteAbilities.mightyMunition);
+        
+        // #536 Allergen
+        
+        // #537 Dynamo
+        if (!mediumSpeed || rollSpinMovesFromLevel == 0 || rollSpinMoves.size() < 2)
+            irrelevantAbilities.add(ParagonLiteAbilities.dynamo);
+        
+        // #538 Rabbit's Foot
+        if (kickMovesThatMissFromLevel == 0 || kickMovesThatMiss.size() < 2)
+            irrelevantAbilities.add(ParagonLiteAbilities.rabbitsFoot);
+        
+        // #539 Floral Armor
+        if (bigWeaknesses < 2)
+            irrelevantAbilities.add(ParagonLiteAbilities.floralArmor);
+        
+        // #540 Traffic Control
+        if (!mediumSpeed)
+            irrelevantAbilities.add(ParagonLiteAbilities.trafficControl);
+        
+        // #541 Veggie Sword
+        if (isGrass || isTypeBoostAbilityIrrelevant(pk, Type.GRASS, isCustomTypeEffectiveness, against, typeGoodDamageMovesLearnt, typeGoodDamageMovesAll))
+            irrelevantAbilities.add(ParagonLiteAbilities.veggieSword);
+        
+        // #542 Flutter Dust
+        if (pk.hp == 1)
+            irrelevantAbilities.add(ParagonLiteAbilities.flutterDust);
     }
 
     private boolean isTypeBoostAbilityIrrelevant(Pokemon pk, Type type, boolean isCustomTypeEffectiveness, Map<Type, Effectiveness> against,
