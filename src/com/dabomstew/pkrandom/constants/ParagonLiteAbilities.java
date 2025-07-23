@@ -71,9 +71,10 @@ public class ParagonLiteAbilities {
     public static final int trafficControl = 540;
     public static final int veggieSword = 541;
     public static final int flutterDust = 542;
+    public static final int focusingLens = 543;
 
     public static final int MIN = heavyWing;
-    public static final int MAX = flutterDust;
+    public static final int MAX = focusingLens;
     
     public static Set<Integer> allowedAbilities = Set.of(
 //            Abilities.aromaVeil, // 165
@@ -207,6 +208,7 @@ public class ParagonLiteAbilities {
             floralArmor, // 539
             trafficControl, // 540
             veggieSword, // 541
-            flutterDust // 542
+            flutterDust, // 542
+            focusingLens // 543
     );
 }
