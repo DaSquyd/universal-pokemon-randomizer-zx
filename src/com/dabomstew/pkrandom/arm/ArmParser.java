@@ -1051,11 +1051,8 @@ public class ArmParser {
                 throw new RuntimeException(e);
             }
 
-            if (value >= 0 && value < 256)
-                return 2;
-
             int shift = 0;
-            while ((value >> (shift + 1)) << (shift + 1) == value)
+            while (value >> shift >= 256 && ((value >> shift) & 1) == 0)
                 ++shift;
 
             int reducedValue = value >> shift;
@@ -1299,9 +1296,9 @@ public class ArmParser {
             if (args[1].startsWith("=")) {
                 int imm = parseValue(line, op, args, args[1]);
 
-                // check to see if this can be conveniently resolved with a move and shift
+                // check to see if this can be conveniently simplified with a move and shift
                 int shift = 0;
-                while (imm != 0 && (imm >> (shift + 1)) << (shift + 1) == imm)
+                while (imm >> shift >= 256 && ((imm >> shift) & 1) == 0)
                     ++shift;
 
                 int reducedImm = imm >> shift;
