@@ -3003,6 +3003,10 @@ public abstract class AbstractRomHandler implements RomHandler {
         // #542 Flutter Dust
         if (pk.hp == 1)
             irrelevantAbilities.add(ParagonLiteAbilities.flutterDust);
+
+        // #543 Focusing Lens
+        if (lightMovesFromLevel == 0 || lightMoves.size() < 2)
+            irrelevantAbilities.add(ParagonLiteAbilities.focusingLens);
     }
 
     private boolean isTypeBoostAbilityIrrelevant(Pokemon pk, Type type, boolean isCustomTypeEffectiveness, Map<Type, Effectiveness> against,

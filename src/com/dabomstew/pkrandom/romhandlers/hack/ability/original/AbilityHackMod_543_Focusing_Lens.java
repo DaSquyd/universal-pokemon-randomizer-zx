@@ -8,10 +8,15 @@ import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
 import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
+import java.util.Map;
 
 public class AbilityHackMod_543_Focusing_Lens extends AbilityHackMod {
-    public AbilityHackMod_543_Focusing_Lens() {
+    private final double multiplier;
+
+    public AbilityHackMod_543_Focusing_Lens(double multiplier) {
         super(ParagonLiteAbilities.focusingLens);
+        
+        this.multiplier = multiplier;
     }
 
     @Override
@@ -39,7 +44,12 @@ public class AbilityHackMod_543_Focusing_Lens extends AbilityHackMod {
     }
 
     @Override
+    public Map<String, Object> getGlobalValues(Context context) {
+        return Map.of("ABILITY_FOCUSING_LENS_MULTIPLIER", multiplier);
+    }
+
+    @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveDamageReaction1, "focusing_lens.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "focusing_lens.s"));
     }
 }

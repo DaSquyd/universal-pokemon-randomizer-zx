@@ -11,6 +11,7 @@ import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_500_HeavyWing;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_511_SunSoaked;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_542_FlutterDust;
+import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_543_Focusing_Lens;
 import com.dabomstew.pkrandom.romhandlers.hack.weather.WeatherHailSnowMode;
 
 import java.util.List;
@@ -47,7 +48,8 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 
                 new AbilityHackMod_511_SunSoaked(),
                 
-                new AbilityHackMod_542_FlutterDust()
+                new AbilityHackMod_542_FlutterDust(),
+                new AbilityHackMod_543_Focusing_Lens(1.3)
         ));
 
         abilityIlluminateMode = AbilityIlluminateMode.RESIST_DARK_AND_GHOST;

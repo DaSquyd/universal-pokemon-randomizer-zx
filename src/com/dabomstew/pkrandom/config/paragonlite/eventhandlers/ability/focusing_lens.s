@@ -1,6 +1,7 @@
     push    {r4, lr} ; store r4 and the linking register onto the stack
-    mov     r0, #VAR_AttackingPoke ; store the attacker into r0
     mov     r4, r2 ; check if the caller is the attacker
+    
+    mov     r0, #VAR_AttackingPoke ; store the attacker into r0
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
     bne     Return ; if not, end
@@ -12,8 +13,8 @@
     cmp     r0, #FALSE ; compare these values, store result in the Zero condition flag
     beq     Return ; if not, end
 
-    ldr     r1, =(0x1000 * FOCUSING_LENS_MULTIPLIER) ; load value of power multiplier into r1
-    mov     r0, #VAR_MovePower ; move BP into r0
+    mov     r0, #VAR_Ratio ; ratio is used for *most* multipliers
+    ldr     r1, =(0x1000 * ABILITY_FOCUSING_LENS_MULTIPLIER) ; load value of power multiplier into r1
     bl      Battle::EventVar_MulValue ; apply the multiplier in r1 to r0 then Return
 
 Return:
