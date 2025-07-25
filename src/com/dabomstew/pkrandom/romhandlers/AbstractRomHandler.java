@@ -1358,6 +1358,8 @@ public abstract class AbstractRomHandler implements RomHandler {
         int rollSpinMovesFromLevel = 0;
         Set<Integer> lightMoves = new HashSet<>();
         int lightMovesFromLevel = 0;
+        Set<Integer> beamMoves = new HashSet<>();
+        int beamMovesFromLevel = 0;
         Set<Integer> offensiveSunMoves = new HashSet<>();
         Set<Integer> supportSunMoves = new HashSet<>();
         Set<Integer> rainMoves = new HashSet<>();
@@ -1495,6 +1497,11 @@ public abstract class AbstractRomHandler implements RomHandler {
                 lightMovesFromLevel++;
             }
 
+            if (m.isCustomBeamMove) {
+                beamMoves.add(m.number);
+                beamMovesFromLevel++;
+            }
+
             if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
                 offensiveSunMoves.add(m.number);
 
@@ -1597,6 +1604,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (m.isCustomLightMove)
                 lightMoves.add(m.number);
+
+            if (m.isCustomBeamMove)
+                beamMoves.add(m.number);
 
             if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
                 offensiveSunMoves.add(m.number);
@@ -1701,6 +1711,9 @@ public abstract class AbstractRomHandler implements RomHandler {
 
             if (m.isCustomLightMove)
                 lightMoves.add(m.number);
+
+            if (m.isCustomBeamMove)
+                beamMoves.add(m.number);
 
             if (m.type == Type.FIRE || m.effect == MoveEffect.SOLAR_BEAM || m.effect == MoveEffect.WEATHER_BALL)
                 offensiveSunMoves.add(m.number);

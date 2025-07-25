@@ -2712,24 +2712,45 @@ public class ParagonLiteHandler {
 
         // Light Moves
         for (int moveIndex : new int[]{
-                Moves.psybeam, // 060
-                Moves.auroraBeam, // 062
-//                Moves.hyperBeam, // 063
-                Moves.solarBeam, // 076
+                Moves.hyperBeam, // 063
+                Moves.solarBeam, // 76
                 Moves.confuseRay, // 109
-//                Moves.mirrorCoat, // 243
+                Moves.lightScreen, // 113
+                Moves.reflect, // 115
+                Moves.flash, // 148
+                Moves.morningSun, // 234
+                Moves.sunnyDay, // 241
+                Moves.mirrorCoat, // 243
                 Moves.lusterPurge, // 295,
-                Moves.signalBeam, // 324
                 Moves.powerGem, // 408
                 Moves.mirrorShot, // 429
                 Moves.flashCannon, // 430
-                Moves.chargeBeam, // 451
-                Moves.moonblast, // 585
+                Moves.technoBlast, // 546
                 Moves.dazzlingGleam, // 605
                 Moves.solarBlade, // 669
-//                Moves.meteorBeam, // 800
+                Moves.auroraVeil, // 694
+                Moves.fleurCannon, // 705
+                Moves.steelBeam, // 796
         }) {
             moves.get(moveIndex).isCustomLightMove = true;
+        }
+
+        // Beam Moves
+        for (int moveIndex : new int[]{
+                Moves.psybeam, // 060
+                Moves.bubbleBeam, // 061
+                Moves.auroraBeam, //062
+                Moves.hyperBeam, // 063
+                Moves.solarBeam, // 076
+                Moves.signalBeam, // 324
+                Moves.chargeBeam, // 451
+                Moves.simpleBeam, // 493
+                Moves.fleurCannon, // 705
+                Moves.steelBeam, // 796
+                Moves.meteorBeam, // 800
+                Moves.electroShot, // 905
+        }) {
+            moves.get(moveIndex).isCustomBeamMove = true;
         }
 
 

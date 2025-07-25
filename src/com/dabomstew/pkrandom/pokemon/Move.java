@@ -174,6 +174,7 @@ public class Move {
     public boolean isCustomDanceMove = false; // 30 (0x00400000)
     public boolean isCustomRollSpinMove = false; // 30 (0x00800000)
     public boolean isCustomLightMove = false; // 30 (0x01000000)
+    public boolean isCustomBeamMove = false; // 30 (0x02000000)
 
     public Move() {
         // Initialize all statStageChanges to something sensible so that we don't need to have

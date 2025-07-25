@@ -671,6 +671,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
             move.isCustomDanceMove = (flags & 0x00400000) != 0;
             move.isCustomRollSpinMove = (flags & 0x00800000) != 0;
             move.isCustomLightMove = (flags & 0x01000000) != 0;
+            move.isCustomBeamMove = (flags & 0x02000000) != 0;
         }
     }
 
