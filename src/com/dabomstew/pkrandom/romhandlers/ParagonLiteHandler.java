@@ -2439,41 +2439,6 @@ public class ParagonLiteHandler {
         System.out.println("Set abilities");
     }
 
-    private void setLeafGuard() {
-        int number = Abilities.leafGuard;
-
-        switch (hackMode.name) {
-            case "paragonlite" -> {
-                // Description
-                String description = "Reduces damage in\\xFFFEsunny weather.";
-                abilityDescriptions.set(number, description);
-
-                // Data
-                setAbilityEventHandlers(number, new AbilityEventHandler(Gen5BattleEventType.onMoveDamageProcessing2, "leaf_guard.s"));
-            }
-            case "Redux" -> {
-                setAbilityEventHandlers(number,
-                        new AbilityEventHandler(Gen5BattleEventType.onAddConditionCheckFail),
-                        new AbilityEventHandler(Gen5BattleEventType.onAddConditionFail),
-                        new AbilityEventHandler(Gen5BattleEventType.onCheckSleep),
-                        new AbilityEventHandler(Gen5BattleEventType.onGetIsCriticalHit, Abilities.battleArmor));
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + hackMode);
-        }
-    }
-
-    private void setSlowStart() {
-        int number = Abilities.slowStart;
-
-        setAbilityEventHandlers(number,
-                new AbilityEventHandler(Gen5BattleEventType.onSwitchIn),
-                new AbilityEventHandler(Gen5BattleEventType.onRotateIn),
-                new AbilityEventHandler(Gen5BattleEventType.onPostAbilityChange),
-                new AbilityEventHandler(Gen5BattleEventType.onCalcSpeed),
-                new AbilityEventHandler(Gen5BattleEventType.onGetAttackingStatValue),
-                new AbilityEventHandler(Gen5BattleEventType.onTurnCheckEnd, "slow_start_end_of_turn.s"));
-    }
-
     private void setLowHpTypeBoostAbility() {
         ParagonLiteOverlay battleOvl = overlays.get(OverlayId.BATTLE);
 
