@@ -17,7 +17,7 @@ public class AbilityHackMod_541_Veggie_Sword extends AbilityHackMod {
 
     @Override
     public String getName(Context context) {
-        return "Transistor";
+        return "Veggie Sword";
     }
 
     @Override
