@@ -30,13 +30,45 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 new AbilityHackMod_001_Stench(20),
                 new AbilityHackMod_006_Damp_FireResist(),
                 new AbilityHackMod_007_Limber_SpeedReductionImmunity(),
+                // TODO: 008 Sand Veil
+                // TODO: 012 Oblivious
                 new AbilityHackMod_016_ColorChange_Protean(false),
                 new AbilityHackMod_017_Immunity_PoisonTypeImmunity(),
                 new AbilityHackMod_023_ShadowTag_Message(abilityShadowTagMessage),
+                // TODO: 028 Synchronize
                 new AbilityHackMod_035_Illuminate_GhostAndDarkResistance(),
+                // TODO: 039 Inner Focus
                 new AbilityHackMod_040_MagmaArmor_WaterAndIceImmunity(),
+                // TODO: 041 Water Veil
+                // TODO: 050 Run Away
                 new AbilityHackMod_051_KeenEye(true, 1.1),
-                new AbilityHackMod_074_PurePower(1.5, MoveCategory.SPECIAL, abilityHugePowerMessage),
+                new AbilityHackMod_052_HyperCutter_IgnoreDefense(),
+                // TODO: 053 Pickup
+                new AbilityHackMod_054_Truant_Heal(true, true, 16, true),
+                new AbilityHackMod_055_Hustle(0.9),
+                new AbilityHackMod_057_Plus_SpAtkBoost(true, 1.2, abilityPlusMessage),
+                new AbilityHackMod_058_Minus_SpDefBoost(true, 1.2, abilityPlusMessage),
+                new AbilityHackMod_061_ShedSkin_NextTurnAlways(),
+                // TODO: 064 Liquid Ooze
+                // TODO: 065 Overgrow
+                // TODO: 066 Blaze
+                // TODO: 067 Torrent
+                // TODO: 068 Swarm
+                new AbilityHackMod_073_WhiteSmoke_Self(),
+                new AbilityHackMod_074_PurePower(2, MoveCategory.SPECIAL, abilityHugePowerMessage),
+                new AbilityHackMod_077_TangledFeet_OnMissOrFail(),
+                new AbilityHackMod_079_Rivalry(1.2, 1),
+                // TODO: 080 Steadfast
+                // TODO: 081 Snow Cloak
+                // TODO: 082 Gluttony
+                new AbilityHackMod_083_AngerPoint_Miss(true),
+                // TODO: 085 Heatproof
+                new AbilityHackMod_089_IronFist(1.3),
+                // TODO: 102 Leaf Guard
+                // TODO: 107 Anticipation
+                // TODO: 108 Forwarn
+                new AbilityHackMod_112_SlowStart(3),
+                // TODO: 119 Frisk
                 new AbilityHackMod_155_Rattled_IntimidateActivationAndBugGhostResist(),
 
                 // Expansion
