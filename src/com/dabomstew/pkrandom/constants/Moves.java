@@ -871,7 +871,7 @@ public class Moves {
     public static final int infernalParade = 844;
     public static final int ceaselessEdge = 845;
     public static final int bleakwindStorm = 846;
-    public static final int windboltStorm = 847;
+    public static final int wildboltStorm = 847;
     public static final int sandsearStorm = 848;
     public static final int lunarBlessing = 849;
     public static final int takeHeart = 850;
