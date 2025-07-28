@@ -13,7 +13,7 @@
     bne     Return
     
     ldr     r0, [r4, #4] ; turns active with slow start
-    cmp     r0, #3 ; 3 turns
+    cmp     r0, #ABILITY_SLOW_START_TURNS
     bge     GetActTogether
     
     mov     r0, r6
