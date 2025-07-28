@@ -205,8 +205,8 @@ public class ParagonLiteAbilities {
 //            allergen, // 536
 //            dynamo // 537
             rabbitsFoot, // 538
-            floralArmor, // 539
-            trafficControl, // 540
+//            floralArmor, // 539
+//            trafficControl, // 540
             veggieSword, // 541
             flutterDust, // 542
             focusingLens // 543
