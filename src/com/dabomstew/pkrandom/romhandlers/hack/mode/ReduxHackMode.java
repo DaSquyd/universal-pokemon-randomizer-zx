@@ -69,6 +69,9 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 // TODO: 108 Forwarn
                 new AbilityHackMod_112_SlowStart(3),
                 // TODO: 119 Frisk
+                new AbilityHackMod_122_FlowerGift_SpAtk(),
+                new AbilityHackMod_124_Pickpocket_OnAttack(),
+                // TODO: Contrary
                 new AbilityHackMod_155_Rattled_IntimidateActivationAndBugGhostResist(),
 
                 // Expansion
