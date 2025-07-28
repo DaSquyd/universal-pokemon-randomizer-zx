@@ -8,49 +8,37 @@ import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
 import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
-import java.util.Map;
 
-public class AbilityHackMod_543_Focusing_Lens extends AbilityHackMod {
-    private final double multiplier;
-    private final boolean includeBeamMoves;
-
-    public AbilityHackMod_543_Focusing_Lens(double multiplier, boolean includeBeamMoves) {
-        super(ParagonLiteAbilities.focusingLens);
-        
-        this.multiplier = multiplier;
-        this.includeBeamMoves = includeBeamMoves;
+public class AbilityHackMod_541_VeggieSword extends AbilityHackMod {
+    public AbilityHackMod_541_VeggieSword() {
+        super(ParagonLiteAbilities.veggieSword);
     }
 
     @Override
     public String getName(Context context) {
-        return "Focusing Lens";
+        return "Veggie Sword";
     }
 
     @Override
     public GameText getDescription(Context context) {
         return new AbilityDescription(
-                "Boosts the power of",
-                includeBeamMoves ? "light and beam moves." : "light moves."
+                "Powers up Grass-type",
+                "attacks."
         );
     }
 
     @Override
     public Dialogue getExplanation(Context context) {
         return new Dialogue(
-                "Focusing Lens, huh...",
+                "Veggie Sword, huh...",
                 Dialogue.clearLine,
                 "This Ability increases the power of",
-                includeBeamMoves ? "light and beam moves." : "light moves."
+                "Grass-type moves."
         );
     }
 
     @Override
-    public Map<String, Object> getGlobalValues(Context context) {
-        return Map.of("ABILITY_FOCUSING_LENS_MULTIPLIER", multiplier);
-    }
-
-    @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, includeBeamMoves ? "focusing_lens_beam.s" : "focusing_lens.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue, "veggie_sword.s"));
     }
 }
