@@ -406,7 +406,7 @@ public class ParagonLiteHandler {
         for (int i = 0; i < pokeUpdates.length; ++i) {
             pokeUpdates[i] = new PokeUpdate();
         }
-        
+
         hackMode.registerGlobalValue(romHandler, settings, armParser, globalAddressMap, arm9, overlays);
     }
 
@@ -451,7 +451,7 @@ public class ParagonLiteHandler {
         var battleOvl = overlays.get(OverlayId.BATTLE);
         var lines = readLines("eventhandlers/ability/common_user_message.s");
         battleOvl.writeCode(lines, "CommonUserMessage", true);
-        
+
         setbattleEventStrings1();
         setBattleEventStrings2();
     }
@@ -2152,7 +2152,7 @@ public class ParagonLiteHandler {
         for (Pokemon pk : pokes) {
             if (pk == null)
                 continue;
-            
+
             uniqueAbilities.add(pk.ability1);
             uniqueAbilities.add(pk.ability2);
             uniqueAbilities.add(pk.ability3);
@@ -2557,7 +2557,8 @@ public class ParagonLiteHandler {
                 Moves.blazeKick, // 299
                 Moves.lowSweep, // 490
         }) {
-            moves.get(moveIndex).isCustomKickMove = true;
+            if (moveIndex < moves.size())
+                moves.get(moveIndex).isCustomKickMove = true;
         }
 
         // Bite Moves
@@ -2570,7 +2571,8 @@ public class ParagonLiteHandler {
                 Moves.iceFang, // 423
                 Moves.fireFang, // 424
         }) {
-            moves.get(moveIndex).isCustomBiteMove = true;
+            if (moveIndex < moves.size())
+                moves.get(moveIndex).isCustomBiteMove = true;
         }
 
         // Slice Moves
@@ -2591,7 +2593,8 @@ public class ParagonLiteHandler {
                 Moves.razorShell, // 534
                 Moves.secretSword, // 548
         }) {
-            moves.get(moveIndex).isCustomSliceMove = true;
+            if (moveIndex < moves.size())
+                moves.get(moveIndex).isCustomSliceMove = true;
         }
 
         // Triage
@@ -2610,8 +2613,11 @@ public class ParagonLiteHandler {
                 Moves.spore, // 147
                 Moves.cottonSpore, // 178
                 Moves.ragePowder, // 476
+                Moves.powder, // 600
+                Moves.magicPowder, // 750
         }) {
-            moves.get(moveIndex).isCustomPowderMove = true;
+            if (moveIndex < moves.size())
+                moves.get(moveIndex).isCustomPowderMove = true;
         }
 
         // Wind moves
@@ -2622,6 +2628,7 @@ public class ParagonLiteHandler {
                 Moves.blizzard, // 059
                 Moves.aeroblast, // 177
                 Moves.icyWind, // 196
+                Moves.sandstorm, // 201
                 Moves.twister, // 239
                 Moves.heatWave, // 257
                 Moves.airCutter, // 314
@@ -2629,8 +2636,15 @@ public class ParagonLiteHandler {
                 Moves.tailwind, // 366
                 Moves.ominousWind, // 466
                 Moves.hurricane, // 542
+                Moves.petalBlizzard, // 572
+                Moves.fairyWind, // 586
+                Moves.springtideStorm, // 831
+                Moves.bleakwindStorm, // 846
+                Moves.wildboltStorm, // 847
+                Moves.sandsearStorm, // 848
         }) {
-            moves.get(moveIndex).isCustomWindMove = true;
+            if (moveIndex < moves.size())
+                moves.get(moveIndex).isCustomWindMove = true;
         }
 
         // Ball/Bomb moves
@@ -2657,8 +2671,13 @@ public class ParagonLiteHandler {
                 Moves.electroBall, // 486
                 Moves.acidSpray, // 491
                 Moves.searingShot, // 545
+                Moves.pollenPuff, // 676
+                Moves.beakBlast, // 690
+                Moves.pyroBall, // 780
+                Moves.syrupBomb, // 903
         }) {
-            moves.get(moveIndex).isCustomBallBombMove = true;
+            if (moveIndex < moves.size())
+                moves.get(moveIndex).isCustomBallBombMove = true;
         }
 
         // Pulse Moves
@@ -2668,8 +2687,11 @@ public class ParagonLiteHandler {
                 Moves.darkPulse, // 399
                 Moves.dragonPulse, // 406
                 Moves.healPulse, // 505
+                Moves.originPulse, // 618
+                Moves.terrainPulse, // 805
         }) {
-            moves.get(moveIndex).isCustomPulseMove = true;
+            if (moveIndex < moves.size())
+                moves.get(moveIndex).isCustomPulseMove = true;
         }
 
         // Dance Moves
@@ -2687,7 +2709,8 @@ public class ParagonLiteHandler {
                 Moves.victoryDance, // 837
                 Moves.aquaStep, // 872
         }) {
-            moves.get(moveIndex).isCustomDanceMove = true;
+            if (moveIndex < moves.size())
+                moves.get(moveIndex).isCustomDanceMove = true;
         }
 
         // Roll/Spin Moves
@@ -2700,59 +2723,89 @@ public class ParagonLiteHandler {
                 Moves.rapidSpin, // 229
                 Moves.iceBall, // 301
                 Moves.gyroBall, // 360
+                Moves.drillRun, // 529
                 Moves.steamroller, // 537
                 Moves.darkestLariat, // 663
+                Moves.doubleIronBash, // 742
+                Moves.steelRoller, // 798
                 Moves.tripleAxel, // 813
                 Moves.spinOut, // 859
                 Moves.iceSpinner, // 861
                 Moves.mortalSpin, // 866
+                Moves.hyperDrill, // 887
         }) {
-            moves.get(moveIndex).isCustomRollSpinMove = true;
+            if (moveIndex < moves.size())
+                moves.get(moveIndex).isCustomRollSpinMove = true;
         }
 
         // Light Moves
         for (int moveIndex : new int[]{
-                Moves.hyperBeam, // 063
+                Moves.psybeam, // 060
+                Moves.bubbleBeam, // 061
+                Moves.auroraBeam, //062
                 Moves.solarBeam, // 76
                 Moves.confuseRay, // 109
                 Moves.lightScreen, // 113
                 Moves.reflect, // 115
+                Moves.swift, // 129
                 Moves.flash, // 148
                 Moves.morningSun, // 234
+                Moves.synthesis, // 235
+                Moves.moonlight, // 236
                 Moves.sunnyDay, // 241
                 Moves.mirrorCoat, // 243
-                Moves.lusterPurge, // 295,
+                Moves.tailGlow, // 294
+                Moves.lusterPurge, // 295
+                Moves.signalBeam, // 324
                 Moves.powerGem, // 408
                 Moves.mirrorShot, // 429
                 Moves.flashCannon, // 430
+                Moves.judgment, // 449
                 Moves.technoBlast, // 546
                 Moves.dazzlingGleam, // 605
+                Moves.lightOfRuin, // 617
+                Moves.originPulse, // 618
                 Moves.solarBlade, // 669
+                Moves.spotlight, // 671
                 Moves.auroraVeil, // 694
-                Moves.fleurCannon, // 705
-                Moves.steelBeam, // 796
+                Moves.moongeistBeam, // 714
+                Moves.photonGeyser, // 722
+                Moves.lightThatBurnsTheSky, // 723
+                Moves.luminaCrash, // 855
+                Moves.fickleBeam, // 907
         }) {
-            moves.get(moveIndex).isCustomLightMove = true;
+            if (moveIndex < moves.size())
+                moves.get(moveIndex).isCustomLightMove = true;
         }
 
         // Beam Moves
         for (int moveIndex : new int[]{
+                Moves.iceBeam, // 058
                 Moves.psybeam, // 060
                 Moves.bubbleBeam, // 061
                 Moves.auroraBeam, //062
                 Moves.hyperBeam, // 063
                 Moves.solarBeam, // 076
+                Moves.triAttack, // 161
                 Moves.signalBeam, // 324
+                Moves.doomDesire, // 353
                 Moves.chargeBeam, // 451
                 Moves.simpleBeam, // 493
+                Moves.technoBlast, // 546
+                Moves.lightOfRuin, // 617
+                Moves.originPulse, // 618
                 Moves.fleurCannon, // 705
+                Moves.moongeistBeam, // 714
                 Moves.steelBeam, // 796
+                Moves.eternabeam, // 795
                 Moves.meteorBeam, // 800
+                Moves.twinBeam, // 888
                 Moves.electroShot, // 905
+                Moves.fickleBeam, // 907
         }) {
-            moves.get(moveIndex).isCustomBeamMove = true;
+            if (moveIndex < moves.size())
+                moves.get(moveIndex).isCustomBeamMove = true;
         }
-
 
         int[] newMoves;
         int[] movesToClear;
