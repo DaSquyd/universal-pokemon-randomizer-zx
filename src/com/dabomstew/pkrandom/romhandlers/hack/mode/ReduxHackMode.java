@@ -49,7 +49,7 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 new AbilityHackMod_511_SunSoaked(),
                 
                 new AbilityHackMod_542_FlutterDust(),
-                new AbilityHackMod_543_Focusing_Lens(1.3)
+                new AbilityHackMod_543_Focusing_Lens(1.3, true)
         ));
 
         abilityIlluminateMode = AbilityIlluminateMode.RESIST_DARK_AND_GHOST;

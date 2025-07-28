@@ -12,11 +12,13 @@ import java.util.Map;
 
 public class AbilityHackMod_543_Focusing_Lens extends AbilityHackMod {
     private final double multiplier;
+    private final boolean includeBeamMoves;
 
-    public AbilityHackMod_543_Focusing_Lens(double multiplier) {
+    public AbilityHackMod_543_Focusing_Lens(double multiplier, boolean includeBeamMoves) {
         super(ParagonLiteAbilities.focusingLens);
         
         this.multiplier = multiplier;
+        this.includeBeamMoves = includeBeamMoves;
     }
 
     @Override
@@ -27,8 +29,8 @@ public class AbilityHackMod_543_Focusing_Lens extends AbilityHackMod {
     @Override
     public GameText getDescription(Context context) {
         return new AbilityDescription(
-                "Boosts the power of light",
-                "and beam moves."
+                "Boosts the power of",
+                includeBeamMoves ? "light and beam moves." : "light moves."
         );
     }
 
@@ -37,9 +39,8 @@ public class AbilityHackMod_543_Focusing_Lens extends AbilityHackMod {
         return new Dialogue(
                 "Focusing Lens, huh...",
                 Dialogue.clearLine,
-                "When a Pokémon with this Ability",
-                "uses a light or beam move,",
-                "the move deals more damage."
+                "This Ability increases the power of",
+                includeBeamMoves ? "light and beam moves." : "light moves."
         );
     }
 
@@ -50,6 +51,6 @@ public class AbilityHackMod_543_Focusing_Lens extends AbilityHackMod {
 
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "focusing_lens.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, includeBeamMoves ? "focusing_lens_beam.s" : "focusing_lens.s"));
     }
 }
