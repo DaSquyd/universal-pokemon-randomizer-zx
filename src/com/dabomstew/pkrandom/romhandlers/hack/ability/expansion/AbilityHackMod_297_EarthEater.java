@@ -30,7 +30,7 @@ public class AbilityHackMod_297_EarthEater extends AbilityHackMod {
     @Override
     public Dialogue getExplanation(Context context) {
         return new Dialogue(
-                "Insectivore, huh...",
+                "Earth Eater, huh...",
                 Dialogue.clearLine,
                 "Pokémon with this Ability do not",
                 "take damage from Ground-type moves",
