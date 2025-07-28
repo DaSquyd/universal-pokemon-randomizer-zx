@@ -9,9 +9,9 @@ import java.util.Map;
 
 public class AbilityHackMod_055_Hustle extends AbilityHackMod {
 
-    private final int accuracyMultiplier;
+    private final double accuracyMultiplier;
 
-    public AbilityHackMod_055_Hustle(int accuracyMultiplier) {
+    public AbilityHackMod_055_Hustle(double accuracyMultiplier) {
         super(Abilities.hustle);
 
         this.accuracyMultiplier = accuracyMultiplier;
