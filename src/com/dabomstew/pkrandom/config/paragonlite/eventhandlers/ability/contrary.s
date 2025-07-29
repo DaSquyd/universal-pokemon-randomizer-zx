@@ -1,20 +1,24 @@
-    push    {r4, lr}
-    mov     r4, r2
-    
-    mov     r0, #VAR_AttackingPoke
+    push    {r3-r5,LR}
+    mov     r0, #2
+    mov     r5, r2
+    mov     r4, r3
     bl      Battle::EventVar_GetValue
-    cmp     r4, r0
+    cmp     r5, r0
     bne     Return
-    
-    mov     r0, #VAR_MoveType
+
+    ; Ability Prompt
+    mov     r0, r6
+    mov     r1, #HE_AbilityPopup_Add
+    mov     r2, r7
+    bl      Battle::Handler_PushRun
+
+    mov     r0, #VAR_Volume
     bl      Battle::EventVar_GetValue
-    cmp     r0, #TYPE_Dragon
-    bne     Return
-    
-    mov     r0, #VAR_Ratio
-    mov     r1, #(0x1800 >> 10) ; 1.5x
-    lsl     r1, #10
-    bl      Battle::EventVar_MulValue
-    
+    mov     r1, r0
+    mov     r0, #VAR_Volume
+    neg     r1, r1
+    bl      Battle::EventVar_RewriteValue
+    str     r0, [r4]
+
 Return:
-    pop     {r4, pc}
+    pop     {r3-r5,PC}
