@@ -8,10 +8,7 @@ import com.dabomstew.pkrandom.romhandlers.hack.ability.modernplus.AbilityHackMod
 import com.dabomstew.pkrandom.romhandlers.hack.ability.old.*;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackModCollection;
 import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
-import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_500_HeavyWing;
-import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_511_SunSoaked;
-import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_542_FlutterDust;
-import com.dabomstew.pkrandom.romhandlers.hack.ability.original.AbilityHackMod_543_FocusingLens;
+import com.dabomstew.pkrandom.romhandlers.hack.ability.original.*;
 import com.dabomstew.pkrandom.romhandlers.hack.weather.WeatherHailSnowMode;
 
 import java.util.List;
@@ -71,7 +68,7 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 // TODO: 119 Frisk
                 new AbilityHackMod_122_FlowerGift_SpAtk(),
                 new AbilityHackMod_124_Pickpocket_OnAttack(),
-                // TODO: Contrary
+                new AbilityHackMod_126_Contrary(),
                 new AbilityHackMod_155_Rattled_IntimidateActivationAndBugGhostResist(),
 
                 // Expansion
@@ -82,7 +79,8 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 new AbilityHackMod_500_HeavyWing(),
                 
                 new AbilityHackMod_511_SunSoaked(),
-                
+
+                new AbilityHackMod_538_RabbitsFoot(),
                 new AbilityHackMod_542_FlutterDust(),
                 new AbilityHackMod_543_FocusingLens(1.3, true)
         ));
