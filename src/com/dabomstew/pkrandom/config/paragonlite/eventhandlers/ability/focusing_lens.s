@@ -4,9 +4,9 @@
     mov     r0, #VAR_AttackingPoke ; store the attacker into r0
     bl      Battle::EventVar_GetValue
     cmp     r4, r0
-    bne     Return ; if not, end
+    bne     Return
 
-    mov     r0, #VAR_MoveID ; store moveID in r0
+    mov     r0, #VAR_MoveId
     bl      Battle::EventVar_GetValue
     mov     r1, #MF_Light ; store if the chosen move is a light move in r1
     bl      ARM9::MoveHasFlag ; check if light move
