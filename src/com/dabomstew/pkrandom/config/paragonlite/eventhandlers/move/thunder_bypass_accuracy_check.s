@@ -3,6 +3,7 @@
     mov     r4, r2
     
     mov     r0, #VAR_AttackingPoke
+    bl      Battle::EventVar_GetValue
     cmp     r4, r0
     bne     Return
     
