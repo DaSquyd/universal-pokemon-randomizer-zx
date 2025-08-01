@@ -153,12 +153,37 @@ public class Gen5BattleEventType {
     public static final int onWeatherReaction = 0x7F;
     public static final int onEnableSimpleDamage = 0x80;
     public static final int onDamageProcessingStart = 0x81;
-    public static final int onDamageProcessingEnd_PreviousHit = 0x82;
+    public static final int onDamageProcessingEnd_PreviousHit = 0x82; // Sheer Force, Shield Dust
+
+    /// The following 5 are canceled if Sheer Force takes effect (only applicable for a few here)
+    
+    // onHit:                   Flame Burst
+    // onAfterSubDamage:        Flame Burst
+    // onAfterMoveSecondary:    Color Change, Pickpocket
+    
+    /// "onHit" in Showdown, happens between Hit1 and Hit2
     public static final int onDamageProcessingEnd_HitReal = 0x83;
+    // Items:       Red Card, Eject Button
+    // Abilities:   Color Change, Moxie
+    // Moves:       Secret Power, Wake-Up Slap, Smelling Salts, Knock Off, Thief/Covet, Pluck/Bug Bite, Circle Throw/Dragon Tail, Smack Down
+    
+    /// "onTryMove" in Showdown
     public static final int onDamageProcessingEnd_Hit1 = 0x84;
+    // Moves:       Shadow Force
+
+    /// "onHit" in Showdown
     public static final int onDamageProcessingEnd_Hit2 = 0x85;
+    // Items:       Life Orb, Shell Bell
+    // Moves:       Flame Burst, Relic Song, Water Pledge/Fire Pledge/Grass Pledge
+
+    /// handled as part of "selfSwitch" in Showdown, happens after onCheckItemReaction
     public static final int onDamageProcessingEnd_Hit3 = 0x86;
+    // Moves:       U-turn/Volt Switch
+    
+    /// "onAfterMoveSecondary" in Showdown
     public static final int onDamageProcessingEnd_Hit4 = 0x87;
+    // Abilities:   Pickpocket
+    
     public static final int onDamageProcessingEnd = 0x88;
     public static final int onPreAbilityChange = 0x89;
     public static final int onPostAbilityChange = 0x8A;
@@ -168,7 +193,11 @@ public class Gen5BattleEventType {
     public static final int unknown8E = 0x8E;
     public static final int onRecoverHealth = 0x8F;
     public static final int onPostItemEquip = 0x90;
+    
+    /// "onUpdate" in Showdown
     public static final int onCheckItemReaction = 0x91;
+    // Items:       Pretty much all Berries that do something
+    
     public static final int onItemConsumed = 0x92;
     public static final int onCheckChargeUpFail = 0x93;
     public static final int onCheckChargeUpSkip = 0x94;
