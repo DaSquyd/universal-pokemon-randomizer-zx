@@ -40,6 +40,6 @@ public class AbilityHackMod_538_RabbitsFoot extends AbilityHackMod {
 
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue, "rabbits_foot.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onBypassAccuracyCheck, "rabbits_foot.s"));
     }
 }
