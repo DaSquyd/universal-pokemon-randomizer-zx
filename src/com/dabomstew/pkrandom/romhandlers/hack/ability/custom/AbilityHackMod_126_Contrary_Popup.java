@@ -9,8 +9,8 @@ import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
-public class AbilityHackMod_126_Contrary extends AbilityHackMod {
-    public AbilityHackMod_126_Contrary() {
+public class AbilityHackMod_126_Contrary_Popup extends AbilityHackMod {
+    public AbilityHackMod_126_Contrary_Popup() {
         super(Abilities.contrary);
     }
 

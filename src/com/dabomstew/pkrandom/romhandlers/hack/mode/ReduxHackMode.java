@@ -11,8 +11,6 @@ import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.original.*;
 import com.dabomstew.pkrandom.romhandlers.hack.weather.WeatherHailSnowMode;
 
-import java.util.List;
-
 // Blaze Black 2 Redux and Volt White 2 Redux
 public class ReduxHackMode extends ModernPlusHackMode {
     public ReduxHackMode() {
@@ -68,7 +66,7 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 // TODO: 119 Frisk
                 new AbilityHackMod_122_FlowerGift_SpAtk(),
                 new AbilityHackMod_124_Pickpocket_OnAttack(),
-                new AbilityHackMod_126_Contrary(),
+                new AbilityHackMod_126_Contrary_Popup(),
                 new AbilityHackMod_134_HeavyMetal_SuperEffective(0.667),
                 new AbilityHackMod_155_Rattled_IntimidateActivationAndBugGhostResist(),
 
