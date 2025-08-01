@@ -7,10 +7,15 @@ import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
 import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
+import java.util.Map;
 
 public class AbilityHackMod_134_HeavyMetal_SuperEffective extends AbilityHackMod {
-    public AbilityHackMod_134_HeavyMetal_SuperEffective() {
+    public final double multiplier;
+    
+    public AbilityHackMod_134_HeavyMetal_SuperEffective(double multiplier) {
         super(Abilities.heavyMetal);
+        
+        this.multiplier = multiplier;
     }
 
     @Override
@@ -19,6 +24,11 @@ public class AbilityHackMod_134_HeavyMetal_SuperEffective extends AbilityHackMod
                 "Heavy alloys reduce",
                 "super effective damage."
         );
+    }
+
+    @Override
+    public Map<String, Object> getGlobalValues(Context context) {
+        return Map.of("ABILITY_HEAVY_METAL_MULTIPLIER", multiplier);
     }
 
     @Override

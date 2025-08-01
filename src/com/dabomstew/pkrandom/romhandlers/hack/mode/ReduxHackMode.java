@@ -69,6 +69,7 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 new AbilityHackMod_122_FlowerGift_SpAtk(),
                 new AbilityHackMod_124_Pickpocket_OnAttack(),
                 new AbilityHackMod_126_Contrary(),
+                new AbilityHackMod_134_HeavyMetal_SuperEffective(0.667),
                 new AbilityHackMod_155_Rattled_IntimidateActivationAndBugGhostResist(),
 
                 // Expansion
@@ -77,7 +78,7 @@ public class ReduxHackMode extends ModernPlusHackMode {
 
                 // Original
                 new AbilityHackMod_500_HeavyWing(),
-                
+
                 new AbilityHackMod_511_SunSoaked(),
 
                 new AbilityHackMod_538_RabbitsFoot(),
@@ -86,7 +87,7 @@ public class ReduxHackMode extends ModernPlusHackMode {
         ));
 
         abilityIlluminateMode = AbilityIlluminateMode.RESIST_DARK_AND_GHOST;
-        
+
         // Ability
         abilityMagmaArmorMode = AbilityMagmaArmorMode.VANILLA_PLUS_IMMUNE_TO_WATER_AND_ICE; // #040
         abilityWaterVeilMode = AbilityWaterVeilMode.VANILLA_PLUS_OVERCOAT; // #041
