@@ -4,7 +4,7 @@
   "moveSerial": 8,
   "amount": 12,
   "fHideMessage": 13,
-  "fMoveAnimation": 14,
+  "fAlways": 14,
   "pokeCount": 15,
   "pokeId": 16,
   "pokeIds": [

@@ -40,7 +40,7 @@ PushWork:
     mov     r0, #STSG_Attack ; 1
     str     r0, [r7, #HandlerParam_ChangeStatStage.stat]
     strb    r0, [r7, #HandlerParam_ChangeStatStage.amount]
-    strb    r0, [r7, #HandlerParam_ChangeStatStage.fMoveAnimation]
+    strb    r0, [r7, #HandlerParam_ChangeStatStage.fAlways]
     
     mov     r0, #0
     str     r0, [sp, #S_ReadPoke]

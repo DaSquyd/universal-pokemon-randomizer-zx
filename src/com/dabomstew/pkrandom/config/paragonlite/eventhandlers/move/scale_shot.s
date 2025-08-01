@@ -19,7 +19,7 @@
     sub     r0, #(STSG_Defense + 1) ; -1
     strb    r0, [r1, #HandlerParam_ChangeStatStage.amount]
     mov     r0, #1
-    strb    r0, [r1, #HandlerParam_ChangeStatStage.fMoveAnimation]
+    strb    r0, [r1, #HandlerParam_ChangeStatStage.fAlways]
     strb    r0, [r1, #HandlerParam_ChangeStatStage.pokeCount]
     strb    r4, [r1, #HandlerParam_ChangeStatStage.pokeId]
     
@@ -37,7 +37,7 @@
     str     r0, [r1, #HandlerParam_ChangeStatStage.stat]
     mov     r0, #1
     strb    r0, [r1, #HandlerParam_ChangeStatStage.amount]
-    strb    r0, [r1, #HandlerParam_ChangeStatStage.fMoveAnimation]
+    strb    r0, [r1, #HandlerParam_ChangeStatStage.fAlways]
     strb    r0, [r1, #HandlerParam_ChangeStatStage.pokeCount]
     strb    r4, [r1, #HandlerParam_ChangeStatStage.pokeId]
     

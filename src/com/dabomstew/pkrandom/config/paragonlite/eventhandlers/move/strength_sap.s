@@ -36,7 +36,7 @@
     sub     r0, #(STSG_Attack + 1) ; -1
     strb    r0, [r1, #HandlerParam_ChangeStatStage.amount]
     mov     r0, #1
-    strb    r0, [r1, #HandlerParam_ChangeStatStage.fMoveAnimation]
+    strb    r0, [r1, #HandlerParam_ChangeStatStage.fAlways]
     mov     r0, [r1, #HandlerParam_ChangeStatStage.pokeCount]
     mov     r0, r6
     mov     r0, [r1, #HandlerParam_ChangeStatStage.pokeId]

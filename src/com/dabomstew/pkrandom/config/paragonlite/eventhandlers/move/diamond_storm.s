@@ -29,7 +29,6 @@
     mov     r0, #2
     strb    r0, [r1, #HandlerParam_ChangeStatStage.amount]
     mov     r0, #1
-    strb    r0, [r1, #HandlerParam_ChangeStatStage.fMoveAnimation]
     strb    r0, [r1, #HandlerParam_ChangeStatStage.pokeCount]
     strb    r4, [r1, #HandlerParam_ChangeStatStage.pokeId]
     

@@ -124,7 +124,7 @@ Label_0x021ACE90:
     str     r1, [sp, #VAR_02]
     ldr     r1, [r4, #HandlerParam_ChangeStatStage.moveSerial]
     str     r1, [sp, #VAR_03]
-    ldrb    r1, [r4, #HandlerParam_ChangeStatStage.fMoveAnimation]
+    ldrb    r1, [r4, #HandlerParam_ChangeStatStage.fAlways]
     str     r1, [sp, #VAR_04]
     ldr     r1, [r4, #HandlerParam_ChangeStatStage.header]
     str     r0, [sp, #VAR_05]

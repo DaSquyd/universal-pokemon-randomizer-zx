@@ -50,7 +50,7 @@
     str     r2, [r1, #HandlerParam_ChangeStatStage.stat]
     sub     r0, r2, #2 ; -1
     strb    r0, [r1, #HandlerParam_ChangeStatStage.amount]
-    strb    r2, [r1, #HandlerParam_ChangeStatStage.fMoveAnimation]
+    strb    r2, [r1, #HandlerParam_ChangeStatStage.fAlways]
     strb    r5, [r1, #HandlerParam_ChangeStatStage.pokeCount]
     
     mov     r3, #0

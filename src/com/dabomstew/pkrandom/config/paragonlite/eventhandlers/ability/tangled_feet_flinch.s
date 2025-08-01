@@ -27,8 +27,8 @@
     str     r0, [r1, #HandlerParam_ChangeStatStage.stat]
     mov     r2, #2 ; stat boost amount
     strb    r2, [r1, #HandlerParam_ChangeStatStage.amount]
-    mov     r0, #0
-    strb    r0, [r1, #HandlerParam_ChangeStatStage.fMoveAnimation]
+    mov     r0, #TRUE
+    strb    r0, [r1, #HandlerParam_ChangeStatStage.fAlways]
     strb    r2, [r1, #HandlerParam_ChangeStatStage.pokeCount]
     mov     r0, r5
     strb    r4, [r1, #HandlerParam_ChangeStatStage.pokeId]
