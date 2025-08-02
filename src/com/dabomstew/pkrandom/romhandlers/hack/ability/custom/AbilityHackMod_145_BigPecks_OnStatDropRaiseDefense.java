@@ -9,9 +9,9 @@ import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
-public class AbilityHackMod_053_Pickup extends AbilityHackMod {
-    public AbilityHackMod_053_Pickup() {
-        super(Abilities.pickup);
+public class AbilityHackMod_145_BigPecks_OnStatDropRaiseDefense extends AbilityHackMod {
+    public AbilityHackMod_145_BigPecks_OnStatDropRaiseDefense() {
+        super(Abilities.bigPecks);
     }
 
     @Override
@@ -22,31 +22,27 @@ public class AbilityHackMod_053_Pickup extends AbilityHackMod {
     @Override
     public GameText getDescription(Context context) {
         return new AbilityDescription(
-                "The Pokémon cleans",
-                "away field hazards."
+                "If a stat falls, Defense",
+                "sharply increases."
         );
     }
 
     @Override
     public Dialogue getExplanation(Context context) {
         return new Dialogue(
-                "Pickup, huh...",
+                "Big Pecks, huh...",
                 Dialogue.clearLine,
-                "Pokémon with this Ability now remove",
-                "entry hazards like Stealth Rock on their",
-                "side of the field on switch-in.",
+                "When an opponent lowers the stats",
+                "of a Pokémon with this Ability,",
+                "its Defense goes way up!",
                 Dialogue.clearLine,
-                "What's more...",
-                Dialogue.clearLine,
-                "Pokémon with this ability can sometimes",
-                "find items when walking around without",
-                "a held item. The higher the Pokémon's level,",
-                "the better the item it can pick up."
+                "But be careful--if it lowers",
+                "its own stats, the Ability won't work!"
         );
     }
 
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "pickup_redux.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveStatStageChangeApplied, "big_pecks.s"));
     }
 }
