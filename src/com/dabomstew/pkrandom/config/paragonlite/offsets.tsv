@@ -631,6 +631,7 @@ Battle	CommonTypeImmuneCheck	Code		thumb	0x021DA8C8	0x021DA8A8	0x021C0110	0x021C
 Battle	CommonTypeRecoverHP	Code		thumb	0x021DA8FC	0x021DA8DC	0x021C0144	0x021C0104
 Battle	CommonTypeNoEffectBoost	Code		thumb	0x021DA98C	0x021DA96C	0x021C01D4	0x021C0194
 Battle	Handler_MoldBreakerSkipCheck	Code		thumb	0x021DB1C8	0x021DB1A8	0x021C0A10	0x021C09D0
+Battle	IsAffectedBySheerForce	Code		thumb	0x021DBFF4	0x021DBFD4	0x021C183C	0x021C17FC
 Battle	Inst_ItemEffectListCountCmp	Inst	2		0x021DCF32	0x021DCF12	0x021C277A	0x021C273A
 Battle	Data_ItemEffectListAddress	Data	4	*	0x021DCF3C	0x021DCF1C	0x021C2784	0x021C2744
 Battle	Data_ItemEffectListAddress4	Data	4	*	0x021DCF40	0x021DCF20	0x021C2788	0x021C2748

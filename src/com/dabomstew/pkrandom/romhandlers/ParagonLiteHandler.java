@@ -2408,6 +2408,9 @@ public class ParagonLiteHandler {
 
         // Changes Drizzle/Drought/Sand Stream/Snow Warning 
         setCommonWeatherChangeAbility();
+        
+        // Is Affected by Sheer Force
+        battleOvl.replaceCode(readLines("eventhandlers/ability/is_affected_by_sheer_force.s"), "IsAffectedBySheerForce");
 
         // Move-type-changing abilities
         battleOvl.writeCode(readLines("eventhandlers/ability/common_move_type_change_type.s"), "CommonMoveTypeChange_Type", true);
@@ -2812,10 +2815,12 @@ public class ParagonLiteHandler {
                         Moves.dualWingbeat, // #814
                         Moves.surgingStrikes, // #818
                         Moves.direClaw, // #827
+                        Moves.stoneAxe, // #830
                         Moves.ragingFury, // #833
                         Moves.barbBarrage, // #839
                         Moves.bitterMalice, // #841
                         Moves.infernalParade, // #844
+                        Moves.ceaselessEdge, // #845
                         Moves.makeItRain, // #874
                         Moves.electroShot, // #905
                         Moves.thunderclap, // #909
@@ -2868,10 +2873,12 @@ public class ParagonLiteHandler {
                         Moves.tripleAxel, // #813
                         Moves.dualWingbeat, // #814
                         Moves.direClaw, // #827
+                        Moves.stoneAxe, // #830
                         Moves.ragingFury, // #833
                         Moves.barbBarrage, // #839
                         Moves.bitterMalice, // #841
                         Moves.infernalParade, // #844
+                        Moves.ceaselessEdge, // #845
                         Moves.makeItRain, // #874
                         Moves.electroShot, // #905
                         Moves.thunderclap, // #909
@@ -2944,7 +2951,7 @@ public class ParagonLiteHandler {
         setMoveAnimations(Moves.boomburst, 752);
 
         // + #591 Diamond Storm
-        setMoveEventHandlers(Moves.diamondStorm, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEnd, "diamond_storm.s"));
+        setMoveEventHandlers(Moves.diamondStorm, new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "diamond_storm.s"));
         setMoveAnimations(Moves.diamondStorm);
 
         // #592 Steam Eruption
@@ -3106,14 +3113,14 @@ public class ParagonLiteHandler {
         setMoveAnimations(Moves.meteorAssault);
 
         // + #796 Steel Beam
-        setMoveEventHandlers(Moves.steelBeam, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEnd, "steel_beam.s"));
+        setMoveEventHandlers(Moves.steelBeam, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEffective, "steel_beam.s"));
         setMoveAnimations(Moves.steelBeam, 762);
 
         // #797 Expanding Force
         setMoveAnimations(Moves.expandingForce, 808);
 
         // + #799 Scale Shot
-        setMoveEventHandlers(Moves.scaleShot, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEnd, "scale_shot.s"));
+        setMoveEventHandlers(Moves.scaleShot, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEffective, "scale_shot.s"));
         setMoveAnimations(Moves.scaleShot, 758);
 
         // + #800 Meteor Beam
@@ -3188,7 +3195,8 @@ public class ParagonLiteHandler {
         // #828 Psyshield Bash
         setMoveAnimations(Moves.psyshieldBash);
 
-        // TODO: + #830 Stone Axe
+        // + #830 Stone Axe
+        setMoveEventHandlers(Moves.stoneAxe, new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_Hit3, Moves.stealthRock, Gen5BattleEventType.onUncategorizedMoveNoTarget));
         setMoveAnimations(Moves.stoneAxe);
 
         // #833 Raging Fury
@@ -3222,7 +3230,8 @@ public class ParagonLiteHandler {
         cloneMoveEventHandlers(Moves.infernalParade, Moves.hex);
         setMoveAnimations(Moves.infernalParade);
 
-        // TODO: + #845 Ceaseless Edge
+        // + #845 Ceaseless Edge
+        setMoveEventHandlers(Moves.ceaselessEdge, new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_Hit3, Moves.spikes, Gen5BattleEventType.onUncategorizedMoveNoTarget));
         setMoveAnimations(Moves.ceaselessEdge);
 
         // #855 Lumina Crash
@@ -5184,11 +5193,15 @@ public class ParagonLiteHandler {
         }
 
         MoveEventHandler(int type, int existingMove) {
+            this(type, existingMove, type);
+        }
+
+        MoveEventHandler(int type, int existingMove, int existingMoveType) {
             ParagonLiteOverlay battleOvl = overlays.get(OverlayId.BATTLE);
 
             this.type = type;
 
-            int referenceAddress = getEventHandlerFuncReferenceAddress(existingMove, getMoveListAddress(), getMoveListCount(), type);
+            int referenceAddress = getEventHandlerFuncReferenceAddress(existingMove, getMoveListAddress(), getMoveListCount(), existingMoveType);
             this.address = battleOvl.readWord(referenceAddress) - 1;
         }
 

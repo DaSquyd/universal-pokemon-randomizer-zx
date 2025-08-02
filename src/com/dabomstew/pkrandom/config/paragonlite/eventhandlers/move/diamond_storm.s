@@ -7,12 +7,6 @@
     cmp     r4, r0
     bne     Return
     
-    bl      Battle::GetPoke
-    mov     r1, #BPV_EffectiveAbility
-    bl      Battle::GetPokeStat
-    cmp     r0, #125 ; Sheer Force
-    beq     Return
-    
     mov     r0, #2
     bl      Battle::Random
     cmp     r0, #0
