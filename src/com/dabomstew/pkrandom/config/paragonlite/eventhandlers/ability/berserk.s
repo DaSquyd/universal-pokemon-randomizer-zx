@@ -34,7 +34,7 @@
     lsls    r0, r7, #0x12
     orrs    r0, r2
     str     r0, [r1]
-    mov     r0, #STAT_Defense
+    mov     r0, #STSG_Defense
     str     r0, [r1,#4]
     strb    r6, [r1,#0xC]
     strb    r0, [r1,#0xE]
