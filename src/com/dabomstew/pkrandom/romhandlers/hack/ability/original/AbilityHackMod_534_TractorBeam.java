@@ -8,10 +8,15 @@ import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
 import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
+import java.util.Map;
 
-public class AbilityHackMod_534_TractorBeam extends AbilityHackMod {    
-    public AbilityHackMod_534_TractorBeam() {
+public class AbilityHackMod_534_TractorBeam extends AbilityHackMod { 
+    private final int turns;
+    
+    public AbilityHackMod_534_TractorBeam(int turns) {
         super(ParagonLiteAbilities.tractorBeam);
+        
+        this.turns = turns;
     }
 
     @Override
@@ -22,19 +27,32 @@ public class AbilityHackMod_534_TractorBeam extends AbilityHackMod {
     @Override
     public GameText getDescription(Context context) {
         return new AbilityDescription(
-                "Moves with recoil boost",
-                "the Pokémon's Speed stat."
+                "An odd beam lifts the foe,",
+                "making them easier to hit."
         );
     }
 
     @Override
     public Dialogue getExplanation(Context context) {
-        // TODO
-        return super.getExplanation(context);
+        return new Dialogue(
+                "Tractor Beam, huh...",
+                Dialogue.clearLine,
+                "A Pokémon with the Ability will apply",
+                "Telekinesis to the opposite Pokémon",
+                "when it enters battle.",
+                Dialogue.clearLine,
+                "You should remember this effect lasts",
+                "for three turns."
+        );
+    }
+
+    @Override
+    public Map<String, Object> getGlobalValues(Context context) {
+        return Map.of("ABILITY_TRACTOR_BEAM_TURNS", turns);
     }
 
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "tenacity.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "tractor_beam.s"));
     }
 }

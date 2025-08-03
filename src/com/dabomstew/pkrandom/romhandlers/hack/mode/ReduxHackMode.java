@@ -80,6 +80,7 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 new AbilityHackMod_511_SunSoaked(),
 
                 new AbilityHackMod_538_RabbitsFoot(),
+                new AbilityHackMod_534_TractorBeam(3),
                 new AbilityHackMod_542_FlutterDust(),
                 new AbilityHackMod_543_FocusingLens(1.3, true)
         ));
