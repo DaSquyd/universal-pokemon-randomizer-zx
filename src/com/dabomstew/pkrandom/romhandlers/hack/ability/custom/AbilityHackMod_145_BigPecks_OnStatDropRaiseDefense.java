@@ -16,7 +16,7 @@ public class AbilityHackMod_145_BigPecks_OnStatDropRaiseDefense extends AbilityH
 
     @Override
     public String getName(Context context) {
-        return "Pickup";
+        return "Big Pecks";
     }
 
     @Override
