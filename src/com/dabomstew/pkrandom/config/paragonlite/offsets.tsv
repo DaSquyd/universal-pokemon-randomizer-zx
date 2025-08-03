@@ -668,7 +668,7 @@ Battle	MakePokeCondition_Param	Code		thumb	0x021E89BC	0x021E899C	0x021CE21C	0x02
 Battle	MakeIndefiniteCondition	Code		thumb	0x021E89E0	0x021E89C0	0x021CE240	0x021CE200
 Battle	MakeIndefiniteCondition_Param	Code		thumb	0x021E89F4	0x021E89D4	0x021CE254	0x021CE214
 Battle	MakeIndefiniteCondition_TurnsMove	Code		thumb	0x021E8A18	0x021E89F8	0x021CE278	0x021CE238
-Battle	MakeTrapCondition_SourcePokeTurns	Code		thumb	0x021E8A48	0x021E8A28	0x021CE2A8	0x021CE268
+Battle	MakeCondition_PokeTurns	Code		thumb	0x021E8A48	0x021E8A28	0x021CE2A8	0x021CE268
 Battle	MakeBadPoisonCondition	Code		thumb	0x021E8A78	0x021E8A58	0x021CE2D8	0x021CE298
 Battle	ConditionPtr_GetIsBadPoison	Code		thumb	0x021E8A98	0x021E8A78	0x021CE2F8	0x021CE2B8
 Battle	ConditionPtr_GetSourcePoke	Code		thumb	0x021E8AB8	0x021E8A98	0x021CE318	0x021CE2D8
