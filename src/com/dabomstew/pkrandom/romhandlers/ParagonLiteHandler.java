@@ -3113,14 +3113,14 @@ public class ParagonLiteHandler {
         setMoveAnimations(Moves.meteorAssault);
 
         // + #796 Steel Beam
-        setMoveEventHandlers(Moves.steelBeam, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEffective, "steel_beam.s"));
+        setMoveEventHandlers(Moves.steelBeam, new MoveEventHandler(Gen5BattleEventType.onMoveExecuteEffective, "steel_beam.s"));
         setMoveAnimations(Moves.steelBeam, 762);
 
         // #797 Expanding Force
         setMoveAnimations(Moves.expandingForce, 808);
 
         // + #799 Scale Shot
-        setMoveEventHandlers(Moves.scaleShot, new MoveEventHandler(Gen5BattleEventType.OnMoveExecuteEffective, "scale_shot.s"));
+        setMoveEventHandlers(Moves.scaleShot, new MoveEventHandler(Gen5BattleEventType.onMoveExecuteEffective, "scale_shot.s"));
         setMoveAnimations(Moves.scaleShot, 758);
 
         // + #800 Meteor Beam
