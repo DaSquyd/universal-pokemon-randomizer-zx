@@ -24,6 +24,7 @@ package com.dabomstew.pkrandom.constants;
 /*----------------------------------------------------------------------------*/
 
 public class Gen5BattleEventType {
+    public static final int none = 0x00;
     public static final int onActionProcessingStart = 0x01;
     public static final int onActionProcessingEnd = 0x02;
     public static final int onMoveSequenceStart = 0x03;
@@ -33,20 +34,20 @@ public class Gen5BattleEventType {
     public static final int onDecideDelayedMove = 0x07;
     public static final int onMoveSequenceSteal = 0x08;
     public static final int onMoveSequenceReflect = 0x09;
-    public static final int unknown0A = 0x0A;
+    public static final int unused0A = 0x0A;
     public static final int onSkipRunCalc = 0x0B;
     public static final int onPreventRun = 0x0C;
     public static final int onRunExitMessage = 0x0D;
     public static final int onCheckSleep = 0x0E;
     public static final int onCheckSpecialPriority = 0x0F;
-    public static final int unknown10 = 0x10;
+    public static final int unused10 = 0x10;
     public static final int onGetMovePriority = 0x11;
     public static final int onCheckFloating = 0x12;
     public static final int onCalcSpeed = 0x13;
-    public static final int unknown14 = 0x14;
+    public static final int unused14 = 0x14;
     public static final int onPreAttacks = 0x15;
-    public static final int onMoveRequestActionOrder = 0x16;
-    public static final int onMoveRequestCheckFail = 0x17;
+    public static final int unused16 = 0x16;
+    public static final int Unused17 = 0x17;
     public static final int onMoveRequestParam = 0x18;
     public static final int onMoveRequestMessage = 0x19;
     public static final int onCheckMoveSteal = 0x1A;
@@ -55,12 +56,12 @@ public class Gen5BattleEventType {
     public static final int onCheckMoveFail = 0x1D;
     public static final int onMoveExecuteCheck1 = 0x1E;
     public static final int onMoveExecuteCheck2 = 0x1F;
-    public static final int onMoveExecuteCheck3 = 0x20;
+    public static final int unused20 = 0x20;
     public static final int onMoveExecuteFail = 0x21;
     public static final int onChooseMove = 0x22;
     public static final int onBreakOpponentGuard = 0x23;
     public static final int onMoveExecuteStart = 0x24;
-    public static final int OnMoveExecuteEffective = 0x25;
+    public static final int onMoveExecuteEffective = 0x25;
     public static final int onMoveExecuteNoEffect = 0x26;
     public static final int OnMoveExecuteEnd = 0x27;
     public static final int onGetMoveParam = 0x28;
