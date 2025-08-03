@@ -67,8 +67,6 @@ PokeLoopStart:
     mov     r1, #0x9E ; level
     mov     r2, #0
     bl      ARM9::Poke_GetParam
-    lsl     r0, #16
-    lsr     r0, #16
     
     add     r2, r0, r7
     cmp     r2, #0
