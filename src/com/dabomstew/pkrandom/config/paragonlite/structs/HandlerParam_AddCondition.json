@@ -1,0 +1,10 @@
+{
+  "header": 0,
+  "conditionType": 4,
+  "conditionPtr": 8,
+  "fAlways": 12,
+  "fMsgDisabled": 13,
+  "fOverwrite": 14,
+  "pokeId": 15,
+  "exStr": 20
+}
