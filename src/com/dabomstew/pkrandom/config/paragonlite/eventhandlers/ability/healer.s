@@ -56,7 +56,7 @@ Loop_Start:
     bl      Battle::Handler_PushWork
     mov     r1, r0
     ldr     r0, [r1, #HandlerParam_CureCondition.header]
-    ldr     r2, =BHP_AbilityPopup
+    mov     r2, =BHP_AbilityPopup
     orr     r0, r2
     str     r0, [r1, #HandlerParam_CureCondition.header]
     

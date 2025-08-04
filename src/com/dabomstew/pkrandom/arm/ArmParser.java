@@ -113,6 +113,7 @@ public class ArmParser {
                 "BtlEventFactor",
                 "BtlvMcss",
                 "BtlvMcssData",
+                "HandlerParam_AddCondition",
                 "HandlerParam_AddSideStatus",
                 "HandlerParam_ChangeHP",
                 "HandlerParam_ChangeStatStage",
@@ -1041,22 +1042,24 @@ public class ArmParser {
             return 2;
 
         // check for simplification
-        if (lowerLine.startsWith("ldr") && line.contains("=")) {
+        if (lowerLine.startsWith("mov")) {
             int equalsIndex = line.indexOf('=');
-            String valueStr = line.substring(equalsIndex).trim();
-            int value;
-            try {
-                value = parseValue(lineNum, line, valueStr);
-            } catch (ArmParseException e) {
-                throw new RuntimeException(e);
+            if (equalsIndex >= 0) {
+                String valueStr = line.substring(equalsIndex).trim();
+                int value;
+                try {
+                    value = parseValue(lineNum, line, valueStr);
+                } catch (ArmParseException e) {
+                    throw new RuntimeException(e);
+                }
+    
+                int shift = 0;
+                while (value >>> shift >= 256 && ((value >>> shift) & 1) == 0)
+                    ++shift;
+    
+                int reducedValue = value >>> shift;
+                return shift > 0 && reducedValue < 256 ? 4 : 2;
             }
-
-            int shift = 0;
-            while (value >> shift >= 256 && ((value >> shift) & 1) == 0)
-                ++shift;
-
-            int reducedValue = value >> shift;
-            return shift > 0 && reducedValue < 256 ? 4 : 2;
         }
 
         if (lowerLine.startsWith("bl "))
@@ -1296,20 +1299,13 @@ public class ArmParser {
             if (args[1].startsWith("=")) {
                 int imm = parseValue(line, op, args, args[1]);
 
-                // check to see if this can be conveniently simplified with a move and shift
                 int shift = 0;
-                while (imm >> shift >= 256 && ((imm >> shift) & 1) == 0)
+                while (imm >>> shift >= 256 && ((imm >>> shift) & 1) == 0)
                     ++shift;
 
-                int reducedImm = imm >> shift;
-                if (reducedImm >= 0 && reducedImm < 256) {
-                    byte[] movBytes = parseInstruction(line, "mov", String.format("%s, #%d", args[0], reducedImm));
-                    if (shift == 0)
-                        return movBytes;
-
-                    byte[] lslBytes = parseInstruction(line, "lsl", String.format("%s, #%d", args[0], shift));
-                    return new byte[]{movBytes[0], movBytes[1], lslBytes[0], lslBytes[1]};
-                }
+                int reducedImm = imm >>> shift;
+                if (imm != 0 && reducedImm < 256)
+                    throw new ArmParseException(line, op, args, String.format("Expression can be simplified using mov %s, %s", args[0], args[1]));
 
                 if (!dataRamAddressMap.containsKey(imm))
                     dataRamAddressMap.put(imm, new TreeSet<>());
@@ -1531,7 +1527,31 @@ public class ArmParser {
 
         if (args[1].startsWith("#"))
             return format3(line, op, args, 0);
+        
+        if (args[1].startsWith("=")) {
+            // check to see if this can be conveniently simplified with a move and shift
+            int imm = parseValue(line, op, argsStr, args[1]);
+            
+            int shift = 0;
+            while (imm >>> shift >= 256 && ((imm >>> shift) & 1) == 0)
+                ++shift;
 
+            int reducedImm = imm >>> shift;
+            if (reducedImm >= 0) {
+                if (reducedImm > 255)
+                    return parseInstruction(line, "ldr", String.format("%s, =%d", args[0], imm));
+                
+                byte[] movBytes = parseInstruction(line, "mov", String.format("%s, #%d", args[0], reducedImm));
+                if (shift == 0)
+                    return movBytes;
+
+                byte[] lslBytes = parseInstruction(line, "lsl", String.format("%s, #%d", args[0], shift));
+                return new byte[]{movBytes[0], movBytes[1], lslBytes[0], lslBytes[1]};
+            }
+            
+            return format3(line, op, args, 0);
+        }
+        
         // Hack to allow "MOV Rd, Rs" to become "ADD Rd, Rs, #0" internally; Format 2 with "ADD" opcode (0)
         // Only used when both registers are low, otherwise use Format 5
         int rd = parseRegister(args[0]);
@@ -1649,9 +1669,8 @@ public class ArmParser {
         if (rd < 0 || rd > 7)
             throw new ExpectedLowRegisterException(line, op, args, 0);
 
-        if (imm < 0 || imm > 255) {
+        if (imm < 0 || imm > 255)
             throw new ExpectedNumberException(line, op, args, 1, imm, 0, 255);
-        }
 
         return halfwordToBytes(imm | (rd << 8) | (opcode << 11) | 0x2000);
     }
