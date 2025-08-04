@@ -17,7 +17,7 @@ public class AbilityHackMod_017_Immunity_PoisonTypeImmunity extends AbilityHackM
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAddConditionFail));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn));
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAbilityCheckNoEffect, "immunity.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "immunity.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onActionProcessingEnd));
     }
 }

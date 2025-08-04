@@ -24,7 +24,7 @@ public class AbilityHackMod_012_Oblivious_TauntAndIntimidateImmunity extends Abi
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAddConditionFail));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onActionProcessingEnd));
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAbilityCheckNoEffect, "oblivious_taunt.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "oblivious_taunt.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeLastCheck, "common_intimidate_immunity.s"));
     }
 }

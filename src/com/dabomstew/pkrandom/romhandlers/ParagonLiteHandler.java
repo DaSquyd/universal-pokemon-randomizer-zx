@@ -3148,7 +3148,7 @@ public class ParagonLiteHandler {
 
         // + #809 Poltergeist
         setMoveEventHandlers(Moves.poltergeist,
-                new MoveEventHandler(Gen5BattleEventType.onNoEffectCheck, "poltergeist_check.s"),
+                new MoveEventHandler(Gen5BattleEventType.onCheckNoEffect2, "poltergeist_check.s"),
                 new MoveEventHandler(Gen5BattleEventType.onDamageProcessingStart, "poltergeist_message.s"));
         setMoveAnimations(Moves.poltergeist, 797);
 

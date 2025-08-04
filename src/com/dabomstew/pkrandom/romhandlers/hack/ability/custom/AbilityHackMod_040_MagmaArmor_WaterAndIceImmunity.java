@@ -32,7 +32,7 @@ public class AbilityHackMod_040_MagmaArmor_WaterAndIceImmunity extends AbilityHa
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onActionProcessingEnd));
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAbilityCheckNoEffect, "magma_armor_redux.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "magma_armor_redux.s"));
     }
 
     @Override

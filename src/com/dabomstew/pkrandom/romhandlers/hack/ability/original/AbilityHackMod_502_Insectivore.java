@@ -1,6 +1,5 @@
 package com.dabomstew.pkrandom.romhandlers.hack.ability.original;
 
-import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.constants.ParagonLiteAbilities;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
@@ -41,7 +40,7 @@ public class AbilityHackMod_502_Insectivore extends AbilityHackMod {
 
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAbilityCheckNoEffect, "insectivore.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "insectivore.s"));
     }
 
     @Override

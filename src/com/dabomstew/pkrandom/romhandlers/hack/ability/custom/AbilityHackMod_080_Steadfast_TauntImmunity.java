@@ -3,9 +3,7 @@ package com.dabomstew.pkrandom.romhandlers.hack.ability.custom;
 import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
-import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
 import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
-import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
 
@@ -33,7 +31,7 @@ public class AbilityHackMod_080_Steadfast_TauntImmunity extends AbilityHackMod {
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveExecuteFail));
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAbilityCheckNoEffect, "steadfast_taunt.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "steadfast_taunt.s"));
     }
 
     @Override

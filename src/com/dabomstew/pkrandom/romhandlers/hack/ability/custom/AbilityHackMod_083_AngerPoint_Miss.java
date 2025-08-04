@@ -53,6 +53,6 @@ public class AbilityHackMod_083_AngerPoint_Miss extends AbilityHackMod {
             inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveDamageReaction1, "anger_point_crit.s"));
 
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveExecuteFail, "anger_point_flinch.s"));
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAbilityCheckNoEffect, "steadfast_taunt.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "steadfast_taunt.s"));
     }
 }

@@ -44,7 +44,7 @@ public class AbilityHackMod_274_WindRider extends AbilityHackMod {
 
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAbilityCheckNoEffect, "wind_rider_immunity.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "wind_rider_immunity.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "wind_rider_on_enter.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "wind_rider_on_enter.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveExecuteEffective, "wind_rider_after_tailwind.s"));

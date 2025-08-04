@@ -35,7 +35,7 @@ public class AbilityHackMod_283_GoodAsGold extends AbilityHackMod {
 
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAbilityCheckNoEffect, "good_as_gold_no_effect.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "good_as_gold_no_effect.s"));
     }
 
     @Override

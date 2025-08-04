@@ -8,7 +8,6 @@ import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
 import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.List;
-import java.util.Map;
 
 public class AbilityHackMod_115_IceBody_IceImmunity extends AbilityHackMod {
     public AbilityHackMod_115_IceBody_IceImmunity() {
@@ -43,7 +42,7 @@ public class AbilityHackMod_115_IceBody_IceImmunity extends AbilityHackMod {
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onWeatherReaction));
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAbilityCheckNoEffect, "ice_body_immunity.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "ice_body_immunity.s"));
     }
 
     @Override

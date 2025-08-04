@@ -43,6 +43,6 @@ public class AbilityHackMod_016_ColorChange_Protean extends AbilityHackMod {
         String filename;
         filename = firstOnly == (proteanHackMod == null || proteanHackMod.firstOnly) ? "protean.s" : "redux_color_change.s";
 
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onDecideTarget, filename));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveTarget, filename));
     }
 }

@@ -6,15 +6,15 @@ import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
 
 import java.util.List;
 
-public class AbilityHackMod_117_SnowWarning_HailImmunity extends AbilityHackMod {
-    public AbilityHackMod_117_SnowWarning_HailImmunity() {
-        super(Abilities.snowWarning);
+public class AbilityHackMod_053_Pickup extends AbilityHackMod {
+    public AbilityHackMod_053_Pickup() {
+        super(Abilities.pickup);
     }
 
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn));
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onWeatherReaction, "snow_warning_no_damage.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onTurnCheckEnd));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "pickup_redux.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "pickup_redux.s"));
     }
 }

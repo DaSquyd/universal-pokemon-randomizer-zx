@@ -65,11 +65,11 @@ public class Gen5BattleEventType {
     public static final int onMoveExecuteNoEffect = 0x26;
     public static final int OnMoveExecuteEnd = 0x27;
     public static final int onGetMoveParam = 0x28;
-    public static final int onDecideTarget = 0x29;
+    public static final int onGetMoveTarget = 0x29;
     public static final int onRedirectTarget = 0x2A;
-    public static final int onRedirectTargetEnd = 0x2B;
-    public static final int onNoEffectCheck = 0x2C;
-    public static final int onAbilityCheckNoEffect = 0x2D;
+    public static final int onCheckNoEffect1 = 0x2B;
+    public static final int onCheckNoEffect2 = 0x2C;
+    public static final int onCheckNoEffect3 = 0x2D;
     public static final int onCheckProtectBreak = 0x2E;
     public static final int onAvoidMove = 0x2F;
     public static final int onCheckDamageToRecover = 0x30;

@@ -1,6 +1,5 @@
 package com.dabomstew.pkrandom.romhandlers.hack.ability.original;
 
-import com.dabomstew.pkrandom.constants.Abilities;
 import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.constants.ParagonLiteAbilities;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackMod;
@@ -43,7 +42,7 @@ public class AbilityHackMod_511_SunSoaked extends AbilityHackMod {
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
         // full effect in get_effective_weather.s
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAbilityCheckNoEffect, "sun-soaked_fire_resistance.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "sun-soaked_fire_resistance.s"));
     }
 
     @Override
