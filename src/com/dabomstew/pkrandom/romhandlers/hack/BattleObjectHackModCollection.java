@@ -520,8 +520,6 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
         if (eventHandlers.isEmpty()) {
             overlay.writeWord(effectListAddress + index * 8, number, false);
             overlay.writeWord(effectListAddress + index * 8 + 4, oldRedirectorAddress + 1, true);
-            String eventHandlerLabel = String.format("EventHandler_%s_%s", battleObjectTypeName, );
-            globalAddressMap.registerCodeAddress(overlay, eventHandlerLabel, eventHandlerRamAddress, 2);
             return;
         }
         
