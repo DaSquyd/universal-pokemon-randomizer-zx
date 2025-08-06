@@ -5,6 +5,14 @@ public abstract class MoveHackMod extends BattleObjectHackMod {
         super(number);
     }
 
+    public String getAuxiliaryAnimationLabel() {
+        return null;
+    }
+    
+    public int[] getAuxiliaryAnimationSpaFiles() {
+        return new int[0];
+    }
+
     public Boolean isProtectionMove() {
         return null;
     }
@@ -31,28 +39,28 @@ public abstract class MoveHackMod extends BattleObjectHackMod {
     public Boolean isComboMove() {
         return null;
     }
-    
+
     // Basis for both Sleep Talk, Assist, and Copy Cat Uncallable
     public Boolean isUncallableMove() {
         return null;
     }
-    
+
     public Boolean isSleepTalkUncallableMove() {
         return null;
     }
-    
+
     public Boolean isAssistUncallableMove() {
         return null;
     }
-    
+
     public Boolean isCopycatUncallableMove() {
         return null;
     }
-    
+
     public Boolean isMimicFailMove() {
         return null;
     }
-    
+
     public Boolean isMetronomeUncallableMove() {
         return null;
     }

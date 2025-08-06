@@ -41,7 +41,7 @@ public abstract class HackMod implements Comparable<HackMod> {
         return getClass().getName().compareToIgnoreCase(o.getClass().getName());
     }
 
-    public static List<String> readLines(String filename) {
+    protected static List<String> readLines(String filename) {
         Scanner sc;
         try {
             filename = "paragonlite/" + filename;
@@ -61,7 +61,7 @@ public abstract class HackMod implements Comparable<HackMod> {
         return lines;
     }
 
-    private static byte[] readBytes(String filename) {
+    protected static byte[] readBytes(String filename) {
         byte[] bytes;
         try {
             InputStream stream = FileFunctions.openConfig("paragonlite/" + filename);

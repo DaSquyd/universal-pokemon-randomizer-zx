@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.romhandlers.hack;
 
 import com.dabomstew.pkrandom.constants.Gen5Constants;
+import com.dabomstew.pkrandom.romhandlers.OverlayId;
 import com.dabomstew.pkrandom.romhandlers.ParagonLiteOverlay;
 
 import java.util.List;
@@ -8,11 +9,6 @@ import java.util.List;
 public class MoveHackModCollection extends BattleObjectHackModCollection<MoveHackMod> {
     public MoveHackModCollection(MoveHackMod... hackMods) {
         super(hackMods);
-    }
-
-    @Override
-    public void apply(Context context) {
-        super.apply(context);
     }
 
     @Override
@@ -96,5 +92,52 @@ public class MoveHackModCollection extends BattleObjectHackModCollection<MoveHac
     @Override
     protected String getEffectListLabel() {
         return "Data_MoveEffectList";
+    }
+
+    @Override
+    public void apply(Context context) {
+        super.apply(context);
+        
+        for (MoveHackMod hackMod : hackMods) {
+            int number = hackMod.number;
+
+            String auxiliaryAnimationLabel = hackMod.getAuxiliaryAnimationLabel();
+            int[] auxiliaryAnimationSpaFiles = hackMod.getAuxiliaryAnimationSpaFiles();
+            
+            if (auxiliaryAnimationLabel == null)
+                continue;
+            
+            String labelLower = auxiliaryAnimationLabel.toLowerCase();
+
+            String formattedMoveName = hackMod.getName(context).toLowerCase().replace(' ', '_');
+            for (int spaFileNumber : auxiliaryAnimationSpaFiles) {
+                byte[] spaFileData = readBytes(String.format("moveanims/spa/%03d_%s_%s_%03d.spa", number, formattedMoveName, labelLower, spaFileNumber));
+                while (moveAnimationsNarc.files.size() <= spaFileNumber) {
+                    moveAnimationsNarc.files.add(new byte[16]);
+                }
+
+                byte[] existingSpaFile = moveAnimationsNarc.files.get(spaFileNumber);
+                for (byte b : existingSpaFile) {
+                    if (b != 0) // Should be all blank
+                        throw new RuntimeException(String.format("Attempted to overwrite existing SPA file #%03d for move #%03d %s",
+                                spaFileNumber, number, names.get(number)));
+                }
+
+                moveAnimationsNarc.files.set(spaFileNumber, spaFileData);
+            }
+            byte[] script = readBytes(String.format("moveanims/scripts/%03d_%s_%s.bin", number, formattedMoveName, labelLower));
+
+            String auxiliaryAnimationName = String.format("%s_%s", formattedMoveName, labelLower);
+            if (!auxiliaryAnimationScriptIndices.containsKey(auxiliaryAnimationName))
+                throw new RuntimeException(String.format("Could not find auxiliary animation with id \"%s\"", auxiliaryAnimationName));
+            int auxiliaryAnimationScriptIndex = auxiliaryAnimationScriptIndices.get(auxiliaryAnimationName);
+
+            while (battleAnimationScriptsNarc.files.size() <= auxiliaryAnimationScriptIndex)
+                battleAnimationScriptsNarc.files.add(getDefaultAnimationScript());
+            battleAnimationScriptsNarc.files.set(auxiliaryAnimationScriptIndex, script);
+
+            formattedMoveName = names.get(number).replaceAll("[ -]", "");
+            context.armParser().addGlobalValue(String.format("BTLANM_%s_%s", formattedMoveName, auxiliaryAnimationLabel), auxiliaryAnimationScriptIndex);
+        }
     }
 }
