@@ -12,11 +12,6 @@ public class AbilityHackModCollection extends BattleObjectHackModCollection<Abil
     }
 
     @Override
-    public void apply(Context context) {
-        super.apply(context);
-    }
-
-    @Override
     protected String getBattleObjectTypeName() {
         return "Ability";
     }

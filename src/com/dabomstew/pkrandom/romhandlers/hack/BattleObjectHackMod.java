@@ -97,9 +97,4 @@ public abstract class BattleObjectHackMod extends HackMod {
                 throw new RuntimeException();
         }
     }
-
-    @Override
-    public final void apply(Context context) {
-        throw new RuntimeException("Battle Object Hack Mods should not be added directly; use a container instead!");
-    }
 }

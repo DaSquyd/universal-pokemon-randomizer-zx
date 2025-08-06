@@ -259,6 +259,8 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
                 }
             }
             objectToEffects.put(number, eventHandlers);
+            
+            hackMod.apply(context);
         }
 
         boolean useTerminator = baseEffectListCount <= 255 && objectToEffects.size() > 255;
