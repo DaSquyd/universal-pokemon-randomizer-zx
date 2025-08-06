@@ -1,13 +1,13 @@
-package com.dabomstew.pkrandom.romhandlers.hack.move;
+package com.dabomstew.pkrandom.romhandlers.hack.move.custom;
 
 import com.dabomstew.pkrandom.constants.Moves;
 import com.dabomstew.pkrandom.romhandlers.hack.MoveHackMod;
 
 import java.util.List;
 
-public class MoveHackMod_118_Metronome extends MoveHackMod {
-    public MoveHackMod_118_Metronome() {
-        super(Moves.metronome);
+public class MoveHackMod_507_SkyDrop extends MoveHackMod {
+    public MoveHackMod_507_SkyDrop() {
+        super(Moves.skyDrop);
     }
 
     @Override
@@ -15,7 +15,7 @@ public class MoveHackMod_118_Metronome extends MoveHackMod {
     }
 
     @Override
-    public Boolean isEncoreFailMove() {
+    public Boolean isAssistUncallableMove() {
         return true;
     }
 }

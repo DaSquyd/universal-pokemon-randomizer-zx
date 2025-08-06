@@ -1,13 +1,13 @@
-package com.dabomstew.pkrandom.romhandlers.hack.move;
+package com.dabomstew.pkrandom.romhandlers.hack.move.custom;
 
 import com.dabomstew.pkrandom.constants.Moves;
 import com.dabomstew.pkrandom.romhandlers.hack.MoveHackMod;
 
 import java.util.List;
 
-public class MoveHackMod_018_Whirlwind extends MoveHackMod {
-    public MoveHackMod_018_Whirlwind() {
-        super(Moves.whirlwind);
+public class MoveHackMod_046_Roar extends MoveHackMod {
+    public MoveHackMod_046_Roar() {
+        super(Moves.roar);
     }
 
     @Override

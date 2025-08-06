@@ -1,13 +1,13 @@
-package com.dabomstew.pkrandom.romhandlers.hack.move;
+package com.dabomstew.pkrandom.romhandlers.hack.move.custom;
 
 import com.dabomstew.pkrandom.constants.Moves;
 import com.dabomstew.pkrandom.romhandlers.hack.MoveHackMod;
 
 import java.util.List;
 
-public class MoveHackMod_383_CopyCat extends MoveHackMod {
-    public MoveHackMod_383_CopyCat() {
-        super(Moves.copycat);
+public class MoveHackMod_214_SleepTalk extends MoveHackMod {
+    public MoveHackMod_214_SleepTalk() {
+        super(Moves.sleepTalk);
     }
 
     @Override

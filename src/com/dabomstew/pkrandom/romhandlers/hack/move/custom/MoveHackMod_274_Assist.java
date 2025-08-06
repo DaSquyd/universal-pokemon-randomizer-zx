@@ -1,13 +1,13 @@
-package com.dabomstew.pkrandom.romhandlers.hack.move;
+package com.dabomstew.pkrandom.romhandlers.hack.move.custom;
 
 import com.dabomstew.pkrandom.constants.Moves;
 import com.dabomstew.pkrandom.romhandlers.hack.MoveHackMod;
 
 import java.util.List;
 
-public class MoveHackMod_267_NaturePower extends MoveHackMod {
-    public MoveHackMod_267_NaturePower() {
-        super(Moves.naturePower);
+public class MoveHackMod_274_Assist extends MoveHackMod {
+    public MoveHackMod_274_Assist() {
+        super(Moves.assist);
     }
 
     @Override

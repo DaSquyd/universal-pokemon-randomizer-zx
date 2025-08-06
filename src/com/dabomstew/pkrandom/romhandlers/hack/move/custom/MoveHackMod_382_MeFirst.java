@@ -1,13 +1,13 @@
-package com.dabomstew.pkrandom.romhandlers.hack.move;
+package com.dabomstew.pkrandom.romhandlers.hack.move.custom;
 
 import com.dabomstew.pkrandom.constants.Moves;
 import com.dabomstew.pkrandom.romhandlers.hack.MoveHackMod;
 
 import java.util.List;
 
-public class MoveHackMod_467_ShadowForce extends MoveHackMod {
-    public MoveHackMod_467_ShadowForce() {
-        super(Moves.shadowForce);
+public class MoveHackMod_382_MeFirst extends MoveHackMod {
+    public MoveHackMod_382_MeFirst() {
+        super(Moves.meFirst);
     }
 
     @Override
@@ -15,7 +15,7 @@ public class MoveHackMod_467_ShadowForce extends MoveHackMod {
     }
 
     @Override
-    public Boolean isAssistUncallableMove() {
+    public Boolean isEncoreFailMove() {
         return true;
     }
 }

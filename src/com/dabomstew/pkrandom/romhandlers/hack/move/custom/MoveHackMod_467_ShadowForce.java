@@ -1,13 +1,13 @@
-package com.dabomstew.pkrandom.romhandlers.hack.move;
+package com.dabomstew.pkrandom.romhandlers.hack.move.custom;
 
 import com.dabomstew.pkrandom.constants.Moves;
 import com.dabomstew.pkrandom.romhandlers.hack.MoveHackMod;
 
 import java.util.List;
 
-public class MoveHackMod_091_Dig extends MoveHackMod {
-    public MoveHackMod_091_Dig() {
-        super(Moves.dig);
+public class MoveHackMod_467_ShadowForce extends MoveHackMod {
+    public MoveHackMod_467_ShadowForce() {
+        super(Moves.shadowForce);
     }
 
     @Override

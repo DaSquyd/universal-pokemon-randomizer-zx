@@ -1,21 +1,22 @@
-package com.dabomstew.pkrandom.romhandlers.hack.move;
+package com.dabomstew.pkrandom.romhandlers.hack.move.custom;
 
 import com.dabomstew.pkrandom.constants.Moves;
 import com.dabomstew.pkrandom.romhandlers.hack.MoveHackMod;
 
 import java.util.List;
 
-public class MoveHackMod_291_Dive extends MoveHackMod {
-    public MoveHackMod_291_Dive() {
-        super(Moves.dive);
+public class MoveHackMod_501_QuickGuard extends MoveHackMod {
+    public MoveHackMod_501_QuickGuard() {
+        super(Moves.quickGuard);
     }
 
     @Override
     public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+        // TODO
     }
 
     @Override
-    public Boolean isAssistUncallableMove() {
+    public Boolean isProtectionMove() {
         return true;
     }
 }

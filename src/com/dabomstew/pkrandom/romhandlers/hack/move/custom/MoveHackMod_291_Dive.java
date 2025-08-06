@@ -1,13 +1,13 @@
-package com.dabomstew.pkrandom.romhandlers.hack.move;
+package com.dabomstew.pkrandom.romhandlers.hack.move.custom;
 
 import com.dabomstew.pkrandom.constants.Moves;
 import com.dabomstew.pkrandom.romhandlers.hack.MoveHackMod;
 
 import java.util.List;
 
-public class MoveHackMod_289_Snatch extends MoveHackMod {
-    public MoveHackMod_289_Snatch() {
-        super(Moves.snatch);
+public class MoveHackMod_291_Dive extends MoveHackMod {
+    public MoveHackMod_291_Dive() {
+        super(Moves.dive);
     }
 
     @Override
@@ -15,7 +15,7 @@ public class MoveHackMod_289_Snatch extends MoveHackMod {
     }
 
     @Override
-    public Boolean isEncoreFailMove() {
+    public Boolean isAssistUncallableMove() {
         return true;
     }
 }
