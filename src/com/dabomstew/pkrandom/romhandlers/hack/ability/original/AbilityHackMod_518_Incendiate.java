@@ -49,8 +49,10 @@ public class AbilityHackMod_518_Incendiate extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveParam, "incendiate_type.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "incendiate_power.s"));
+
+        return true;
     }
 }

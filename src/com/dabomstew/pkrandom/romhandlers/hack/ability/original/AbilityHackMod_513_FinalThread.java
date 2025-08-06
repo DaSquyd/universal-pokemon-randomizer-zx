@@ -35,9 +35,11 @@ public class AbilityHackMod_513_FinalThread extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         // TODO
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveDamageReaction1, "final_thread.s"));
+
+        return true;
     }
 
     @Override

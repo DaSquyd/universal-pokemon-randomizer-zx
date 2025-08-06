@@ -19,9 +19,11 @@ public class AbilityHackMod_155_Rattled_IntimidateActivationAndBugGhostResist ex
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue, "rattled_resist_redux.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeSuccess, "rattled_on_intimidate.s"));
+
+        return true;
     }
 
     @Override

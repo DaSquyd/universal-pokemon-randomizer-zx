@@ -39,8 +39,10 @@ public class AbilityHackMod_297_EarthEater extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "earth_eater.s"));
+
+        return true;
     }
 
     @Override

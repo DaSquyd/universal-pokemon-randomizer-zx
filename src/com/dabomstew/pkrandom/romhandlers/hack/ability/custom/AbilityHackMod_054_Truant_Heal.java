@@ -41,7 +41,7 @@ public class AbilityHackMod_054_Truant_Heal extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveExecuteCheck1));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveExecuteFail, "truant_on_fail.s"));
@@ -52,5 +52,7 @@ public class AbilityHackMod_054_Truant_Heal extends AbilityHackMod {
         
         if (healOnMoveTurns && healOnLoafingTurns)
             inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveExecuteNoEffect, "truant_every_turn_heal.s"));
+
+        return true;
     }
 }

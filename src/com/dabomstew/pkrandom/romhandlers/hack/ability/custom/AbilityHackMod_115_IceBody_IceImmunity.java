@@ -40,9 +40,11 @@ public class AbilityHackMod_115_IceBody_IceImmunity extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onWeatherReaction));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "ice_body_immunity.s"));
+
+        return true;
     }
 
     @Override

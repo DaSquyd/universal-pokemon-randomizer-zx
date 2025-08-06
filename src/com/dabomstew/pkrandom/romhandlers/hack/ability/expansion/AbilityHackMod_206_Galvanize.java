@@ -45,8 +45,10 @@ public class AbilityHackMod_206_Galvanize extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveParam, "galvanize_type.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "galvanize_power.s"));
+
+        return true;
     }
 }

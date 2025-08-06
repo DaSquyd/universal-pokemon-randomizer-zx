@@ -8,7 +8,7 @@ public class ItemHackMod extends BattleObjectHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public void registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         
     }
 

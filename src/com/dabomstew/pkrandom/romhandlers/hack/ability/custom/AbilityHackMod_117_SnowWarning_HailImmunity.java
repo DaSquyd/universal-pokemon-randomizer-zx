@@ -12,9 +12,11 @@ public class AbilityHackMod_117_SnowWarning_HailImmunity extends AbilityHackMod 
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onWeatherReaction, "snow_warning_no_damage.s"));
+        
+        return true;
     }
 }

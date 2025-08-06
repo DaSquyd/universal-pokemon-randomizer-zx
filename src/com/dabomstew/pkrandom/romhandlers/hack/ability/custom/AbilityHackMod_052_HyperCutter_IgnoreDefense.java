@@ -29,11 +29,13 @@ public class AbilityHackMod_052_HyperCutter_IgnoreDefense extends AbilityHackMod
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeLastCheck, "hyper_cutter_stat_drop.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeFail));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStat, "hyper_cutter_attacking_stat.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetDefendingStat, "hyper_cutter_defending_stat.s"));
+
+        return true;
     }
 
     @Override

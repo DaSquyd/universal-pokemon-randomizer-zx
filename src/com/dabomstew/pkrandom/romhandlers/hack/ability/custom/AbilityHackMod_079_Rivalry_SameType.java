@@ -44,7 +44,9 @@ public class AbilityHackMod_079_Rivalry_SameType extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "rivalry_same_type.s"));
+
+        return true;
     }
 }

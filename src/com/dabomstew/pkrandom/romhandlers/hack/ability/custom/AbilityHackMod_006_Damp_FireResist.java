@@ -19,7 +19,7 @@ public class AbilityHackMod_006_Damp_FireResist extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         // Old Damp
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveExecuteCheck2));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveExecuteFail));
@@ -30,5 +30,7 @@ public class AbilityHackMod_006_Damp_FireResist extends AbilityHackMod {
         // Old Heatproof
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, Abilities.heatproof));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onConditionDamage, Abilities.heatproof));
+        
+        return true;
     }
 }

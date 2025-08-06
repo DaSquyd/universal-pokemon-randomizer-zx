@@ -44,7 +44,7 @@ public class AbilityHackMod_270_ThermalExchange extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         // Raise Attack
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveDamageReaction1, "thermal_exchange_boost.s"));
         
@@ -57,6 +57,8 @@ public class AbilityHackMod_270_ThermalExchange extends AbilityHackMod {
         
         if (resistFire)
             inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue, "thermal_exchange_resist.s"));
+
+        return true;
     }
 
     @Override

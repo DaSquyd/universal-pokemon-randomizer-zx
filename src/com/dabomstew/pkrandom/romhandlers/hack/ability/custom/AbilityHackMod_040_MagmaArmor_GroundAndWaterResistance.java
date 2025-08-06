@@ -39,9 +39,11 @@ public class AbilityHackMod_040_MagmaArmor_GroundAndWaterResistance extends Abil
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveDamageReaction1, "magma_armor_burn.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue, "magma_armor_resist.s"));
+
+        return true;
     }
 
     @Override

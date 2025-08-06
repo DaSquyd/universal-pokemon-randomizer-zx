@@ -39,8 +39,10 @@ public class AbilityHackMod_073_WhiteSmoke_Self extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeLastCheck, "white_smoke.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeFail));
+
+        return true;
     }
 }

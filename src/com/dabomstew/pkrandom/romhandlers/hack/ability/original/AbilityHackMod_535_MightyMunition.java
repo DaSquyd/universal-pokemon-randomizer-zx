@@ -55,7 +55,9 @@ public class AbilityHackMod_535_MightyMunition extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "mighty_munition.s"));
+
+        return true;
     }
 }

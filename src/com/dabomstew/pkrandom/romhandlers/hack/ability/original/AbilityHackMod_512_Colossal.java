@@ -48,9 +48,11 @@ public class AbilityHackMod_512_Colossal extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         // full effect in is_guaranteed_hit.s
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveDamageProcessing2, "colossal_damage.s"));
+
+        return true;
     }
 
     @Override

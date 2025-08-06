@@ -1,10 +1,7 @@
 package com.dabomstew.pkrandom.romhandlers.hack;
 
 import com.dabomstew.pkrandom.Utils;
-import com.dabomstew.pkrandom.arm.ArmParser;
 import com.dabomstew.pkrandom.romhandlers.*;
-import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
-import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
 import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
 import java.util.*;
@@ -53,13 +50,17 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
         }
 
         EventHandler(int type, int existingObject) {
+            this(type, existingObject, type);
+        }
+
+        EventHandler(int type, int existingObject, int existingType) {
             this.type = type;
 
             int functionRomAddress = getAddFunctionRomAddress();
             int numReferenceOffset = getEffectListNumReferenceOffset();
             int objectListAddress = battleOvl.readWord(functionRomAddress + numReferenceOffset);
 
-            int referenceAddress = getEventHandlerFuncReferenceAddress(existingObject, objectListAddress, getEffectListCount(), type);
+            int referenceAddress = getEventHandlerFuncReferenceAddress(existingObject, objectListAddress, getEffectListCount(), existingType);
             this.address = battleOvl.readWord(referenceAddress) - 1;
         }
 
@@ -219,6 +220,11 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
             objectToEffects.put(number, null);
             existingRedirectors.put(number, redirectorAddress);
         }
+        
+        // Pre Register
+        for (BattleObjectHackMod hackMod : hackMods) {
+            hackMod.preRegisterEventHandlers(context);
+        }
 
         for (BattleObjectHackMod hackMod : hackMods) {
             int number = hackMod.number;
@@ -237,14 +243,14 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
 
             // Event Handlers
             List<BattleObjectHackMod.QueueEntry> queueEntries = new ArrayList<>();
-            hackMod.populateQueueEntries(context, queueEntries);
+            var useEffects = hackMod.registerEventHandlers(context, queueEntries);
 
             // Tables
             for (Table table : tables)
                 table.update(hackMod);
 
             // Effects
-            if (queueEntries.isEmpty()) {
+            if (!useEffects) {
                 objectToEffects.remove(number);
                 continue;
             }
@@ -259,8 +265,6 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
                 }
             }
             objectToEffects.put(number, eventHandlers);
-            
-            hackMod.apply(context);
         }
 
         boolean useTerminator = baseEffectListCount <= 255 && objectToEffects.size() > 255;
@@ -301,6 +305,11 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
             setBattleObject(number, effectIndex, newEventListAddress, existingRedirectors, eventHandlers);
 
             ++effectIndex;
+        }
+
+        // Post Write
+        for (BattleObjectHackMod hackMod : hackMods) {
+            hackMod.postWriteEventHandlers(context);
         }
 
         int addFunctionRomAddress = getAddFunctionRomAddress();
@@ -499,21 +508,31 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
 
     protected final void setBattleObject(int number, int index, int effectListAddress, Map<Integer, Integer> existingRedirectors, List<EventHandler> eventHandlers) {
         var overlay = getOverlay();
+        
+        String battleObjectTypeName = getBattleObjectTypeName();
 
         int eventHandlerListSize = eventHandlers.size() * 8;
 
+        int oldRedirectorAddress = existingRedirectors.get(number) - 1;
+        int oldEventHandlerListAddress = getEventHandlerListAddressFromRedirector(oldRedirectorAddress);
+        int oldEventHandlerListCount = getEventHandlerListCountFromRedirector(oldRedirectorAddress);
+
+        if (eventHandlers.isEmpty()) {
+            overlay.writeWord(effectListAddress + index * 8, number, false);
+            overlay.writeWord(effectListAddress + index * 8 + 4, oldRedirectorAddress + 1, true);
+            String eventHandlerLabel = String.format("EventHandler_%s_%s", battleObjectTypeName, );
+            globalAddressMap.registerCodeAddress(overlay, eventHandlerLabel, eventHandlerRamAddress, 2);
+            return;
+        }
+        
         for (EventHandler eventHandler : eventHandlers) {
             if (eventHandler.address > 0)
                 continue;
 
-            int redirectorAddress = existingRedirectors.get(number) - 1;
-            int eventHandlerListAddress = getEventHandlerListAddressFromRedirector(redirectorAddress);
-            int eventHandlerListCount = getEventHandlerListCountFromRedirector(redirectorAddress);
-
-            for (int i = 0; i < eventHandlerListCount; ++i) {
-                int eventHandlerType = overlay.readWord(eventHandlerListAddress + i * 8);
+            for (int i = 0; i < oldEventHandlerListCount; ++i) {
+                int eventHandlerType = overlay.readWord(oldEventHandlerListAddress + i * 8);
                 if (eventHandlerType == eventHandler.type) {
-                    eventHandler.address = overlay.readWord(eventHandlerListAddress + i * 8 + 4) - 1;
+                    eventHandler.address = overlay.readWord(oldEventHandlerListAddress + i * 8 + 4) - 1;
                     break;
                 }
             }

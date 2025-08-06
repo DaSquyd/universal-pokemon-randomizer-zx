@@ -43,7 +43,9 @@ public class AbilityHackMod_229_GrassySurge extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         // TODO
+
+        return true;
     }
 }

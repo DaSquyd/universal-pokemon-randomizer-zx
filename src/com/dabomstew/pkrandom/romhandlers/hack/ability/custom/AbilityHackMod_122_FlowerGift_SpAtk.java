@@ -29,7 +29,7 @@ public class AbilityHackMod_122_FlowerGift_SpAtk extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostLastSwitchIn));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
@@ -41,5 +41,7 @@ public class AbilityHackMod_122_FlowerGift_SpAtk extends AbilityHackMod {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPreAbilityChange));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue, "flower_gift_spatk.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetDefendingStatValue));
+
+        return true;
     }
 }

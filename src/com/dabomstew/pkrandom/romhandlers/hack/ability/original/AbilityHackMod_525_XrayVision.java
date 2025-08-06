@@ -40,8 +40,10 @@ public class AbilityHackMod_525_XrayVision extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "x-ray_vision.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "x-ray_vision.s"));
+
+        return true;
     }
 }

@@ -24,7 +24,7 @@ public class AbilityHackMod_300_MindsEye extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         // ignore changes to evasion
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveAccuracyStage, Abilities.unaware));
 
@@ -34,6 +34,8 @@ public class AbilityHackMod_300_MindsEye extends AbilityHackMod {
 
         // hit Ghost-type Pokémon with Normal- and Fighting-type moves
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetEffectiveness, Abilities.scrappy));
+
+        return true;
     }
 
     @Override

@@ -29,11 +29,13 @@ public class AbilityHackMod_058_Minus_SpDefBoost extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue, "minus_spdef.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "minus_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "minus_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "minus_message.s"));
+        
+        return true;
     }
 
     @Override

@@ -23,8 +23,10 @@ public class AbilityHackMod_055_Hustle extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveAccuracy, "hustle_accuracy.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower));
+
+        return true;
     }
 }

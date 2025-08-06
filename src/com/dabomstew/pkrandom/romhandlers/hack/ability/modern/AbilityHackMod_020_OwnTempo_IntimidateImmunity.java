@@ -19,11 +19,13 @@ public class AbilityHackMod_020_OwnTempo_IntimidateImmunity extends AbilityHackM
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAddConditionCheckFail));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAddConditionFail));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onActionProcessingEnd));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeLastCheck, "common_intimidate_immunity.s"));
+
+        return true;
     }
 }

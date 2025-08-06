@@ -29,13 +29,15 @@ public class AbilityHackMod_041_WaterVeil_OvercoatEffect extends AbilityHackMod 
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAddConditionCheckFail));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAddConditionFail));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onActionProcessingEnd));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onWeatherReaction, Abilities.overcoat));
+
+        return true;
     }
 
     @Override

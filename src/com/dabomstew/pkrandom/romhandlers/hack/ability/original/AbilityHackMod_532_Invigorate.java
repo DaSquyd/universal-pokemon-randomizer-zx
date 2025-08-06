@@ -48,8 +48,10 @@ public class AbilityHackMod_532_Invigorate extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveParam, "invigorate_type.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "invigorate_power.s"));
+
+        return true;
     }
 }

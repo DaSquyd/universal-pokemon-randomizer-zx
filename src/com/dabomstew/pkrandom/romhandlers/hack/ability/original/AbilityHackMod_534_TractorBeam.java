@@ -52,7 +52,9 @@ public class AbilityHackMod_534_TractorBeam extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "tractor_beam.s"));
+
+        return true;
     }
 }

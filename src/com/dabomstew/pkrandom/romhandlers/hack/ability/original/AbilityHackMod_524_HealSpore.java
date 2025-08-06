@@ -34,8 +34,10 @@ public class AbilityHackMod_524_HealSpore extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveDamageReaction1, "heal_spore.s"));
+
+        return true;
     }
 
     @Override

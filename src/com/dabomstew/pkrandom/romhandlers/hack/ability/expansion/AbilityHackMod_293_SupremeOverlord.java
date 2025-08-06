@@ -56,7 +56,7 @@ public class AbilityHackMod_293_SupremeOverlord extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "supreme_overlord_power.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "supreme_overlord_on_enter.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "supreme_overlord_on_enter.s"));
@@ -64,5 +64,7 @@ public class AbilityHackMod_293_SupremeOverlord extends AbilityHackMod {
         
         if (!onlyOnEnter)
             inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchOut, "supreme_overlord_on_exit.s"));
+
+        return true;
     }
 }

@@ -40,7 +40,9 @@ public class AbilityHackMod_501_Specialized extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onApplySTAB, "specialized.s"));
+
+        return true;
     }
 }

@@ -16,10 +16,12 @@ public class AbilityHackMod_023_ShadowTag_Message extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPreventRun));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "shadow_tag_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "shadow_tag_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "shadow_tag_message.s"));
+
+        return true;
     }
 }

@@ -23,8 +23,10 @@ public class AbilityHackMod_077_TangledFeet_OnMissOrFail extends AbilityHackMod 
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveExecuteFail, "tangled_feet_flinch.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveExecuteNoEffect, "tangled_feet_miss.s"));
+
+        return true;
     }
 }

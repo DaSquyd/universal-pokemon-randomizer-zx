@@ -34,7 +34,9 @@ public class AbilityHackMod_091_Adaptability_NonStab extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveDamageProcessing2, "adaptability.s"));
+
+        return true;
     }
 }

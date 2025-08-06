@@ -34,7 +34,9 @@ public class AbilityHackMod_192_Stamina extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveDamageReaction1, "stamina.s"));
+
+        return true;
     }
 }

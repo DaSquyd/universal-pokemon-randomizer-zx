@@ -38,10 +38,12 @@ public class AbilityHackMod_134_HeavyMetal_DefenseSpeed extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetWeight));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetDefendingStatValue, "heavy_metal_defense.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCalcSpeed, "heavy_metal_speed.s"));
+
+        return true;
     }
 
     @Override

@@ -74,7 +74,7 @@ public class AbilityHackMod_074_PurePower extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         // Multiplier
         if (multiplier == 2 || moveCategory != MoveCategory.PHYSICAL)
             inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue));
@@ -87,5 +87,7 @@ public class AbilityHackMod_074_PurePower extends AbilityHackMod {
             inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "pure_power_message.s"));
             inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "pure_power_message.s"));
         }
+
+        return true;
     }
 }

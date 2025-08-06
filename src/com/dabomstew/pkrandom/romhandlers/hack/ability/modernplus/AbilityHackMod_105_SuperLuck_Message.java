@@ -16,10 +16,12 @@ public class AbilityHackMod_105_SuperLuck_Message extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetIsCriticalHit));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "super_luck_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "super_luck_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "super_luck_message.s"));
+
+        return true;
     }
 }

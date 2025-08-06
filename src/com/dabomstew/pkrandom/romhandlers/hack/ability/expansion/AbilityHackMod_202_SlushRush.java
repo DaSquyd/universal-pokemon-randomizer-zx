@@ -38,8 +38,10 @@ public class AbilityHackMod_202_SlushRush extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCalcSpeed, "slush_rush_speed.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onWeatherReaction, "slush_rush_weather_immune.s"));
+
+        return true;
     }
 }

@@ -20,8 +20,10 @@ public class AbilityHackMod_035_Illuminate_GhostAndDarkResistance extends Abilit
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue, "illuminate_redux.s"));
+
+        return true;
     }
 
     @Override

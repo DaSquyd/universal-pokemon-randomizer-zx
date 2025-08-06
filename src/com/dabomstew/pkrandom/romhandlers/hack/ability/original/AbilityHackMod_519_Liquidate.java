@@ -48,8 +48,10 @@ public class AbilityHackMod_519_Liquidate extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveParam, "liquidate_type.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "liquidate_power.s"));
+
+        return true;
     }
 }

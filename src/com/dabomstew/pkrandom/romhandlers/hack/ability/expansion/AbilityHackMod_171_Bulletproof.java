@@ -33,8 +33,10 @@ public class AbilityHackMod_171_Bulletproof extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "bulletproof.s"));
+
+        return true;
     }
 
     @Override

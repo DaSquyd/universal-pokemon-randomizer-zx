@@ -48,8 +48,10 @@ public class AbilityHackMod_520_Florilate extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveParam, "florilate_type.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "florilate_power.s"));
+
+        return true;
     }
 }

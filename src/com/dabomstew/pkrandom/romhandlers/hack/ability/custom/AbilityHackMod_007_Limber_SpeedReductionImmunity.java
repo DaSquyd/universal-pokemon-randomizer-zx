@@ -28,7 +28,7 @@ public class AbilityHackMod_007_Limber_SpeedReductionImmunity extends AbilityHac
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAddConditionCheckFail));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAddConditionFail));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
@@ -36,5 +36,7 @@ public class AbilityHackMod_007_Limber_SpeedReductionImmunity extends AbilityHac
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onActionProcessingEnd));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeLastCheck, "limber_speed.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeFail, "limber_speed_message.s"));
+
+        return true;
     }
 }

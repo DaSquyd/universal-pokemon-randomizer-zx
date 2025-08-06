@@ -45,7 +45,9 @@ public class AbilityHackMod_124_Pickpocket_OnAttack extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onDamageProcessingEnd_Hit4, "pickpocket.s"));
+
+        return true;
     }
 }

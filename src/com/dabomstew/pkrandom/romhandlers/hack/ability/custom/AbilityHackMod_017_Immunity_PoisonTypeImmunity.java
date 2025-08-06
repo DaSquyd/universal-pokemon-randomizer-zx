@@ -12,12 +12,14 @@ public class AbilityHackMod_017_Immunity_PoisonTypeImmunity extends AbilityHackM
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAddConditionCheckFail));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onAddConditionFail));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "immunity.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onActionProcessingEnd));
+
+        return true;
     }
 }

@@ -48,7 +48,9 @@ public class AbilityHackMod_529_Relentless extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         // TODO
+
+        return true;
     }
 }

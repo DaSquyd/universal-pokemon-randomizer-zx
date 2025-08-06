@@ -22,7 +22,9 @@ public class AbilityHackMod_144_Regenerator extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchOutEnd, "regenerator.s"));
+
+        return true;
     }
 }

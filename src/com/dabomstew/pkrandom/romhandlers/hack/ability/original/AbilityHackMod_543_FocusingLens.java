@@ -50,7 +50,9 @@ public class AbilityHackMod_543_FocusingLens extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, includeBeamMoves ? "focusing_lens_beam.s" : "focusing_lens.s"));
+
+        return true;
     }
 }

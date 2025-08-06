@@ -16,10 +16,12 @@ public class AbilityHackMod_025_WonderGuard_Message extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "wonder_guard_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "wonder_guard_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "wonder_guard_message.s"));
+
+        return true;
     }
 }

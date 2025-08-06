@@ -26,10 +26,12 @@ public class AbilityHackMod_057_Plus_SpAtkBoost extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue, "plus_spatk.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "plus_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "plus_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "plus_message.s"));
+
+        return true;
     }
 }

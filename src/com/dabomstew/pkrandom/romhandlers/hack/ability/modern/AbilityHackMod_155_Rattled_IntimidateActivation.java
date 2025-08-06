@@ -19,8 +19,10 @@ public class AbilityHackMod_155_Rattled_IntimidateActivation extends AbilityHack
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveDamageReaction1));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeSuccess, "rattled_on_intimidate.s"));
+
+        return true;
     }
 }

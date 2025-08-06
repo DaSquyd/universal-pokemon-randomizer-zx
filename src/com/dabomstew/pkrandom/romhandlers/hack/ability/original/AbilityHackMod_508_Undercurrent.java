@@ -40,9 +40,11 @@ public class AbilityHackMod_508_Undercurrent extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "undercurrent_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "undercurrent_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCalcSpeed, "undercurrent_speed.s"));
+
+        return true;
     }
 }

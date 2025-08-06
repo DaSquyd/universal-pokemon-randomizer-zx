@@ -23,12 +23,14 @@ public class AbilityHackMod_112_SlowStart extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCalcSpeed));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onTurnCheckEnd, "slow_start_end_of_turn.s"));
+
+        return true;
     }
 }

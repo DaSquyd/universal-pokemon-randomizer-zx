@@ -39,7 +39,9 @@ public class AbilityHackMod_509_WindWhipper extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "wind_whipper.s"));
+
+        return true;
     }
 }

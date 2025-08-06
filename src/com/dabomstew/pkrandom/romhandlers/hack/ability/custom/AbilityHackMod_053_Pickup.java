@@ -12,9 +12,11 @@ public class AbilityHackMod_053_Pickup extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onTurnCheckEnd));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "pickup_redux.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "pickup_redux.s"));
+
+        return true;
     }
 }

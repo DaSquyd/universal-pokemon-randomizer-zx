@@ -19,8 +19,10 @@ public class AbilityHackMod_158_Prankster_QuickGuardDarkType extends AbilityHack
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         // TODO
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePriority, "prankster.s"));
+
+        return true;
     }
 }

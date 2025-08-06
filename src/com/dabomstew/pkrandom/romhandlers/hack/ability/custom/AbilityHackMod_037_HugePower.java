@@ -60,7 +60,7 @@ public class AbilityHackMod_037_HugePower extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         // Multiplier
         if (multiplier == 2)
             inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetAttackingStatValue));
@@ -73,5 +73,7 @@ public class AbilityHackMod_037_HugePower extends AbilityHackMod {
             inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "huge_power_message.s"));
             inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "huge_power_message.s"));
         }
+
+        return true;
     }
 }

@@ -16,10 +16,12 @@ public class AbilityHackMod_042_MagnetPull_Message extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPreventRun));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "magnet_pull_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "magnet_pull_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "magnet_pull_message.s"));
+
+        return true;
     }
 }

@@ -29,13 +29,15 @@ public class AbilityHackMod_035_Illuminate_Modern extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         // ignore changes to evasion
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveAccuracyStage, Abilities.unaware));
 
         // prevent accuracy drop
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeLastCheck, Abilities.keenEye));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onStatStageChangeFail, Abilities.keenEye));
+
+        return true;
     }
 
     @Override

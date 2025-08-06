@@ -37,12 +37,14 @@ public class AbilityHackMod_016_ColorChange_Protean extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         AbilityHackMod_168_Protean proteanHackMod = (AbilityHackMod_168_Protean) context.applied().get(AbilityHackMod_168_Protean.class);
 
         String filename;
         filename = firstOnly == (proteanHackMod == null || proteanHackMod.firstOnly) ? "protean.s" : "redux_color_change.s";
 
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveTarget, filename));
+
+        return true;
     }
 }

@@ -56,8 +56,10 @@ public class AbilityHackMod_169_FurCoat extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetDefendingStatValue, "fur_coat.s"));
+
+        return true;
     }
 
     @Override

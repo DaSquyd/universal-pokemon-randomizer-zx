@@ -31,9 +31,11 @@ public class AbilityHackMod_035_Illuminate_Accuracy extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "illuminate_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "illuminate_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMoveAccuracy, "illuminate_accuracy.s"));
+
+        return true;
     }
 }

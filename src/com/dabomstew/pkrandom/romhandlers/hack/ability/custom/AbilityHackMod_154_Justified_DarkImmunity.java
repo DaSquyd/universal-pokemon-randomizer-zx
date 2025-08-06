@@ -27,8 +27,10 @@ public class AbilityHackMod_154_Justified_DarkImmunity extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCheckNoEffect3, "justified.s"));
+
+        return true;
     }
 
     @Override

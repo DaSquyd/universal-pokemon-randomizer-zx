@@ -41,6 +41,7 @@ public class AbilityHackMod_031_LightningRod_NameUpdate extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
+        return true;
     }
 }

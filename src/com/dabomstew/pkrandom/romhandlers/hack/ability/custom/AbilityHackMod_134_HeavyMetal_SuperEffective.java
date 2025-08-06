@@ -32,9 +32,11 @@ public class AbilityHackMod_134_HeavyMetal_SuperEffective extends AbilityHackMod
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetWeight));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveDamageProcessing2, "heavy_metal_redux.s"));
+
+        return true;
     }
 
     @Override

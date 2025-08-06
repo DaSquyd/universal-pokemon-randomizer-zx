@@ -65,7 +65,9 @@ public class AbilityHackMod_181_ToughClaws extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onGetMovePower, "mega_launcher.s"));
+
+        return true;
     }
 }

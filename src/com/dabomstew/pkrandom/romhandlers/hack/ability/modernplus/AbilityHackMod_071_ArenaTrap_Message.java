@@ -16,10 +16,12 @@ public class AbilityHackMod_071_ArenaTrap_Message extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPreventRun));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "arena_trap_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onRotateIn, "arena_trap_message.s"));
         inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onPostAbilityChange, "arena_trap_message.s"));
+
+        return true;
     }
 }

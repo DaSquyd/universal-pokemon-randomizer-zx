@@ -1,7 +1,5 @@
 package com.dabomstew.pkrandom.romhandlers.hack;
 
-import com.dabomstew.pkrandom.arm.ArmParser;
-import com.dabomstew.pkrandom.romhandlers.hack.string.AbilityDescription;
 import com.dabomstew.pkrandom.romhandlers.hack.string.Dialogue;
 import com.dabomstew.pkrandom.romhandlers.hack.string.GameText;
 
@@ -55,6 +53,10 @@ public abstract class BattleObjectHackMod extends HackMod {
     }
 
     @Override
+    public final void apply(Context context) {
+    }
+
+    @Override
     public Set<Class<? extends HackMod>> getDependencies() {
         return Set.of();
     }
@@ -75,16 +77,14 @@ public abstract class BattleObjectHackMod extends HackMod {
         return Map.of();
     }
 
-    public abstract void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries);
-
     @Override
-    public void registerGlobalValues(Context context) {
+    public final void registerGlobalValues(Context context) {
         Map<String, Object> globalValues = getGlobalValues(context);
-        
+
         for (Map.Entry<String, Object> globalValue : globalValues.entrySet()) {
             String name = globalValue.getKey();
             Object value = globalValue.getValue();
-            
+
             if (value instanceof Byte byteValue)
                 addGlobalValue(context, name, (int)byteValue);
             else if (value instanceof Integer intValue)
@@ -96,5 +96,13 @@ public abstract class BattleObjectHackMod extends HackMod {
             else
                 throw new RuntimeException();
         }
+    }
+
+    public void preRegisterEventHandlers(Context context) {
+    }
+
+    public abstract boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries);
+
+    public void postWriteEventHandlers(Context context) {
     }
 }

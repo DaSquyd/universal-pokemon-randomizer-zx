@@ -32,6 +32,7 @@ public class AbilityHackMod_014_CompoundEyes_NameUpdate extends AbilityHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
+        return true;
     }
 }
