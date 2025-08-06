@@ -508,8 +508,6 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
 
     protected final void setBattleObject(int number, int index, int effectListAddress, Map<Integer, Integer> existingRedirectors, List<EventHandler> eventHandlers) {
         var overlay = getOverlay();
-        
-        String battleObjectTypeName = getBattleObjectTypeName();
 
         int eventHandlerListSize = eventHandlers.size() * 8;
 
