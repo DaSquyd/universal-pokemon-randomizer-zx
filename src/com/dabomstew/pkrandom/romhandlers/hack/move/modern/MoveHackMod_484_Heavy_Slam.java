@@ -1,4 +1,4 @@
-package com.dabomstew.pkrandom.romhandlers.hack.move;
+package com.dabomstew.pkrandom.romhandlers.hack.move.modern;
 
 import com.dabomstew.pkrandom.constants.Moves;
 import com.dabomstew.pkrandom.romhandlers.hack.MoveHackMod;
@@ -11,6 +11,7 @@ public class MoveHackMod_484_Heavy_Slam extends MoveHackMod {
     }
 
     @Override
-    public void populateQueueEntries(Context context, List<QueueEntry> inOutQueueEntries) {
+    public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
+        return true;
     }
 }
