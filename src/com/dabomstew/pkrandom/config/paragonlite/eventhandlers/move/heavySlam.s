@@ -78,4 +78,4 @@ MinimizedLogic:
     bl      Battle::EventVar_RewriteValue
 
 Return:
-    pop     {r4-r7, sp}
+    pop     {r4-r7, pc}

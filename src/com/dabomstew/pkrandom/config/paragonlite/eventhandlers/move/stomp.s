@@ -29,4 +29,4 @@
     bl      Battle::EventVar_RewriteValue
 
 Return:
-    pop     {r3-r5, sp}
+    pop     {r3-r5, pc}
