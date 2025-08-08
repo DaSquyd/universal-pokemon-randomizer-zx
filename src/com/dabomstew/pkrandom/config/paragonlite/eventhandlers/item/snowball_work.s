@@ -1,36 +1,24 @@
-    push    {r4-r6, lr}
-    mov     r6, r0 ; r6 := battleEventItem
-    mov     r5, r1 ; r5 := server flow
-    mov     r4, r2 ; r4 := poke
+    push    {r3-r5, lr}
+    mov     r5, r1
+    mov     r4, r2
 
-    mov     r0, #VAR_DefendingPoke
+    mov     r0, #VAR_PokeId
     bl      Battle::BattleEventVar_GetValue
-    mov     r4, r0
-    bne     Return
-
-    mov     r0, #VAR_SubstituteFlag
-    bl      Battle::BattleEventVar_GetValue
-    cmp     r0, #FALSE
-    bne     Return
-
-    mov     r0, #VAR_MoveType
-    bl      Battle::BattleEventVar_GetValue
-    cmp     r0, #TYPE_Ice
+    cmp     r4, r0
     bne     Return
 
     mov     r0, r5
-    mov     r1, r4
-    bl      Battle::GetPoke
-    mov     r1, #1
-    mov     r2, #1
-    bl      Battle::IsStatChangeValid
-    cmp     r0, #0
-    beq     Return
-
-    mov     r0, r6
-    mov     r1, r5
+    mov     r1, #HE_ChangeStatStage
     mov     r2, r4
-    bl      Battle::ItemEvent_PushRun
+    bl      Battle::Handler_PushWork
+    mov     r1, r0
+    mov     r0, #1
+    strb    r0, [r1, #0x0F]
+    strb    r4, [r1, #0x10]
+    str     r0, [r1, #4]
+    strb    r0, [r1, #0x0C]
+    mov     r0, r5
+    bl      Handler_PopWork
 
 Return:
-    pop     {r4-r6, pc}
+    pop     {r3-r5, pc}

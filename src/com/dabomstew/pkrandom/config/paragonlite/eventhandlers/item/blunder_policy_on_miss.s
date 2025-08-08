@@ -8,30 +8,21 @@
     cmp     r4, r0
     bne     Return
     
-    mov     r0, #VAR_SubstituteFlag 
-    bl      Battle::EventVar_GetValue
-    cmp     r0, #0
-    bne     Return
-    
-    mov     r0, #VAR_Effectiveness
-    bl      Battle::EventVar_GetValue
-    bl      Battle::GetEffectivenessAdvantage
-    cmp     r0, #2 ; super effective
-    bne     Return
+    ; TODO - do we need to explicitly check for miss here, or is this handled by the call like Tangled Feet?
     
     mov     r0, r5
     mov     r1, r4
     bl      Battle::GetPoke
     mov     r7, r0
     
-    mov     r1, #BPV_AttackStage
+    mov     r1, #BPV_SpeedStage
     mov     r2, #1
     bl      Battle::IsStatChangeValid
     cmp     r0, #0
     bne     PushRun
     
     mov     r0, r7
-    mov     r1, #BPV_SpAtkStage
+    mov     r1, #BPV_AccuracyStage
     mov     r2, #1
     bl      Battle::IsStatChangeValid
     cmp     r0, #0
