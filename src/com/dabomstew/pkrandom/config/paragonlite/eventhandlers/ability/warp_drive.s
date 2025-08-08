@@ -8,7 +8,7 @@
     bne     Return
 
     mov     r0, r5
-    bl      Battle::GetTerrain // TODO
+    bl      Battle::GetTerrain ; TODO - add function
     cmp     r0, #TERRAIN_Psychic
     bne     Return
 
