@@ -21,8 +21,6 @@
     mov     r0, #4
     bl      Battle::EventVar_GetValue
     mov     r1, r0
-    lsl     r1, #24
-    lsr     r1, #24
     mov     r0, r4
     bl      Battle::GetPoke
     mov     r1, r0
@@ -31,16 +29,16 @@
     bl      Battle::ServerEvent_CalcSpeed
     
 ; 50 * target speed / user speed
-    mov     r1, #50
+    mov     r1, #MOVE_GYRO_BALL_MULTIPLIER
     mul     r0, r1
     mov     r1, r5
     blx     ARM9::DivideModSigned
     mov     r1, r0
     
 CheckMaxValue:
-    cmp     r1, #150
+    cmp     r1, #MOVE_GYRO_BALL_MAX_POWER
     bls     CheckMinValue
-    mov     r1, #150
+    mov     r1, #MOVE_GYRO_BALL_MAX_POWER
     
 CheckMinValue:
     cmp     r1, #0

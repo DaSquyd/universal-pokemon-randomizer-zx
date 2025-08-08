@@ -1,6 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers.hack.mode;
 
-import com.dabomstew.pkrandom.romhandlers.ParagonLiteDocWriter;
+import com.dabomstew.pkrandom.romhandlers.hack.MoveHackModCollection;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.custom.AbilityHackMod_051_KeenEye;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.expansion.*;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.modern.*;
@@ -8,7 +8,10 @@ import com.dabomstew.pkrandom.romhandlers.hack.ability.old.AbilityIlluminateMode
 import com.dabomstew.pkrandom.romhandlers.hack.ability.old.AbilityRattledMode;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackModCollection;
 import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
+import com.dabomstew.pkrandom.romhandlers.hack.move.expansion.*;
+import com.dabomstew.pkrandom.romhandlers.hack.move.modern.*;
 import com.dabomstew.pkrandom.romhandlers.hack.pokemon.AbilityExpansionHackMod;
+import com.dabomstew.pkrandom.romhandlers.hack.pokemon.MoveExpansionHackMod;
 import com.dabomstew.pkrandom.romhandlers.hack.weather.WeatherHailSnowMode;
 
 public class ModernHackMode extends HackMode {
@@ -86,6 +89,70 @@ public class ModernHackMode extends HackMode {
                 new AbilityHackMod_300_MindsEye(),
                 new AbilityHackMod_308_TeraShell(), // TODO
                 new AbilityHackMod_310_PoisonPuppeteer() // TODO
+        ));
+
+        // Move
+        addHackMod(new MoveExpansionHackMod());
+        addHackMod(new MoveHackModCollection(
+                new MoveHackMod_011_ViseGrip(),
+                new MoveHackMod_018_Whirlwind(),
+                new MoveHackMod_019_Fly(),
+                new MoveHackMod_023_Stomp(),
+                new MoveHackMod_046_Roar(),
+                new MoveHackMod_059_Blizzard(),
+                new MoveHackMod_074_Growth(),
+                new MoveHackMod_076_SolarBeam(),
+                new MoveHackMod_087_Thunder(),
+                new MoveHackMod_091_Dig(),
+                new MoveHackMod_118_Metronome(),
+                new MoveHackMod_182_Protect_MoveChance(),
+                new MoveHackMod_214_SleepTalk(),
+                new MoveHackMod_234_MorningSun(),
+                new MoveHackMod_235_Synthesis(),
+                new MoveHackMod_236_Moonlight(),
+                new MoveHackMod_267_NaturePower(),
+                new MoveHackMod_237_HiddenPower(),
+                new MoveHackMod_274_Assist(),
+                new MoveHackMod_282_KnockOff(),
+                new MoveHackMod_289_Snatch(),
+                new MoveHackMod_291_Dive(),
+                new MoveHackMod_311_WeatherBall(),
+                new MoveHackMod_336_Howl(),
+                new MoveHackMod_340_Bounce(),
+                new MoveHackMod_382_MeFirst(),
+                new MoveHackMod_383_CopyCat(),
+                new MoveHackMod_449_Judgment_PixiePlate(),
+                new MoveHackMod_467_ShadowForce(),
+                new MoveHackMod_469_WideGuard(),
+                new MoveHackMod_484_Heavy_Slam(),
+                new MoveHackMod_501_QuickGuard(),
+                new MoveHackMod_507_SkyDrop(),
+                new MoveHackMod_542_Hurricane(),
+                
+                // Expansion
+                new MoveHackMod_560_FlyingPress(), // TODO
+                new MoveHackMod_561_MatBlock(), // TODO
+                new MoveHackMod_562_Belch(),
+                new MoveHackMod_564_StickyWeb(),
+                new MoveHackMod_565_FellStinger(),
+                new MoveHackMod_566_PhantomForce(),
+                new MoveHackMod_570_ParabolicCharge(),
+                new MoveHackMod_571_Spotlight(), // TODO
+                new MoveHackMod_572_PetalBlizzard(),
+                new MoveHackMod_573_FreezeDry(),
+                new MoveHackMod_574_DisarmingVoice(),
+                new MoveHackMod_577_DrainingKiss(),
+                new MoveHackMod_578_CraftyShield(), // TODO
+                new MoveHackMod_580_GrassyTerrain(), // TODO
+                new MoveHackMod_583_PlayRough(),
+                new MoveHackMod_584_FairyWind(),
+                new MoveHackMod_585_Moonblast(),
+                new MoveHackMod_586_Boomburst(),
+                new MoveHackMod_588_KingsShield(), // TODO
+                new MoveHackMod_591_DiamondStorm(),
+                new MoveHackMod_592_SteamEruption(),
+                new MoveHackMod_594_WaterShuriken(),
+                new MoveHackMod_595_MysticalFire()
         ));
 
 

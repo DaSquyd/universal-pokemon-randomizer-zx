@@ -72,11 +72,11 @@ public class HackModCollection<T extends HackMod> extends HackMod {
         sortHackMods();
 
         for (T hackMod : hackMods) {
-            if (context.applied().containsKey(hackMod.getClass()))
+            if (context.applied.containsKey(hackMod.getClass()))
                 throw new RuntimeException();
 
             hackMod.apply(context);
-            context.applied().put(hackMod.getClass(), hackMod);
+            context.applied.put(hackMod.getClass(), hackMod);
         }
     }
 

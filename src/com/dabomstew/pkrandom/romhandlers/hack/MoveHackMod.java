@@ -4,7 +4,19 @@ public abstract class MoveHackMod extends BattleObjectHackMod {
     public MoveHackMod(int number) {
         super(number);
     }
-
+    
+    public boolean addAnimation() {
+        return false;
+    }
+    
+    public int[] getAnimationSpaFiles() {
+        return new int[0];
+    }
+    
+    public String getAnimationSpecification() {
+        return null;
+    }
+    
     public String getAuxiliaryAnimationLabel() {
         return null;
     }

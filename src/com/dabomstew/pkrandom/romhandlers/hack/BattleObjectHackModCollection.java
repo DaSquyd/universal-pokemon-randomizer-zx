@@ -191,10 +191,14 @@ public abstract class BattleObjectHackModCollection<T extends BattleObjectHackMo
 
     @Override
     public void apply(Context context) {
-        romHandler = context.romHandler();
-        battleOvl = context.overlays().get(OverlayId.BATTLE);
-        battleServerOvl = context.overlays().get(OverlayId.BATTLE_SERVER);
-        globalAddressMap = context.globalAddressMap();
+        applyInternal(context);
+    }
+    
+    protected void applyInternal(Context context) {
+        romHandler = context.romHandler;
+        battleOvl = context.overlays.get(OverlayId.BATTLE);
+        battleServerOvl = context.overlays.get(OverlayId.BATTLE_SERVER);
+        globalAddressMap = context.globalAddressMap;
 
         sortHackMods(new NewFirstComparator(getMaxVanillaObjectNumber()));
 

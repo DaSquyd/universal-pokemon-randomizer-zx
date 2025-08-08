@@ -1,5 +1,6 @@
 package com.dabomstew.pkrandom.romhandlers.hack.move.expansion;
 
+import com.dabomstew.pkrandom.constants.Gen5BattleEventType;
 import com.dabomstew.pkrandom.constants.Moves;
 import com.dabomstew.pkrandom.romhandlers.hack.MoveHackMod;
 
@@ -11,8 +12,13 @@ public class MoveHackMod_562_Belch extends MoveHackMod {
     }
 
     @Override
+    public boolean addAnimation() {
+        return true;
+    }
+
+    @Override
     public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
-        // TODO
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onMoveExecuteCheck2, "belch.s"));
 
         return true;
     }

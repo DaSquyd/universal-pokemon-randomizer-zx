@@ -19,19 +19,19 @@ public class AbilityExpansionHackMod extends HackMod {
 
     @Override
     public void apply(Context context) {
-        ParagonLiteOverlay storageSystemOvl = context.overlays().get(OverlayId.STORAGE_SYSTEM);
+        ParagonLiteOverlay storageSystemOvl = context.overlays.get(OverlayId.STORAGE_SYSTEM);
 
         // Updates the personal data to allow for abilities up to index 1023
         List<String> readPersonalDataLines = readLines("read_poke_personal_data.s");
-        context.arm9().writeCodeForceInline(readPersonalDataLines, "ReadPokePersonalData", false);
+        context.arm9.writeCodeForceInline(readPersonalDataLines, "ReadPokePersonalData", false);
 
         // Also fixes the Azurill->Marill gender bug
         List<String> readBoxDataLines = readLines("read_poke_box_data.s");
-        context.arm9().writeCodeForceInline(readBoxDataLines, "ReadPokeBoxData", true);
+        context.arm9.writeCodeForceInline(readBoxDataLines, "ReadPokeBoxData", true);
 
         // Also fixes the Azurill->Marill gender bug
         List<String> writeBoxDataLines = readLines("write_poke_box_data.s");
-        context.arm9().writeCodeForceInline(writeBoxDataLines, "WritePokeBoxData", true);
+        context.arm9.writeCodeForceInline(writeBoxDataLines, "WritePokeBoxData", true);
 
         // Fix Storage System to display abilities properly
 

@@ -110,6 +110,8 @@ public class ParagonLiteHandler {
     List<String> itemNameMessages;
     List<String> itemPluralNames;
     List<String> itemDescriptions;
+    
+    HackMode.Params hackModeParams = new HackMode.Params();
 
     // Update
     List<String> oldAbilityNames;
@@ -407,11 +409,26 @@ public class ParagonLiteHandler {
             pokeUpdates[i] = new PokeUpdate();
         }
 
-        hackMode.registerGlobalValue(romHandler, settings, armParser, globalAddressMap, arm9, overlays);
+        hackModeParams.romHandler = romHandler;
+        hackModeParams.settings = settings;
+        hackModeParams.armParser = armParser;
+        hackModeParams.globalAddressMap = globalAddressMap;
+        hackModeParams.arm9 = arm9;
+        hackModeParams.overlays = overlays;
+        hackModeParams.classicPokes = classicPokes;
+        hackModeParams.pokes = pokes;
+        hackModeParams.formeMappings = formeMappings;
+        hackModeParams.moves = moves;
+        hackModeParams.moveAnimationsNarc = moveAnimationsNarc;
+        hackModeParams.originalMoveAnimationsNarcCount = originalMoveAnimationsNarcCount;
+        hackModeParams.moveAnimationScriptsNarc = moveAnimationScriptsNarc;
+        hackModeParams.battleAnimationScriptsNarc = battleAnimationScriptsNarc;
+        
+        hackMode.registerGlobalValue(hackModeParams);
     }
 
-    public void applyHackMods() {
-        hackMode.applyAll(romHandler, settings, armParser, globalAddressMap, arm9, overlays);
+    public void applyHackMods() {        
+        hackMode.applyAll(hackModeParams);
     }
 
     public void save() {
@@ -2904,65 +2921,6 @@ public class ParagonLiteHandler {
         // TODO: For some reason the relocator addresses values are wrong
         relocateMoveListRamAddress(newMoves.length - movesToClear.length);
 
-        // #560 Flying Press
-        setMoveAnimations(Moves.flyingPress);
-
-        // + #562 Belch
-        setMoveEventHandlers(Moves.belch, new MoveEventHandler(Gen5BattleEventType.onMoveExecuteCheck2, "belch.s"));
-        setMoveAnimations(Moves.belch);
-
-        // TODO #564 Sticky Web
-        setMoveEventHandlers(Moves.stickyWeb, new MoveEventHandler(Gen5BattleEventType.onUncategorizedMoveNoTarget, "sticky_web.s"));
-        setMoveAnimations(Moves.stickyWeb, 770);
-
-        // + #565 Fell Stinger
-        setMoveEventHandlers(Moves.fellStinger, new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "fell_stinger.s"));
-        setMoveAnimations(Moves.fellStinger);
-
-        // #570 Parabolic Charge
-        setMoveAnimations(Moves.parabolicCharge);
-
-        // #572 Petal Blizzard
-        setMoveAnimations(Moves.petalBlizzard, 786);
-
-        // + #573 Freeze-Dry
-        setMoveEventHandlers(Moves.freezeDry, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "freeze-dry.s"));
-        setMoveAnimations(Moves.freezeDry);
-
-        // #574 Disarming Voice
-        setMoveAnimations(Moves.disarmingVoice, 743);
-
-        // #577 Draining Kiss
-        setMoveAnimations(Moves.drainingKiss, 744);
-
-        // #580 Grassy Terrain
-        setMoveAnimations(Moves.grassyTerrain);
-
-        // #583 Play Rough
-        setMoveAnimations(Moves.playRough, 740);
-
-        // #584 Fairy Wind
-        setMoveAnimations(Moves.fairyWind);
-
-        // #585 Moonblast
-        setMoveAnimations(Moves.moonblast, 741, 742);
-
-        // #586 Boomburst
-        setMoveAnimations(Moves.boomburst, 752);
-
-        // + #591 Diamond Storm
-        setMoveEventHandlers(Moves.diamondStorm, new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal, "diamond_storm.s"));
-        setMoveAnimations(Moves.diamondStorm);
-
-        // #592 Steam Eruption
-        setMoveAnimations(Moves.steamEruption);
-
-        // #594 Water Shuriken
-        setMoveAnimations(Moves.waterShuriken, 763);
-
-        // #595 Mystical Fire
-        setMoveAnimations(Moves.mysticalFire);
-
         // TODO: + #596 Spiky Shield
         cloneMoveEventHandlers(Moves.spikyShield, Moves.protect);
         setMoveAnimations(Moves.spikyShield, 772);
@@ -3328,149 +3286,6 @@ public class ParagonLiteHandler {
         /////////////////
         /// OLD MOVES ///
         /////////////////
-
-        // #011 Vise Grip
-        setMoveAuxiliaryAnimation(Moves.viseGrip, "Trap", auxiliaryAnimationScriptIndices);
-
-        // #013 Razor Wind
-        if (hackMode.name.equals("Redux"))
-            setMoveAnimations(Moves.razorWind);
-
-        // + #024 Double Kick
-        setMoveEventHandlers(Moves.doubleKick, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
-
-        // + #041 Twineedle
-        setMoveEventHandlers(Moves.twineedle, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
-
-        // #059 Blizzard
-        setMoveEventHandlers(Moves.blizzard, new MoveEventHandler(Gen5BattleEventType.onBypassAccuracyCheck, "blizzard.s"));
-
-        // #074 Growth
-        setMoveEventHandlers(Moves.growth, new MoveEventHandler(Gen5BattleEventType.onGetStatStageChangeValue, "growth.s"));
-
-        // #076 Solar Beam
-        setMoveEventHandlers(Moves.solarBeam,
-                new MoveEventHandler(Gen5BattleEventType.onCheckChargeUpSkip, "solar_beam_charge_up_skip.s"),
-                new MoveEventHandler(Gen5BattleEventType.onChargeUpStart),
-                new MoveEventHandler(Gen5BattleEventType.onGetMovePower, "solar_beam_move_power.s"));
-
-        // #087 Thunder
-        setMoveEventHandlers(Moves.thunder,
-                new MoveEventHandler(Gen5BattleEventType.onCheckSemiInvulnerable),
-                new MoveEventHandler(Gen5BattleEventType.onBypassAccuracyCheck, "thunder_bypass_accuracy_check.s"),
-                new MoveEventHandler(Gen5BattleEventType.onGetMoveAccuracy, "thunder_accuracy.s"));
-
-        // + #121 Egg Bomb
-        cloneMoveEventHandlers(Moves.eggBomb, Moves.psystrike);
-
-        // + #155 Bonemerang
-        setMoveEventHandlers(Moves.bonemerang, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
-
-        // #167 Triple Kick
-        if (hackMode.name.equals("ParagonLite"))
-            setMoveEventHandlers(Moves.tripleKick, new MoveEventHandler(Gen5BattleEventType.onGetHitCount));
-
-        // + #190 Octazooka
-        if (hackMode.name.equals("Redux"))
-            setMoveEventHandlers(Moves.octazooka, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "super_effective_vs_steel.s"));
-        setMoveAnimations(Moves.octazooka, 360);
-
-        // #200 Outrage
-        if (hackMode.name.equals("ParagonLite"))
-            cloneMoveEventHandlers(Moves.outrage, Moves.revenge);
-
-        // #234 Morning Sun
-        setMoveEventHandlers(Moves.morningSun, new MoveEventHandler(Gen5BattleEventType.onRecoverHealth, "morning_sun.s"));
-
-        // #235 Synthesis
-        cloneMoveEventHandlers(Moves.synthesis, Moves.morningSun);
-
-        // #236 Moonlight
-        cloneMoveEventHandlers(Moves.moonlight, Moves.morningSun);
-
-        // #237 Hidden Power
-        setMoveEventHandlers(Moves.hiddenPower, new MoveEventHandler(Gen5BattleEventType.onGetMoveParam));
-
-        // #243 Mirror Coat
-        if (hackMode.name.equals("ParagonLite"))
-            cloneMoveEventHandlers(Moves.mirrorCoat, Moves.eruption);
-
-        // #280 Brick Break
-        setMoveEventHandlers(Moves.brickBreak,
-                new MoveEventHandler(Gen5BattleEventType.onMoveDamageProcessing1),
-                new MoveEventHandler(Gen5BattleEventType.onMoveDamageProcessingEnd),
-                new MoveEventHandler(Gen5BattleEventType.onGetMoveDamage, "common_screen_break.s"));
-
-        // #282 Knock Off
-//        setMoveEventHandlers(Moves.knockOff,
-//                new MoveEventHandler(Gen5BattleEventType.onDamageProcessingEnd_HitReal),
-//                new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "knock_off.s"));
-
-        // + #310 Astonish
-        if (hackMode.name.equals("ParagonLite"))
-            cloneMoveEventHandlers(Moves.astonish, Moves.fakeOut);
-
-        // #311 Weather Ball
-        setMoveEventHandlers(Moves.weatherBall,
-                new MoveEventHandler(Gen5BattleEventType.onGetMoveParam, "weather_ball_type.s"),
-                new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "weather_ball_base_power.s"));
-
-        // #327 Sky Uppercut
-        setMoveEventHandlers(Moves.skyUppercut,
-                new MoveEventHandler(Gen5BattleEventType.onCheckSemiInvulnerable),
-                new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "sky_uppercut.s"));
-
-        // + #336 Howl
-        setMoveEventHandlers(Moves.howl, new MoveEventHandler(Gen5BattleEventType.onUncategorizedMoveNoTarget, "howl.s"));
-        setMoveAnimations(Moves.howl);
-
-        // #360 Gyro Ball
-        if (hackMode.name.equals("ParagonLite"))
-            setMoveEventHandlers(Moves.gyroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "gyro_ball.s"));
-
-        // #362 Brine
-        if (hackMode.name.equals("ParagonLite"))
-            setMoveEventHandlers(Moves.brine, new MoveEventHandler(Gen5BattleEventType.onGetEffectiveness, "super_effective_vs_steel.s"));
-
-        // #368 Metal Burst
-        if (hackMode.name.equals("ParagonLite"))
-            cloneMoveEventHandlers(Moves.metalBurst, Moves.eruption);
-
-        // #381 Lucky Chant
-        if (hackMode.name.equals("ParagonLite"))
-            cloneMoveEventHandlers(Moves.luckyChant, Moves.focusEnergy);
-
-        // + #443 Magnet Bomb
-        cloneMoveEventHandlers(Moves.magnetBomb, Moves.psystrike);
-
-        // #449 Judgment (needs update for Pixie plate)
-        setMoveEventHandlers(Moves.judgment, new MoveEventHandler(Gen5BattleEventType.onGetMoveParam, "judgment.s"));
-
-        // + #458 Double Hit
-        setMoveEventHandlers(Moves.doubleHit, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
-
-        // #486 Electro Ball
-        if (hackMode.name.equals("ParagonLite"))
-            setMoveEventHandlers(Moves.electroBall, new MoveEventHandler(Gen5BattleEventType.onGetMoveBasePower, "electro_ball.s"));
-
-        // + #530 Dual Chop
-        setMoveEventHandlers(Moves.dualChop, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
-
-        // #542 Hurricane
-        cloneMoveEventHandlers(Moves.hurricane, Moves.thunder);
-
-        // + #544 Gear Grind
-        setMoveEventHandlers(Moves.gearGrind, new MoveEventHandler(Gen5BattleEventType.onGetHitCount, Moves.tripleKick));
-
-        int listAddress = getMoveListAddress();
-        int listCount = getMoveListCount();
-        for (int i = 0; i < listCount; ++i) {
-            if (battleOvl.readWord(listAddress + i * 8) == 0) {
-                int dataAddress = globalAddressMap.getRomAddress(battleOvl, "Data_MoveEffectListCount");
-                battleOvl.writeWord(dataAddress, i, false);
-                break;
-            }
-        }
 
         System.out.println("Set moves");
     }

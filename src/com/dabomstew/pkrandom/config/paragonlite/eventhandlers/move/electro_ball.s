@@ -31,16 +31,16 @@
     bl      Battle::ServerEvent_CalcSpeed
     
 ; 60 * user speed / target speed
-    mov     r1, #50
+    mov     r1, #MOVE_ELECTRO_BALL_MULTIPLIER
     mul     r0, r1
     mov     r1, r6
     blx     ARM9::DivideModSigned
     mov     r1, r0
     
 CheckMaxValue:
-    cmp     r1, #150
+    cmp     r1, #MOVE_ELECTRO_BALL_MAX_POWER
     bls     CheckMinValue
-    mov     r1, #150
+    mov     r1, #MOVE_ELECTRO_BALL_MAX_POWER
     
 CheckMinValue:
     cmp     r1, #0

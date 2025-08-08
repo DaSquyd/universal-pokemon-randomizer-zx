@@ -2,8 +2,8 @@ package com.dabomstew.pkrandom.romhandlers.hack;
 
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.arm.ArmParser;
-import com.dabomstew.pkrandom.pokemon.MoveCategory;
-import com.dabomstew.pkrandom.pokemon.Type;
+import com.dabomstew.pkrandom.newnds.NARCArchive;
+import com.dabomstew.pkrandom.pokemon.*;
 import com.dabomstew.pkrandom.romhandlers.*;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.old.*;
 import com.dabomstew.pkrandom.romhandlers.hack.item.ItemProtectorMode;
@@ -12,6 +12,27 @@ import com.dabomstew.pkrandom.romhandlers.hack.weather.WeatherHailSnowMode;
 import java.util.*;
 
 public class HackMode {
+    public static class Params {
+        public Gen5RomHandler romHandler;
+        public Settings settings;
+
+        public ArmParser armParser;
+        public ParagonLiteAddressMap globalAddressMap;
+
+        public ParagonLiteArm9 arm9;
+        public Map<OverlayId, ParagonLiteOverlay> overlays;
+
+        public Pokemon[] classicPokes;
+        public Pokemon[] pokes;
+        public Map<Integer, FormeInfo> formeMappings;
+        public List<Move> moves;
+
+        public NARCArchive moveAnimationsNarc;
+        public int originalMoveAnimationsNarcCount;
+        public NARCArchive moveAnimationScriptsNarc;
+        public NARCArchive battleAnimationScriptsNarc;
+    }
+    
     public final String name;
 
     private final Map<Class<? extends HackMod>, HackMod> hackMods = new HashMap<>();
@@ -190,18 +211,48 @@ public class HackMode {
         return hackModClass.cast(hackMod);
     }
     
-    public void registerGlobalValue(Gen5RomHandler romHandler, Settings settings, ArmParser armParser, ParagonLiteAddressMap globalAddressMap, ParagonLiteArm9 arm9, Map<OverlayId, ParagonLiteOverlay> overlays) {
+    public void registerGlobalValue(Params params) {
         Collection<HackMod> hackModValues = hackMods.values();
-        HackMod.Context context = new HackMod.Context(romHandler, settings, armParser, globalAddressMap, arm9, overlays, null);
+
+        HackMod.Context context = new HackMod.Context();
+        context.romHandler = params.romHandler;
+        context.settings = params.settings;
+        context.armParser = params.armParser;
+        context.globalAddressMap = params.globalAddressMap;
+        context.arm9 = params.arm9;
+        context.overlays = params.overlays;
+        context.classicPokes = params.classicPokes;
+        context.pokes = params.pokes;
+        context.formeMappings = params.formeMappings;
+        context.moves = params.moves;
+        context.moveAnimationsNarc = params.moveAnimationsNarc;
+        
         for (HackMod hackMod : hackModValues) {
             hackMod.registerGlobalValues(context);
         }
     }
 
-    public void applyAll(Gen5RomHandler romHandler, Settings settings, ArmParser armParser, ParagonLiteAddressMap globalAddressMap, ParagonLiteArm9 arm9, Map<OverlayId, ParagonLiteOverlay> overlays) {
+    public void applyAll(Params params) {
         Collection<HackMod> hackModValues = hackMods.values();
         Map<Class<? extends HackMod>, HackMod> applied = new HashMap<>();
-        HackMod.Context context = new HackMod.Context(romHandler, settings, armParser, globalAddressMap, arm9, overlays, applied);
+        
+        HackMod.Context context = new HackMod.Context();
+        context.romHandler = params.romHandler;
+        context.settings = params.settings;
+        context.armParser = params.armParser;
+        context.globalAddressMap = params.globalAddressMap;
+        context.arm9 = params.arm9;
+        context.overlays = params.overlays;
+        context.classicPokes = params.classicPokes;
+        context.pokes = params.pokes;
+        context.formeMappings = params.formeMappings;
+        context.moves = params.moves;
+        context.moveAnimationsNarc = params.moveAnimationsNarc;
+        context.originalMoveAnimationsNarcCount = params.originalMoveAnimationsNarcCount;
+        context.moveAnimationScriptsNarc = params.moveAnimationScriptsNarc;
+        context.battleAnimationScriptsNarc = params.battleAnimationScriptsNarc;
+        context.applied = applied;
+        
         for (HackMod hackMod : hackModValues) {
             if (applied.containsKey(hackMod.getClass()))
                 throw new RuntimeException();

@@ -1,6 +1,7 @@
 package com.dabomstew.pkrandom.romhandlers.hack.mode;
 
 import com.dabomstew.pkrandom.pokemon.MoveCategory;
+import com.dabomstew.pkrandom.romhandlers.hack.MoveHackModCollection;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.custom.*;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.expansion.AbilityHackMod_177_GaleWings;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.expansion.AbilityHackMod_270_ThermalExchange;
@@ -9,6 +10,9 @@ import com.dabomstew.pkrandom.romhandlers.hack.ability.old.*;
 import com.dabomstew.pkrandom.romhandlers.hack.AbilityHackModCollection;
 import com.dabomstew.pkrandom.romhandlers.hack.HackMode;
 import com.dabomstew.pkrandom.romhandlers.hack.ability.original.*;
+import com.dabomstew.pkrandom.romhandlers.hack.move.custom.*;
+import com.dabomstew.pkrandom.romhandlers.hack.move.expansion.MoveHackMod_584_FairyWind;
+import com.dabomstew.pkrandom.romhandlers.hack.pokemon.MoveExpansionHackMod;
 import com.dabomstew.pkrandom.romhandlers.hack.weather.WeatherHailSnowMode;
 
 // Blaze Black 2 Redux and Volt White 2 Redux
@@ -21,6 +25,7 @@ public class ReduxHackMode extends ModernPlusHackMode {
         abilityHugePowerMessage = "{0} is striking\na pose!";
 
         // Ability
+        addHackMod(new MoveExpansionHackMod("redux_moves.narc", "redux_movetexts.tsv"));
         addHackMod(new AbilityHackModCollection(
                 new AbilityHackMod_001_Stench(20),
                 new AbilityHackMod_006_Damp_FireResist(),
@@ -83,6 +88,22 @@ public class ReduxHackMode extends ModernPlusHackMode {
                 new AbilityHackMod_534_TractorBeam(3),
                 new AbilityHackMod_542_FlutterDust(),
                 new AbilityHackMod_543_FocusingLens(1.3, true)
+        ));
+        
+        // Moves
+        addHackMod(new MoveHackModCollection(
+                new MoveHackMod_013_RazorWind_SingleTurn(),
+                new MoveHackMod_024_DoubleKick_Accuracy(),
+                new MoveHackMod_041_Twineedle_Accuracy(),
+                new MoveHackMod_121_EggBomb_PhysicalDefense(),
+                new MoveHackMod_155_Bonemerang_Accuracy(),
+                new MoveHackMod_167_TripleKick(10),
+                new MoveHackMod_190_Octazooka_Steel(),
+                new MoveHackMod_327_SkyUppercut_Flying(),
+                new MoveHackMod_443_MagnetBomb_PhysicalDefense(),
+                new MoveHackMod_458_DoubleHit_Accuracy(),
+                new MoveHackMod_530_DualChop_Accuracy(),
+                new MoveHackMod_544_GearGrind_Accuracy()
         ));
 
         abilityIlluminateMode = AbilityIlluminateMode.RESIST_DARK_AND_GHOST;

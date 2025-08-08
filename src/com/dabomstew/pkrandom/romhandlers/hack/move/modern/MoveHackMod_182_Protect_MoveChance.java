@@ -20,7 +20,7 @@ public class MoveHackMod_182_Protect_MoveChance extends MoveHackMod {
 
     @Override
     public void postWriteEventHandlers(Context context) {
-        ParagonLiteOverlay battleOvl = context.overlays().get(OverlayId.BATTLE);
+        ParagonLiteOverlay battleOvl = context.overlays.get(OverlayId.BATTLE);
 
         int romAddress = battleOvl.getRomAddress("MoveHandler_Protect_CheckFail");
 

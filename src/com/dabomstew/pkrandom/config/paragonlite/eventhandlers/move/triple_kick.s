@@ -2,7 +2,7 @@
     mov     r5, r2
     mov     r4, r3
     
-    mov     r0, #0x03
+    mov     r0, #VAR_AttackingPoke
     bl      Battle::EventVar_GetValue
     cmp     r5, r0
     bne     End
@@ -10,20 +10,20 @@
 ; get iteration count
     ldr     r2, [r4]
     
-; power   = i * 10 + 20
-; 1st hit = 20
-; 2nd hit = 30
-; 3rd hit = 40
-; total   = 90
-    mov     r1, #10
+    mov     r1, #MOVE_TRIPLE_KICK_INCREMENT
     mul     r1, r2
-    add     r1, #20
+    
+#if (MOVE_TRIPLE_KICK_BASE_POWER - MOVE_TRIPLE_KICK_INCREMENT) > 0
+    add     r1, #(MOVE_TRIPLE_KICK_BASE_POWER - MOVE_TRIPLE_KICK_INCREMENT)
+#elif (MOVE_TRIPLE_KICK_BASE_POWER - MOVE_TRIPLE_KICK_INCREMENT) < 0
+    sub     r1, #(MOVE_TRIPLE_KICK_INCREMENT - MOVE_TRIPLE_KICK_BASE_POWER)
+#endif
     
 ; increment iteration count
     add     r2, #1
     str     r2, [r4]
     
-    mov     r0, #0x30 ; move base power
+    mov     r0, #VAR_MoveBasePower
     bl      Battle::EventVar_RewriteValue
     
 End:

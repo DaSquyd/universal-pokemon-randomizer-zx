@@ -3,6 +3,10 @@ package com.dabomstew.pkrandom.romhandlers.hack;
 import com.dabomstew.pkrandom.FileFunctions;
 import com.dabomstew.pkrandom.Settings;
 import com.dabomstew.pkrandom.arm.ArmParser;
+import com.dabomstew.pkrandom.newnds.NARCArchive;
+import com.dabomstew.pkrandom.pokemon.FormeInfo;
+import com.dabomstew.pkrandom.pokemon.Move;
+import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.*;
 
 import java.io.FileNotFoundException;
@@ -13,8 +17,27 @@ import java.util.*;
 
 public abstract class HackMod implements Comparable<HackMod> {
 
-    public record Context(Gen5RomHandler romHandler, Settings settings, ArmParser armParser, ParagonLiteAddressMap globalAddressMap, ParagonLiteArm9 arm9,
-                          Map<OverlayId, ParagonLiteOverlay> overlays, Map<Class<? extends HackMod>, HackMod> applied) {
+    public static class Context {
+        public Gen5RomHandler romHandler;
+        public Settings settings;
+
+        public ArmParser armParser;
+        public ParagonLiteAddressMap globalAddressMap;
+
+        public ParagonLiteArm9 arm9;
+        public Map<OverlayId, ParagonLiteOverlay> overlays;
+
+        public Pokemon[] classicPokes;
+        public Pokemon[] pokes;
+        public Map<Integer, FormeInfo> formeMappings;
+        public List<Move> moves;
+        
+        public NARCArchive moveAnimationsNarc;
+        public int originalMoveAnimationsNarcCount;
+        public NARCArchive moveAnimationScriptsNarc;
+        public NARCArchive battleAnimationScriptsNarc;
+
+        public Map<Class<? extends HackMod>, HackMod> applied;
     }
 
     public static class HackModComparator implements Comparator<HackMod> {
