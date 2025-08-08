@@ -35,7 +35,7 @@ public class AbilityHackMod_523_PastoralAroma extends AbilityHackMod {
 
     @Override
     public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
-        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchOutEnd, "pastoral_aroma.s"));
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onSwitchIn, "pastoral_aroma.s"));
 
         return true;
     }
