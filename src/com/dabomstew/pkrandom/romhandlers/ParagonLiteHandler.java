@@ -2755,7 +2755,7 @@ public class ParagonLiteHandler {
 
         // Light Moves
         for (int moveIndex : new int[]{
-                // If we disagree on any of these, should we have a Redux only set of flags?
+                // TODO If we disagree on any of these, should we have a Redux only set of flags?
                 // Moves.psybeam, // 060
                 Moves.bubbleBeam, // 061
                 // Moves.auroraBeam, //062
