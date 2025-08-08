@@ -2534,6 +2534,7 @@ public class ParagonLiteHandler {
         for (int moveIndex : new int[]{
                 Moves.stomp, // 023
                 Moves.doubleKick, // 024
+                Moves.megaKick, // 025
                 Moves.jumpKick, // 026
                 Moves.rollingKick, // 027
                 Moves.lowKick, // 067
@@ -2541,6 +2542,9 @@ public class ParagonLiteHandler {
                 Moves.tripleKick, // 167
                 Moves.blazeKick, // 299
                 Moves.lowSweep, // 490
+                Moves.tropKick, // 688
+                Moves.thunderousKick, //823
+                Moves.axeKick, // 853
         }) {
             if (moveIndex < moves.size())
                 moves.get(moveIndex).isCustomKickMove = true;
@@ -2550,6 +2554,7 @@ public class ParagonLiteHandler {
         for (int moveIndex : new int[]{
                 Moves.bite, // 044
                 Moves.hyperFang, // 158
+                Moves.superFang, // 162
                 Moves.crunch, // 242
                 Moves.poisonFang, // 305
                 Moves.thunderFang, // 422
@@ -2562,6 +2567,7 @@ public class ParagonLiteHandler {
 
         // Slice Moves
         for (int moveIndex : new int[]{
+                Moves.razorWind, // 013
                 Moves.cut, // 015
                 Moves.razorLeaf, // 075
                 Moves.slash, // 163
@@ -2574,9 +2580,13 @@ public class ParagonLiteHandler {
                 Moves.xScissor, // 404
                 Moves.psychoCut, // 427
                 Moves.crossPoison, // 440
+                Moves.spacialRend, // 460
+                Moves.dualChop, // 530
                 Moves.sacredSword, // 533
                 Moves.razorShell, // 534
                 Moves.secretSword, // 548
+                Moves.solarBlade, // 669
+                Moves.aquaCutter, // 895
         }) {
             if (moveIndex < moves.size())
                 moves.get(moveIndex).isCustomSliceMove = true;
@@ -2597,6 +2607,8 @@ public class ParagonLiteHandler {
                 Moves.sleepPowder, // 079
                 Moves.spore, // 147
                 Moves.cottonSpore, // 178
+                Moves.powderSnow, // 181
+                Moves.silverWind, // 318
                 Moves.ragePowder, // 476
                 Moves.powder, // 600
                 Moves.magicPowder, // 750
@@ -2614,12 +2626,16 @@ public class ParagonLiteHandler {
                 Moves.aeroblast, // 177
                 Moves.icyWind, // 196
                 Moves.sandstorm, // 201
+                Moves.sweetScent, // 230
                 Moves.twister, // 239
                 Moves.heatWave, // 257
+                Moves.aromatherapy, // 312
                 Moves.airCutter, // 314
                 Moves.silverWind, // 318
                 Moves.tailwind, // 366
+                Moves.defog, // 432
                 Moves.ominousWind, // 466
+                Moves.leafTornado, // 536
                 Moves.hurricane, // 542
                 Moves.petalBlizzard, // 572
                 Moves.fairyWind, // 586
@@ -2635,6 +2651,7 @@ public class ParagonLiteHandler {
         // Ball/Bomb moves
         for (int moveIndex : new int[]{
                 Moves.eggBomb, // 121
+                Moves.spikeCannon, // 131
                 Moves.barrage, // 140
                 Moves.sludgeBomb, // 188
                 Moves.octazooka, // 190
@@ -2642,6 +2659,7 @@ public class ParagonLiteHandler {
                 Moves.shadowBall, // 247
                 Moves.mistBall, // 296
                 Moves.iceBall, // 301
+                Moves.hydroCannon, // 308
                 Moves.weatherBall, // 311
                 Moves.bulletSeed, // 331
                 Moves.rockBlast, // 350
@@ -2651,14 +2669,18 @@ public class ParagonLiteHandler {
                 Moves.focusBlast, // 411
                 Moves.energyBall, // 412
                 Moves.mudBomb, // 426
+                Moves.flashCannon, // 430
                 Moves.rockWrecker, // 439
                 Moves.magnetBomb, // 443
                 Moves.electroBall, // 486
                 Moves.acidSpray, // 491
+                Moves.voltSwitch, // 521
                 Moves.searingShot, // 545
+                Moves.moonblast, // 585
                 Moves.pollenPuff, // 676
                 Moves.beakBlast, // 690
                 Moves.pyroBall, // 780
+                Moves.armorCannon, // 890
                 Moves.syrupBomb, // 903
         }) {
             if (moveIndex < moves.size())
@@ -2683,14 +2705,19 @@ public class ParagonLiteHandler {
         for (int moveIndex : new int[]{
                 Moves.swordsDance, // 014
                 Moves.petalDance, // 080
+                Moves.dizzyPunch, // 146
+                Moves.bellyDrum, // 187
+                Moves.rainDance, // 240
                 Moves.featherDance, // 297
                 Moves.teeterDance, // 298
                 Moves.dragonDance, // 349
                 Moves.lunarDance, // 461
                 Moves.quiverDance, // 483
+                Moves.entrainment, // 494
                 Moves.fieryDance, // 552
                 Moves.revelationDance, // 686
                 Moves.clangorousSoul, // 775
+                Moves.drumBeating, // 778
                 Moves.victoryDance, // 837
                 Moves.aquaStep, // 872
         }) {
@@ -2701,7 +2728,10 @@ public class ParagonLiteHandler {
         // Roll/Spin Moves
         for (int moveIndex : new int[]{
                 Moves.rollingKick, // 027
+                Moves.hornDrill, // 032
+                Moves.drillPeck, // 065
                 Moves.fireSpin, // 083
+                Moves.defenseCurl, // 111
                 Moves.tripleKick, // 167
                 Moves.flameWheel, // 172
                 Moves.rollout, // 205
@@ -2725,23 +2755,26 @@ public class ParagonLiteHandler {
 
         // Light Moves
         for (int moveIndex : new int[]{
-                Moves.psybeam, // 060
+                // If we disagree on any of these, should we have a Redux only set of flags?
+                // Moves.psybeam, // 060
                 Moves.bubbleBeam, // 061
-                Moves.auroraBeam, //062
+                // Moves.auroraBeam, //062
+                Moves.hyperBeam, // 63
                 Moves.solarBeam, // 76
                 Moves.confuseRay, // 109
                 Moves.lightScreen, // 113
                 Moves.reflect, // 115
-                Moves.swift, // 129
+                // Moves.swift, // 129
                 Moves.flash, // 148
                 Moves.morningSun, // 234
-                Moves.synthesis, // 235
+                // Moves.synthesis, // 235
                 Moves.moonlight, // 236
                 Moves.sunnyDay, // 241
                 Moves.mirrorCoat, // 243
                 Moves.tailGlow, // 294
                 Moves.lusterPurge, // 295
-                Moves.signalBeam, // 324
+                // Moves.signalBeam, // 324
+                Moves.doomDesire, // 353
                 Moves.powerGem, // 408
                 Moves.mirrorShot, // 429
                 Moves.flashCannon, // 430
@@ -2753,9 +2786,11 @@ public class ParagonLiteHandler {
                 Moves.solarBlade, // 669
                 Moves.spotlight, // 671
                 Moves.auroraVeil, // 694
+                Moves.fleurCannon, // 705
                 Moves.moongeistBeam, // 714
                 Moves.photonGeyser, // 722
                 Moves.lightThatBurnsTheSky, // 723
+                Moves.steelBeam, // 796
                 Moves.luminaCrash, // 855
                 Moves.fickleBeam, // 907
         }) {
@@ -2773,7 +2808,6 @@ public class ParagonLiteHandler {
                 Moves.solarBeam, // 076
                 Moves.triAttack, // 161
                 Moves.signalBeam, // 324
-                Moves.doomDesire, // 353
                 Moves.chargeBeam, // 451
                 Moves.simpleBeam, // 493
                 Moves.technoBlast, // 546
