@@ -13,7 +13,7 @@
     bl      Battle::Handler_PushWork
     mov     r1, r0
     
-    mov     r0, #STSG_Attack
+    mov     r0, #STSG_Speed
     str     r0, [r1, #0x04]
     mov     r0, #2 ; boost amount
     strb    r0, [r1, #0x0C]
@@ -29,10 +29,11 @@
     mov     r2, r4
     bl      Battle::Handler_PushWork
     mov     r1, r0
-    
-    mov     r0, #STSG_SpAtk
+
+#if BLUNDER_POLICY_ACCURACY != 0: ; TODO - Implement this
+    mov     r0, #STSG_Accuracy
     str     r0, [r1, #0x04]
-    mov     r0, #2 ; boost amount
+    mov     r0, #BLUNDER_POLICY_ACCURACY
     strb    r0, [r1, #0x0C]
     mov     r0, #1
     strb    r0, [r1, #0x0E]
@@ -40,6 +41,7 @@
     strb    r4, [r1, #0x10]
     mov     r0, r5
     bl      Battle::Handler_PopWork
-    
+##endif
+
 End:
     pop     {r3-r5, pc}
