@@ -40,8 +40,7 @@ public class AbilityHackMod_527_WarpDrive extends AbilityHackMod {
 
     @Override
     public boolean registerEventHandlers(Context context, List<QueueEntry> inOutQueueEntries) {
-        // TODO
-
+        inOutQueueEntries.add(new QueueEntry(Gen5BattleEventType.onCalcSpeed, "warp_drive.s"));
         return true;
     }
 }
